@@ -34,4 +34,14 @@ describe('starter content pack', () => {
     expect(resolved.classes.get('cleric')?.spellcasting?.type).toBe('full');
     expect(resolved.classes.get('druid')?.spellcasting?.type).toBe('full');
   });
+
+  it('ships all four group-2 classes (Fighter, Monk, Paladin, Ranger)', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    for (const id of ['fighter', 'monk', 'paladin', 'ranger']) {
+      expect(resolved.classes.get(id), `class ${id} missing`).toBeDefined();
+    }
+    expect(resolved.classes.get('paladin')?.spellcasting?.type).toBe('half');
+    expect(resolved.classes.get('ranger')?.spellcasting?.type).toBe('half');
+  });
 });
