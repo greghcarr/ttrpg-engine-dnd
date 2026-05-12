@@ -381,6 +381,8 @@ export {
   planWeaponMastery,
   planForage,
   planNavigationCheck,
+  planMoraleCheck,
+  planReactionRoll,
 } from './engine/plan/index.js';
 export type {
   ShortRestIntent,
@@ -407,7 +409,22 @@ export type {
   WeaponMasteryIntent,
   ForageIntent,
   NavigationCheckIntent,
+  MoraleCheckIntent,
+  ReactionRollIntent,
 } from './engine/plan/index.js';
+export {
+  AttitudeChangedEventSchema,
+  MoraleCheckRolledEventSchema,
+  MoraleBrokenEventSchema,
+  AttitudeSchema,
+  ATTITUDES,
+} from './schemas/events/index.js';
+export type {
+  AttitudeChangedEvent,
+  MoraleCheckRolledEvent,
+  MoraleBrokenEvent,
+  Attitude,
+} from './schemas/events/index.js';
 export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,

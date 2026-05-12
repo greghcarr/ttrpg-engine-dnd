@@ -426,6 +426,19 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       }
       return `${forager} forages: d20(${event.d20})+${event.bonus}=${event.total} vs DC ${event.dc} -> ${event.foodPounds} lb food, ${event.waterPounds} lb water.`;
     }
+    case 'AttitudeChanged': {
+      const who = characterName(stateBefore, event.characterId);
+      const cause = event.cause !== undefined ? ` (${event.cause})` : '';
+      return `${who} attitude -> ${event.toAttitude}${cause}.`;
+    }
+    case 'MoraleCheckRolled': {
+      const who = characterName(stateBefore, event.characterId);
+      return `${who} morale check: d20(${event.d20})+${event.bonus}=${event.total} vs DC ${event.dc} -> ${event.success ? 'holds' : 'shaken'}.`;
+    }
+    case 'MoraleBroken': {
+      const who = characterName(stateBefore, event.characterId);
+      return `${who}'s morale breaks: ${event.action}!`;
+    }
   }
 };
 

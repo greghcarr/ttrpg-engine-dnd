@@ -111,6 +111,14 @@ export const CharacterSchema = z.object({
   pendingChoiceIds: z.array(ULIDSchema).default([]),
   xp: z.number().int().min(0).default(0),
   mountedOnId: ULIDSchema.optional(),
+  attitude: z.enum(['hostile', 'unfriendly', 'indifferent', 'friendly', 'helpful']).optional(),
+  morale: z
+    .object({
+      current: z.number().int(),
+      max: z.number().int().min(1),
+    })
+    .optional(),
+  moraleBroken: z.boolean().default(false),
 });
 export type Character = z.infer<typeof CharacterSchema>;
 

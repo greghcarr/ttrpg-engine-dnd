@@ -49,6 +49,8 @@ import {
   planWeaponMastery,
   planForage,
   planNavigationCheck,
+  planMoraleCheck,
+  planReactionRoll,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -58,6 +60,8 @@ import {
   type WeaponMasteryIntent,
   type ForageIntent,
   type NavigationCheckIntent,
+  type MoraleCheckIntent,
+  type ReactionRollIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -161,6 +165,8 @@ export interface Engine {
     weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
     forage(state: CampaignState, intent: Omit<ForageIntent, 'type'>): PlanResult;
     navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
+    moraleCheck(state: CampaignState, intent: Omit<MoraleCheckIntent, 'type'>): PlanResult;
+    reactionRoll(state: CampaignState, intent: Omit<ReactionRollIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -303,6 +309,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     navigationCheck(state, intent) {
       return { events: planNavigationCheck(state, content, rng, { type: 'NavigationCheck', ...intent }) };
+    },
+    moraleCheck(state, intent) {
+      return { events: planMoraleCheck(state, content, rng, { type: 'MoraleCheck', ...intent }) };
+    },
+    reactionRoll(state, intent) {
+      return { events: planReactionRoll(state, content, rng, { type: 'ReactionRoll', ...intent }) };
     },
   };
 

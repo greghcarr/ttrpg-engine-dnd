@@ -118,6 +118,11 @@ import {
   NavigationCheckRolledEventSchema,
   ForagedForEventSchema,
 } from './travel.js';
+import {
+  AttitudeChangedEventSchema,
+  MoraleCheckRolledEventSchema,
+  MoraleBrokenEventSchema,
+} from './npc.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -203,6 +208,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   TravelLegCompletedEventSchema,
   NavigationCheckRolledEventSchema,
   ForagedForEventSchema,
+  AttitudeChangedEventSchema,
+  MoraleCheckRolledEventSchema,
+  MoraleBrokenEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -291,6 +299,9 @@ export const EVENT_TYPES = [
   'TravelLegCompleted',
   'NavigationCheckRolled',
   'ForagedFor',
+  'AttitudeChanged',
+  'MoraleCheckRolled',
+  'MoraleBroken',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -558,3 +569,16 @@ export type {
   NavigationCheckRolledEvent,
   ForagedForEvent,
 } from './travel.js';
+export {
+  AttitudeChangedEventSchema,
+  MoraleCheckRolledEventSchema,
+  MoraleBrokenEventSchema,
+  AttitudeSchema,
+  ATTITUDES,
+} from './npc.js';
+export type {
+  AttitudeChangedEvent,
+  MoraleCheckRolledEvent,
+  MoraleBrokenEvent,
+  Attitude,
+} from './npc.js';

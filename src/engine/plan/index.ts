@@ -81,3 +81,9 @@ export {
   type ForageIntent,
   type NavigationCheckIntent,
 } from './travel.js';
+export {
+  planMoraleCheck,
+  planReactionRoll,
+  type MoraleCheckIntent,
+  type ReactionRollIntent,
+} from './npc.js';

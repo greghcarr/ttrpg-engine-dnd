@@ -114,6 +114,11 @@ import {
   applyNavigationCheckRolled,
   applyForagedFor,
 } from './reducers/travel.js';
+import {
+  applyAttitudeChanged,
+  applyMoraleCheckRolled,
+  applyMoraleBroken,
+} from './reducers/npc.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -367,6 +372,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ForagedFor':
         applyForagedFor(draft, event);
+        break;
+      case 'AttitudeChanged':
+        applyAttitudeChanged(draft, event);
+        break;
+      case 'MoraleCheckRolled':
+        applyMoraleCheckRolled(draft, event);
+        break;
+      case 'MoraleBroken':
+        applyMoraleBroken(draft, event);
         break;
       default: {
         const exhaustive: never = event;
