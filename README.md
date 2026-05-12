@@ -1,6 +1,6 @@
 # ttrpg-engine-dnd
 
-[![CI](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml)
+[![CI](https://github.com/greghcarr/ttrpg-engine-dnd/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/ttrpg-engine-dnd/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 [![Status](https://img.shields.io/badge/status-alpha-yellow)](README.md#status)
@@ -177,7 +177,7 @@ You can also pin to a git ref while iterating alongside the engine:
 ```jsonc
 // in your consumer's package.json
 "dependencies": {
-  "ttrpg-engine-dnd": "github:greghcarr/dnd-engine"
+  "ttrpg-engine-dnd": "github:greghcarr/ttrpg-engine-dnd"
   // or, when developing alongside the engine:
   // "ttrpg-engine-dnd": "file:../dnd-engine"
 }

@@ -1,6 +1,6 @@
 # ttrpg-engine-dnd, conventions
 
-A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Published on npm as `ttrpg-engine-dnd`. Local directory and git repo were renamed to `ttrpg-engine-dnd` on 2026-05-12; GitHub remote rename pending. Ships schemas + engine only; no rulebook content. Consumers supply content packs.
+A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Published on npm as `ttrpg-engine-dnd`; local directory at `Visual Studio Code/ttrpg-engine-dnd/`; GitHub repo at `github.com/greghcarr/ttrpg-engine-dnd`. All three names aligned on 2026-05-12. Ships schemas + engine only; no rulebook content. Consumers supply content packs.
 
 ## Goal
 

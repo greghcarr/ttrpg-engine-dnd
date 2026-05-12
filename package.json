@@ -55,12 +55,12 @@
   "author": "Greg Carr",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/greghcarr/dnd-engine.git"
+    "url": "git+https://github.com/greghcarr/ttrpg-engine-dnd.git"
   },
   "bugs": {
-    "url": "https://github.com/greghcarr/dnd-engine/issues"
+    "url": "https://github.com/greghcarr/ttrpg-engine-dnd/issues"
   },
-  "homepage": "https://github.com/greghcarr/dnd-engine#readme",
+  "homepage": "https://github.com/greghcarr/ttrpg-engine-dnd#readme",
   "engines": {
     "node": ">=18"
   },
