@@ -50,6 +50,6 @@ describe('golden: save + ability check sequences', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Fighter rolls a CON save then an Athletics check',
       }),
-    ).toMatchFileSnapshot('./transcripts/checks.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s4-checks.transcript.md');
   });
 });
