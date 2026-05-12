@@ -14,6 +14,7 @@ import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
@@ -157,12 +158,18 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   };
 
   const damageTotal = damageRolls.reduce((s, v) => s + v, 0) + damageRollPayload.modifier;
+  const mitigatedComponents = mitigateDamage({
+    character: target,
+    itemInstances: state.itemInstances,
+    content,
+    rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
+  });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
     at,
     type: 'DamageApplied',
     targetId: input.targetId,
-    components: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
+    components: mitigatedComponents,
     causedByEventId: damageRolled.id,
   };
 

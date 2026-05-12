@@ -2,9 +2,15 @@ import { z } from 'zod';
 import { ULIDSchema, DamageTypeSchema } from '../primitives.js';
 import { EventEnvelopeSchema } from './envelope.js';
 
+export const DAMAGE_MITIGATION_KINDS = ['resisted', 'immune', 'vulnerable'] as const;
+export const DamageMitigationKindSchema = z.enum(DAMAGE_MITIGATION_KINDS);
+export type DamageMitigationKind = z.infer<typeof DamageMitigationKindSchema>;
+
 export const DamageComponentSchema = z.object({
   amount: z.number().int().min(0),
   type: DamageTypeSchema,
+  rawAmount: z.number().int().min(0).optional(),
+  mitigation: DamageMitigationKindSchema.optional(),
 });
 export type DamageComponent = z.infer<typeof DamageComponentSchema>;
 

@@ -33,6 +33,7 @@ import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
 import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import {
   CANTRIP_LEVEL,
   D20_SIDES,
@@ -183,12 +184,18 @@ const planAttackMechanic = (
       causedByEventId: attackEvent.id,
     };
     events.push(damageRolled);
+    const mitigated = mitigateDamage({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      rawComponents: [{ amount: Math.max(0, damageTotal), type: mechanic.damageType }],
+    });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,
       at,
       type: 'DamageApplied',
       targetId,
-      components: [{ amount: Math.max(0, damageTotal), type: mechanic.damageType }],
+      components: mitigated,
       causedByEventId: damageRolled.id,
     };
     events.push(damageApplied);
@@ -257,12 +264,18 @@ const planSaveMechanic = (
       const raw = rolls.reduce((s, v) => s + v, 0) + modifier;
       const finalAmount = success && mechanic.halfOnSuccess === true ? halveDamage(raw) : success ? 0 : raw;
       if (finalAmount > 0) {
+        const mitigated = mitigateDamage({
+          character: target,
+          itemInstances: state.itemInstances,
+          content,
+          rawComponents: [{ amount: finalAmount, type: mechanic.damageType }],
+        });
         const damageApplied: DamageAppliedEvent = {
           id: newEventId() as ULID,
           at,
           type: 'DamageApplied',
           targetId,
-          components: [{ amount: finalAmount, type: mechanic.damageType }],
+          components: mitigated,
           causedByEventId: saveEvent.id,
         };
         events.push(damageApplied);

@@ -47,7 +47,12 @@ const sumDamage = (event: Extract<Event, { type: 'DamageApplied' }>): { total: n
   const parts: string[] = [];
   for (const c of event.components) {
     total += c.amount;
-    parts.push(`${c.amount} ${c.type}`);
+    const baseLabel = `${c.amount} ${c.type}`;
+    if (c.mitigation !== undefined && c.rawAmount !== undefined) {
+      parts.push(`${baseLabel} [${c.mitigation} from ${c.rawAmount}]`);
+    } else {
+      parts.push(baseLabel);
+    }
   }
   return { total, summary: parts.join(' + ') };
 };
