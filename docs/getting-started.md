@@ -5,8 +5,7 @@ This walkthrough builds your first character, attacks a goblin, saves the campai
 ## 1. Install
 
 ```sh
-# while pre-alpha
-npm install github:greghcarr/dnd-engine
+npm install dnd-engine
 ```
 
 Peer dependencies (`zod`, `immer`, `ulid`) install transitively.
@@ -136,7 +135,8 @@ This is the practical payoff of event sourcing. Your save file is the truth; the
 
 ## What's next
 
-- **Build content**: extend the starter pack or write your own. See [src/schemas/content/](../src/schemas/content/) for the shapes; the pack format is JSON validated by Zod.
-- **Run the examples** in [examples/](../examples/) for slightly larger scenarios.
-- **Read the architecture overview** in [CLAUDE.md](../CLAUDE.md) for the locked design (event sourcing, plan/commit, RNG capture, effect primitives).
-- **Browse the public surface** in [src/index.ts](../src/index.ts). Anything re-exported there is stable; anything else is internal.
+- **Understand the mental model**: [docs/concepts.md](concepts.md) explains why the API has the shape it does (events, plan/commit, content packs, effect primitives, PendingChoice).
+- **Common how-tos**: [docs/recipes.md](recipes.md) covers save/undo/redo, branching timelines, adding content and feats, houserules, multiplayer sync, custom planners, and migrations.
+- **Browse the public surface**: [docs/api-overview.md](api-overview.md) lists every public symbol by namespace.
+- **Larger scenarios**: [examples/](../examples/) has three runnable scripts. The showcase transcript at [tests/golden/transcripts/showcase.transcript.md](../tests/golden/transcripts/showcase.transcript.md) walks through a multi-act campaign exercising most of the engine.
+- **Bring your own content**: see [src/schemas/content/](../src/schemas/content/) for the Zod schemas of `Species`, `Background`, `Class`, `Spell`, `Feat`, `ItemDefinition`, `MonsterStatblock`, `Condition`. Load with `loadContentPack(json)` and merge with the starter via `resolveContent([starter, mine])`.

@@ -37,7 +37,18 @@ const sheet = engine.derive.character(campaign.state, alyx.id);
 console.log(`${alyx.name}: AC ${sheet.ac.total}, HP ${sheet.hp.current}/${sheet.hp.max}`);
 ```
 
-For a step-by-step walkthrough see [docs/getting-started.md](docs/getting-started.md). For the full public surface see [docs/api-overview.md](docs/api-overview.md).
+## Documentation
+
+Pick the doc that matches what you want:
+
+| You want to... | Read this |
+|---|---|
+| Try the smallest possible working example | [examples/00-quickstart](examples/00-quickstart/) |
+| Walk through your first character, attack, and save/load | [docs/getting-started.md](docs/getting-started.md) |
+| Understand the mental model (events, plan/commit, content packs) | [docs/concepts.md](docs/concepts.md) |
+| Look up a specific public symbol | [docs/api-overview.md](docs/api-overview.md) |
+| See common patterns (save, undo, houserules, multiplayer sync) | [docs/recipes.md](docs/recipes.md) |
+| Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
 
 ## Why this engine
 
