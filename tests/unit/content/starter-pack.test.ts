@@ -20,4 +20,18 @@ describe('starter content pack', () => {
     expect(resolved.items.get('longsword')).toBeDefined();
     expect(resolved.conditions.get('prone')).toBeDefined();
   });
+
+  it('ships all four Phase E group-1 classes (Barbarian, Bard, Cleric, Druid)', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    for (const id of ['barbarian', 'bard', 'cleric', 'druid']) {
+      const cls = resolved.classes.get(id);
+      expect(cls, `class ${id} missing`).toBeDefined();
+      expect(cls?.levelTable['1']?.proficiencyBonus).toBe(2);
+      expect(cls?.levelTable['20']?.proficiencyBonus).toBe(6);
+    }
+    expect(resolved.classes.get('bard')?.spellcasting?.type).toBe('full');
+    expect(resolved.classes.get('cleric')?.spellcasting?.type).toBe('full');
+    expect(resolved.classes.get('druid')?.spellcasting?.type).toBe('full');
+  });
 });

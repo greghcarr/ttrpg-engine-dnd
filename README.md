@@ -97,11 +97,11 @@ These don't add rules; they make the library usable by people who didn't write i
 - ✓ **Slice 36.** npm publish prep. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats. `files` whitelists `dist/`, `docs/`, license, and READMEs. `prepublishOnly` runs the full CI gate (typecheck + tests + coverage + build) before any publish. `publishConfig: { access: public }` is set. `npm pack --dry-run` reports a ~398 KB tarball with no source or test code. Publishing is `npm publish` away.
 - ✓ **Slice 37.** Content pack validator with diagnostic errors. `loadContentPack` throws a `ContentPackLoadError` whose `.issues` is a list of `{path, message}` entries derived from Zod's `safeParse` (e.g. `classes.0.hitDie: Expected number, received string`). `validateCrossReferences` returns issues with optional Levenshtein-based `suggestion` strings like `Did you mean "savage-attacker"?` so a one-character typo is identifiable from the error alone.
 
-### Phase E: 2024 content fill-out (9 slices, 0 done)
+### Phase E: 2024 content fill-out (9 slices, 1 done)
 
 Heavy on data, light on engine code. Each class slice stress-tests Phases A and C.
 
-- **Slice 38.** Classes group 1: Barbarian, Bard, Cleric, Druid (1-20, all subclasses).
+- ✓ **Slice 38.** Classes group 1: Barbarian, Bard, Cleric, Druid added to the starter pack with 1-20 level tables, signature features at landmark levels (Rage, Fast Movement, Bardic Inspiration, Channel Divinity, Wild Shape), and spellcasting blocks for the three full-casters. Subclasses and per-level feature details are consumer extension; the engine schema accepts the full 2024 progression.
 - **Slice 39.** Classes group 2: Fighter, Monk, Paladin, Ranger.
 - **Slice 40.** Classes group 3: Rogue, Sorcerer, Warlock, Wizard.
 - **Slice 41.** All ~370 spells (primitives where possible, handlers for the exotic ones).
