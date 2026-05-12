@@ -1,0 +1,61 @@
+ttrpg-engine-dnd
+Copyright (c) 2026 Greg Carr
+
+This package contains two categories of material, governed by two licenses.
+
+==============================================================================
+1. Engine code (MIT License)
+==============================================================================
+
+All TypeScript source code under `src/` (excluding the contents of
+`src/content/packs/`) is original work by Greg Carr, licensed under the MIT
+License. See LICENSE for the full text.
+
+This category includes: the event-sourced state machine, all reducers and
+planners, derivation functions, Zod schema definitions, the content pack
+loader, the RNG abstraction, migration machinery, branded ID utilities, the
+transcript formatter (in tests/), and every example. None of this material
+incorporates copyrightable expression from Wizards of the Coast publications.
+
+Game mechanics, rules, and procedures are not copyrightable under U.S. law
+(see Baker v. Selden, 101 U.S. 99). The engine implements such mechanics in
+original code.
+
+==============================================================================
+2. Starter content pack (CC BY 4.0)
+==============================================================================
+
+The JSON content pack at `src/content/packs/starter-pack.json` contains
+material derived from the Dungeons & Dragons System Reference Document 5.2
+(SRD 5.2) released by Wizards of the Coast, LLC under the Creative Commons
+Attribution 4.0 International License (CC BY 4.0):
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+Attribution per CC BY 4.0:
+
+    Portions of the starter content pack are derived from the Dungeons &
+    Dragons System Reference Document 5.2, copyright Wizards of the Coast
+    LLC, used under the Creative Commons Attribution 4.0 International
+    License. The original SRD 5.2 is available from Wizards of the Coast.
+
+The mechanical encodings (effect primitives, JSON structure, level table
+shapes, etc.) are this package's own implementation; the material derived
+from SRD 5.2 consists of names, structural rules, and numeric values present
+in the SRD release.
+
+Some entries in the starter pack reference 2024 PHB or DMG mechanics whose
+inclusion in SRD 5.2 is not independently confirmed by this package's
+authors. See `docs/content-attribution.md` for an item-by-item audit and
+guidance for consumers extending the pack.
+
+==============================================================================
+3. Trademarks
+==============================================================================
+
+"Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of
+the Coast LLC. This project is not affiliated with, endorsed by, or sponsored
+by Wizards of the Coast.
+
+The package name `ttrpg-engine-dnd` uses generic descriptive terms; "dnd" is
+used in the lowercase descriptive sense, not as a trademark of any product.

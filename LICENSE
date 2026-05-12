@@ -1,4 +1,9 @@
-MIT License
+This package contains two categories of material under two licenses. See
+NOTICE for the full attribution and the scope of each license.
+
+==============================================================================
+Engine code: MIT License
+==============================================================================
 
 Copyright (c) 2026 Greg Carr
 
@@ -19,3 +24,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+==============================================================================
+Starter content pack: Creative Commons Attribution 4.0 International
+==============================================================================
+
+The JSON content at src/content/packs/starter-pack.json contains material
+derived from the Dungeons & Dragons System Reference Document 5.2 released
+by Wizards of the Coast LLC under the Creative Commons Attribution 4.0
+International License (CC BY 4.0). See NOTICE for the required attribution
+and docs/content-attribution.md for an item-by-item audit.
+
+https://creativecommons.org/licenses/by/4.0/legalcode

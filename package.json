@@ -21,7 +21,8 @@
     "VERSIONING.md",
     "DEVELOPMENT.md",
     "CONTRIBUTING.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "sideEffects": false,
   "scripts": {

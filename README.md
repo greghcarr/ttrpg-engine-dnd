@@ -53,6 +53,7 @@ Pick the doc that matches what you want:
 | Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
 | Know what each version means (alpha / beta / rc / 1.0) | [VERSIONING.md](VERSIONING.md) |
 | Read the change history | [CHANGELOG.md](CHANGELOG.md) |
+| Understand the IP / attribution situation | [NOTICE](NOTICE) and [docs/content-attribution.md](docs/content-attribution.md) |
 
 ## Why this engine
 
@@ -232,11 +233,15 @@ For a step-by-step walkthrough, see [docs/getting-started.md](docs/getting-start
 
 ## Intellectual property
 
-This library is original work. It contains zero text, statblocks, or content from the Wizards of the Coast D&D 5.5e rulebooks. The schemas describe the *shape* of D&D content (a spell has a level, a school, a list of mechanical effects) but no copyrighted content.
+The package ships two categories of material under two licenses. See [NOTICE](NOTICE) for the full attribution and [docs/content-attribution.md](docs/content-attribution.md) for an item-by-item audit of the starter content pack.
 
-D&D content is published by Wizards of the Coast. The 2024 SRD (System Reference Document) is released under Creative Commons CC BY 4.0; portions of older 5e content are available under the OGL 1.0a. If you build a content pack to load into this engine, your pack is subject to those licenses, not this library's license. This library does not ship, distribute, or endorse any specific content pack.
+**Engine code (MIT)**: all TypeScript source under `src/` (excluding `src/content/packs/`) is original work expressing public-domain game mechanics. The reducers, planners, schemas, derivations, and effect primitives are this package's own implementation; they incorporate no copyrightable expression from Wizards of the Coast publications.
 
-Dungeons & Dragons is a trademark of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast.
+**Starter content pack (CC BY 4.0)**: `src/content/packs/starter-pack.json` contains material derived from the Dungeons & Dragons System Reference Document 5.2, copyright Wizards of the Coast LLC, used under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode). The mechanical encodings (JSON structure, effect-primitive vocabulary, level-table shapes) are this package's own work; the derived material consists of names, structural rules, and numeric values present in SRD 5.2. Most-but-not-all of the pack is confidently SRD-covered; see the audit doc for items (notably Bastions and Epic Boons) where SRD inclusion was not independently verified by the authors.
+
+**Trademarks**: "Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast. The package name `ttrpg-engine-dnd` uses generic descriptive terms.
+
+If you build your own content pack to load into this engine, your pack's license is your choice and is independent of this package.
 
 ## Contributing
 
@@ -244,4 +249,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). The architecture is locked (see [CLAUDE.
 
 ## License
 
-[MIT](LICENSE). Copyright (c) 2026 Greg Carr.
+Engine code: [MIT](LICENSE). Copyright (c) 2026 Greg Carr.
+
+Starter content pack: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/legalcode) (derived from D&D SRD 5.2). See [NOTICE](NOTICE) for the required attribution.
