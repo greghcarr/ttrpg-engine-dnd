@@ -357,6 +357,8 @@ export { apply, applyAll } from './engine/apply.js';
 export { replay } from './engine/replay.js';
 export { commit } from './engine/commit.js';
 export { undo, redo } from './engine/undo-redo.js';
+export { performIntent, serializeCampaign, loadCampaign, createPC } from './engine/conveniences.js';
+export type { CreatePCOptions, SerializedCampaign } from './engine/conveniences.js';
 export type { Engine, Campaign, CreateEngineOptions, CampaignInit, PlanResult } from './engine/index.js';
 export {
   planShortRest,

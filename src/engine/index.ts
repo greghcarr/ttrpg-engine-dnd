@@ -16,6 +16,9 @@ export { apply, applyAll } from './apply.js';
 export { replay } from './replay.js';
 export { commit } from './commit.js';
 export { undo, redo } from './undo-redo.js';
+export { performIntent, serializeCampaign, loadCampaign, createPC } from './conveniences.js';
+export type { CreatePCOptions, SerializedCampaign } from './conveniences.js';
+import { performIntent } from './conveniences.js';
 import {
   planShortRest,
   planLongRest,
@@ -124,6 +127,7 @@ export interface Engine {
   commit(campaign: Campaign, events: ReadonlyArray<Event>): Campaign;
   undo(campaign: Campaign): Campaign;
   redo(campaign: Campaign): Campaign;
+  do(campaign: Campaign, intent: { readonly type: string } & Record<string, unknown>): Campaign;
 
   plan: {
     shortRest(state: CampaignState, intent: { participantIds: ReadonlyArray<string>; at?: string }): PlanResult;
@@ -402,6 +406,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     commit,
     undo,
     redo,
+    do(campaign, intent) {
+      return performIntent(this, campaign, intent);
+    },
     plan: planNs,
     derive: deriveNs,
   };
