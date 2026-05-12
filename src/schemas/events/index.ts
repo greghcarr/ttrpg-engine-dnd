@@ -130,6 +130,12 @@ import {
   SentientItemConflictEventSchema,
 } from './charges.js';
 import { CharacterResurrectedEventSchema } from './resurrection.js';
+import {
+  PolymorphAppliedEventSchema,
+  PolymorphRevertedEventSchema,
+  SimulacrumCreatedEventSchema,
+  WishGrantedEventSchema,
+} from './transformations.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -223,6 +229,10 @@ export const EventSchema = z.discriminatedUnion('type', [
   ItemRechargedEventSchema,
   SentientItemConflictEventSchema,
   CharacterResurrectedEventSchema,
+  PolymorphAppliedEventSchema,
+  PolymorphRevertedEventSchema,
+  SimulacrumCreatedEventSchema,
+  WishGrantedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -319,6 +329,10 @@ export const EVENT_TYPES = [
   'ItemRecharged',
   'SentientItemConflict',
   'CharacterResurrected',
+  'PolymorphApplied',
+  'PolymorphReverted',
+  'SimulacrumCreated',
+  'WishGranted',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -633,3 +647,20 @@ export type {
   CharacterResurrectedEvent,
   ResurrectionSpell,
 } from './resurrection.js';
+export {
+  PolymorphAppliedEventSchema,
+  PolymorphRevertedEventSchema,
+  SimulacrumCreatedEventSchema,
+  WishGrantedEventSchema,
+  PolymorphFormSchema,
+  PolymorphKindSchema,
+  POLYMORPH_KINDS,
+} from './transformations.js';
+export type {
+  PolymorphAppliedEvent,
+  PolymorphRevertedEvent,
+  SimulacrumCreatedEvent,
+  WishGrantedEvent,
+  PolymorphForm,
+  PolymorphKind,
+} from './transformations.js';

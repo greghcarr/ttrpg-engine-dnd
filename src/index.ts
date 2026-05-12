@@ -460,6 +460,23 @@ export type {
   ResurrectionSpell,
 } from './schemas/events/index.js';
 export {
+  PolymorphAppliedEventSchema,
+  PolymorphRevertedEventSchema,
+  SimulacrumCreatedEventSchema,
+  WishGrantedEventSchema,
+  PolymorphFormSchema,
+  PolymorphKindSchema,
+  POLYMORPH_KINDS,
+} from './schemas/events/index.js';
+export type {
+  PolymorphAppliedEvent,
+  PolymorphRevertedEvent,
+  SimulacrumCreatedEvent,
+  WishGrantedEvent,
+  PolymorphForm,
+  PolymorphKind,
+} from './schemas/events/index.js';
+export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,

@@ -31,13 +31,13 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Twenty slices complete (Phase A and Phase B done), 415 tests across 68 files. The engine compiles, builds (ESM + CJS + `.d.ts`), and the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite.
+**Pre-alpha.** Thirty slices complete (Phases A, B, and C done), 443 tests across 80 files. The engine compiles, builds (ESM + CJS + `.d.ts`), and the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite.
 
 The next priority is the adoption surface (npm publish, starter SRD content pack, examples directory, getting-started doc), tracked as Phase D in the Roadmap below. Until then, the library is install-via-git-URL and the test suite is the de facto API reference.
 
 ## Roadmap
 
-Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phase A and Phase B are complete (20 slices). Next up: Phase C (combat fill-in) followed by Phase D (adoption surface).
+Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phases A, B, and C are complete (30 slices). Next up: Phase D (adoption surface) followed by Phase E (2024 content) and the optional Phase F (core extraction).
 
 ### Phase A: Engine mechanics (16 slices, all done)
 
@@ -70,7 +70,7 @@ The campaign-state surface area beyond combatants.
 - ✓ **Slice 19.** Locations and environmental terrain. `Location` (with optional parent and `LocationMap` of cells: normal / difficult / impassable / water), `Door` (open / closed / locked, blocks LOS and movement when shut). New events `LocationCreated`, `DoorAdded`, `DoorStateChanged`, `CharacterLocationChanged`. Derivations `terrainAt`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect` (Bresenham ray, blocked by impassable cells and closed/locked doors).
 - ✓ **Slice 20.** Quests, objectives, rewards, milestone XP. `Quest` (active / completed / failed / abandoned) with required and optional `QuestObjective`s tracking progress against thresholds. New events `QuestStarted`, `ObjectiveProgressed` / `Completed` / `Failed`, `QuestCompleted` / `Failed` / `Abandoned`, `QuestRewardClaimed` (distributes XP per beneficiary and currency to the linked party), `XPAwarded` (direct grant), `MilestoneAwarded` (minor / major / campaign tags appended to the campaign state).
 
-### Phase C: Combat fill-in (10 slices, 9 done)
+### Phase C: Combat fill-in (10 slices, all done)
 
 High-impact mechanics consumers will immediately want. Each slice closes a gap that's currently missing or partial.
 
@@ -83,7 +83,7 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 27.** Downtime, crafting, training. `DowntimeActivityResolved` appends to a `downtimeLog` on the campaign with kind (`crafting` / `training` / `recuperating` / `research` / `work` / `other`), day count, outcome (`success` / `partial` / `failure`), summary, optional produced item definition ID, and optional tool proficiency gained. Tool proficiencies accumulate per character in `toolProficienciesByCharacter`.
 - ✓ **Slice 28.** Magic item charges, recharge, sentient items. ItemInstance gains `maxCharges` and `sentient { ego, alignment, personality }` fields. `ItemChargeConsumed` decrements `chargesRemaining` (refuses to over-spend), `ItemRecharged` adds back up to `maxCharges` on one of five cadences (`dawn`, `dusk`, `shortRest`, `longRest`, `manual`), `SentientItemConflict` records the outcome of an item-vs-wielder showdown.
 - ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
-- **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish via the `CustomEffect` handler hook.
+- ✓ **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish. `PolymorphApplied` swaps HP, ability scores, speed, and species into a new form and snapshots the originals to `Character.polymorphedSnapshot`; `PolymorphReverted` restores them. `wild-shape`, `polymorph`, and `true-polymorph` share the machinery via a `kind` discriminator. `SimulacrumCreated` clones a character into a creature-kind duplicate at half-HP (transient state reset). `WishGranted` records a freeform wish description; `stressApplied: true` increments the granter's exhaustion. Concrete spell effects beyond the form swap stay in the consumer's hands.
 
 ### Phase D: Adoption surface (7 slices, 0 done)
 

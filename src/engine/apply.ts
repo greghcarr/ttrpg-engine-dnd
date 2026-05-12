@@ -126,6 +126,12 @@ import {
   applySentientItemConflict,
 } from './reducers/charges.js';
 import { applyCharacterResurrected } from './reducers/resurrection.js';
+import {
+  applyPolymorphApplied,
+  applyPolymorphReverted,
+  applySimulacrumCreated,
+  applyWishGranted,
+} from './reducers/transformations.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -403,6 +409,18 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'CharacterResurrected':
         applyCharacterResurrected(draft, event);
+        break;
+      case 'PolymorphApplied':
+        applyPolymorphApplied(draft, event);
+        break;
+      case 'PolymorphReverted':
+        applyPolymorphReverted(draft, event);
+        break;
+      case 'SimulacrumCreated':
+        applySimulacrumCreated(draft, event);
+        break;
+      case 'WishGranted':
+        applyWishGranted(draft, event);
         break;
       default: {
         const exhaustive: never = event;

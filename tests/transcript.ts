@@ -470,6 +470,23 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const newSpecies = event.newSpeciesId !== undefined ? `, reborn as ${event.newSpeciesId}` : '';
       return `**${who}** is restored via ${event.spell}${caster} (now ${event.hpAfter} HP)${newSpecies}.`;
     }
+    case 'PolymorphApplied': {
+      const who = characterName(stateBefore, event.targetId);
+      return `**${who}** transforms via ${event.kind} into ${event.form.name} (${event.form.hp} HP).`;
+    }
+    case 'PolymorphReverted': {
+      const who = characterName(stateAfter, event.targetId);
+      return `**${who}** reverts (${event.reason}).`;
+    }
+    case 'SimulacrumCreated': {
+      const original = characterName(stateBefore, event.originalId);
+      return `Simulacrum of **${original}** created (${event.hpMax} HP).`;
+    }
+    case 'WishGranted': {
+      const who = characterName(stateAfter, event.granterId);
+      const stress = event.stressApplied ? ' (took the stress)' : '';
+      return `**${who}** grants a wish${stress}: ${event.description}`;
+    }
   }
 };
 

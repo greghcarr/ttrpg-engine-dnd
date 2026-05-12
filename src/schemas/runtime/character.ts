@@ -119,6 +119,20 @@ export const CharacterSchema = z.object({
     })
     .optional(),
   moraleBroken: z.boolean().default(false),
+  polymorphedSnapshot: z
+    .object({
+      hp: z.object({
+        current: z.number().int(),
+        max: z.number().int().min(1),
+        temp: z.number().int().min(0).default(0),
+      }),
+      abilityScores: AbilityScoresSchema,
+      speedFeet: z.number().int().min(0),
+      speciesId: z.string(),
+      kind: z.enum(['polymorph', 'wild-shape', 'true-polymorph']),
+      formName: z.string(),
+    })
+    .optional(),
 });
 export type Character = z.infer<typeof CharacterSchema>;
 
