@@ -427,6 +427,28 @@
       "mastery": "Vex"
     },
     {
+      "id": "dagger",
+      "itemKind": "weapon",
+      "name": "Dagger",
+      "category": "simple",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "1d4",
+      "properties": ["finesse", "light", "thrown"],
+      "mastery": "Nick"
+    },
+    {
+      "id": "shortsword",
+      "itemKind": "weapon",
+      "name": "Shortsword",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "1d6",
+      "properties": ["finesse", "light"],
+      "mastery": "Vex"
+    },
+    {
       "id": "longbow",
       "itemKind": "weapon",
       "name": "Longbow",

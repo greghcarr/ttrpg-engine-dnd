@@ -36,12 +36,16 @@ import {
   planMove,
   planDash,
   planDisengage,
+  planActionSurge,
+  planOffHandAttack,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
+  type ActionSurgeIntent,
+  type OffHandAttackIntent,
   type CreateEncounterIntent,
   type RollInitiativeIntent,
   type StartEncounterIntent,
@@ -122,6 +126,8 @@ export interface Engine {
     move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
     dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
+    actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
+    offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -225,6 +231,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     disengage(state, intent) {
       return { events: planDisengage(state, content, { type: 'Disengage', ...intent }) };
+    },
+    actionSurge(state, intent) {
+      return { events: planActionSurge(state, content, { type: 'ActionSurge', ...intent }) };
+    },
+    offHandAttack(state, intent) {
+      return { events: planOffHandAttack(state, content, rng, { type: 'OffHandAttack', ...intent }) };
     },
   };
 

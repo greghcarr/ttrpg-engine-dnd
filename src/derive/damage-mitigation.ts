@@ -22,25 +22,37 @@ const halfRoundDown = (n: number): number => Math.floor(n / RESISTANCE_DIVISOR);
 export const mitigateDamage = (input: MitigateDamageInput): DamageComponent[] => {
   const effects = buildEffectStack(input);
   return input.rawComponents.map((component) => {
+    const rawAmount = component.amount;
+    const flatReduction = effects.flatDamageReductionFor(component.type);
+    const afterFlat = Math.max(0, rawAmount - flatReduction);
+
     if (effects.hasImmunity(component.type)) {
-      return { amount: 0, type: component.type, rawAmount: component.amount, mitigation: 'immune' };
+      return { amount: 0, type: component.type, rawAmount, mitigation: 'immune' };
     }
     if (effects.hasVulnerability(component.type)) {
       return {
-        amount: component.amount * VULNERABILITY_MULTIPLIER,
+        amount: afterFlat * VULNERABILITY_MULTIPLIER,
         type: component.type,
-        rawAmount: component.amount,
+        rawAmount,
         mitigation: 'vulnerable',
       };
     }
     if (effects.hasResistance(component.type)) {
       return {
-        amount: halfRoundDown(component.amount),
+        amount: halfRoundDown(afterFlat),
         type: component.type,
-        rawAmount: component.amount,
+        rawAmount,
         mitigation: 'resisted',
       };
     }
-    return { amount: component.amount, type: component.type };
+    if (flatReduction > 0) {
+      return {
+        amount: afterFlat,
+        type: component.type,
+        rawAmount,
+        mitigation: 'resisted',
+      };
+    }
+    return { amount: rawAmount, type: component.type };
   });
 };

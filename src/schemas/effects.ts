@@ -138,6 +138,7 @@ export type Effect =
   | { kind: 'ExpandSpellList'; classId: string; spellIds: string[] }
   | { kind: 'SetHPMaxFormula'; formula: Formula }
   | { kind: 'OfferChoice'; choiceId: string; prompt: string; options: ChoiceOptionShape[]; oneOf: number; when: 'onAcquire' | 'onLevelUp' | 'onLongRest' }
+  | { kind: 'FlatDamageReduction'; damageTypes: DamageType[]; amount: number }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -284,6 +285,11 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       when: z.enum(['onAcquire', 'onLevelUp', 'onLongRest']),
     }),
     z.object({
+      kind: z.literal('FlatDamageReduction'),
+      damageTypes: z.array(DamageTypeSchema).min(1),
+      amount: z.number().int().min(1),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -315,5 +321,6 @@ export const EFFECT_KINDS = [
   'ExpandSpellList',
   'SetHPMaxFormula',
   'OfferChoice',
+  'FlatDamageReduction',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

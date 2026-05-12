@@ -1,7 +1,25 @@
 import type { Draft } from 'immer';
 import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import type { ResourceSpentEvent } from '../../schemas/events/resources.js';
 import { invariant } from '../../internal/invariants.js';
+
+const ACTION_SURGE_RESOURCE_ID = 'action-surge';
+
+export const resetActionForActionSurgeIfApplicable = (
+  state: Draft<CampaignState>,
+  event: ResourceSpentEvent,
+): void => {
+  if (event.resourceId !== ACTION_SURGE_RESOURCE_ID) return;
+  const encounterId = state.activeEncounterId;
+  if (encounterId === undefined) return;
+  const encounter = state.encounters[encounterId];
+  if (!encounter) return;
+  const combatant = encounter.combatants.find((c) => c.combatantId === event.characterId);
+  if (!combatant) return;
+  combatant.turnUsage.actionUsed = false;
+  combatant.turnUsage.attacksMadeThisTurn = 0;
+};
 
 export const applyActionEconomyConsumed = (
   state: Draft<CampaignState>,
@@ -35,4 +53,10 @@ export const applyActionEconomyConsumed = (
       combatant.turnUsage.attacksMadeThisTurn += 1;
       break;
   }
+};
+
+export const resetActionForActionSurge = (
+  combatant: { turnUsage: { actionUsed: boolean } },
+): void => {
+  combatant.turnUsage.actionUsed = false;
 };

@@ -70,6 +70,7 @@ export class EffectAccumulator {
   private readonly resourceGrants: ResourceGrant[] = [];
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
+  private readonly flatDamageReductions = new Map<DamageType, number>();
 
   addModifier(target: ModifierTarget, value: number, source: string): void {
     const key = modifierKey(target);
@@ -171,6 +172,13 @@ export class EffectAccumulator {
   actionEconomyTotal(op: 'extraAttack' | 'extraAction' | 'extraBonusAction'): number {
     return this.actionEconomyMods.get(op) ?? 0;
   }
+  addFlatDamageReduction(damageType: DamageType, amount: number): void {
+    const prior = this.flatDamageReductions.get(damageType) ?? 0;
+    this.flatDamageReductions.set(damageType, Math.max(prior, amount));
+  }
+  flatDamageReductionFor(damageType: DamageType): number {
+    return this.flatDamageReductions.get(damageType) ?? 0;
+  }
 }
 
 export interface BuilderContext {
@@ -229,6 +237,11 @@ export const applyEffectToBuilder = (
     case 'ModifyActionEconomy':
       acc.addActionEconomy(effect.op, effect.count);
       return;
+    case 'FlatDamageReduction':
+      for (const damageType of effect.damageTypes) {
+        acc.addFlatDamageReduction(damageType, effect.amount);
+      }
+      return;
     case 'GrantSense':
     case 'ModifySpeed':
     case 'GrantSpellSlots':
@@ -242,5 +255,10 @@ export const applyEffectToBuilder = (
     case 'OfferChoice':
     case 'Custom':
       return;
+    default: {
+      const _exhaustive: never = effect;
+      void _exhaustive;
+      return;
+    }
   }
 };

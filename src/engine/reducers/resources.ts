@@ -7,6 +7,7 @@ import type {
   ResourceSpentEvent,
 } from '../../schemas/events/resources.js';
 import { invariant } from '../../internal/invariants.js';
+import { resetActionForActionSurgeIfApplicable } from './action-economy.js';
 
 const requireCharacter = (state: Draft<CampaignState>, id: string): Draft<Character> => {
   const c = state.characters[id];
@@ -26,6 +27,7 @@ export const applyResourceSpent = (
     `Resource ${event.resourceId} insufficient: have ${resource.current}, spend ${event.amount}`,
   );
   resource.current -= event.amount;
+  resetActionForActionSurgeIfApplicable(state, event);
 };
 
 export const applyResourceRestored = (
