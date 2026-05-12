@@ -7,11 +7,14 @@ import {
   SpellSchoolSchema,
 } from '../primitives.js';
 
+const CANTRIP_SCALING_THRESHOLDS = [5, 11, 17] as const;
+
 const SpellAttackMechanicSchema = z.object({
   kind: z.literal('attack'),
   damageDice: DiceExpressionSchema,
   damageType: DamageTypeSchema,
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
+  cantripScalingDice: DiceExpressionSchema.optional(),
 });
 
 const SpellSaveMechanicSchema = z.object({
@@ -22,6 +25,7 @@ const SpellSaveMechanicSchema = z.object({
   halfOnSuccess: z.boolean().optional(),
   conditionOnFail: z.string().optional(),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
+  cantripScalingDice: DiceExpressionSchema.optional(),
 });
 
 const SpellHealMechanicSchema = z.object({
@@ -29,6 +33,24 @@ const SpellHealMechanicSchema = z.object({
   amountDice: DiceExpressionSchema,
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
 });
+
+export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
+export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
+export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
+
+export const SpellTargetingSchema = z.object({
+  shape: SpellAreaShapeSchema,
+  size: z.number().int().min(1),
+});
+export type SpellTargeting = z.infer<typeof SpellTargetingSchema>;
+
+export const cantripExtraDice = (characterLevel: number): number => {
+  let extra = 0;
+  for (const threshold of CANTRIP_SCALING_THRESHOLDS) {
+    if (characterLevel >= threshold) extra += 1;
+  }
+  return extra;
+};
 
 export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellAttackMechanicSchema,
@@ -55,5 +77,6 @@ export const SpellSchema = z.object({
   classes: z.array(z.string()).default([]),
   description: z.string().optional(),
   mechanicalEffects: z.array(SpellMechanicSchema).default([]),
+  targeting: SpellTargetingSchema.optional(),
 });
 export type Spell = z.infer<typeof SpellSchema>;

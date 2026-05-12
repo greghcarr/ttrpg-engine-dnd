@@ -23,7 +23,9 @@ import type {
   ConcentrationStartedEvent,
 } from '../../schemas/events/concentration.js';
 import type { Spell, SpellMechanic } from '../../schemas/content/spell.js';
+import { cantripExtraDice } from '../../schemas/content/spell.js';
 import type { Character } from '../../schemas/runtime/character.js';
+import { computeTotalLevel } from '../../schemas/runtime/character.js';
 import type { AppliedConditionRef } from '../../schemas/runtime/effect-instance.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
@@ -51,6 +53,7 @@ export interface CastSpellIntent {
   readonly slotSource?: SpellSlotSource;
   readonly targetIds: ReadonlyArray<string>;
   readonly castingClassId?: string;
+  readonly asRitual?: boolean;
   readonly at?: string;
 }
 
@@ -106,6 +109,22 @@ const rollDamage = (
   return { rolls, modifier: parsed.modifier };
 };
 
+const rollCantripScaling = (
+  scalingExpression: string | undefined,
+  extraSteps: number,
+  rng: RNG,
+  doubleDice: boolean,
+): number[] => {
+  if (scalingExpression === undefined || extraSteps <= 0) return [];
+  const parsed = parseDiceExpression(scalingExpression);
+  const dieCount = parsed.count * extraSteps * (doubleDice ? 2 : 1);
+  const rolls: number[] = [];
+  for (let i = 0; i < dieCount; i++) {
+    rolls.push(rollDie(parsed.die, rng));
+  }
+  return rolls;
+};
+
 const halveDamage = (totalDamage: number): number => Math.floor(totalDamage / 2);
 
 const planAttackMechanic = (
@@ -128,6 +147,7 @@ const planAttackMechanic = (
     classId: castingClassId,
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
+  const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
@@ -163,7 +183,9 @@ const planAttackMechanic = (
 
     if (!hit) continue;
 
-    const { rolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, isCrit);
+    const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, isCrit);
+    const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, isCrit);
+    const rolls = [...baseRolls, ...scalingRolls];
     const damageTotal = rolls.reduce((s, v) => s + v, 0) + modifier;
     const damageRolled: DamageRolledEvent = {
       id: newEventId() as ULID,
@@ -228,6 +250,7 @@ const planSaveMechanic = (
     classId: castingClassId,
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
+  const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
   const events: Event[] = [];
   const conditionsApplied: AppliedConditionRef[] = [];
 
@@ -260,7 +283,9 @@ const planSaveMechanic = (
     events.push(saveEvent);
 
     if (mechanic.damageDice !== undefined && mechanic.damageType !== undefined) {
-      const { rolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, false);
+      const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, false);
+      const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, false);
+      const rolls = [...baseRolls, ...scalingRolls];
       const raw = rolls.reduce((s, v) => s + v, 0) + modifier;
       const finalAmount = success && mechanic.halfOnSuccess === true ? halveDamage(raw) : success ? 0 : raw;
       if (finalAmount > 0) {
@@ -356,7 +381,12 @@ export const planCastSpell = (
   const castingClassId = findCastingClass(character, content, intent.castingClassId);
   const slotSource = chooseSlotSource(spell, intent, state, content);
 
-  if (spell.level > CANTRIP_LEVEL) {
+  const castAsRitual = intent.asRitual === true;
+  if (castAsRitual && spell.ritual !== true) {
+    throw new Error(`Spell ${spell.id} cannot be cast as a ritual`);
+  }
+
+  if (spell.level > CANTRIP_LEVEL && !castAsRitual) {
     const available = computeAvailableSpellSlots(character, content.classes);
     if (slotSource === 'pact') {
       if (available.pact === undefined || available.pact.count <= 0) {
@@ -385,11 +415,11 @@ export const planCastSpell = (
     slotLevel: intent.slotLevel,
     slotSource,
     targetIds: [...intent.targetIds],
-    castAsRitual: false,
+    castAsRitual,
   };
   const events: Event[] = [declared];
 
-  if (spell.level > CANTRIP_LEVEL) {
+  if (spell.level > CANTRIP_LEVEL && !castAsRitual) {
     if (slotSource === 'pact') {
       const consumed: PactSlotConsumedEvent = {
         id: newEventId() as ULID,

@@ -320,7 +320,8 @@
         {
           "kind": "attack",
           "damageDice": "1d10",
-          "damageType": "fire"
+          "damageType": "fire",
+          "cantripScalingDice": "1d10"
         }
       ]
     },
@@ -350,6 +351,7 @@
       "concentration": false,
       "ritual": false,
       "classes": ["wizard", "sorcerer"],
+      "targeting": { "shape": "sphere", "size": 20 },
       "mechanicalEffects": [
         {
           "kind": "save",
@@ -360,6 +362,20 @@
           "extraDicePerSlotLevel": 1
         }
       ]
+    },
+    {
+      "id": "detect-magic",
+      "name": "Detect Magic",
+      "level": 1,
+      "school": "divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": { "verbal": true, "somatic": true },
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": true,
+      "classes": ["wizard", "cleric", "druid", "bard", "paladin", "ranger", "sorcerer"],
+      "mechanicalEffects": []
     },
     {
       "id": "hold-person",
