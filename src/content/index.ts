@@ -4,6 +4,7 @@ export {
   type ResolvedContent,
   resolveContent,
   loadContentPack,
+  ContentPackLoadError,
 } from './pack.js';
 export {
   validateCrossReferences,

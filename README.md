@@ -31,13 +31,13 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Thirty slices complete (Phases A, B, and C done), 443 tests across 80 files. The engine compiles, builds (ESM + CJS + `.d.ts`), and the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite.
+**Pre-alpha.** Thirty-seven slices complete (Phases A, B, C, and D done), 461 tests across 85 files. The engine compiles, builds (ESM + CJS + `.d.ts`), the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite, and the adoption surface (starter content pack, examples, getting-started doc, `engine.do()` convenience, derivation memoization, npm-publish-ready package, content validator with suggestions) is in place.
 
-The next priority is the adoption surface (npm publish, starter SRD content pack, examples directory, getting-started doc), tracked as Phase D in the Roadmap below. Until then, the library is install-via-git-URL and the test suite is the de facto API reference.
+What remains: Phase E is 2024 content fill-out (12 classes through level 20, ~370 spells, full species/backgrounds/feats, monsters, magic items, bastions, epic boons, variant rules). Phase F is the optional `ttrpg-engine-core` extraction if multi-system support becomes a goal. A consumer can ship a working app today using the starter content pack and extending it.
 
 ## Roadmap
 
-Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phases A, B, and C are complete (30 slices). Next up: Phase D (adoption surface) followed by Phase E (2024 content) and the optional Phase F (core extraction).
+Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phases A through D are complete (37 slices). Next up: Phase E (2024 content fill-out) and the optional Phase F (core extraction).
 
 ### Phase A: Engine mechanics (16 slices, all done)
 
@@ -85,7 +85,7 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
 - ✓ **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish. `PolymorphApplied` swaps HP, ability scores, speed, and species into a new form and snapshots the originals to `Character.polymorphedSnapshot`; `PolymorphReverted` restores them. `wild-shape`, `polymorph`, and `true-polymorph` share the machinery via a `kind` discriminator. `SimulacrumCreated` clones a character into a creature-kind duplicate at half-HP (transient state reset). `WishGranted` records a freeform wish description; `stressApplied: true` increments the granter's exhaustion. Concrete spell effects beyond the form swap stay in the consumer's hands.
 
-### Phase D: Adoption surface (7 slices, 6 done)
+### Phase D: Adoption surface (7 slices, all done)
 
 These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
 
@@ -95,7 +95,7 @@ These don't add rules; they make the library usable by people who didn't write i
 - ✓ **Slice 34.** Public API conveniences. `engine.do(campaign, intent)` dispatches on `intent.type` to the right planner and commits the result in one call (covers every Phase A-C planner). `serializeCampaign(c)` writes a JSON string with id, name, schemaVersion, and events only; state is omitted because `loadCampaign(json)` replays the events to reconstruct it. `createPC({name, speciesId, backgroundId, classId, hpMax, ...})` returns a `Character` with sensible defaults; caller emits the `CharacterCreated` event themselves to add to a campaign.
 - ✓ **Slice 35.** Derivation memoization keyed on `CampaignState.version`. Every `engine.derive.*` method now caches its result per-engine; the cache invalidates automatically when `state.version` advances (i.e., on every commit). Repeated calls at the same version return the same object reference, so a UI that asks for derived AC ten times per frame across twelve combatants pays for one computation each.
 - ✓ **Slice 36.** npm publish prep. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats. `files` whitelists `dist/`, `docs/`, license, and READMEs. `prepublishOnly` runs the full CI gate (typecheck + tests + coverage + build) before any publish. `publishConfig: { access: public }` is set. `npm pack --dry-run` reports a ~398 KB tarball with no source or test code. Publishing is `npm publish` away.
-- **Slice 37.** Content pack validator with helpful diagnostic errors (path-pointed Zod failures, cross-reference resolution failures with offending IDs).
+- ✓ **Slice 37.** Content pack validator with diagnostic errors. `loadContentPack` throws a `ContentPackLoadError` whose `.issues` is a list of `{path, message}` entries derived from Zod's `safeParse` (e.g. `classes.0.hitDie: Expected number, received string`). `validateCrossReferences` returns issues with optional Levenshtein-based `suggestion` strings like `Did you mean "savage-attacker"?` so a one-character typo is identifiable from the error alone.
 
 ### Phase E: 2024 content fill-out (9 slices, 0 done)
 

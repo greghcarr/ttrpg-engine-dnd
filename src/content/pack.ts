@@ -74,4 +74,26 @@ export const resolveContent = (packs: ReadonlyArray<ContentPack>): ResolvedConte
   return { species, backgrounds, classes, subclasses, feats, spells, items, monsters, conditions };
 };
 
-export const loadContentPack = (input: unknown): ContentPack => ContentPackSchema.parse(input);
+const formatZodPath = (path: ReadonlyArray<PropertyKey>): string =>
+  path.length === 0 ? '<root>' : path.map((p) => String(p)).join('.');
+
+export class ContentPackLoadError extends Error {
+  public readonly issues: ReadonlyArray<{ path: string; message: string }>;
+  constructor(issues: ReadonlyArray<{ path: string; message: string }>) {
+    const summary = issues.length === 1 ? '1 issue' : `${issues.length} issues`;
+    const body = issues.map((i) => `  ${i.path}: ${i.message}`).join('\n');
+    super(`Content pack failed validation (${summary}):\n${body}`);
+    this.name = 'ContentPackLoadError';
+    this.issues = issues;
+  }
+}
+
+export const loadContentPack = (input: unknown): ContentPack => {
+  const result = ContentPackSchema.safeParse(input);
+  if (result.success) return result.data;
+  const issues = result.error.issues.map((i) => ({
+    path: formatZodPath(i.path),
+    message: i.message,
+  }));
+  throw new ContentPackLoadError(issues);
+};
