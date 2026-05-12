@@ -79,6 +79,14 @@ describe('starter content pack', () => {
     expect(resolved.spells.get('identify')?.ritual).toBe(true);
   });
 
+  it('ships at least nine epic boons in the epic-boon feat category', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    const boons = [...resolved.feats.values()].filter((f) => f.category === 'epic-boon');
+    expect(boons.length).toBeGreaterThanOrEqual(9);
+    expect(resolved.feats.get('boon-of-truesight')?.category).toBe('epic-boon');
+  });
+
   it('ships magic items and monster statblocks', () => {
     const pack = loadStarterPack();
     const resolved = resolveContent([pack]);
