@@ -174,6 +174,68 @@
       "spellcasting": { "ability": "INT", "type": "full" }
     },
     {
+      "id": "rogue",
+      "name": "Rogue",
+      "hitDie": 8,
+      "primaryAbility": ["DEX"],
+      "savingThrowProficiencies": ["DEX", "INT"],
+      "armorProficiencies": ["light"],
+      "weaponProficiencies": ["simple"],
+      "toolProficiencies": ["thieves-tools"],
+      "levelTable": {
+        "1": {
+          "proficiencyBonus": 2,
+          "features": [
+            {
+              "id": "sneak-attack",
+              "name": "Sneak Attack",
+              "effects": [
+                {
+                  "kind": "OnEvent",
+                  "id": "sneak-attack",
+                  "trigger": {
+                    "eventType": "AttackRolled",
+                    "filter": {
+                      "kind": "all",
+                      "terms": [
+                        { "kind": "eq", "path": "event.attackerIsSelf", "value": true },
+                        { "kind": "eq", "path": "event.hit", "value": true },
+                        { "kind": "eq", "path": "event.used", "value": "advantage" }
+                      ]
+                    }
+                  },
+                  "actions": [
+                    { "kind": "AddDamage", "dice": "1d6", "damageType": "piercing" }
+                  ],
+                  "oncePer": "turn"
+                }
+              ]
+            }
+          ],
+          "columns": {}
+        },
+        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      }
+    },
+    {
       "id": "warlock",
       "name": "Warlock",
       "hitDie": 8,

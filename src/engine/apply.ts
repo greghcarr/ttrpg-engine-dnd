@@ -49,6 +49,7 @@ import {
   applyConcentrationBroken,
   applyConcentrationStarted,
 } from './reducers/concentration.js';
+import { applyTriggerFired } from './reducers/triggers.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -161,6 +162,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ConcentrationBroken':
         applyConcentrationBroken(draft, event);
+        break;
+      case 'TriggerFired':
+        applyTriggerFired(draft, event);
         break;
       default: {
         const exhaustive: never = event;

@@ -13,6 +13,8 @@ import { newEventId } from '../../ids.js';
 import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { dispatchTriggers } from '../triggers/dispatch.js';
+import { applyAll } from '../apply.js';
 import type { ULID } from '../ids-utils.js';
 
 const D20 = 20;
@@ -111,8 +113,17 @@ export const planAttack = (
     critical,
   };
 
+  const stateAfterAttack = applyAll(state, [attackRolled]);
+  const attackTriggers = dispatchTriggers({
+    state: stateAfterAttack,
+    content,
+    rng,
+    event: attackRolled,
+    at,
+  });
+
   if (!hit) {
-    return [attackRolled];
+    return [attackRolled, ...attackTriggers];
   }
 
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
@@ -152,5 +163,5 @@ export const planAttack = (
     causedByEventId: damageRolled.id,
   };
 
-  return [attackRolled, damageRolled, damageApplied];
+  return [attackRolled, ...attackTriggers, damageRolled, damageApplied];
 };

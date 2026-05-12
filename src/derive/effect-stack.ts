@@ -90,6 +90,23 @@ export interface BuildEffectStackInput {
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
 }
 
+export const collectEffectsFromCharacter = (input: BuildEffectStackInput): Effect[] => {
+  const { character, content, itemInstances, pendingChoices } = input;
+  const effects: Effect[] = [];
+  const species = content.species.get(character.speciesId);
+  if (species) effects.push(...species.traits);
+  const background = content.backgrounds.get(character.backgroundId);
+  if (background) effects.push(...background.traits);
+  effects.push(...collectClassEffects(character, content));
+  effects.push(...collectFeatEffects(character, content));
+  effects.push(...collectItemEffects(character, itemInstances, content));
+  effects.push(...collectConditionEffects(character, content));
+  if (pendingChoices) {
+    effects.push(...collectResolvedChoiceEffects(character, pendingChoices));
+  }
+  return effects;
+};
+
 export const buildEffectStack = (input: BuildEffectStackInput): EffectAccumulator => {
   const { character, content, itemInstances, pendingChoices } = input;
   const acc = new EffectAccumulator();

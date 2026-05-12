@@ -7,6 +7,10 @@ import type {
   ShortRestStartedEvent,
 } from '../../schemas/events/rest.js';
 import { invariant } from '../../internal/invariants.js';
+import {
+  clearLongRestCountersForCharacters,
+  clearShortRestCountersForCharacters,
+} from './triggers.js';
 
 export const applyShortRestStarted = (
   state: Draft<CampaignState>,
@@ -32,6 +36,7 @@ export const applyShortRestEnded = (
     if (!character) continue;
     character.pactSlotsUsed = 0;
   }
+  clearShortRestCountersForCharacters(state, session.participantIds);
 };
 
 const halfRoundedDown = (n: number): number => Math.floor(n / 2);
@@ -86,4 +91,5 @@ export const applyLongRestEnded = (
     character.spellSlotsUsed = {};
     character.pactSlotsUsed = 0;
   }
+  clearLongRestCountersForCharacters(state, session.participantIds);
 };

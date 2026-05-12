@@ -77,6 +77,17 @@ export const CharacterSchema = z.object({
     .default({}),
   pactSlotsUsed: z.number().int().min(0).default(0),
   concentrationEffectId: ULIDSchema.optional(),
+  triggerCounters: z
+    .record(
+      z.string(),
+      z.object({
+        firedThisTurn: z.boolean().optional(),
+        firedThisRound: z.boolean().optional(),
+        firedThisShortRest: z.boolean().optional(),
+        firedThisLongRest: z.boolean().optional(),
+      }),
+    )
+    .default({}),
   featsTaken: z.array(z.string()).default([]),
   pendingChoiceIds: z.array(ULIDSchema).default([]),
   xp: z.number().int().min(0).default(0),

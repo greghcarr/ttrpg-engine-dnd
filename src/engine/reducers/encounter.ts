@@ -10,6 +10,10 @@ import type {
   TurnStartedEvent,
 } from '../../schemas/events/encounter.js';
 import { invariant } from '../../internal/invariants.js';
+import {
+  clearRoundCountersForCharacters,
+  clearTurnCountersForCharacter,
+} from './triggers.js';
 
 export const applyEncounterCreated = (
   state: Draft<CampaignState>,
@@ -86,6 +90,7 @@ export const applyTurnStarted = (
     `Turn-start mismatch: expected ${active?.combatantId}, got ${event.combatantId}`,
   );
   invariant(encounter.round === event.round, `Round mismatch`);
+  clearTurnCountersForCharacter(state, event.combatantId);
 };
 
 export const applyTurnEnded = (
@@ -118,6 +123,10 @@ export const applyRoundEnded = (
   for (const c of encounter.combatants) c.hasActedThisRound = false;
   encounter.round += 1;
   encounter.activeIndex = 0;
+  clearRoundCountersForCharacters(
+    state,
+    encounter.combatants.map((c) => c.combatantId),
+  );
 };
 
 export const applyEncounterEnded = (

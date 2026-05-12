@@ -53,6 +53,7 @@ import {
   ConcentrationStartedEventSchema,
   ConcentrationBrokenEventSchema,
 } from './concentration.js';
+import { TriggerFiredEventSchema } from './triggers.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -91,6 +92,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   PactSlotConsumedEventSchema,
   ConcentrationStartedEventSchema,
   ConcentrationBrokenEventSchema,
+  TriggerFiredEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -132,6 +134,7 @@ export const EVENT_TYPES = [
   'PactSlotConsumed',
   'ConcentrationStarted',
   'ConcentrationBroken',
+  'TriggerFired',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -259,3 +262,5 @@ export type {
   ConcentrationBrokenEvent,
   ConcentrationBrokenReason,
 } from './concentration.js';
+export { TriggerFiredEventSchema } from './triggers.js';
+export type { TriggerFiredEvent } from './triggers.js';

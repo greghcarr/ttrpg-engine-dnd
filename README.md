@@ -40,7 +40,7 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Foundation plus six slices complete, about 48% of the full mechanical coverage goal. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 321 tests across 43 files.
+**Pre-alpha.** Foundation plus seven slices complete, about 54% of the full mechanical coverage goal. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 326 tests across 45 files.
 
 Completed:
 
@@ -50,16 +50,17 @@ Completed:
 - **Slice 4.** `plan.save`, `plan.abilityCheck` (with optional skill), record-only `SaveRolled` / `AbilityCheckRolled` resolution events. Honors caller-supplied advantage or derives it from the effect stack. Skill checks apply half / proficient / expertise multipliers. `computeAbilityCheck` + `computePassiveScore` derivations.
 - **Slice 5.** Spellcasting. `plan.castSpell` handles cantrips and leveled spells; dispatches per-target attack / save / heal mechanics through the existing resolution chains; consumes standard or pact slots (auto-picks pact when both apply); upcasting via `extraDicePerSlotLevel`. `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed` events. Long rest restores all slots, short rest restores pact slots only. `computeAvailableSpellSlots` derivation.
 - **Slice 6.** Concentration enforcement. `EffectInstance` table tracks active spell effects with their applied conditions; concentration spells emit `ConcentrationStarted` and set `Character.concentrationEffectId`. `plan.checkConcentration(characterId, damage)` rolls a CON save with DC `max(10, floor(damage/2))`, emits `ConcentrationBroken` on failure which auto-removes every condition the effect installed. Casting a new concentration spell while already concentrating evicts the prior effect. `formatEvent` covers the new events so transcripts narrate concentration lifecycle.
+- **Slice 7.** OnEvent trigger system. The dispatcher walks every character's effect stack after each triggering event, evaluates the `Predicate` filter against event facts (`event.attackerIsSelf`, `event.hit`, `event.used`, `event.critical`), checks cadence (`oncePer: 'turn' | 'round' | 'shortRest' | 'longRest'`), and fires `AddDamage` actions producing rider events. `TriggerFired` event marks usage; `Character.triggerCounters` tracks per-cadence state. `TurnStarted` / `RoundEnded` / `ShortRestEnded` / `LongRestEnded` reducers reset the appropriate counters. Wired into `planAttack`. Test pack now has a Rogue with Sneak Attack as the canonical OnEvent feature.
 
 ## Roadmap
 
 Three phases, 22 slices total. About 15 to 25 hours of focused execution time.
 
-### Phase A: Engine mechanics (12 slices, 6 done)
+### Phase A: Engine mechanics (12 slices, 7 done)
 
-Each slice lands a load-bearing combat or rules mechanic. Order is dependency-driven. Slices 1, 2, 3, 4, 5, 6 listed under Status above; the rest below.
+Each slice lands a load-bearing combat or rules mechanic. Order is dependency-driven. Slices 1, 2, 3, 4, 5, 6, 7 listed under Status above; the rest below.
 
-- 7. **OnEvent trigger system** (next). Sneak Attack, Rage damage rider, Divine Smite, weapon masteries (Vex, Topple, Sap, Nick, Push, Slow, Cleave, Graze, Flex), Bardic Inspiration, Lucky feat. Once-per-turn / round / rest enforcement.
+- 8. **Action economy** (next). Action / bonus action / reaction tracking. Extra Attack enforcement. Multiattack. Action Surge. Two-weapon fighting.
 - 8. **Action economy.** Action / bonus action / reaction tracking. Extra Attack enforcement. Multiattack. Action Surge. Two-weapon fighting.
 - 9. **Reactions protocol.** Reaction-window events that pause turn flow. Opportunity attacks, Counterspell, Shield, Hellish Rebuke.
 - 10. **Movement and positioning.** Speed in feet, difficult terrain, dash / disengage / hide, jumping, climbing, swimming, distance tracking for reach and ranged.
