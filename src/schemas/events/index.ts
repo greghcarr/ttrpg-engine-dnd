@@ -124,6 +124,11 @@ import {
   MoraleBrokenEventSchema,
 } from './npc.js';
 import { DowntimeActivityResolvedEventSchema } from './downtime.js';
+import {
+  ItemChargeConsumedEventSchema,
+  ItemRechargedEventSchema,
+  SentientItemConflictEventSchema,
+} from './charges.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -213,6 +218,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   MoraleCheckRolledEventSchema,
   MoraleBrokenEventSchema,
   DowntimeActivityResolvedEventSchema,
+  ItemChargeConsumedEventSchema,
+  ItemRechargedEventSchema,
+  SentientItemConflictEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -305,6 +313,9 @@ export const EVENT_TYPES = [
   'MoraleCheckRolled',
   'MoraleBroken',
   'DowntimeActivityResolved',
+  'ItemChargeConsumed',
+  'ItemRecharged',
+  'SentientItemConflict',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -597,3 +608,16 @@ export type {
   DowntimeKind,
   DowntimeOutcome,
 } from './downtime.js';
+export {
+  ItemChargeConsumedEventSchema,
+  ItemRechargedEventSchema,
+  SentientItemConflictEventSchema,
+  RechargeCadenceSchema,
+  RECHARGE_CADENCES,
+} from './charges.js';
+export type {
+  ItemChargeConsumedEvent,
+  ItemRechargedEvent,
+  SentientItemConflictEvent,
+  RechargeCadence,
+} from './charges.js';

@@ -13,5 +13,13 @@ export const ItemInstanceSchema = z.object({
   containerId: ULIDSchema.optional(),
   acquiredAtEventId: ULIDSchema.optional(),
   identifiedByCharacterIds: z.array(ULIDSchema).default([]),
+  maxCharges: z.number().int().min(0).optional(),
+  sentient: z
+    .object({
+      ego: z.number().int().min(0),
+      alignment: z.string(),
+      personality: z.string().optional(),
+    })
+    .optional(),
 });
 export type ItemInstance = z.infer<typeof ItemInstanceSchema>;

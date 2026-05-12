@@ -438,6 +438,19 @@ export type {
   DowntimeOutcome,
 } from './schemas/events/index.js';
 export {
+  ItemChargeConsumedEventSchema,
+  ItemRechargedEventSchema,
+  SentientItemConflictEventSchema,
+  RechargeCadenceSchema,
+  RECHARGE_CADENCES,
+} from './schemas/events/index.js';
+export type {
+  ItemChargeConsumedEvent,
+  ItemRechargedEvent,
+  SentientItemConflictEvent,
+  RechargeCadence,
+} from './schemas/events/index.js';
+export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,

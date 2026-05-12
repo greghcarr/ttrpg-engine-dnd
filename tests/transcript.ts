@@ -447,6 +447,21 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const tool = event.toolProficiencyGained !== undefined ? `, gains tool: ${event.toolProficiencyGained}` : '';
       return `Downtime (${event.kind}): ${who}, ${event.days}d -> ${event.outcome}. ${event.summary}${item}${tool}.`;
     }
+    case 'ItemChargeConsumed': {
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      const by = event.byCharacterId !== undefined ? ` by **${characterName(stateBefore, event.byCharacterId)}**` : '';
+      const forEffect = event.forEffect !== undefined ? ` for ${event.forEffect}` : '';
+      return `${item} loses ${event.amount} charge(s)${by}${forEffect}.`;
+    }
+    case 'ItemRecharged': {
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      return `${item} recharges ${event.amount} (${event.cadence}).`;
+    }
+    case 'SentientItemConflict': {
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      const who = characterName(stateBefore, event.wielderId);
+      return `${item} vs ${who}: ${event.winner} prevails${event.description !== undefined ? ` (${event.description})` : ''}.`;
+    }
   }
 };
 
