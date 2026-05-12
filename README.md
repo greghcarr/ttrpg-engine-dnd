@@ -49,6 +49,8 @@ Pick the doc that matches what you want:
 | Look up a specific public symbol | [docs/api-overview.md](docs/api-overview.md) |
 | See common patterns (save, undo, houserules, multiplayer sync) | [docs/recipes.md](docs/recipes.md) |
 | Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
+| Know what each version means (alpha / beta / rc / 1.0) | [VERSIONING.md](VERSIONING.md) |
+| Read the change history | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Why this engine
 

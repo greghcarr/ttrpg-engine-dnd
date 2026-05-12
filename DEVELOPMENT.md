@@ -41,9 +41,13 @@ npm run ci             # typecheck + coverage + build (full gate)
 4. Re-export from the public barrel [src/index.ts](src/index.ts).
 5. Planner test: deterministic for fixed seed, different seeds produce different rolls, applied events do not call RNG.
 
+## Versioning
+
+Bump policy, pre-release tag meanings (alpha / beta / rc), promotion criteria, and the roadmap to 1.0.0 are in [VERSIONING.md](VERSIONING.md). Short version: don't bump on every PR, treat ambiguous changes as breaking, update CHANGELOG with every release.
+
 ## Schema migrations
 
-Bump `SCHEMA_VERSION` in [src/version.ts](src/version.ts) and add a migration function in [src/migrations/](src/migrations/) in the same PR as the breaking schema change. Migration test accompanies it.
+Bump `SCHEMA_VERSION` in [src/version.ts](src/version.ts) and add a migration function in [src/migrations/](src/migrations/) in the same PR as the breaking schema change. Migration test accompanies it. `SCHEMA_VERSION` is independent of the package version, see [VERSIONING.md](VERSIONING.md) for the contract.
 
 ## Consumer integration
 
