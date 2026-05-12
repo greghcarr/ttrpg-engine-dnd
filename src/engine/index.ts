@@ -46,12 +46,14 @@ import {
   planCounterspell,
   planDispelMagic,
   planIdentify,
+  planWeaponMastery,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
   type CounterspellIntent,
   type DispelMagicIntent,
   type IdentifyIntent,
+  type WeaponMasteryIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -152,6 +154,7 @@ export interface Engine {
     counterspell(state: CampaignState, intent: Omit<CounterspellIntent, 'type'>): PlanResult;
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
+    weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -285,6 +288,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };
+    },
+    weaponMastery(state, intent) {
+      return { events: planWeaponMastery(state, content, rng, { type: 'WeaponMastery', ...intent }) };
     },
   };
 

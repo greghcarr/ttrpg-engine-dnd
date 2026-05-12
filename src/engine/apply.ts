@@ -99,6 +99,7 @@ import {
   applySpellDispelled,
   applyItemIdentified,
 } from './reducers/reactive-spells.js';
+import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -319,6 +320,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemIdentified':
         applyItemIdentified(draft, event);
+        break;
+      case 'WeaponMasteryActivated':
+        applyWeaponMasteryActivated(draft, event);
         break;
       default: {
         const exhaustive: never = event;

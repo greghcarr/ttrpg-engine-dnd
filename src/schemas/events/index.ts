@@ -103,6 +103,7 @@ import {
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
 } from './reactive-spells.js';
+import { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -177,6 +178,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
+  WeaponMasteryActivatedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -254,6 +256,7 @@ export const EVENT_TYPES = [
   'SpellCountered',
   'SpellDispelled',
   'ItemIdentified',
+  'WeaponMasteryActivated',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -491,3 +494,5 @@ export type {
   SpellDispelledEvent,
   ItemIdentifiedEvent,
 } from './reactive-spells.js';
+export { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
+export type { WeaponMasteryActivatedEvent } from './weapon-mastery.js';

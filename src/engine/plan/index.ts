@@ -74,3 +74,4 @@ export {
   type DispelMagicIntent,
   type IdentifyIntent,
 } from './reactive-spells.js';
+export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js';

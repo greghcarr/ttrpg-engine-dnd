@@ -367,6 +367,13 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const item = itemName(stateBefore, content, event.itemInstanceId);
       return `**${who}** identifies ${item}.`;
     }
+    case 'WeaponMasteryActivated': {
+      const who = characterName(stateBefore, event.attackerId);
+      const targetLabel = event.targetId !== undefined
+        ? ` against **${characterName(stateBefore, event.targetId)}**`
+        : '';
+      return `Mastery: ${event.mastery}${targetLabel} (${who}).`;
+    }
   }
 };
 

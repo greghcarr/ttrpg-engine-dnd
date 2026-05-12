@@ -378,6 +378,7 @@ export {
   planCounterspell,
   planDispelMagic,
   planIdentify,
+  planWeaponMastery,
 } from './engine/plan/index.js';
 export type {
   ShortRestIntent,
@@ -401,6 +402,7 @@ export type {
   CounterspellIntent,
   DispelMagicIntent,
   IdentifyIntent,
+  WeaponMasteryIntent,
 } from './engine/plan/index.js';
 export {
   SpellCounteredEventSchema,
@@ -412,6 +414,8 @@ export type {
   SpellDispelledEvent,
   ItemIdentifiedEvent,
 } from './schemas/events/index.js';
+export { WeaponMasteryActivatedEventSchema } from './schemas/events/index.js';
+export type { WeaponMasteryActivatedEvent } from './schemas/events/index.js';
 
 export type { HandlerRegistry, EffectHandler, HandlerContext } from './handlers/index.js';
 
