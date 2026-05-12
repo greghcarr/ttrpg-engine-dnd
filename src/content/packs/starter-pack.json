@@ -3,30 +3,23 @@
   "name": "dnd-engine starter pack",
   "version": "0.1.0",
   "species": [
-    {
-      "id": "human",
-      "name": "Human",
-      "size": "Medium",
-      "creatureType": "Humanoid",
-      "speed": { "walk": 30 },
-      "languages": ["common"],
-      "traits": []
-    }
+    { "id": "human", "name": "Human", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common"], "traits": [] },
+    { "id": "elf", "name": "Elf", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "elvish"], "traits": [] },
+    { "id": "dwarf", "name": "Dwarf", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "dwarvish"], "traits": [] },
+    { "id": "halfling", "name": "Halfling", "size": "Small", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "halfling"], "traits": [] },
+    { "id": "tiefling", "name": "Tiefling", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "infernal"], "traits": [] },
+    { "id": "dragonborn", "name": "Dragonborn", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "draconic"], "traits": [] },
+    { "id": "gnome", "name": "Gnome", "size": "Small", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common", "gnomish"], "traits": [] }
   ],
   "backgrounds": [
-    {
-      "id": "soldier",
-      "name": "Soldier",
-      "abilityScoreIncreases": {
-        "options": ["STR", "DEX", "CON"],
-        "pattern": "+2/+1"
-      },
-      "skillProficiencies": ["athletics", "intimidation"],
-      "toolProficiencies": ["gaming"],
-      "languages": [],
-      "originFeatId": "savage-attacker",
-      "traits": []
-    }
+    { "id": "soldier", "name": "Soldier", "abilityScoreIncreases": { "options": ["STR", "DEX", "CON"], "pattern": "+2/+1" }, "skillProficiencies": ["athletics", "intimidation"], "toolProficiencies": ["gaming"], "languages": [], "originFeatId": "savage-attacker", "traits": [] },
+    { "id": "sage", "name": "Sage", "abilityScoreIncreases": { "options": ["INT", "WIS", "CHA"], "pattern": "+2/+1" }, "skillProficiencies": ["arcana", "history"], "toolProficiencies": ["calligraphers-supplies"], "languages": [], "originFeatId": "magic-initiate-wizard", "traits": [] },
+    { "id": "criminal", "name": "Criminal", "abilityScoreIncreases": { "options": ["DEX", "CON", "INT"], "pattern": "+2/+1" }, "skillProficiencies": ["sleight-of-hand", "stealth"], "toolProficiencies": ["thieves-tools"], "languages": [], "originFeatId": "alert", "traits": [] },
+    { "id": "acolyte", "name": "Acolyte", "abilityScoreIncreases": { "options": ["INT", "WIS", "CHA"], "pattern": "+2/+1" }, "skillProficiencies": ["insight", "religion"], "toolProficiencies": ["calligraphers-supplies"], "languages": [], "originFeatId": "magic-initiate-cleric", "traits": [] },
+    { "id": "folk-hero", "name": "Folk Hero", "abilityScoreIncreases": { "options": ["STR", "CON", "WIS"], "pattern": "+2/+1" }, "skillProficiencies": ["animal-handling", "survival"], "toolProficiencies": ["smiths-tools"], "languages": [], "originFeatId": "tough", "traits": [] },
+    { "id": "noble", "name": "Noble", "abilityScoreIncreases": { "options": ["STR", "INT", "CHA"], "pattern": "+2/+1" }, "skillProficiencies": ["history", "persuasion"], "toolProficiencies": ["gaming"], "languages": [], "originFeatId": "skilled", "traits": [] },
+    { "id": "guild-artisan", "name": "Guild Artisan", "abilityScoreIncreases": { "options": ["STR", "DEX", "WIS"], "pattern": "+2/+1" }, "skillProficiencies": ["insight", "persuasion"], "toolProficiencies": ["smiths-tools"], "languages": [], "originFeatId": "crafter", "traits": [] },
+    { "id": "outlander", "name": "Outlander", "abilityScoreIncreases": { "options": ["STR", "DEX", "WIS"], "pattern": "+2/+1" }, "skillProficiencies": ["athletics", "survival"], "toolProficiencies": ["musical"], "languages": [], "originFeatId": "tough", "traits": [] }
   ],
   "feats": [
     {
@@ -50,7 +43,26 @@
           "abilityModifiers": ["DEX", "CON"]
         }
       ]
-    }
+    },
+    { "id": "alert", "name": "Alert", "category": "origin", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "magic-initiate-cleric", "name": "Magic Initiate (Cleric)", "category": "origin", "repeatable": true, "prerequisites": [], "effects": [] },
+    { "id": "magic-initiate-wizard", "name": "Magic Initiate (Wizard)", "category": "origin", "repeatable": true, "prerequisites": [], "effects": [] },
+    { "id": "magic-initiate-druid", "name": "Magic Initiate (Druid)", "category": "origin", "repeatable": true, "prerequisites": [], "effects": [] },
+    { "id": "tough", "name": "Tough", "category": "origin", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "skilled", "name": "Skilled", "category": "origin", "repeatable": true, "prerequisites": [], "effects": [] },
+    { "id": "crafter", "name": "Crafter", "category": "origin", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "lucky", "name": "Lucky", "category": "origin", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "GrantResource", "resourceId": "luck", "max": 3, "recharge": "longRest" }] },
+    { "id": "great-weapon-master", "name": "Great Weapon Master", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "sharpshooter", "name": "Sharpshooter", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "polearm-master", "name": "Polearm Master", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "war-caster", "name": "War Caster", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "resilient-con", "name": "Resilient (Constitution)", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-archery", "name": "Fighting Style: Archery", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-defense", "name": "Fighting Style: Defense", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-dueling", "name": "Fighting Style: Dueling", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-great-weapon", "name": "Fighting Style: Great Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-protection", "name": "Fighting Style: Protection", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-two-weapon", "name": "Fighting Style: Two-Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] }
   ],
   "classes": [
     {
@@ -1135,7 +1147,33 @@
       "name": "Potion of Healing",
       "onConsume": [],
       "description": "Heals 2d4+2 hit points when consumed"
-    }
+    },
+    { "id": "greatsword", "itemKind": "weapon", "name": "Greatsword", "category": "martial", "attackKind": "melee", "damageType": "slashing", "damageDice": "2d6", "properties": ["heavy", "two-handed"], "mastery": "Graze" },
+    { "id": "greataxe", "itemKind": "weapon", "name": "Greataxe", "category": "martial", "attackKind": "melee", "damageType": "slashing", "damageDice": "1d12", "properties": ["heavy", "two-handed"], "mastery": "Cleave" },
+    { "id": "warhammer", "itemKind": "weapon", "name": "Warhammer", "category": "martial", "attackKind": "melee", "damageType": "bludgeoning", "damageDice": "1d8", "versatileDice": "1d10", "properties": ["versatile"], "mastery": "Push" },
+    { "id": "mace", "itemKind": "weapon", "name": "Mace", "category": "simple", "attackKind": "melee", "damageType": "bludgeoning", "damageDice": "1d6", "properties": [], "mastery": "Sap" },
+    { "id": "spear", "itemKind": "weapon", "name": "Spear", "category": "simple", "attackKind": "melee", "damageType": "piercing", "damageDice": "1d6", "versatileDice": "1d8", "properties": ["thrown", "versatile"], "mastery": "Sap", "rangeNormal": 20, "rangeLong": 60 },
+    { "id": "quarterstaff", "itemKind": "weapon", "name": "Quarterstaff", "category": "simple", "attackKind": "melee", "damageType": "bludgeoning", "damageDice": "1d6", "versatileDice": "1d8", "properties": ["versatile"], "mastery": "Topple" },
+    { "id": "handaxe", "itemKind": "weapon", "name": "Handaxe", "category": "simple", "attackKind": "melee", "damageType": "slashing", "damageDice": "1d6", "properties": ["light", "thrown"], "mastery": "Vex", "rangeNormal": 20, "rangeLong": 60 },
+    { "id": "crossbow-light", "itemKind": "weapon", "name": "Crossbow, light", "category": "simple", "attackKind": "ranged", "damageType": "piercing", "damageDice": "1d8", "properties": ["ammunition", "loading", "two-handed"], "mastery": "Slow", "rangeNormal": 80, "rangeLong": 320 },
+    { "id": "studded-leather", "itemKind": "armor", "name": "Studded Leather", "category": "light", "baseAC": 12, "stealthDisadvantage": false },
+    { "id": "scale-mail", "itemKind": "armor", "name": "Scale Mail", "category": "medium", "baseAC": 14, "stealthDisadvantage": true, "dexCap": 2 },
+    { "id": "breastplate", "itemKind": "armor", "name": "Breastplate", "category": "medium", "baseAC": 14, "stealthDisadvantage": false, "dexCap": 2 },
+    { "id": "half-plate", "itemKind": "armor", "name": "Half Plate", "category": "medium", "baseAC": 15, "stealthDisadvantage": true, "dexCap": 2 },
+    { "id": "ring-mail", "itemKind": "armor", "name": "Ring Mail", "category": "heavy", "baseAC": 14, "stealthDisadvantage": true },
+    { "id": "splint", "itemKind": "armor", "name": "Splint", "category": "heavy", "baseAC": 17, "stealthDisadvantage": true, "strRequirement": 15 },
+    { "id": "thieves-tools", "itemKind": "tool", "name": "Thieves' Tools", "category": "artisan" },
+    { "id": "smiths-tools", "itemKind": "tool", "name": "Smith's Tools", "category": "artisan" },
+    { "id": "herbalism-kit", "itemKind": "tool", "name": "Herbalism Kit", "category": "artisan" },
+    { "id": "calligraphers-supplies", "itemKind": "tool", "name": "Calligrapher's Supplies", "category": "artisan" },
+    { "id": "musical-lute", "itemKind": "tool", "name": "Lute", "category": "musical" },
+    { "id": "torch", "itemKind": "gear", "name": "Torch" },
+    { "id": "rope-hempen-50", "itemKind": "gear", "name": "Rope, hempen (50 feet)" },
+    { "id": "backpack", "itemKind": "gear", "name": "Backpack" },
+    { "id": "rations-1-day", "itemKind": "gear", "name": "Rations (1 day)" },
+    { "id": "waterskin", "itemKind": "gear", "name": "Waterskin" },
+    { "id": "bedroll", "itemKind": "gear", "name": "Bedroll" },
+    { "id": "tinderbox", "itemKind": "gear", "name": "Tinderbox" }
   ],
   "monsters": [],
   "conditions": [

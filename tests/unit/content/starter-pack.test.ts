@@ -78,4 +78,19 @@ describe('starter content pack', () => {
     expect(resolved.spells.get('counterspell')).toBeDefined();
     expect(resolved.spells.get('identify')?.ritual).toBe(true);
   });
+
+  it('ships diverse species, backgrounds, feats, and equipment', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    expect(resolved.species.size).toBeGreaterThanOrEqual(7);
+    expect(resolved.backgrounds.size).toBeGreaterThanOrEqual(8);
+    expect(resolved.feats.size).toBeGreaterThanOrEqual(15);
+    expect(resolved.items.size).toBeGreaterThanOrEqual(25);
+    expect(resolved.species.get('dwarf')).toBeDefined();
+    expect(resolved.backgrounds.get('sage')?.originFeatId).toBe('magic-initiate-wizard');
+    expect(resolved.feats.get('fighting-style-archery')?.category).toBe('fighting-style');
+    expect(resolved.items.get('greatsword')?.itemKind).toBe('weapon');
+    expect(resolved.items.get('thieves-tools')?.itemKind).toBe('tool');
+    expect(resolved.items.get('torch')?.itemKind).toBe('gear');
+  });
 });
