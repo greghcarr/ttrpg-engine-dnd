@@ -1,6 +1,6 @@
 {
   "id": "starter-pack",
-  "name": "dnd-engine starter pack",
+  "name": "ttrpg-engine-dnd starter pack",
   "version": "0.1.0",
   "species": [
     { "id": "human", "name": "Human", "size": "Medium", "creatureType": "Humanoid", "speed": { "walk": 30 }, "languages": ["common"], "traits": [] },

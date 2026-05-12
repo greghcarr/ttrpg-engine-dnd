@@ -5,7 +5,7 @@ This walkthrough builds your first character, attacks a goblin, saves the campai
 ## 1. Install
 
 ```sh
-npm install dnd-engine
+npm install ttrpg-engine-dnd@alpha
 ```
 
 Peer dependencies (`zod`, `immer`, `ulid`) install transitively.
@@ -13,7 +13,7 @@ Peer dependencies (`zod`, `immer`, `ulid`) install transitively.
 ## 2. Create an engine with the starter pack
 
 ```ts
-import { createEngine, loadStarterPack, seededRNG } from 'dnd-engine';
+import { createEngine, loadStarterPack, seededRNG } from 'ttrpg-engine-dnd';
 
 const engine = createEngine({
   contentPacks: [loadStarterPack()],
@@ -26,8 +26,8 @@ The starter pack ships in the package and includes Fighter, Wizard, Rogue, Palad
 ## 3. Build a character
 
 ```ts
-import { CharacterSchema, newCharacterId, newItemInstanceId, newEventId } from 'dnd-engine';
-import { commit } from 'dnd-engine';
+import { CharacterSchema, newCharacterId, newItemInstanceId, newEventId } from 'ttrpg-engine-dnd';
+import { commit } from 'ttrpg-engine-dnd';
 
 const alyx = CharacterSchema.parse({
   id: newCharacterId(),
@@ -114,7 +114,7 @@ All randomness was consumed inside `engine.plan.attack`. The events it returned 
 ## 6. Save and load
 
 ```ts
-import { replay, EventSchema } from 'dnd-engine';
+import { replay, EventSchema } from 'ttrpg-engine-dnd';
 
 // Save: events are the durable artifact. State is computed.
 const saved = JSON.stringify({

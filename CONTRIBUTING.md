@@ -1,4 +1,4 @@
-# Contributing to dnd-engine
+# Contributing to ttrpg-engine-dnd
 
 Thanks for your interest. This engine is built to be the foundation that other D&D 5.5e tools rely on, so contributions are held to a higher bar than typical app code.
 

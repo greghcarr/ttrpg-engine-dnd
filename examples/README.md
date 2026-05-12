@@ -1,4 +1,4 @@
-# dnd-engine examples
+# ttrpg-engine-dnd examples
 
 Small runnable examples showing how to consume the engine. Each example is a single TypeScript file you can run with `tsx`:
 
@@ -8,7 +8,7 @@ npx tsx examples/02-combat-encounter/index.ts
 npx tsx examples/03-save-and-load/index.ts
 ```
 
-The examples import from `../../src/index.js` because they live inside this repo. In a downstream consumer you would import from `'dnd-engine'` instead; everything else is identical.
+The examples import from `../../src/index.js` because they live inside this repo. In a downstream consumer you would import from `'ttrpg-engine-dnd'` instead; everything else is identical.
 
 ## Index
 

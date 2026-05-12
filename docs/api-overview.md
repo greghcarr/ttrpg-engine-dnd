@@ -97,7 +97,7 @@ const issues = validateCrossReferences(resolved);
 ## RNG
 
 ```ts
-import { defaultRNG, seededRNG, throwOnCallRNG } from 'dnd-engine';
+import { defaultRNG, seededRNG, throwOnCallRNG } from 'ttrpg-engine-dnd';
 ```
 
 `seededRNG(seed)` for deterministic tests. `throwOnCallRNG()` is the architectural canary: pass it into a replay to prove `apply()` never reaches for randomness.

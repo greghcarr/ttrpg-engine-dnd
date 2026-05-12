@@ -10,9 +10,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'DndEngine',
+      name: 'TtrpgEngineDnd',
       formats: ['es', 'cjs'],
-      fileName: (format) => `dnd-engine.${format === 'es' ? 'js' : 'cjs'}`,
+      fileName: (format) => `ttrpg-engine-dnd.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
       external: ['zod', 'immer', 'ulid'],

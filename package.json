@@ -1,16 +1,16 @@
 {
-  "name": "dnd-engine",
+  "name": "ttrpg-engine-dnd",
   "version": "0.1.0-alpha.0",
   "description": "Standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only content model with effect-primitive vocabulary and code-handler escape hatch.",
   "type": "module",
-  "main": "./dist/dnd-engine.cjs",
-  "module": "./dist/dnd-engine.js",
+  "main": "./dist/ttrpg-engine-dnd.cjs",
+  "module": "./dist/ttrpg-engine-dnd.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/dnd-engine.js",
-      "require": "./dist/dnd-engine.cjs"
+      "import": "./dist/ttrpg-engine-dnd.js",
+      "require": "./dist/ttrpg-engine-dnd.cjs"
     }
   },
   "files": [

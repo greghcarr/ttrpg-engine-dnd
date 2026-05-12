@@ -1,6 +1,6 @@
-# dnd-engine, conventions
+# ttrpg-engine-dnd, conventions
 
-A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Ships schemas + engine only; no rulebook content. Consumers supply content packs.
+A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Published on npm as `ttrpg-engine-dnd`; the local directory and git repo remain `dnd-engine`. Ships schemas + engine only; no rulebook content. Consumers supply content packs.
 
 ## Goal
 

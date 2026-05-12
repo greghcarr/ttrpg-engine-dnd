@@ -1,4 +1,4 @@
-# dnd-engine
+# ttrpg-engine-dnd
 
 [![CI](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -7,19 +7,21 @@
 
 A standalone, event-sourced TypeScript domain engine for Dungeons & Dragons 5.5e (the 2024 rules update). Schema-only. Bring your own content pack (a starter SRD-shaped pack ships in the box).
 
+The package is named `ttrpg-engine-dnd` because the long-term plan extracts the system-agnostic core (event sourcing, plan/commit, branded IDs, content packs, sessions, party, predicate / formula DSL) into a future `ttrpg-engine-core` package, with `ttrpg-engine-dnd` becoming the 5.5e adapter. See [VERSIONING.md](VERSIONING.md) and the Phase F slice in the roadmap below.
+
 If you are building a D&D character sheet, encounter tracker, virtual tabletop, automation tool, or AI dungeon master and you do not want to reimplement the rules engine from scratch, this is for you.
 
 ## Quick start
 
 ```sh
-npm install dnd-engine
+npm install ttrpg-engine-dnd@alpha
 ```
 
 ```ts
 import {
   createEngine, loadStarterPack, createPC, commit,
   seededRNG, newEventId,
-} from 'dnd-engine';
+} from 'ttrpg-engine-dnd';
 
 const engine = createEngine({ contentPacks: [loadStarterPack()], rng: seededRNG(42) });
 const alyx = createPC({
@@ -156,7 +158,7 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 
 ### Phase F: Core extraction (1 slice, optional, future)
 
-- **Slice 47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `dnd-engine` becomes the 5.5e adapter on top. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once `dnd-engine` is mature.
+- **Slice 47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `ttrpg-engine-dnd` (this package) becomes the 5.5e adapter on top of the core. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once this package is mature.
 
 ### What "perfect" cannot mean
 
@@ -165,19 +167,19 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 ## Install
 
 ```sh
-npm install dnd-engine
+npm install ttrpg-engine-dnd@alpha
 ```
 
-The package ships ESM, CJS, and `.d.ts`. Peer dependencies (`zod`, `immer`, `ulid`) install transitively. The package is configured for `npm publish` (entry points, `prepublishOnly` runs the full CI gate, `publishConfig: public`); publish to the registry when ready with `npm publish`.
+The package is published under the `alpha` dist-tag and ships ESM, CJS, and `.d.ts`. Peer dependencies (`zod`, `immer`, `ulid`) install transitively. See [VERSIONING.md](VERSIONING.md) for the alpha-to-1.0 roadmap and the alpha->beta promotion gate.
 
-During pre-alpha you can also pin to a git ref:
+You can also pin to a git ref while iterating alongside the engine:
 
 ```jsonc
 // in your consumer's package.json
 "dependencies": {
-  "dnd-engine": "github:greghcarr/dnd-engine"
+  "ttrpg-engine-dnd": "github:greghcarr/dnd-engine"
   // or, when developing alongside the engine:
-  // "dnd-engine": "file:../dnd-engine"
+  // "ttrpg-engine-dnd": "file:../dnd-engine"
 }
 ```
 
@@ -188,7 +190,7 @@ import {
   createEngine,
   loadContentPack,
   seededRNG,
-} from 'dnd-engine';
+} from 'ttrpg-engine-dnd';
 import myContent from './my-content-pack.json';
 
 const engine = createEngine({
