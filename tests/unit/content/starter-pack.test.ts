@@ -79,6 +79,19 @@ describe('starter content pack', () => {
     expect(resolved.spells.get('identify')?.ritual).toBe(true);
   });
 
+  it('ships magic items and monster statblocks', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    const bagOfHolding = resolved.items.get('bag-of-holding');
+    expect(bagOfHolding?.itemKind).toBe('magic');
+    const wand = resolved.items.get('wand-of-magic-missiles');
+    expect(wand?.itemKind === 'magic' && wand.charges?.max).toBe(7);
+    expect(resolved.monsters.size).toBeGreaterThanOrEqual(5);
+    expect(resolved.monsters.get('goblin')?.cr).toBe(0.25);
+    expect(resolved.monsters.get('young-red-dragon')?.cr).toBe(10);
+    expect(resolved.monsters.get('skeleton')?.damageImmunities).toContain('poison');
+  });
+
   it('ships diverse species, backgrounds, feats, and equipment', () => {
     const pack = loadStarterPack();
     const resolved = resolveContent([pack]);
