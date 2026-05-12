@@ -85,7 +85,7 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
 - ✓ **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish. `PolymorphApplied` swaps HP, ability scores, speed, and species into a new form and snapshots the originals to `Character.polymorphedSnapshot`; `PolymorphReverted` restores them. `wild-shape`, `polymorph`, and `true-polymorph` share the machinery via a `kind` discriminator. `SimulacrumCreated` clones a character into a creature-kind duplicate at half-HP (transient state reset). `WishGranted` records a freeform wish description; `stressApplied: true` increments the granter's exhaustion. Concrete spell effects beyond the form swap stay in the consumer's hands.
 
-### Phase D: Adoption surface (7 slices, 5 done)
+### Phase D: Adoption surface (7 slices, 6 done)
 
 These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
 
@@ -94,7 +94,7 @@ These don't add rules; they make the library usable by people who didn't write i
 - ✓ **Slice 33.** Getting-started doc at [docs/getting-started.md](docs/getting-started.md) walking through install, engine setup, character creation, attack resolution, and save/load round-trip. API reference at [docs/api-overview.md](docs/api-overview.md) maps every public symbol by namespace (planners, derivations, events, schemas, content packs, RNG, IDs, migrations).
 - ✓ **Slice 34.** Public API conveniences. `engine.do(campaign, intent)` dispatches on `intent.type` to the right planner and commits the result in one call (covers every Phase A-C planner). `serializeCampaign(c)` writes a JSON string with id, name, schemaVersion, and events only; state is omitted because `loadCampaign(json)` replays the events to reconstruct it. `createPC({name, speciesId, backgroundId, classId, hpMax, ...})` returns a `Character` with sensible defaults; caller emits the `CharacterCreated` event themselves to add to a campaign.
 - ✓ **Slice 35.** Derivation memoization keyed on `CampaignState.version`. Every `engine.derive.*` method now caches its result per-engine; the cache invalidates automatically when `state.version` advances (i.e., on every commit). Repeated calls at the same version return the same object reference, so a UI that asks for derived AC ten times per frame across twelve combatants pays for one computation each.
-- **Slice 36.** `npm publish` to the public registry. Until this, every install is via git URL.
+- ✓ **Slice 36.** npm publish prep. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats. `files` whitelists `dist/`, `docs/`, license, and READMEs. `prepublishOnly` runs the full CI gate (typecheck + tests + coverage + build) before any publish. `publishConfig: { access: public }` is set. `npm pack --dry-run` reports a ~398 KB tarball with no source or test code. Publishing is `npm publish` away.
 - **Slice 37.** Content pack validator with helpful diagnostic errors (path-pointed Zod failures, cross-reference resolution failures with offending IDs).
 
 ### Phase E: 2024 content fill-out (9 slices, 0 done)
@@ -121,7 +121,13 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 
 ## Install
 
-Not yet published to npm. While pre-alpha, install via git URL or a sibling directory:
+```sh
+npm install dnd-engine
+```
+
+The package ships ESM, CJS, and `.d.ts`. Peer dependencies (`zod`, `immer`, `ulid`) install transitively. The package is configured for `npm publish` (entry points, `prepublishOnly` runs the full CI gate, `publishConfig: public`); publish to the registry when ready with `npm publish`.
+
+During pre-alpha you can also pin to a git ref:
 
 ```jsonc
 // in your consumer's package.json
@@ -131,8 +137,6 @@ Not yet published to npm. While pre-alpha, install via git URL or a sibling dire
   // "dnd-engine": "file:../dnd-engine"
 }
 ```
-
-`npm publish` is tracked as Slice 36 in the roadmap.
 
 ## Usage (preview)
 

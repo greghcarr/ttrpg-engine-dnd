@@ -15,6 +15,7 @@
   },
   "files": [
     "dist",
+    "docs",
     "README.md",
     "DEVELOPMENT.md",
     "CONTRIBUTING.md",
@@ -27,7 +28,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "ci": "npm run typecheck && npm run test:coverage && npm run build"
+    "ci": "npm run typecheck && npm run test:coverage && npm run build",
+    "prepublishOnly": "npm run ci"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "immer": "^10.1.1",
