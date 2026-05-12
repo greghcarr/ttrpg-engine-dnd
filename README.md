@@ -70,7 +70,7 @@ The campaign-state surface area beyond combatants.
 - ✓ **Slice 19.** Locations and environmental terrain. `Location` (with optional parent and `LocationMap` of cells: normal / difficult / impassable / water), `Door` (open / closed / locked, blocks LOS and movement when shut). New events `LocationCreated`, `DoorAdded`, `DoorStateChanged`, `CharacterLocationChanged`. Derivations `terrainAt`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect` (Bresenham ray, blocked by impassable cells and closed/locked doors).
 - ✓ **Slice 20.** Quests, objectives, rewards, milestone XP. `Quest` (active / completed / failed / abandoned) with required and optional `QuestObjective`s tracking progress against thresholds. New events `QuestStarted`, `ObjectiveProgressed` / `Completed` / `Failed`, `QuestCompleted` / `Failed` / `Abandoned`, `QuestRewardClaimed` (distributes XP per beneficiary and currency to the linked party), `XPAwarded` (direct grant), `MilestoneAwarded` (minor / major / campaign tags appended to the campaign state).
 
-### Phase C: Combat fill-in (10 slices, 8 done)
+### Phase C: Combat fill-in (10 slices, 9 done)
 
 High-impact mechanics consumers will immediately want. Each slice closes a gap that's currently missing or partial.
 
@@ -82,7 +82,7 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 26.** NPCs with reaction and morale mechanics. Character schema gains optional `attitude`, `morale`, and `moraleBroken` fields. `planReactionRoll` rolls the presenter's CHA (Persuasion) against a DC and bumps the NPC's attitude (hostile / unfriendly / indifferent / friendly / helpful) based on margin. `planMoraleCheck` rolls the NPC's Wisdom against a DC; failed checks decrement morale and emit `MoraleBroken` (flee / surrender) when morale hits zero.
 - ✓ **Slice 27.** Downtime, crafting, training. `DowntimeActivityResolved` appends to a `downtimeLog` on the campaign with kind (`crafting` / `training` / `recuperating` / `research` / `work` / `other`), day count, outcome (`success` / `partial` / `failure`), summary, optional produced item definition ID, and optional tool proficiency gained. Tool proficiencies accumulate per character in `toolProficienciesByCharacter`.
 - ✓ **Slice 28.** Magic item charges, recharge, sentient items. ItemInstance gains `maxCharges` and `sentient { ego, alignment, personality }` fields. `ItemChargeConsumed` decrements `chargesRemaining` (refuses to over-spend), `ItemRecharged` adds back up to `maxCharges` on one of five cadences (`dawn`, `dusk`, `shortRest`, `longRest`, `manual`), `SentientItemConflict` records the outcome of an item-vs-wielder showdown.
-- **Slice 29.** Resurrection variants beyond Revivify: Raise Dead, Reincarnate, True Resurrection.
+- ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
 - **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish via the `CustomEffect` handler hook.
 
 ### Phase D: Adoption surface (7 slices, 0 done)

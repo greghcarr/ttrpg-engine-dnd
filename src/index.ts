@@ -451,6 +451,15 @@ export type {
   RechargeCadence,
 } from './schemas/events/index.js';
 export {
+  CharacterResurrectedEventSchema,
+  ResurrectionSpellSchema,
+  RESURRECTION_SPELLS,
+} from './schemas/events/index.js';
+export type {
+  CharacterResurrectedEvent,
+  ResurrectionSpell,
+} from './schemas/events/index.js';
+export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,

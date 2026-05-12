@@ -462,6 +462,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const who = characterName(stateBefore, event.wielderId);
       return `${item} vs ${who}: ${event.winner} prevails${event.description !== undefined ? ` (${event.description})` : ''}.`;
     }
+    case 'CharacterResurrected': {
+      const who = characterName(stateAfter, event.characterId);
+      const caster = event.byCharacterId !== undefined
+        ? ` by **${characterName(stateBefore, event.byCharacterId)}**`
+        : '';
+      const newSpecies = event.newSpeciesId !== undefined ? `, reborn as ${event.newSpeciesId}` : '';
+      return `**${who}** is restored via ${event.spell}${caster} (now ${event.hpAfter} HP)${newSpecies}.`;
+    }
   }
 };
 

@@ -129,6 +129,7 @@ import {
   ItemRechargedEventSchema,
   SentientItemConflictEventSchema,
 } from './charges.js';
+import { CharacterResurrectedEventSchema } from './resurrection.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -221,6 +222,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   ItemChargeConsumedEventSchema,
   ItemRechargedEventSchema,
   SentientItemConflictEventSchema,
+  CharacterResurrectedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -316,6 +318,7 @@ export const EVENT_TYPES = [
   'ItemChargeConsumed',
   'ItemRecharged',
   'SentientItemConflict',
+  'CharacterResurrected',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -621,3 +624,12 @@ export type {
   SentientItemConflictEvent,
   RechargeCadence,
 } from './charges.js';
+export {
+  CharacterResurrectedEventSchema,
+  ResurrectionSpellSchema,
+  RESURRECTION_SPELLS,
+} from './resurrection.js';
+export type {
+  CharacterResurrectedEvent,
+  ResurrectionSpell,
+} from './resurrection.js';

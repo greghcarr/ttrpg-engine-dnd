@@ -125,6 +125,7 @@ import {
   applyItemRecharged,
   applySentientItemConflict,
 } from './reducers/charges.js';
+import { applyCharacterResurrected } from './reducers/resurrection.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -399,6 +400,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'SentientItemConflict':
         applySentientItemConflict(draft, event);
+        break;
+      case 'CharacterResurrected':
+        applyCharacterResurrected(draft, event);
         break;
       default: {
         const exhaustive: never = event;
