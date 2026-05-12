@@ -5,7 +5,7 @@
 **Mira** casts Hold Person (slot 2) at Ogre.
 Slot consumed: level 2.
 **Ogre** WIS save: d20(2) + -2 = 0 vs DC 15 -> failure.
-**Ogre** is now paralyzed.
+**Ogre** is now Paralyzed.
 **Mira** is now concentrating on Hold Person.
 **Mira** takes 18 damage (18 slashing). (HP 28 -> 10)
 **Mira** CON save: d20(3) + 1 = 4 vs DC 10 -> failure.
