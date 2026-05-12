@@ -426,6 +426,18 @@ export type {
   Attitude,
 } from './schemas/events/index.js';
 export {
+  DowntimeActivityResolvedEventSchema,
+  DowntimeKindSchema,
+  DowntimeOutcomeSchema,
+  DOWNTIME_KINDS,
+  DOWNTIME_OUTCOMES,
+} from './schemas/events/index.js';
+export type {
+  DowntimeActivityResolvedEvent,
+  DowntimeKind,
+  DowntimeOutcome,
+} from './schemas/events/index.js';
+export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,

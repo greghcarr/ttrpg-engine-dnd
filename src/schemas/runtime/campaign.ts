@@ -13,6 +13,7 @@ import { QuestSchema } from './quest.js';
 import { MilestoneKindSchema } from '../events/quests.js';
 import { VehicleSchema } from './vehicle.js';
 import { TravelLegSchema } from './travel.js';
+import { DowntimeLogEntrySchema } from './downtime.js';
 
 export const CampaignStateSchema = z.object({
   characters: z.record(ULIDSchema, CharacterSchema).default({}),
@@ -29,6 +30,8 @@ export const CampaignStateSchema = z.object({
   quests: z.record(ULIDSchema, QuestSchema).default({}),
   vehicles: z.record(ULIDSchema, VehicleSchema).default({}),
   travelLog: z.array(TravelLegSchema).default([]),
+  downtimeLog: z.array(DowntimeLogEntrySchema).default([]),
+  toolProficienciesByCharacter: z.record(ULIDSchema, z.array(z.string())).default({}),
   milestones: z
     .array(
       z.object({
@@ -74,6 +77,8 @@ export const emptyCampaignState = (): CampaignState => ({
   quests: {},
   vehicles: {},
   travelLog: [],
+  downtimeLog: [],
+  toolProficienciesByCharacter: {},
   milestones: [],
   inGameTime: { totalMinutes: 0 },
   version: 0,

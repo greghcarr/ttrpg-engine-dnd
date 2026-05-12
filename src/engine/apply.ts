@@ -119,6 +119,7 @@ import {
   applyMoraleCheckRolled,
   applyMoraleBroken,
 } from './reducers/npc.js';
+import { applyDowntimeActivityResolved } from './reducers/downtime.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -381,6 +382,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'MoraleBroken':
         applyMoraleBroken(draft, event);
+        break;
+      case 'DowntimeActivityResolved':
+        applyDowntimeActivityResolved(draft, event);
         break;
       default: {
         const exhaustive: never = event;

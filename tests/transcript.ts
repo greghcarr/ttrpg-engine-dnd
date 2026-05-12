@@ -439,6 +439,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const who = characterName(stateBefore, event.characterId);
       return `${who}'s morale breaks: ${event.action}!`;
     }
+    case 'DowntimeActivityResolved': {
+      const who = characterName(stateBefore, event.characterId);
+      const item = event.producedItemDefinitionId !== undefined
+        ? `, produces ${content.items.get(event.producedItemDefinitionId)?.name ?? event.producedItemDefinitionId}`
+        : '';
+      const tool = event.toolProficiencyGained !== undefined ? `, gains tool: ${event.toolProficiencyGained}` : '';
+      return `Downtime (${event.kind}): ${who}, ${event.days}d -> ${event.outcome}. ${event.summary}${item}${tool}.`;
+    }
   }
 };
 

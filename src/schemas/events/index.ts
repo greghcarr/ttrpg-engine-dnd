@@ -123,6 +123,7 @@ import {
   MoraleCheckRolledEventSchema,
   MoraleBrokenEventSchema,
 } from './npc.js';
+import { DowntimeActivityResolvedEventSchema } from './downtime.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -211,6 +212,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   AttitudeChangedEventSchema,
   MoraleCheckRolledEventSchema,
   MoraleBrokenEventSchema,
+  DowntimeActivityResolvedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -302,6 +304,7 @@ export const EVENT_TYPES = [
   'AttitudeChanged',
   'MoraleCheckRolled',
   'MoraleBroken',
+  'DowntimeActivityResolved',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -582,3 +585,15 @@ export type {
   MoraleBrokenEvent,
   Attitude,
 } from './npc.js';
+export {
+  DowntimeActivityResolvedEventSchema,
+  DowntimeKindSchema,
+  DowntimeOutcomeSchema,
+  DOWNTIME_KINDS,
+  DOWNTIME_OUTCOMES,
+} from './downtime.js';
+export type {
+  DowntimeActivityResolvedEvent,
+  DowntimeKind,
+  DowntimeOutcome,
+} from './downtime.js';
