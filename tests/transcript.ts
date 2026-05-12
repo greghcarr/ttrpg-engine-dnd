@@ -350,6 +350,23 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     }
     case 'MilestoneAwarded':
       return `Milestone (${event.kind}): "${event.title}".`;
+    case 'SpellCountered': {
+      const counter = characterName(stateBefore, event.counterCasterId);
+      const target = characterName(stateBefore, event.targetCasterId);
+      const spell = spellName(content, event.spellId);
+      return `**${counter}** counterspells **${target}**'s ${spell}: the spell fails.`;
+    }
+    case 'SpellDispelled': {
+      const who = characterName(stateBefore, event.dispelledByCharacterId);
+      const effect = stateBefore.effectInstances[event.effectInstanceId];
+      const spell = effect !== undefined ? spellName(content, effect.spellId) : 'an effect';
+      return `**${who}** dispels ${spell}.`;
+    }
+    case 'ItemIdentified': {
+      const who = characterName(stateBefore, event.identifiedByCharacterId);
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      return `**${who}** identifies ${item}.`;
+    }
   }
 };
 

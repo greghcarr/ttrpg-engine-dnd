@@ -94,6 +94,11 @@ import {
   applyXPAwarded,
   applyMilestoneAwarded,
 } from './reducers/quests.js';
+import {
+  applySpellCountered,
+  applySpellDispelled,
+  applyItemIdentified,
+} from './reducers/reactive-spells.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -305,6 +310,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'MilestoneAwarded':
         applyMilestoneAwarded(draft, event);
+        break;
+      case 'SpellCountered':
+        applySpellCountered(draft, event);
+        break;
+      case 'SpellDispelled':
+        applySpellDispelled(draft, event);
+        break;
+      case 'ItemIdentified':
+        applyItemIdentified(draft, event);
         break;
       default: {
         const exhaustive: never = event;

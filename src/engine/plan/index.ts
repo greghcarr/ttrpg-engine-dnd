@@ -66,3 +66,11 @@ export {
   type ShoveIntent,
   type HideIntent,
 } from './contested.js';
+export {
+  planCounterspell,
+  planDispelMagic,
+  planIdentify,
+  type CounterspellIntent,
+  type DispelMagicIntent,
+  type IdentifyIntent,
+} from './reactive-spells.js';

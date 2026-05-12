@@ -98,6 +98,11 @@ import {
   XPAwardedEventSchema,
   MilestoneAwardedEventSchema,
 } from './quests.js';
+import {
+  SpellCounteredEventSchema,
+  SpellDispelledEventSchema,
+  ItemIdentifiedEventSchema,
+} from './reactive-spells.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -169,6 +174,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   QuestRewardClaimedEventSchema,
   XPAwardedEventSchema,
   MilestoneAwardedEventSchema,
+  SpellCounteredEventSchema,
+  SpellDispelledEventSchema,
+  ItemIdentifiedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -243,6 +251,9 @@ export const EVENT_TYPES = [
   'QuestRewardClaimed',
   'XPAwarded',
   'MilestoneAwarded',
+  'SpellCountered',
+  'SpellDispelled',
+  'ItemIdentified',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -470,3 +481,13 @@ export type {
   MilestoneAwardedEvent,
   MilestoneKind,
 } from './quests.js';
+export {
+  SpellCounteredEventSchema,
+  SpellDispelledEventSchema,
+  ItemIdentifiedEventSchema,
+} from './reactive-spells.js';
+export type {
+  SpellCounteredEvent,
+  SpellDispelledEvent,
+  ItemIdentifiedEvent,
+} from './reactive-spells.js';

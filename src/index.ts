@@ -375,6 +375,9 @@ export {
   planGrapple,
   planShove,
   planHide,
+  planCounterspell,
+  planDispelMagic,
+  planIdentify,
 } from './engine/plan/index.js';
 export type {
   ShortRestIntent,
@@ -395,7 +398,20 @@ export type {
   GrappleIntent,
   ShoveIntent,
   HideIntent,
+  CounterspellIntent,
+  DispelMagicIntent,
+  IdentifyIntent,
 } from './engine/plan/index.js';
+export {
+  SpellCounteredEventSchema,
+  SpellDispelledEventSchema,
+  ItemIdentifiedEventSchema,
+} from './schemas/events/index.js';
+export type {
+  SpellCounteredEvent,
+  SpellDispelledEvent,
+  ItemIdentifiedEvent,
+} from './schemas/events/index.js';
 
 export type { HandlerRegistry, EffectHandler, HandlerContext } from './handlers/index.js';
 

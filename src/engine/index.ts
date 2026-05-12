@@ -43,9 +43,15 @@ import {
   planGrapple,
   planShove,
   planHide,
+  planCounterspell,
+  planDispelMagic,
+  planIdentify,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
+  type CounterspellIntent,
+  type DispelMagicIntent,
+  type IdentifyIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -143,6 +149,9 @@ export interface Engine {
     grapple(state: CampaignState, intent: Omit<GrappleIntent, 'type'>): PlanResult;
     shove(state: CampaignState, intent: Omit<ShoveIntent, 'type'>): PlanResult;
     hide(state: CampaignState, intent: Omit<HideIntent, 'type'>): PlanResult;
+    counterspell(state: CampaignState, intent: Omit<CounterspellIntent, 'type'>): PlanResult;
+    dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
+    identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -267,6 +276,15 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     hide(state, intent) {
       return { events: planHide(state, content, rng, { type: 'Hide', ...intent }) };
+    },
+    counterspell(state, intent) {
+      return { events: planCounterspell(state, content, rng, { type: 'Counterspell', ...intent }) };
+    },
+    dispelMagic(state, intent) {
+      return { events: planDispelMagic(state, content, rng, { type: 'DispelMagic', ...intent }) };
+    },
+    identify(state, intent) {
+      return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };
     },
   };
 

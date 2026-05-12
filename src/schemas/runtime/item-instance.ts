@@ -12,5 +12,6 @@ export const ItemInstanceSchema = z.object({
   equippedBy: ULIDSchema.optional(),
   containerId: ULIDSchema.optional(),
   acquiredAtEventId: ULIDSchema.optional(),
+  identifiedByCharacterIds: z.array(ULIDSchema).default([]),
 });
 export type ItemInstance = z.infer<typeof ItemInstanceSchema>;
