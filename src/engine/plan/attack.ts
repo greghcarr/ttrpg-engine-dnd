@@ -46,30 +46,35 @@ const chooseDamageAbility = (
   return 'STR';
 };
 
-export const planAttack = (
-  state: CampaignState,
-  content: ResolvedContent,
-  rng: RNG,
-  intent: AttackIntent,
-): ReadonlyArray<Event> => {
-  const attacker = state.characters[intent.attackerId];
-  if (!attacker) throw new Error(`Unknown attacker ${intent.attackerId}`);
-  const target = state.characters[intent.targetId];
-  if (!target) throw new Error(`Unknown target ${intent.targetId}`);
-  const weaponInstance = state.itemInstances[intent.weaponInstanceId];
-  if (!weaponInstance) throw new Error(`Unknown weapon ${intent.weaponInstanceId}`);
+export interface ResolveAttackInput {
+  readonly state: CampaignState;
+  readonly content: ResolvedContent;
+  readonly rng: RNG;
+  readonly attackerId: string;
+  readonly targetId: string;
+  readonly weaponInstanceId: string;
+  readonly advantage?: 'advantage' | 'disadvantage' | 'none';
+  readonly at: string;
+}
+
+export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> => {
+  const { state, content, rng, at } = input;
+  const attacker = state.characters[input.attackerId];
+  if (!attacker) throw new Error(`Unknown attacker ${input.attackerId}`);
+  const target = state.characters[input.targetId];
+  if (!target) throw new Error(`Unknown target ${input.targetId}`);
+  const weaponInstance = state.itemInstances[input.weaponInstanceId];
+  if (!weaponInstance) throw new Error(`Unknown weapon ${input.weaponInstanceId}`);
   const weaponDef = content.items.get(weaponInstance.definitionId);
   if (!weaponDef || weaponDef.itemKind !== 'weapon') {
     throw new Error(`Item ${weaponInstance.definitionId} is not a weapon`);
   }
 
-  const economyPrelude = planActionEconomyForAttack(state, content, intent);
-
   const attackBonusResult = computeAttackBonus({
     character: attacker,
     itemInstances: state.itemInstances,
     content,
-    weaponInstanceId: intent.weaponInstanceId,
+    weaponInstanceId: input.weaponInstanceId,
   });
 
   const acResult = computeAC({
@@ -78,7 +83,7 @@ export const planAttack = (
     content,
   });
 
-  const advantage = intent.advantage ?? 'none';
+  const advantage = input.advantage ?? 'none';
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
   if (advantage !== 'none') {
     rolls.push(rollDie(D20_SIDES, rng));
@@ -95,15 +100,13 @@ export const planAttack = (
   const hit = !naturalMiss && (naturalHit || total >= acResult.total);
   const critical = naturalHit;
 
-  const at = intent.at ?? nowIso();
-
   const attackRolled: AttackRolledEvent = {
     id: newEventId() as ULID,
     at,
     type: 'AttackRolled',
-    attackerId: intent.attackerId,
-    targetId: intent.targetId,
-    weaponInstanceId: intent.weaponInstanceId,
+    attackerId: input.attackerId,
+    targetId: input.targetId,
+    weaponInstanceId: input.weaponInstanceId,
     d20: rolls,
     used: advantage,
     attackBonus: attackBonusResult.total,
@@ -123,7 +126,7 @@ export const planAttack = (
   });
 
   if (!hit) {
-    return [...economyPrelude, attackRolled, ...attackTriggers];
+    return [attackRolled, ...attackTriggers];
   }
 
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
@@ -145,9 +148,9 @@ export const planAttack = (
     id: newEventId() as ULID,
     at,
     type: 'DamageRolled',
-    attackerId: intent.attackerId,
-    targetId: intent.targetId,
-    weaponInstanceId: intent.weaponInstanceId,
+    attackerId: input.attackerId,
+    targetId: input.targetId,
+    weaponInstanceId: input.weaponInstanceId,
     rolls: [damageRollPayload],
     critical,
     causedByEventId: attackRolled.id,
@@ -158,12 +161,33 @@ export const planAttack = (
     id: newEventId() as ULID,
     at,
     type: 'DamageApplied',
-    targetId: intent.targetId,
+    targetId: input.targetId,
     components: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
     causedByEventId: damageRolled.id,
   };
 
-  return [...economyPrelude, attackRolled, ...attackTriggers, damageRolled, damageApplied];
+  return [attackRolled, ...attackTriggers, damageRolled, damageApplied];
+};
+
+export const planAttack = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: AttackIntent,
+): ReadonlyArray<Event> => {
+  const economyPrelude = planActionEconomyForAttack(state, content, intent);
+  const at = intent.at ?? nowIso();
+  const resolution = resolveAttack({
+    state,
+    content,
+    rng,
+    attackerId: intent.attackerId,
+    targetId: intent.targetId,
+    weaponInstanceId: intent.weaponInstanceId,
+    ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
+    at,
+  });
+  return [...economyPrelude, ...resolution];
 };
 
 const findActiveCombatant = (

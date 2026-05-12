@@ -32,8 +32,10 @@ import {
   planAbilityCheck,
   planCastSpell,
   planCheckConcentration,
+  planOpportunityAttack,
   type RestIntent,
   type AttackIntent,
+  type OpportunityAttackIntent,
   type CreateEncounterIntent,
   type RollInitiativeIntent,
   type StartEncounterIntent,
@@ -92,6 +94,7 @@ export interface Engine {
     longRest(state: CampaignState, intent: { participantIds: ReadonlyArray<string>; at?: string }): PlanResult;
     rest(state: CampaignState, intent: RestIntent): PlanResult;
     attack(state: CampaignState, intent: Omit<AttackIntent, 'type'>): PlanResult;
+    opportunityAttack(state: CampaignState, intent: Omit<OpportunityAttackIntent, 'type'>): PlanResult;
     createEncounter(
       state: CampaignState,
       intent: Omit<CreateEncounterIntent, 'type'>,
@@ -153,6 +156,14 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     attack(state, intent) {
       return { events: planAttack(state, content, rng, { type: 'Attack', ...intent }) };
+    },
+    opportunityAttack(state, intent) {
+      return {
+        events: planOpportunityAttack(state, content, rng, {
+          type: 'OpportunityAttack',
+          ...intent,
+        }),
+      };
     },
     createEncounter(state, intent) {
       return planCreateEncounter(state, content, { type: 'CreateEncounter', ...intent });

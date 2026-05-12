@@ -5,7 +5,11 @@ export {
   type LongRestIntent,
   type RestIntent,
 } from './rest.js';
-export { planAttack, type AttackIntent } from './attack.js';
+export { planAttack, resolveAttack, type AttackIntent, type ResolveAttackInput } from './attack.js';
+export {
+  planOpportunityAttack,
+  type OpportunityAttackIntent,
+} from './opportunity-attack.js';
 export {
   planCreateEncounter,
   planRollInitiative,
