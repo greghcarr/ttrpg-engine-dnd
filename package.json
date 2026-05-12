@@ -1,6 +1,6 @@
 {
   "name": "dnd-engine",
-  "version": "0.1.0-pre-alpha",
+  "version": "0.1.0-alpha.0",
   "description": "Standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only content model with effect-primitive vocabulary and code-handler escape hatch.",
   "type": "module",
   "main": "./dist/dnd-engine.cjs",
@@ -17,6 +17,7 @@
     "dist",
     "docs",
     "README.md",
+    "CHANGELOG.md",
     "DEVELOPMENT.md",
     "CONTRIBUTING.md",
     "LICENSE"

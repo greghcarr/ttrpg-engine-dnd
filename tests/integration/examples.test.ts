@@ -12,6 +12,12 @@ const runExample = (relPath: string): string => {
 };
 
 describe('examples', () => {
+  it('00-quickstart matches the README snippet', () => {
+    const out = runExample('examples/00-quickstart/index.ts');
+    expect(out).toContain('Alyx: AC');
+    expect(out).toContain('HP 26/26');
+  });
+
   it('01-character-sheet prints a Fighter sheet', () => {
     const out = runExample('examples/01-character-sheet/index.ts');
     expect(out).toContain('Alyx, Fighter 3');

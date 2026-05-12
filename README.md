@@ -3,11 +3,41 @@
 [![CI](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/dnd-engine/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
-[![Status](https://img.shields.io/badge/status-pre--alpha-orange)](README.md#status)
+[![Status](https://img.shields.io/badge/status-alpha-yellow)](README.md#status)
 
-A standalone, event-sourced TypeScript domain engine for Dungeons & Dragons 5.5e (the 2024 rules update).
+A standalone, event-sourced TypeScript domain engine for Dungeons & Dragons 5.5e (the 2024 rules update). Schema-only. Bring your own content pack (a starter SRD-shaped pack ships in the box).
 
 If you are building a D&D character sheet, encounter tracker, virtual tabletop, automation tool, or AI dungeon master and you do not want to reimplement the rules engine from scratch, this is for you.
+
+## Quick start
+
+```sh
+npm install dnd-engine
+```
+
+```ts
+import {
+  createEngine, loadStarterPack, createPC, commit,
+  seededRNG, newEventId,
+} from 'dnd-engine';
+
+const engine = createEngine({ contentPacks: [loadStarterPack()], rng: seededRNG(42) });
+const alyx = createPC({
+  name: 'Alyx', speciesId: 'human', backgroundId: 'soldier',
+  classId: 'fighter', level: 3, hpMax: 26,
+  abilityScores: { STR: 16, DEX: 14, CON: 14, INT: 10, WIS: 12, CHA: 8 },
+});
+
+let campaign = engine.createCampaign({ name: 'demo' });
+campaign = commit(campaign, [
+  { id: newEventId(), at: new Date().toISOString(), type: 'CharacterCreated', snapshot: alyx },
+]);
+
+const sheet = engine.derive.character(campaign.state, alyx.id);
+console.log(`${alyx.name}: AC ${sheet.ac.total}, HP ${sheet.hp.current}/${sheet.hp.max}`);
+```
+
+For a step-by-step walkthrough see [docs/getting-started.md](docs/getting-started.md). For the full public surface see [docs/api-overview.md](docs/api-overview.md).
 
 ## Why this engine
 
