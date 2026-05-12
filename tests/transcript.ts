@@ -506,6 +506,17 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     }
     case 'BastionLevelChanged':
       return `Bastion levels up: ${event.fromLevel} -> ${event.toLevel}.`;
+    case 'CampaignSettingsChanged': {
+      const toggles: string[] = [];
+      if (event.grittyRest !== undefined) toggles.push(`grittyRest=${event.grittyRest}`);
+      if (event.heroPoints !== undefined) toggles.push(`heroPoints=${event.heroPoints}`);
+      if (event.sanity !== undefined) toggles.push(`sanity=${event.sanity}`);
+      if (event.massCombat !== undefined) toggles.push(`massCombat=${event.massCombat}`);
+      if (event.feaCharacterFlaws !== undefined) toggles.push(`feaCharacterFlaws=${event.feaCharacterFlaws}`);
+      if (event.customHouserulesAdd !== undefined) toggles.push(`+houserules: ${event.customHouserulesAdd.join(', ')}`);
+      if (event.customHouserulesRemove !== undefined) toggles.push(`-houserules: ${event.customHouserulesRemove.join(', ')}`);
+      return `Campaign settings: ${toggles.join(', ')}.`;
+    }
   }
 };
 

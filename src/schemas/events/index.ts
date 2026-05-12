@@ -137,6 +137,7 @@ import {
   BastionDamagedEventSchema,
   BastionLevelChangedEventSchema,
 } from './bastion.js';
+import { CampaignSettingsChangedEventSchema } from './settings.js';
 import { CharacterResurrectedEventSchema } from './resurrection.js';
 import {
   PolymorphAppliedEventSchema,
@@ -247,6 +248,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   PolymorphRevertedEventSchema,
   SimulacrumCreatedEventSchema,
   WishGrantedEventSchema,
+  CampaignSettingsChangedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -353,6 +355,7 @@ export const EVENT_TYPES = [
   'PolymorphReverted',
   'SimulacrumCreated',
   'WishGranted',
+  'CampaignSettingsChanged',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -677,6 +680,8 @@ export type {
   BastionLevelChangedEvent,
   BastionTurnOrder,
 } from './bastion.js';
+export { CampaignSettingsChangedEventSchema } from './settings.js';
+export type { CampaignSettingsChangedEvent } from './settings.js';
 export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,

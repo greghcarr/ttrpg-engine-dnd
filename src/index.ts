@@ -474,6 +474,13 @@ export type {
   BastionTurnOrder,
 } from './schemas/events/index.js';
 export {
+  CampaignSettingsSchema,
+  defaultCampaignSettings,
+} from './schemas/runtime/index.js';
+export type { CampaignSettings } from './schemas/runtime/index.js';
+export { CampaignSettingsChangedEventSchema } from './schemas/events/index.js';
+export type { CampaignSettingsChangedEvent } from './schemas/events/index.js';
+export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,
   RESURRECTION_SPELLS,

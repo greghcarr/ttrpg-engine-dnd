@@ -6,7 +6,7 @@ A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). 
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through D are complete (Slices 1-37). When picking the next slice, prefer the lowest-numbered unfinished slice unless the user asks otherwise; the order is dependency-driven.
+This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E are complete (Slices 1-46). Only Phase F (Slice 47, optional ttrpg-engine-core extraction) remains.
 
 ## Library-quality bar (internal working note)
 

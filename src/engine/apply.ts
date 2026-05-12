@@ -133,6 +133,7 @@ import {
   applyBastionDamaged,
   applyBastionLevelChanged,
 } from './reducers/bastion.js';
+import { applyCampaignSettingsChanged } from './reducers/settings.js';
 import { applyCharacterResurrected } from './reducers/resurrection.js';
 import {
   applyPolymorphApplied,
@@ -447,6 +448,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'WishGranted':
         applyWishGranted(draft, event);
+        break;
+      case 'CampaignSettingsChanged':
+        applyCampaignSettingsChanged(draft, event);
         break;
       default: {
         const exhaustive: never = event;

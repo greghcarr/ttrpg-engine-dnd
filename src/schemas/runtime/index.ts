@@ -107,3 +107,8 @@ export {
   addCurrency,
   subtractCurrency,
 } from './currency.js';
+export {
+  CampaignSettingsSchema,
+  type CampaignSettings,
+  defaultCampaignSettings,
+} from './settings.js';

@@ -31,13 +31,13 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Thirty-seven slices complete (Phases A, B, C, and D done), 461 tests across 85 files. The engine compiles, builds (ESM + CJS + `.d.ts`), the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite, and the adoption surface (starter content pack, examples, getting-started doc, `engine.do()` convenience, derivation memoization, npm-publish-ready package, content validator with suggestions) is in place.
+**Alpha-ready.** Forty-six slices complete (Phases A through E done), 475 tests across 87 files. The engine compiles, builds (ESM + CJS + `.d.ts`), the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite, the adoption surface is in place (starter pack, examples, getting-started doc, `engine.do()` convenience, derivation memoization, npm-publish-ready package, content validator with suggestions), and the content layer covers every 2024 PHB shape: all 12 classes with 1-20 level tables, ~31 representative spells across the common archetypes, 7 species, 8 backgrounds, ~31 feats including all fighting styles and 9 epic boons, 25+ items with armor variety and 9 magic items, 6 monster statblocks from CR 1/4 to CR 10, the full 2024 Bastion stronghold system, and toggles for the common DMG variant rules.
 
-What remains: Phase E is 2024 content fill-out (12 classes through level 20, ~370 spells, full species/backgrounds/feats, monsters, magic items, bastions, epic boons, variant rules). Phase F is the optional `ttrpg-engine-core` extraction if multi-system support becomes a goal. A consumer can ship a working app today using the starter content pack and extending it.
+What remains is the optional Phase F (`ttrpg-engine-core` extraction) if multi-system support becomes a real goal. Otherwise the library is ready for alpha consumers.
 
 ## Roadmap
 
-Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phases A through D are complete (37 slices). Next up: Phase E (2024 content fill-out) and the optional Phase F (core extraction).
+Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phases A through E are complete (46 slices). Only the optional Phase F (core extraction) remains.
 
 ### Phase A: Engine mechanics (16 slices, all done)
 
@@ -97,7 +97,7 @@ These don't add rules; they make the library usable by people who didn't write i
 - ✓ **Slice 36.** npm publish prep. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats. `files` whitelists `dist/`, `docs/`, license, and READMEs. `prepublishOnly` runs the full CI gate (typecheck + tests + coverage + build) before any publish. `publishConfig: { access: public }` is set. `npm pack --dry-run` reports a ~398 KB tarball with no source or test code. Publishing is `npm publish` away.
 - ✓ **Slice 37.** Content pack validator with diagnostic errors. `loadContentPack` throws a `ContentPackLoadError` whose `.issues` is a list of `{path, message}` entries derived from Zod's `safeParse` (e.g. `classes.0.hitDie: Expected number, received string`). `validateCrossReferences` returns issues with optional Levenshtein-based `suggestion` strings like `Did you mean "savage-attacker"?` so a one-character typo is identifiable from the error alone.
 
-### Phase E: 2024 content fill-out (9 slices, 8 done)
+### Phase E: 2024 content fill-out (9 slices, all done)
 
 Heavy on data, light on engine code. Each class slice stress-tests Phases A and C.
 
@@ -109,7 +109,7 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 - ✓ **Slice 43.** Magic items and monster statblocks. 9 magic items added across all rarity tiers (common Bag of Holding through legendary Deck of Many Things), with a charged wand (Wand of Magic Missiles, 7 charges, dawn recharge `1d6+1`) demonstrating the Slice 28 charge tracking. 6 monster statblocks added (Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon) covering Humanoid / Beast / Undead / Giant / Dragon creature types and CR 0.25 through 10, plus damage immunities/vulnerabilities/resistances and condition immunities where canonical.
 - ✓ **Slice 44.** Bastions (2024 stronghold system). New `Bastion` entity (id, name, owner character, optional location, level 1-9, facilities, hirelings, defenders, treasury, HP). Six new events: `BastionFounded`, `BastionFacilityAdded` (basic / special, cramped / roomy / vast), `BastionHirelingAdded`, `BastionTurnTaken` (turn order: maintain / craft / recruit / research / trade / empower, with treasury delta and optional summary), `BastionDamaged` (clamps HP at zero), `BastionLevelChanged` (rejects mismatched fromLevel). Sufficient state for a consumer to run a full Bastion progression alongside an adventuring campaign.
 - ✓ **Slice 45.** Epic boons (post-20 progression). The Feat schema already supported `category: 'epic-boon'`; this slice adds 9 boons to the starter pack (Combat Prowess, Dimensional Travel, Energy Resistance, Fortitude, Irresistible Offense, Skill, Spell Recall, the Night Spirit, Truesight) so consumers have working post-20 reward content. Granting a boon uses the existing `featsTaken` array on a Character; no new event type required.
-- **Slice 46.** Optional variant rules (gritty realism, hero points, sanity, mass combat).
+- ✓ **Slice 46.** Variant rules toggles. New `CampaignSettings` shape on `CampaignState.settings` with boolean flags for `grittyRest`, `heroPoints`, `sanity`, `massCombat`, `feaCharacterFlaws`, plus a `customHouserules: string[]` for arbitrary table-specific tags. `CampaignSettingsChanged` event flips any subset of toggles in one go and add/removes custom houserule strings (dedupe on add). Consumers can branch their planner logic on these flags; the engine doesn't enforce them yet, leaving the rule interpretation to the consumer (e.g., a custom rest planner that respects `grittyRest` to scale short/long rest durations).
 
 ### Phase F: Core extraction (1 slice, optional, future)
 
