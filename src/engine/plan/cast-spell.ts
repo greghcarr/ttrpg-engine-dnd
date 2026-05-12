@@ -33,14 +33,14 @@ import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
 import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
+import {
+  CANTRIP_LEVEL,
+  D20_SIDES,
+  NAT_1,
+  NAT_20,
+} from '../../internal/constants.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
-
-const D20_SIDES = 20;
-const NAT_20 = 20;
-const NAT_1 = 1;
-const CANTRIP_LEVEL = 0;
-
-const nowIso = (): string => new Date().toISOString();
 
 export interface CastSpellIntent {
   readonly type: 'CastSpell';

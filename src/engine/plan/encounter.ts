@@ -15,11 +15,9 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newEventId, newEncounterId } from '../../ids.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { D20_SIDES } from '../../internal/constants.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
-
-const D20 = 20;
-
-const nowIso = (): string => new Date().toISOString();
 
 export interface CreateEncounterIntent {
   readonly type: 'CreateEncounter';
@@ -65,7 +63,7 @@ export const planRollInitiative = (
   const rolls: InitiativeRoll[] = encounter.combatants.map((c) => {
     const character = state.characters[c.combatantId];
     const dexMod = character ? abilityModifier(character.abilityScores.DEX) : 0;
-    const d20 = rollDie(D20, rng);
+    const d20 = rollDie(D20_SIDES, rng);
     return {
       combatantId: c.combatantId,
       d20,

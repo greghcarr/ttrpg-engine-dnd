@@ -11,6 +11,7 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newChoiceId, newEventId } from '../../ids.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { Effect } from '../../schemas/effects.js';
 
@@ -23,8 +24,6 @@ export interface LevelUpIntent {
   readonly hpStrategy: HPStrategy;
   readonly at?: string;
 }
-
-const nowIso = (): string => new Date().toISOString();
 
 export const planLevelUp = (
   state: CampaignState,

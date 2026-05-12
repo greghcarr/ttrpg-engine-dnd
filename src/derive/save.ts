@@ -5,6 +5,7 @@ import type { AbilityScore } from '../schemas/primitives.js';
 import { abilityModifier, proficiencyBonus } from './ability.js';
 import { buildEffectStack } from './effect-stack.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
+import { EXHAUSTION_SAVE_PENALTY_PER_LEVEL } from '../internal/constants.js';
 
 export interface SaveBreakdownEntry {
   readonly source: string;
@@ -52,7 +53,7 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   }
 
   if (input.character.exhaustion > 0) {
-    const penalty = -2 * input.character.exhaustion;
+    const penalty = EXHAUSTION_SAVE_PENALTY_PER_LEVEL * input.character.exhaustion;
     breakdown.push({ source: 'exhaustion', value: penalty });
   }
 

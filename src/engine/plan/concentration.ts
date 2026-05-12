@@ -7,9 +7,10 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
 import { computeSavingThrow } from '../../derive/save.js';
+import { D20_SIDES } from '../../internal/constants.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 
-const D20_SIDES = 20;
 const CONCENTRATION_MIN_DC = 10;
 const CONCENTRATION_DC_DIVISOR = 2;
 
@@ -19,8 +20,6 @@ export interface CheckConcentrationIntent {
   readonly damageTaken: number;
   readonly at?: string;
 }
-
-const nowIso = (): string => new Date().toISOString();
 
 const concentrationDC = (damageTaken: number): number =>
   Math.max(CONCENTRATION_MIN_DC, Math.floor(damageTaken / CONCENTRATION_DC_DIVISOR));

@@ -120,7 +120,7 @@ export const applyRoundEnded = (
     encounter.activeIndex >= encounter.combatants.length,
     'Not all combatants have acted',
   );
-  for (const c of encounter.combatants) c.hasActedThisRound = false;
+  for (const combatant of encounter.combatants) combatant.hasActedThisRound = false;
   encounter.round += 1;
   encounter.activeIndex = 0;
   clearRoundCountersForCharacters(

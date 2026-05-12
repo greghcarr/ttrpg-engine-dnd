@@ -4,6 +4,19 @@ import type { Character } from '../../schemas/runtime/character.js';
 import type { TriggerFiredEvent } from '../../schemas/events/triggers.js';
 import { invariant } from '../../internal/invariants.js';
 
+type CadenceField =
+  | 'firedThisTurn'
+  | 'firedThisRound'
+  | 'firedThisShortRest'
+  | 'firedThisLongRest';
+
+const ALL_CADENCE_FIELDS: ReadonlyArray<CadenceField> = [
+  'firedThisTurn',
+  'firedThisRound',
+  'firedThisShortRest',
+  'firedThisLongRest',
+];
+
 const requireCharacter = (state: Draft<CampaignState>, id: string): Draft<Character> => {
   const c = state.characters[id];
   invariant(c !== undefined, `Character ${id} not found`);
@@ -16,53 +29,35 @@ export const applyTriggerFired = (
 ): void => {
   const character = requireCharacter(state, event.characterId);
   const prior = character.triggerCounters[event.triggerId] ?? {};
-  character.triggerCounters[event.triggerId] = {
-    ...prior,
-    ...(event.cadence.firedThisTurn !== undefined
-      ? { firedThisTurn: event.cadence.firedThisTurn }
-      : {}),
-    ...(event.cadence.firedThisRound !== undefined
-      ? { firedThisRound: event.cadence.firedThisRound }
-      : {}),
-    ...(event.cadence.firedThisShortRest !== undefined
-      ? { firedThisShortRest: event.cadence.firedThisShortRest }
-      : {}),
-    ...(event.cadence.firedThisLongRest !== undefined
-      ? { firedThisLongRest: event.cadence.firedThisLongRest }
-      : {}),
-  };
-};
-
-const clearTurnCounters = (character: Draft<Character>): void => {
-  for (const key of Object.keys(character.triggerCounters)) {
-    const counter = character.triggerCounters[key];
-    if (counter !== undefined) counter.firedThisTurn = false;
+  const merged: Character['triggerCounters'][string] = { ...prior };
+  for (const field of ALL_CADENCE_FIELDS) {
+    const incoming = event.cadence[field];
+    if (incoming !== undefined) merged[field] = incoming;
   }
+  character.triggerCounters[event.triggerId] = merged;
 };
 
-const clearRoundCounters = (character: Draft<Character>): void => {
-  for (const key of Object.keys(character.triggerCounters)) {
-    const counter = character.triggerCounters[key];
-    if (counter !== undefined) counter.firedThisRound = false;
-  }
-};
-
-const clearShortRestCounters = (character: Draft<Character>): void => {
-  for (const key of Object.keys(character.triggerCounters)) {
-    const counter = character.triggerCounters[key];
-    if (counter !== undefined) counter.firedThisShortRest = false;
-  }
-};
-
-const clearLongRestCounters = (character: Draft<Character>): void => {
-  for (const key of Object.keys(character.triggerCounters)) {
-    const counter = character.triggerCounters[key];
-    if (counter !== undefined) {
-      counter.firedThisTurn = false;
-      counter.firedThisRound = false;
-      counter.firedThisShortRest = false;
-      counter.firedThisLongRest = false;
+const clearCadenceFields = (
+  character: Draft<Character>,
+  fields: ReadonlyArray<CadenceField>,
+): void => {
+  for (const triggerId of Object.keys(character.triggerCounters)) {
+    const counter = character.triggerCounters[triggerId];
+    if (counter === undefined) continue;
+    for (const field of fields) {
+      counter[field] = false;
     }
+  }
+};
+
+const clearForParticipants = (
+  state: Draft<CampaignState>,
+  characterIds: ReadonlyArray<string>,
+  fields: ReadonlyArray<CadenceField>,
+): void => {
+  for (const id of characterIds) {
+    const character = state.characters[id];
+    if (character !== undefined) clearCadenceFields(character, fields);
   }
 };
 
@@ -72,35 +67,20 @@ export const clearTurnCountersForCharacter = (
 ): void => {
   const character = state.characters[characterId];
   if (!character) return;
-  clearTurnCounters(character);
+  clearCadenceFields(character, ['firedThisTurn']);
 };
 
 export const clearRoundCountersForCharacters = (
   state: Draft<CampaignState>,
   characterIds: ReadonlyArray<string>,
-): void => {
-  for (const id of characterIds) {
-    const character = state.characters[id];
-    if (character !== undefined) clearRoundCounters(character);
-  }
-};
+): void => clearForParticipants(state, characterIds, ['firedThisRound']);
 
 export const clearShortRestCountersForCharacters = (
   state: Draft<CampaignState>,
   characterIds: ReadonlyArray<string>,
-): void => {
-  for (const id of characterIds) {
-    const character = state.characters[id];
-    if (character !== undefined) clearShortRestCounters(character);
-  }
-};
+): void => clearForParticipants(state, characterIds, ['firedThisShortRest']);
 
 export const clearLongRestCountersForCharacters = (
   state: Draft<CampaignState>,
   characterIds: ReadonlyArray<string>,
-): void => {
-  for (const id of characterIds) {
-    const character = state.characters[id];
-    if (character !== undefined) clearLongRestCounters(character);
-  }
-};
+): void => clearForParticipants(state, characterIds, ALL_CADENCE_FIELDS);

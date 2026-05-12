@@ -7,6 +7,7 @@ import type {
 } from '../../schemas/events/rest.js';
 import type { Event } from '../../schemas/events/index.js';
 import { newEventId } from '../../ids.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../../engine/ids-utils.js';
 
 export interface LongRestIntent {
@@ -22,8 +23,6 @@ export interface ShortRestIntent {
 }
 
 export type RestIntent = LongRestIntent | ShortRestIntent;
-
-const nowIso = (): string => new Date().toISOString();
 
 export const planShortRest = (
   _state: CampaignState,

@@ -15,11 +15,9 @@ import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
+import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
-
-const D20 = 20;
-const NAT_20 = 20;
-const NAT_1 = 1;
 
 export interface AttackIntent {
   readonly type: 'Attack';
@@ -29,8 +27,6 @@ export interface AttackIntent {
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
   readonly at?: string;
 }
-
-const nowIso = (): string => new Date().toISOString();
 
 const chooseDamageAbility = (
   attacker: { abilityScores: { STR: number; DEX: number } },
@@ -79,9 +75,9 @@ export const planAttack = (
   });
 
   const advantage = intent.advantage ?? 'none';
-  const rolls: number[] = [rollDie(D20, rng)];
+  const rolls: number[] = [rollDie(D20_SIDES, rng)];
   if (advantage !== 'none') {
-    rolls.push(rollDie(D20, rng));
+    rolls.push(rollDie(D20_SIDES, rng));
   }
   const usedRoll =
     advantage === 'advantage'

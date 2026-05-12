@@ -7,8 +7,7 @@ import { SKILL_ABILITY, PROFICIENCY_MULTIPLIER } from '../schemas/primitives.js'
 import { abilityModifier, proficiencyBonus } from './ability.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { buildEffectStack } from './effect-stack.js';
-
-const EXHAUSTION_PENALTY_PER_LEVEL = 2;
+import { EXHAUSTION_SAVE_PENALTY_PER_LEVEL } from '../internal/constants.js';
 
 export interface AbilityCheckBreakdownEntry {
   readonly source: string;
@@ -31,7 +30,8 @@ export interface ComputeAbilityCheckInput {
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
 }
 
-const exhaustionPenalty = (level: number): number => -EXHAUSTION_PENALTY_PER_LEVEL * level;
+const exhaustionPenalty = (level: number): number =>
+  EXHAUSTION_SAVE_PENALTY_PER_LEVEL * level;
 
 export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityCheckResult => {
   const breakdown: AbilityCheckBreakdownEntry[] = [

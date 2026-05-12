@@ -12,11 +12,9 @@ import { rollDie } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { computeAbilityCheck } from '../../derive/ability-check.js';
+import { D20_SIDES } from '../../internal/constants.js';
+import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
-
-const D20_SIDES = 20;
-
-const nowIso = (): string => new Date().toISOString();
 
 const rollWithAdvantage = (
   rng: RNG,
