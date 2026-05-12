@@ -117,8 +117,10 @@ export const applyConditionApplied = (
     (c) => c.conditionId === event.conditionId,
   );
   if (existing) return;
+  // Use the triggering event id as the applied-condition id when none was supplied.
+  // This keeps replay deterministic even when the consumer omits an explicit id.
   character.appliedConditions.push({
-    id: event.appliedConditionId ?? newAppliedConditionId(),
+    id: event.appliedConditionId ?? event.id,
     conditionId: event.conditionId,
     sourceEventId: event.id,
     ...(event.level !== undefined ? { level: event.level } : {}),

@@ -546,6 +546,129 @@
           "value": 4
         }
       ]
+    },
+    {
+      "id": "blinded",
+      "name": "Blinded",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "charmed",
+      "name": "Charmed",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "deafened",
+      "name": "Deafened",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "frightened",
+      "name": "Frightened",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "grappled",
+      "name": "Grappled",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 }
+      ]
+    },
+    {
+      "id": "incapacitated",
+      "name": "Incapacitated",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "invisible",
+      "name": "Invisible",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage" }
+      ]
+    },
+    {
+      "id": "paralyzed",
+      "name": "Paralyzed",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    },
+    {
+      "id": "petrified",
+      "name": "Petrified",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "GrantResistance", "damageType": "all" },
+        { "kind": "GrantConditionImmunity", "conditionId": "poisoned" }
+      ]
+    },
+    {
+      "id": "poisoned",
+      "name": "Poisoned",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "restrained",
+      "name": "Restrained",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "stunned",
+      "name": "Stunned",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    },
+    {
+      "id": "unconscious",
+      "name": "Unconscious",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
     }
   ]
 }
