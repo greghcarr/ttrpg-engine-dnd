@@ -322,61 +322,89 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
   };
 
+  const memo = new Map<string, unknown>();
+  let memoVersion = -1;
+  const memoize = <T>(args: ReadonlyArray<string | number>, state: CampaignState, compute: () => T): T => {
+    if (state.version !== memoVersion) {
+      memo.clear();
+      memoVersion = state.version;
+    }
+    const key = args.join('|');
+    if (memo.has(key)) return memo.get(key) as T;
+    const result = compute();
+    memo.set(key, result);
+    return result;
+  };
+
   const deriveNs: Engine['derive'] = {
     character(state, id) {
-      return computeDerivedCharacter({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-      });
+      return memoize(['character', id], state, () =>
+        computeDerivedCharacter({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+        }),
+      );
     },
     ac(state, id) {
-      return computeAC({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-      });
+      return memoize(['ac', id], state, () =>
+        computeAC({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+        }),
+      );
     },
     savingThrow(state, id, ability) {
-      return computeSavingThrow({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-        ability,
-      });
+      return memoize(['save', id, ability], state, () =>
+        computeSavingThrow({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+          ability,
+        }),
+      );
     },
     attackBonus(state, id, weaponInstanceId) {
-      return computeAttackBonus({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-        weaponInstanceId,
-      });
+      return memoize(['attack', id, weaponInstanceId], state, () =>
+        computeAttackBonus({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+          weaponInstanceId,
+        }),
+      );
     },
     spellSaveDC(state, id, classId) {
-      return computeSpellSaveDC({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-        classId,
-      });
+      return memoize(['spellDC', id, classId], state, () =>
+        computeSpellSaveDC({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+          classId,
+        }),
+      );
     },
     spellAttackBonus(state, id, classId) {
-      return computeSpellAttackBonus({
-        character: requireCharacter(state, id),
-        itemInstances: state.itemInstances,
-        content,
-        pendingChoices: state.pendingChoices,
-        classId,
-      });
+      return memoize(['spellAtk', id, classId], state, () =>
+        computeSpellAttackBonus({
+          character: requireCharacter(state, id),
+          itemInstances: state.itemInstances,
+          content,
+          pendingChoices: state.pendingChoices,
+          classId,
+        }),
+      );
     },
     spellSlots(state, id) {
-      return computeSpellSlots(requireCharacter(state, id), content.classes);
+      return memoize(['slots', id], state, () =>
+        computeSpellSlots(requireCharacter(state, id), content.classes),
+      );
     },
     abilityModifier(score) {
       return abilityModifier(score);
