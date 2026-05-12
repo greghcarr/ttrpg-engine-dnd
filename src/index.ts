@@ -301,6 +301,7 @@ export {
   validateCrossReferences,
 } from './content/index.js';
 export type { ContentPack, ResolvedContent, ContentValidationIssue } from './content/index.js';
+export { loadStarterPack, STARTER_PACK_RAW } from './content/packs/starter.js';
 
 export {
   DefaultRNG,

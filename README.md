@@ -85,11 +85,11 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
 - ✓ **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish. `PolymorphApplied` swaps HP, ability scores, speed, and species into a new form and snapshots the originals to `Character.polymorphedSnapshot`; `PolymorphReverted` restores them. `wild-shape`, `polymorph`, and `true-polymorph` share the machinery via a `kind` discriminator. `SimulacrumCreated` clones a character into a creature-kind duplicate at half-HP (transient state reset). `WishGranted` records a freeform wish description; `stressApplied: true` increments the granter's exhaustion. Concrete spell effects beyond the form swap stay in the consumer's hands.
 
-### Phase D: Adoption surface (7 slices, 0 done)
+### Phase D: Adoption surface (7 slices, 1 done)
 
 These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
 
-- **Slice 31.** Starter SRD-shaped content pack (separate package, MIT or CC-BY, based on the 2024 SRD release). Without this, no consumer can instantiate a single character.
+- ✓ **Slice 31.** Starter content pack bundled in the package as `src/content/packs/starter-pack.json` and exported via `loadStarterPack()`. Includes Fighter, Wizard, Rogue, Paladin, and Warlock classes (levels 1-5 for combat-relevant features), Human species, Soldier background, all 15 conditions, ~6 spells, ~10 items, plus the canonical Sneak Attack OnEvent feature. Enough to instantiate a character and run combat without writing any content from scratch; consumers extend it from the 2024 SRD CC-BY release as their needs grow.
 - **Slice 32.** `/examples` directory: 2-3 small working consumer apps (CLI character sheet, encounter tracker, web demo).
 - **Slice 33.** Getting-started doc ("build your first Fighter in 30 lines") plus API reference generated from TypeScript types.
 - **Slice 34.** Public API conveniences: `engine.do(state, intent)` (plan + commit in one call), `loadCampaign(json)` / `serializeCampaign(c)`, `engine.createPC({species, background, classL1})`.

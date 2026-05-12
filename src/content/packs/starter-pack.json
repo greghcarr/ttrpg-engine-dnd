@@ -1,0 +1,690 @@
+{
+  "id": "starter-pack",
+  "name": "dnd-engine starter pack",
+  "version": "0.1.0",
+  "species": [
+    {
+      "id": "human",
+      "name": "Human",
+      "size": "Medium",
+      "creatureType": "Humanoid",
+      "speed": { "walk": 30 },
+      "languages": ["common"],
+      "traits": []
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "soldier",
+      "name": "Soldier",
+      "abilityScoreIncreases": {
+        "options": ["STR", "DEX", "CON"],
+        "pattern": "+2/+1"
+      },
+      "skillProficiencies": ["athletics", "intimidation"],
+      "toolProficiencies": ["gaming"],
+      "languages": [],
+      "originFeatId": "savage-attacker",
+      "traits": []
+    }
+  ],
+  "feats": [
+    {
+      "id": "savage-attacker",
+      "name": "Savage Attacker",
+      "category": "origin",
+      "repeatable": false,
+      "prerequisites": [],
+      "effects": []
+    },
+    {
+      "id": "unarmored-defense-barbarian",
+      "name": "Unarmored Defense (Barbarian)",
+      "category": "general",
+      "repeatable": false,
+      "prerequisites": [],
+      "effects": [
+        {
+          "kind": "OverrideACFormula",
+          "base": 10,
+          "abilityModifiers": ["DEX", "CON"]
+        }
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "hitDie": 10,
+      "primaryAbility": ["STR", "DEX"],
+      "savingThrowProficiencies": ["STR", "CON"],
+      "armorProficiencies": ["light", "medium", "heavy", "shield"],
+      "weaponProficiencies": ["simple", "martial"],
+      "toolProficiencies": [],
+      "skillChoices": {
+        "choices": 2,
+        "from": ["acrobatics", "athletics", "history", "insight", "intimidation", "perception", "survival"]
+      },
+      "levelTable": {
+        "1": {
+          "proficiencyBonus": 2,
+          "features": [
+            {
+              "id": "second-wind",
+              "name": "Second Wind",
+              "effects": [
+                {
+                  "kind": "GrantResource",
+                  "resourceId": "second-wind",
+                  "max": 2,
+                  "recharge": "shortRest"
+                }
+              ]
+            }
+          ],
+          "columns": {}
+        },
+        "2": {
+          "proficiencyBonus": 2,
+          "features": [
+            {
+              "id": "action-surge",
+              "name": "Action Surge",
+              "effects": [
+                {
+                  "kind": "GrantResource",
+                  "resourceId": "action-surge",
+                  "max": 1,
+                  "recharge": "shortRest"
+                }
+              ]
+            }
+          ],
+          "columns": {}
+        },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": {
+          "proficiencyBonus": 3,
+          "features": [
+            {
+              "id": "extra-attack",
+              "name": "Extra Attack",
+              "effects": [
+                {
+                  "kind": "ModifyActionEconomy",
+                  "op": "extraAttack",
+                  "count": 1
+                }
+              ]
+            }
+          ],
+          "columns": {}
+        },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      },
+      "subclassLevel": 3
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "hitDie": 6,
+      "primaryAbility": ["INT"],
+      "savingThrowProficiencies": ["INT", "WIS"],
+      "armorProficiencies": [],
+      "weaponProficiencies": [],
+      "toolProficiencies": [],
+      "levelTable": {
+        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      },
+      "spellcasting": { "ability": "INT", "type": "full" }
+    },
+    {
+      "id": "rogue",
+      "name": "Rogue",
+      "hitDie": 8,
+      "primaryAbility": ["DEX"],
+      "savingThrowProficiencies": ["DEX", "INT"],
+      "armorProficiencies": ["light"],
+      "weaponProficiencies": ["simple"],
+      "toolProficiencies": ["thieves-tools"],
+      "levelTable": {
+        "1": {
+          "proficiencyBonus": 2,
+          "features": [
+            {
+              "id": "sneak-attack",
+              "name": "Sneak Attack",
+              "effects": [
+                {
+                  "kind": "OnEvent",
+                  "id": "sneak-attack",
+                  "trigger": {
+                    "eventType": "AttackRolled",
+                    "filter": {
+                      "kind": "all",
+                      "terms": [
+                        { "kind": "eq", "path": "event.attackerIsSelf", "value": true },
+                        { "kind": "eq", "path": "event.hit", "value": true },
+                        { "kind": "eq", "path": "event.used", "value": "advantage" }
+                      ]
+                    }
+                  },
+                  "actions": [
+                    { "kind": "AddDamage", "dice": "1d6", "damageType": "piercing" }
+                  ],
+                  "oncePer": "turn"
+                }
+              ]
+            }
+          ],
+          "columns": {}
+        },
+        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      }
+    },
+    {
+      "id": "warlock",
+      "name": "Warlock",
+      "hitDie": 8,
+      "primaryAbility": ["CHA"],
+      "savingThrowProficiencies": ["WIS", "CHA"],
+      "armorProficiencies": ["light"],
+      "weaponProficiencies": ["simple"],
+      "toolProficiencies": [],
+      "levelTable": {
+        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      },
+      "spellcasting": { "ability": "CHA", "type": "pact" }
+    },
+    {
+      "id": "paladin",
+      "name": "Paladin",
+      "hitDie": 10,
+      "primaryAbility": ["STR", "CHA"],
+      "savingThrowProficiencies": ["WIS", "CHA"],
+      "armorProficiencies": ["light", "medium", "heavy", "shield"],
+      "weaponProficiencies": ["simple", "martial"],
+      "toolProficiencies": [],
+      "levelTable": {
+        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+      },
+      "spellcasting": { "ability": "CHA", "type": "half" }
+    }
+  ],
+  "subclasses": [],
+  "spells": [
+    {
+      "id": "fire-bolt",
+      "name": "Fire Bolt",
+      "level": 0,
+      "school": "evocation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": { "verbal": true, "somatic": true },
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": ["wizard", "sorcerer"],
+      "mechanicalEffects": [
+        {
+          "kind": "attack",
+          "damageDice": "1d10",
+          "damageType": "fire",
+          "cantripScalingDice": "1d10"
+        }
+      ]
+    },
+    {
+      "id": "magic-missile",
+      "name": "Magic Missile",
+      "level": 1,
+      "school": "evocation",
+      "castingTime": "Action",
+      "range": "120 feet",
+      "components": { "verbal": true, "somatic": true },
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": ["wizard", "sorcerer"],
+      "mechanicalEffects": []
+    },
+    {
+      "id": "fireball",
+      "name": "Fireball",
+      "level": 3,
+      "school": "evocation",
+      "castingTime": "Action",
+      "range": "150 feet",
+      "components": { "verbal": true, "somatic": true, "material": "a tiny ball of bat guano and sulfur" },
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": ["wizard", "sorcerer"],
+      "targeting": { "shape": "sphere", "size": 20 },
+      "mechanicalEffects": [
+        {
+          "kind": "save",
+          "ability": "DEX",
+          "damageDice": "8d6",
+          "damageType": "fire",
+          "halfOnSuccess": true,
+          "extraDicePerSlotLevel": 1
+        }
+      ]
+    },
+    {
+      "id": "detect-magic",
+      "name": "Detect Magic",
+      "level": 1,
+      "school": "divination",
+      "castingTime": "Action",
+      "range": "Self",
+      "components": { "verbal": true, "somatic": true },
+      "duration": "Concentration, up to 10 minutes",
+      "concentration": true,
+      "ritual": true,
+      "classes": ["wizard", "cleric", "druid", "bard", "paladin", "ranger", "sorcerer"],
+      "mechanicalEffects": []
+    },
+    {
+      "id": "hold-person",
+      "name": "Hold Person",
+      "level": 2,
+      "school": "enchantment",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": { "verbal": true, "somatic": true, "material": "a small straight piece of iron" },
+      "duration": "Concentration, up to 1 minute",
+      "concentration": true,
+      "ritual": false,
+      "classes": ["wizard", "cleric", "bard"],
+      "mechanicalEffects": [
+        {
+          "kind": "save",
+          "ability": "WIS",
+          "conditionOnFail": "paralyzed"
+        }
+      ]
+    },
+    {
+      "id": "cure-wounds",
+      "name": "Cure Wounds",
+      "level": 1,
+      "school": "abjuration",
+      "castingTime": "Action",
+      "range": "Touch",
+      "components": { "verbal": true, "somatic": true },
+      "duration": "Instantaneous",
+      "concentration": false,
+      "ritual": false,
+      "classes": ["cleric", "druid", "paladin", "ranger"],
+      "mechanicalEffects": [
+        {
+          "kind": "heal",
+          "amountDice": "2d8",
+          "extraDicePerSlotLevel": 2
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "longsword",
+      "itemKind": "weapon",
+      "name": "Longsword",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "slashing",
+      "damageDice": "1d8",
+      "versatileDice": "1d10",
+      "properties": ["versatile"],
+      "mastery": "Sap"
+    },
+    {
+      "id": "rapier",
+      "itemKind": "weapon",
+      "name": "Rapier",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "1d8",
+      "properties": ["finesse"],
+      "mastery": "Vex"
+    },
+    {
+      "id": "dagger",
+      "itemKind": "weapon",
+      "name": "Dagger",
+      "category": "simple",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "1d4",
+      "properties": ["finesse", "light", "thrown"],
+      "mastery": "Nick"
+    },
+    {
+      "id": "shortsword",
+      "itemKind": "weapon",
+      "name": "Shortsword",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "1d6",
+      "properties": ["finesse", "light"],
+      "mastery": "Vex"
+    },
+    {
+      "id": "longbow",
+      "itemKind": "weapon",
+      "name": "Longbow",
+      "category": "martial",
+      "attackKind": "ranged",
+      "damageType": "piercing",
+      "damageDice": "1d8",
+      "properties": ["ammunition", "heavy", "two-handed"],
+      "mastery": "Slow",
+      "rangeNormal": 150,
+      "rangeLong": 600
+    },
+    {
+      "id": "leather-armor",
+      "itemKind": "armor",
+      "name": "Leather Armor",
+      "category": "light",
+      "baseAC": 11,
+      "stealthDisadvantage": false
+    },
+    {
+      "id": "chain-shirt",
+      "itemKind": "armor",
+      "name": "Chain Shirt",
+      "category": "medium",
+      "baseAC": 13,
+      "dexCap": 2,
+      "stealthDisadvantage": false
+    },
+    {
+      "id": "chain-mail",
+      "itemKind": "armor",
+      "name": "Chain Mail",
+      "category": "heavy",
+      "baseAC": 16,
+      "strRequirement": 13,
+      "stealthDisadvantage": true
+    },
+    {
+      "id": "plate",
+      "itemKind": "armor",
+      "name": "Plate Armor",
+      "category": "heavy",
+      "baseAC": 18,
+      "strRequirement": 15,
+      "stealthDisadvantage": true
+    },
+    {
+      "id": "shield",
+      "itemKind": "armor",
+      "name": "Shield",
+      "category": "shield",
+      "baseAC": 2,
+      "stealthDisadvantage": false
+    },
+    {
+      "id": "healing-potion",
+      "itemKind": "consumable",
+      "name": "Potion of Healing",
+      "onConsume": [],
+      "description": "Heals 2d4+2 hit points when consumed"
+    }
+  ],
+  "monsters": [],
+  "conditions": [
+    {
+      "id": "exhaustion",
+      "name": "Exhaustion",
+      "stackable": true,
+      "endsOn": [{ "kind": "longRest" }],
+      "effects": []
+    },
+    {
+      "id": "prone",
+      "name": "Prone",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "SetAdvantage",
+          "on": "attack",
+          "mode": "disadvantage"
+        }
+      ]
+    },
+    {
+      "id": "blessed",
+      "name": "Blessed",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "AddModifier",
+          "target": { "kind": "save", "ability": "WIS" },
+          "value": 4
+        }
+      ]
+    },
+    {
+      "id": "blinded",
+      "name": "Blinded",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "charmed",
+      "name": "Charmed",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "deafened",
+      "name": "Deafened",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "frightened",
+      "name": "Frightened",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "grappled",
+      "name": "Grappled",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 }
+      ]
+    },
+    {
+      "id": "incapacitated",
+      "name": "Incapacitated",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "invisible",
+      "name": "Invisible",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage" }
+      ]
+    },
+    {
+      "id": "paralyzed",
+      "name": "Paralyzed",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    },
+    {
+      "id": "petrified",
+      "name": "Petrified",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "GrantResistance", "damageType": "all" },
+        { "kind": "GrantConditionImmunity", "conditionId": "poisoned" }
+      ]
+    },
+    {
+      "id": "poisoned",
+      "name": "Poisoned",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "restrained",
+      "name": "Restrained",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "disadvantage" }
+      ]
+    },
+    {
+      "id": "stunned",
+      "name": "Stunned",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    },
+    {
+      "id": "unconscious",
+      "name": "Unconscious",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    }
+  ]
+}
