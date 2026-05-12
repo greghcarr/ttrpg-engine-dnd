@@ -33,7 +33,13 @@ import {
   applyTurnStarted,
 } from './reducers/encounter.js';
 import { applyAttackRolled, applyDamageRolled } from './reducers/attack.js';
-import { applyItemAcquired } from './reducers/inventory.js';
+import {
+  applyItemAcquired,
+  applyItemAttuned,
+  applyItemEquipped,
+  applyItemUnattuned,
+  applyItemUnequipped,
+} from './reducers/inventory.js';
 import {
   applyChoiceRequired,
   applyChoiceResolved,
@@ -183,6 +189,18 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'Disengaged':
         applyDisengaged(draft, event);
+        break;
+      case 'ItemEquipped':
+        applyItemEquipped(draft, event);
+        break;
+      case 'ItemUnequipped':
+        applyItemUnequipped(draft, event);
+        break;
+      case 'ItemAttuned':
+        applyItemAttuned(draft, event);
+        break;
+      case 'ItemUnattuned':
+        applyItemUnattuned(draft, event);
         break;
       default: {
         const exhaustive: never = event;

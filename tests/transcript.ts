@@ -198,6 +198,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `**${characterName(stateBefore, event.combatantId)}** Dashes.`;
     case 'Disengaged':
       return `**${characterName(stateBefore, event.combatantId)}** Disengages.`;
+    case 'ItemEquipped':
+      return `**${characterName(stateBefore, event.characterId)}** equips ${itemName(stateBefore, content, event.instanceId)} (${event.slot}).`;
+    case 'ItemUnequipped':
+      return `**${characterName(stateBefore, event.characterId)}** unequips ${event.slot}.`;
+    case 'ItemAttuned':
+      return `**${characterName(stateBefore, event.characterId)}** attunes to ${itemName(stateBefore, content, event.instanceId)}.`;
+    case 'ItemUnattuned':
+      return `**${characterName(stateBefore, event.characterId)}** ends attunement to ${itemName(stateBefore, content, event.instanceId)}.`;
   }
 };
 

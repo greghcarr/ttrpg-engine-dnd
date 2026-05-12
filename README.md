@@ -40,7 +40,7 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Foundation plus nine slices complete, about 65% of the full mechanical coverage goal. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 345 tests across 50 files.
+**Pre-alpha.** Foundation plus twelve slices complete, about 80% of the full mechanical coverage goal. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 360 tests across 55 files.
 
 Completed:
 
@@ -53,18 +53,18 @@ Completed:
 - **Slice 7.** OnEvent trigger system. The dispatcher walks every character's effect stack after each triggering event, evaluates the `Predicate` filter against event facts (`event.attackerIsSelf`, `event.hit`, `event.used`, `event.critical`), checks cadence (`oncePer: 'turn' | 'round' | 'shortRest' | 'longRest'`), and fires `AddDamage` actions producing rider events. `TriggerFired` event marks usage; `Character.triggerCounters` tracks per-cadence state. `TurnStarted` / `RoundEnded` / `ShortRestEnded` / `LongRestEnded` reducers reset the appropriate counters. Wired into `planAttack`. Test pack now has a Rogue with Sneak Attack as the canonical OnEvent feature.
 - **Slice 8.** Action economy. `Combatant.turnUsage: { actionUsed, bonusActionUsed, attacksMadeThisTurn, reactionUsedThisRound }` tracks per-turn usage. `ActionEconomyConsumed` event marks consumption; reducer enforces "can't double-use the Action" / "can't double-use the Bonus Action" / "can't double-use the Reaction this round" invariants. `TurnStarted` resets per-turn fields for the active combatant; `RoundEnded` resets `reactionUsedThisRound` for everyone. `computeActionEconomyBudget` derivation reads `ModifyActionEconomy` effects to determine `maxAttacksPerAction` (Extra Attack), `extraActionsPerTurn` (Action Surge), `extraBonusActionsPerTurn`. `planAttack` enforces the attack budget when the attacker is the active combatant in an active encounter; out-of-combat attacks are unmetered. Golden scenario demonstrates Fighter L1 throwing on a second attack and Fighter L5 attacking twice per Action.
 - **Slice 9.** Reactions protocol, scoped to opportunity attacks. `resolveAttack` extracted from `planAttack` as a shared helper so `planOpportunityAttack` reuses the d20 / damage / OnEvent-trigger pipeline. The new planner requires the reactor to be in the active encounter but not the active combatant, emits `ActionEconomyConsumed { kind: 'reaction' }`, then runs the attack chain; bypasses the action and attack-budget checks. Throws on a second reaction same round; refreshes at `RoundEnded`. The retroactive reactions (Shield, Counterspell, Hellish Rebuke) come in a follow-up slice.
+- **Slice 10.** Movement and positioning. Combatants gain optional `position: { x, y }` in feet and per-turn movement state (`feetMovedThisTurn`, `dashed`, `disengaged`). New `CombatantMoved`, `Dashed`, `Disengaged` events. `planMove` enforces the budget against `Character.speedFeet` (doubled if Dashed) using Chebyshev distance. `planDash` and `planDisengage` consume the Action. `TurnStarted` resets all per-turn movement state.
+- **Slice 11.** Damage mitigation order of operations. New `mitigateDamage` derivation walks the target's effect stack and applies immunity (zero), then vulnerability (×2), then resistance (½ rounded down) to each damage component. `DamageComponent` schema extended with `rawAmount` and `mitigation: 'resisted' | 'immune' | 'vulnerable'`. `resolveAttack` and `planCastSpell` route their `DamageApplied` events through mitigation. Reaction-based mitigations (Shield, Heavy Armor Master, Uncanny Dodge) plug into this layer in a later slice.
+- **Slice 12.** Inventory mechanics. New `ItemEquipped`, `ItemUnequipped`, `ItemAttuned`, `ItemUnattuned` events with reducers enforcing the 3-slot attunement cap and maintaining the `Character.equipped` / `ItemInstance.attunedTo` back-link. `computeCarryingCapacity` (STR × 15) and `computeEncumbrance` derivations compute carried weight against the carrying threshold and produce `unencumbered` / `encumbered` / `heavily-encumbered` labels.
 
 ## Roadmap
 
 Three phases, 22 slices total. About 15 to 25 hours of focused execution time.
 
-### Phase A: Engine mechanics (12 slices, 9 done)
+### Phase A: Engine mechanics (12 slices, 12 done)
 
-Each slice lands a load-bearing combat or rules mechanic. Order is dependency-driven. Slices 1 to 9 listed under Status above; the rest below.
-- 10. **Movement and positioning** (next). Speed in feet, difficult terrain, dash / disengage / hide, jumping, climbing, swimming, distance tracking for reach and ranged.
-- 9b. **Reaction-window expansion** (later). Retroactive reaction modifiers (Shield's +5 AC after seeing a hit, Counterspell pausing a `SpellCastDeclared`, Hellish Rebuke triggered by damage). Action Surge and two-weapon fighting also land here.
-- 11. **Damage mitigation order of operations.** Vulnerability -> resistance -> immunity layered correctly. Absorb Elements, Heavy Armor Master, Uncanny Dodge integration.
-- 12. **Inventory mechanics.** Attunement enforcement (max 3), carrying capacity, encumbrance, donning / doffing armor, weapon draw / stow, two-handed grip.
+Each slice lands a load-bearing combat or rules mechanic. Order is dependency-driven. Slices 1 to 12 listed under Status above; the rest below.
+- 9b. **Reaction-window expansion** (next). Retroactive reaction modifiers (Shield's +5 AC after seeing a hit, Counterspell pausing a `SpellCastDeclared`, Hellish Rebuke triggered by damage). Action Surge and two-weapon fighting also land here. Heavy Armor Master and Uncanny Dodge plug into the damage-mitigation layer landed in slice 11.
 - 13. **NPC / Creature as first-class combatants.** `Creature` distinct from PC `Character`: multiattack, legendary actions, lair actions, regional effects.
 - 14. **Environmental hazards.** Falling, suffocation, drowning, poison and disease tracks, lighting effects (disadvantage in dim, etc.), cover (half, three-quarters, total).
 - 15. **Conditions library.** Full mechanical implementation of all 15 2024 conditions (blinded, charmed, deafened, frightened, grappled, incapacitated, invisible, paralyzed, petrified, poisoned, prone, restrained, stunned, unconscious, plus the 2024 single-track exhaustion).

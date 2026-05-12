@@ -60,6 +60,12 @@ import {
   DashedEventSchema,
   DisengagedEventSchema,
 } from './movement.js';
+import {
+  ItemEquippedEventSchema,
+  ItemUnequippedEventSchema,
+  ItemAttunedEventSchema,
+  ItemUnattunedEventSchema,
+} from './inventory.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -103,6 +109,10 @@ export const EventSchema = z.discriminatedUnion('type', [
   CombatantMovedEventSchema,
   DashedEventSchema,
   DisengagedEventSchema,
+  ItemEquippedEventSchema,
+  ItemUnequippedEventSchema,
+  ItemAttunedEventSchema,
+  ItemUnattunedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -149,6 +159,10 @@ export const EVENT_TYPES = [
   'CombatantMoved',
   'Dashed',
   'Disengaged',
+  'ItemEquipped',
+  'ItemUnequipped',
+  'ItemAttuned',
+  'ItemUnattuned',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -230,8 +244,23 @@ export {
   DamageRollSchema,
   AttackAdvantageSchema,
 } from './attack.js';
-export { ItemAcquiredEventSchema } from './inventory.js';
-export type { ItemAcquiredEvent } from './inventory.js';
+export {
+  ItemAcquiredEventSchema,
+  ItemEquippedEventSchema,
+  ItemUnequippedEventSchema,
+  ItemAttunedEventSchema,
+  ItemUnattunedEventSchema,
+  EquipSlotSchema,
+  EQUIP_SLOTS,
+} from './inventory.js';
+export type {
+  ItemAcquiredEvent,
+  ItemEquippedEvent,
+  ItemUnequippedEvent,
+  ItemAttunedEvent,
+  ItemUnattunedEvent,
+  EquipSlot,
+} from './inventory.js';
 export {
   LevelUpResolvedEventSchema,
   ChoiceRequiredEventSchema,
