@@ -70,11 +70,11 @@ The campaign-state surface area beyond combatants.
 - ✓ **Slice 19.** Locations and environmental terrain. `Location` (with optional parent and `LocationMap` of cells: normal / difficult / impassable / water), `Door` (open / closed / locked, blocks LOS and movement when shut). New events `LocationCreated`, `DoorAdded`, `DoorStateChanged`, `CharacterLocationChanged`. Derivations `terrainAt`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect` (Bresenham ray, blocked by impassable cells and closed/locked doors).
 - ✓ **Slice 20.** Quests, objectives, rewards, milestone XP. `Quest` (active / completed / failed / abandoned) with required and optional `QuestObjective`s tracking progress against thresholds. New events `QuestStarted`, `ObjectiveProgressed` / `Completed` / `Failed`, `QuestCompleted` / `Failed` / `Abandoned`, `QuestRewardClaimed` (distributes XP per beneficiary and currency to the linked party), `XPAwarded` (direct grant), `MilestoneAwarded` (minor / major / campaign tags appended to the campaign state).
 
-### Phase C: Combat fill-in (10 slices, 0 done)
+### Phase C: Combat fill-in (10 slices, 1 done)
 
 High-impact mechanics consumers will immediately want. Each slice closes a gap that's currently missing or partial.
 
-- **Slice 21.** Grapple, shove, hide actions; the full action / bonus-action menu beyond Attack / Cast / Dash / Disengage.
+- ✓ **Slice 21.** Grapple, shove, hide actions. `planGrapple` rolls the attacker's unarmed save DC (8 + STR mod + prof) and emits a `SaveRolled` for the target (STR or DEX); failure applies the `grappled` condition. `planShove` does the same with a STR save and applies `prone` or emits a forced `CombatantMoved` (5 ft push). `planHide` rolls a DEX (stealth) check against DC 15 (or caller-provided DC) and applies the `invisible` condition on success. All three consume an Action when the actor is an active combatant; out-of-combat usage is unmetered.
 - **Slice 22.** Counterspell + Dispel Magic + Identify (reactive spellcasting chain that interrupts `SpellCastDeclared`).
 - **Slice 23.** Full Weapon Mastery effects (Sap, Vex, Topple, Push, Cleave, Slow, Nick, Graze) wired into the attack pipeline; today they're flagged in the schema but not enforced.
 - **Slice 24.** Mounts, vehicles, mounted combat.

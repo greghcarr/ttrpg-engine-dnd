@@ -372,6 +372,9 @@ export {
   planResolveChoice,
   planSave,
   planAbilityCheck,
+  planGrapple,
+  planShove,
+  planHide,
 } from './engine/plan/index.js';
 export type {
   ShortRestIntent,
@@ -389,6 +392,9 @@ export type {
   ResolveChoiceIntent,
   SaveIntent,
   AbilityCheckIntent,
+  GrappleIntent,
+  ShoveIntent,
+  HideIntent,
 } from './engine/plan/index.js';
 
 export type { HandlerRegistry, EffectHandler, HandlerContext } from './handlers/index.js';

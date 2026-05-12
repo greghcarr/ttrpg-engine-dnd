@@ -58,3 +58,11 @@ export { planOffHandAttack, type OffHandAttackIntent } from './offhand-attack.js
 export { planMultiattack, type MultiattackIntent } from './multiattack.js';
 export { planFalling, type FallingIntent } from './falling.js';
 export { coverACBonus, COVER_KINDS, type CoverKind } from './attack.js';
+export {
+  planGrapple,
+  planShove,
+  planHide,
+  type GrappleIntent,
+  type ShoveIntent,
+  type HideIntent,
+} from './contested.js';

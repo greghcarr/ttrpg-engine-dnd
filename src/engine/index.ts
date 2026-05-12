@@ -40,6 +40,12 @@ import {
   planOffHandAttack,
   planMultiattack,
   planFalling,
+  planGrapple,
+  planShove,
+  planHide,
+  type GrappleIntent,
+  type ShoveIntent,
+  type HideIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -134,6 +140,9 @@ export interface Engine {
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
     multiattack(state: CampaignState, intent: Omit<MultiattackIntent, 'type'>): PlanResult;
     falling(state: CampaignState, intent: Omit<FallingIntent, 'type'>): PlanResult;
+    grapple(state: CampaignState, intent: Omit<GrappleIntent, 'type'>): PlanResult;
+    shove(state: CampaignState, intent: Omit<ShoveIntent, 'type'>): PlanResult;
+    hide(state: CampaignState, intent: Omit<HideIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -249,6 +258,15 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     falling(state, intent) {
       return { events: planFalling(state, content, { type: 'Falling', ...intent }) };
+    },
+    grapple(state, intent) {
+      return { events: planGrapple(state, content, rng, { type: 'Grapple', ...intent }) };
+    },
+    shove(state, intent) {
+      return { events: planShove(state, content, rng, { type: 'Shove', ...intent }) };
+    },
+    hide(state, intent) {
+      return { events: planHide(state, content, rng, { type: 'Hide', ...intent }) };
     },
   };
 
