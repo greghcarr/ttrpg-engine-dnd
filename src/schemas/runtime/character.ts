@@ -76,6 +76,7 @@ export const CharacterSchema = z.object({
     )
     .default({}),
   pactSlotsUsed: z.number().int().min(0).default(0),
+  concentrationEffectId: ULIDSchema.optional(),
   featsTaken: z.array(z.string()).default([]),
   pendingChoiceIds: z.array(ULIDSchema).default([]),
   xp: z.number().int().min(0).default(0),

@@ -18,11 +18,16 @@ import type {
   HealedEvent,
 } from '../../schemas/events/combat.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
+import type {
+  ConcentrationBrokenEvent,
+  ConcentrationStartedEvent,
+} from '../../schemas/events/concentration.js';
 import type { Spell, SpellMechanic } from '../../schemas/content/spell.js';
 import type { Character } from '../../schemas/runtime/character.js';
+import type { AppliedConditionRef } from '../../schemas/runtime/effect-instance.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
-import { newEventId } from '../../ids.js';
+import { newAppliedConditionId, newEffectInstanceId, newEventId } from '../../ids.js';
 import { computeSpellSaveDC, computeSpellAttackBonus } from '../../derive/spell-dc.js';
 import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
 import { computeAC } from '../../derive/ac.js';
@@ -191,6 +196,11 @@ const planAttackMechanic = (
   return events;
 };
 
+interface SaveMechanicOutcome {
+  readonly events: Event[];
+  readonly conditionsApplied: AppliedConditionRef[];
+}
+
 const planSaveMechanic = (
   state: CampaignState,
   content: ResolvedContent,
@@ -201,7 +211,7 @@ const planSaveMechanic = (
   declaredEventId: string,
   at: string,
   castingClassId: string,
-): Event[] => {
+): SaveMechanicOutcome => {
   const character = state.characters[intent.characterId];
   if (!character) throw new Error(`Unknown character ${intent.characterId}`);
   const dcResult = computeSpellSaveDC({
@@ -212,6 +222,7 @@ const planSaveMechanic = (
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const events: Event[] = [];
+  const conditionsApplied: AppliedConditionRef[] = [];
 
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
@@ -258,18 +269,25 @@ const planSaveMechanic = (
       }
     }
     if (!success && mechanic.conditionOnFail !== undefined) {
+      const appliedConditionId = newAppliedConditionId();
       const cond: ConditionAppliedEvent = {
         id: newEventId() as ULID,
         at,
         type: 'ConditionApplied',
         targetId,
         conditionId: mechanic.conditionOnFail,
+        appliedConditionId,
         causedByEventId: saveEvent.id,
       };
       events.push(cond);
+      conditionsApplied.push({
+        targetId: targetId as ULID,
+        conditionId: mechanic.conditionOnFail,
+        appliedConditionId,
+      });
     }
   }
-  return events;
+  return { events, conditionsApplied };
 };
 
 const planHealMechanic = (
@@ -381,18 +399,48 @@ export const planCastSpell = (
     }
   }
 
+  const conditionsApplied: AppliedConditionRef[] = [];
   for (const mechanic of spell.mechanicalEffects) {
     if (mechanic.kind === 'attack') {
       events.push(
         ...planAttackMechanic(state, content, rng, intent, spell, mechanic, declared.id, at, castingClassId),
       );
     } else if (mechanic.kind === 'save') {
-      events.push(
-        ...planSaveMechanic(state, content, rng, intent, spell, mechanic, declared.id, at, castingClassId),
+      const outcome = planSaveMechanic(
+        state, content, rng, intent, spell, mechanic, declared.id, at, castingClassId,
       );
+      events.push(...outcome.events);
+      conditionsApplied.push(...outcome.conditionsApplied);
     } else {
       events.push(...planHealMechanic(state, rng, intent, spell, mechanic, declared.id, at));
     }
+  }
+
+  if (spell.concentration === true) {
+    if (character.concentrationEffectId !== undefined) {
+      const priorBroken: ConcentrationBrokenEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'ConcentrationBroken',
+        effectInstanceId: character.concentrationEffectId,
+        casterId: intent.characterId as ULID,
+        reason: 'newConcentrationSpell',
+        causedByEventId: declared.id,
+      };
+      events.push(priorBroken);
+    }
+    const started: ConcentrationStartedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConcentrationStarted',
+      effectInstanceId: newEffectInstanceId(),
+      casterId: intent.characterId as ULID,
+      spellId: intent.spellId,
+      targetIds: [...intent.targetIds] as ULID[],
+      conditionsApplied,
+      causedByEventId: declared.id,
+    };
+    events.push(started);
   }
 
   return events;

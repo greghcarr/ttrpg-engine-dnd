@@ -15,6 +15,12 @@ export {
 } from './character.js';
 export { ItemInstanceSchema, type ItemInstance } from './item-instance.js';
 export {
+  EffectInstanceSchema,
+  AppliedConditionRefSchema,
+  type EffectInstance,
+  type AppliedConditionRef,
+} from './effect-instance.js';
+export {
   PendingChoiceSchema,
   type PendingChoice,
   ChoiceOptionSchema,

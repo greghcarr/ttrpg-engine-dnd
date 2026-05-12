@@ -36,3 +36,7 @@ export {
   planCastSpell,
   type CastSpellIntent,
 } from './cast-spell.js';
+export {
+  planCheckConcentration,
+  type CheckConcentrationIntent,
+} from './concentration.js';

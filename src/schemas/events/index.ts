@@ -49,6 +49,10 @@ import {
   SpellSlotConsumedEventSchema,
   PactSlotConsumedEventSchema,
 } from './spellcasting.js';
+import {
+  ConcentrationStartedEventSchema,
+  ConcentrationBrokenEventSchema,
+} from './concentration.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -85,6 +89,8 @@ export const EventSchema = z.discriminatedUnion('type', [
   SpellCastDeclaredEventSchema,
   SpellSlotConsumedEventSchema,
   PactSlotConsumedEventSchema,
+  ConcentrationStartedEventSchema,
+  ConcentrationBrokenEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -124,6 +130,8 @@ export const EVENT_TYPES = [
   'SpellCastDeclared',
   'SpellSlotConsumed',
   'PactSlotConsumed',
+  'ConcentrationStarted',
+  'ConcentrationBroken',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -241,3 +249,13 @@ export type {
   PactSlotConsumedEvent,
   SpellSlotSource,
 } from './spellcasting.js';
+export {
+  ConcentrationStartedEventSchema,
+  ConcentrationBrokenEventSchema,
+  ConcentrationBrokenReasonSchema,
+} from './concentration.js';
+export type {
+  ConcentrationStartedEvent,
+  ConcentrationBrokenEvent,
+  ConcentrationBrokenReason,
+} from './concentration.js';

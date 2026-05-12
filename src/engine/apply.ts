@@ -45,6 +45,10 @@ import {
   applySpellCastDeclared,
   applySpellSlotConsumed,
 } from './reducers/spellcasting.js';
+import {
+  applyConcentrationBroken,
+  applyConcentrationStarted,
+} from './reducers/concentration.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -151,6 +155,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'PactSlotConsumed':
         applyPactSlotConsumed(draft, event);
+        break;
+      case 'ConcentrationStarted':
+        applyConcentrationStarted(draft, event);
+        break;
+      case 'ConcentrationBroken':
+        applyConcentrationBroken(draft, event);
         break;
       default: {
         const exhaustive: never = event;

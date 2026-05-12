@@ -37,6 +37,7 @@ export const ConditionAppliedEventSchema = EventEnvelopeSchema.extend({
   conditionId: z.string(),
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
+  appliedConditionId: ULIDSchema.optional(),
 });
 export type ConditionAppliedEvent = z.infer<typeof ConditionAppliedEventSchema>;
 

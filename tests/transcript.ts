@@ -167,6 +167,17 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `Slot consumed: level ${event.slotLevel}.`;
     case 'PactSlotConsumed':
       return `Pact slot consumed.`;
+    case 'ConcentrationStarted': {
+      const caster = characterName(stateBefore, event.casterId);
+      const spell = spellName(content, event.spellId);
+      return `**${caster}** is now concentrating on ${spell}.`;
+    }
+    case 'ConcentrationBroken': {
+      const caster = characterName(stateBefore, event.casterId);
+      const spell = stateBefore.effectInstances[event.effectInstanceId]?.spellId;
+      const spellLabel = spell !== undefined ? spellName(content, spell) : 'their spell';
+      return `**${caster}**'s concentration on ${spellLabel} broke (${event.reason}).`;
+    }
   }
 };
 

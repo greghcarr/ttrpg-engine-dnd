@@ -31,6 +31,7 @@ import {
   planSave,
   planAbilityCheck,
   planCastSpell,
+  planCheckConcentration,
   type RestIntent,
   type AttackIntent,
   type CreateEncounterIntent,
@@ -44,6 +45,7 @@ import {
   type SaveIntent,
   type AbilityCheckIntent,
   type CastSpellIntent,
+  type CheckConcentrationIntent,
 } from './plan/index.js';
 import { newCampaignId } from '../ids.js';
 import { SCHEMA_VERSION } from '../version.js';
@@ -104,6 +106,10 @@ export interface Engine {
     save(state: CampaignState, intent: Omit<SaveIntent, 'type'>): PlanResult;
     abilityCheck(state: CampaignState, intent: Omit<AbilityCheckIntent, 'type'>): PlanResult;
     castSpell(state: CampaignState, intent: Omit<CastSpellIntent, 'type'>): PlanResult;
+    checkConcentration(
+      state: CampaignState,
+      intent: Omit<CheckConcentrationIntent, 'type'>,
+    ): PlanResult;
   };
 
   derive: {
@@ -182,6 +188,14 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     castSpell(state, intent) {
       return { events: planCastSpell(state, content, rng, { type: 'CastSpell', ...intent }) };
+    },
+    checkConcentration(state, intent) {
+      return {
+        events: planCheckConcentration(state, content, rng, {
+          type: 'CheckConcentration',
+          ...intent,
+        }),
+      };
     },
   };
 

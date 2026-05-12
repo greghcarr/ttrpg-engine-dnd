@@ -118,7 +118,7 @@ export const applyConditionApplied = (
   );
   if (existing) return;
   character.appliedConditions.push({
-    id: newAppliedConditionId(),
+    id: event.appliedConditionId ?? newAppliedConditionId(),
     conditionId: event.conditionId,
     sourceEventId: event.id,
     ...(event.level !== undefined ? { level: event.level } : {}),
