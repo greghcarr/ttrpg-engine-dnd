@@ -34,7 +34,8 @@
     "prepublishOnly": "npm run ci"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "alpha"
   },
   "dependencies": {
     "immer": "^10.1.1",
