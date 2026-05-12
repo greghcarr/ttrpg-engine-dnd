@@ -68,4 +68,14 @@ describe('starter content pack', () => {
       expect(resolved.classes.get(id), `class ${id} missing`).toBeDefined();
     }
   });
+
+  it('ships at least 25 spells across cantrip + leveled tiers', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    expect(resolved.spells.size).toBeGreaterThanOrEqual(25);
+    expect(resolved.spells.get('eldritch-blast')).toBeDefined();
+    expect(resolved.spells.get('healing-word')).toBeDefined();
+    expect(resolved.spells.get('counterspell')).toBeDefined();
+    expect(resolved.spells.get('identify')?.ritual).toBe(true);
+  });
 });
