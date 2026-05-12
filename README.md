@@ -113,6 +113,10 @@ These are heavy on data, light on engine code. Each class slice stress-tests Pha
 - **45.** Epic boons (post-20 progression).
 - **46.** Optional variant rules (gritty realism, hero points, sanity, mass combat).
 
+### Phase F: Core extraction (optional, future)
+
+- **47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `dnd-engine` becomes the 5.5e adapter on top. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once `dnd-engine` is mature.
+
 ### What "perfect" cannot mean
 
 5.5e explicitly delegates some rulings to the DM: improvised actions, narrative consequences, table houserules, ambiguous spell interactions that even Sage Advice has issued multiple clarifications on. A rules engine cannot adjudicate these. The `CustomEffect` code-handler escape hatch is the explicit spot for table-specific rulings. After all phases the engine covers ~95% of printed mechanics by surface area; the rest is documented as DM-discretion territory.

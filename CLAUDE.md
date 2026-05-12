@@ -23,6 +23,17 @@ The engine architecture is locked and proven. The remaining work falls into four
 
 When working in this repo, assume any of these gaps may be the next slice the user picks. Don't pre-implement them; deliver each as its own slice with its own golden test.
 
+## System-agnostic core seam (forward-looking)
+
+dnd-engine has a clean split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. Until and unless that slice happens, follow this rule when adding new architectural code:
+
+- **System-agnostic and should stay that way:** [src/ids.ts](src/ids.ts), [src/engine/apply.ts](src/engine/apply.ts) / [replay.ts](src/engine/replay.ts) / [commit.ts](src/engine/commit.ts) / [undo-redo.ts](src/engine/undo-redo.ts), [src/content/pack.ts](src/content/pack.ts), [src/schemas/runtime/party.ts](src/schemas/runtime/party.ts) / [session.ts](src/schemas/runtime/session.ts) / [currency.ts](src/schemas/runtime/currency.ts) / [in-game-time.ts](src/schemas/runtime/in-game-time.ts), [src/schemas/predicate.ts](src/schemas/predicate.ts) + [formula.ts](src/schemas/formula.ts) (mostly).
+- **D&D-specific and that's fine:** Character / Spell / Item / Condition / Encounter / Class / Species / Background schemas; combat / spellcasting / rest / level-up reducers and planners; damage type, action economy, spell slot, concentration models.
+
+When adding to the first list, prefer shapes that don't bake in D&D specifics (six ability scores, d20 + AC, 13 damage types, spell slot architecture) unless there's a concrete D&D reason. When adding to the second list, no need to abstract; build what 5.5e needs.
+
+The seam doesn't need to be perfect today, just clean enough that a future `ttrpg-engine-core` extraction is a manageable refactor rather than a rewrite.
+
 ## Architecture (locked)
 
 - **Event-sourced.** State changes are events. `apply(state, event) -> state` is pure.
