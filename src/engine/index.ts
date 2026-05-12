@@ -47,6 +47,8 @@ import {
   planDispelMagic,
   planIdentify,
   planWeaponMastery,
+  planForage,
+  planNavigationCheck,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -54,6 +56,8 @@ import {
   type DispelMagicIntent,
   type IdentifyIntent,
   type WeaponMasteryIntent,
+  type ForageIntent,
+  type NavigationCheckIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -155,6 +159,8 @@ export interface Engine {
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
+    forage(state: CampaignState, intent: Omit<ForageIntent, 'type'>): PlanResult;
+    navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -291,6 +297,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     weaponMastery(state, intent) {
       return { events: planWeaponMastery(state, content, rng, { type: 'WeaponMastery', ...intent }) };
+    },
+    forage(state, intent) {
+      return { events: planForage(state, content, rng, { type: 'Forage', ...intent }) };
+    },
+    navigationCheck(state, intent) {
+      return { events: planNavigationCheck(state, content, rng, { type: 'NavigationCheck', ...intent }) };
     },
   };
 

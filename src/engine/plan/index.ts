@@ -75,3 +75,9 @@ export {
   type IdentifyIntent,
 } from './reactive-spells.js';
 export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js';
+export {
+  planForage,
+  planNavigationCheck,
+  type ForageIntent,
+  type NavigationCheckIntent,
+} from './travel.js';

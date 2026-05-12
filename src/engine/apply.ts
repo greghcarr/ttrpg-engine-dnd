@@ -109,6 +109,11 @@ import {
   applyVehicleDamaged,
   applyVehicleRepaired,
 } from './reducers/mounts-vehicles.js';
+import {
+  applyTravelLegCompleted,
+  applyNavigationCheckRolled,
+  applyForagedFor,
+} from './reducers/travel.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -353,6 +358,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'VehicleRepaired':
         applyVehicleRepaired(draft, event);
+        break;
+      case 'TravelLegCompleted':
+        applyTravelLegCompleted(draft, event);
+        break;
+      case 'NavigationCheckRolled':
+        applyNavigationCheckRolled(draft, event);
+        break;
+      case 'ForagedFor':
+        applyForagedFor(draft, event);
         break;
       default: {
         const exhaustive: never = event;

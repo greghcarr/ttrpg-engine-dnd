@@ -404,6 +404,28 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const vehicle = stateAfter.vehicles[event.vehicleId];
       return `${vehicle?.name ?? event.vehicleId} repaired for ${event.amount} HP.`;
     }
+    case 'TravelLegCompleted': {
+      const fromName = event.fromLocationId !== undefined
+        ? (stateBefore.locations[event.fromLocationId]?.name ?? event.fromLocationId.slice(0, 6))
+        : 'origin';
+      const toName = event.toLocationId !== undefined
+        ? (stateAfter.locations[event.toLocationId]?.name ?? event.toLocationId.slice(0, 6))
+        : 'destination';
+      const note = event.notes !== undefined ? ` — ${event.notes}` : '';
+      return `Travel: ${fromName} -> ${toName}, ${event.miles} mi over ${event.hours}h at ${event.pace} pace${note}.`;
+    }
+    case 'NavigationCheckRolled': {
+      const navigator = characterName(stateBefore, event.navigatorId);
+      const verdict = event.success ? 'on course' : 'lost';
+      return `Navigation check (${navigator}): d20(${event.d20})+${event.bonus}=${event.total} vs DC ${event.dc} -> ${verdict}.`;
+    }
+    case 'ForagedFor': {
+      const forager = characterName(stateBefore, event.foragerId);
+      if (!event.success) {
+        return `${forager} forages: d20(${event.d20})+${event.bonus}=${event.total} vs DC ${event.dc} -> nothing found.`;
+      }
+      return `${forager} forages: d20(${event.d20})+${event.bonus}=${event.total} vs DC ${event.dc} -> ${event.foodPounds} lb food, ${event.waterPounds} lb water.`;
+    }
   }
 };
 

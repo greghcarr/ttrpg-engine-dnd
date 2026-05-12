@@ -113,6 +113,11 @@ import {
   VehicleDamagedEventSchema,
   VehicleRepairedEventSchema,
 } from './mounts-vehicles.js';
+import {
+  TravelLegCompletedEventSchema,
+  NavigationCheckRolledEventSchema,
+  ForagedForEventSchema,
+} from './travel.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -195,6 +200,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   VehicleDepartedEventSchema,
   VehicleDamagedEventSchema,
   VehicleRepairedEventSchema,
+  TravelLegCompletedEventSchema,
+  NavigationCheckRolledEventSchema,
+  ForagedForEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -280,6 +288,9 @@ export const EVENT_TYPES = [
   'VehicleDeparted',
   'VehicleDamaged',
   'VehicleRepaired',
+  'TravelLegCompleted',
+  'NavigationCheckRolled',
+  'ForagedFor',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -537,3 +548,13 @@ export type {
   VehicleDamagedEvent,
   VehicleRepairedEvent,
 } from './mounts-vehicles.js';
+export {
+  TravelLegCompletedEventSchema,
+  NavigationCheckRolledEventSchema,
+  ForagedForEventSchema,
+} from './travel.js';
+export type {
+  TravelLegCompletedEvent,
+  NavigationCheckRolledEvent,
+  ForagedForEvent,
+} from './travel.js';

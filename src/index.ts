@@ -379,6 +379,8 @@ export {
   planDispelMagic,
   planIdentify,
   planWeaponMastery,
+  planForage,
+  planNavigationCheck,
 } from './engine/plan/index.js';
 export type {
   ShortRestIntent,
@@ -403,6 +405,8 @@ export type {
   DispelMagicIntent,
   IdentifyIntent,
   WeaponMasteryIntent,
+  ForageIntent,
+  NavigationCheckIntent,
 } from './engine/plan/index.js';
 export {
   SpellCounteredEventSchema,
@@ -439,6 +443,16 @@ export type {
   VehicleDepartedEvent,
   VehicleDamagedEvent,
   VehicleRepairedEvent,
+} from './schemas/events/index.js';
+export {
+  TravelLegCompletedEventSchema,
+  NavigationCheckRolledEventSchema,
+  ForagedForEventSchema,
+} from './schemas/events/index.js';
+export type {
+  TravelLegCompletedEvent,
+  NavigationCheckRolledEvent,
+  ForagedForEvent,
 } from './schemas/events/index.js';
 
 export type { HandlerRegistry, EffectHandler, HandlerContext } from './handlers/index.js';
