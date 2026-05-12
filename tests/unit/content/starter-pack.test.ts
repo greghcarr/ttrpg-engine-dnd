@@ -44,4 +44,28 @@ describe('starter content pack', () => {
     expect(resolved.classes.get('paladin')?.spellcasting?.type).toBe('half');
     expect(resolved.classes.get('ranger')?.spellcasting?.type).toBe('half');
   });
+
+  it('ships all four group-3 classes (Rogue, Sorcerer, Warlock, Wizard)', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    for (const id of ['rogue', 'sorcerer', 'warlock', 'wizard']) {
+      expect(resolved.classes.get(id), `class ${id} missing`).toBeDefined();
+    }
+    expect(resolved.classes.get('sorcerer')?.spellcasting?.type).toBe('full');
+    expect(resolved.classes.get('warlock')?.spellcasting?.type).toBe('pact');
+    expect(resolved.classes.get('wizard')?.spellcasting?.type).toBe('full');
+  });
+
+  it('starter pack covers all 12 PHB classes', () => {
+    const pack = loadStarterPack();
+    const resolved = resolveContent([pack]);
+    const expected = [
+      'barbarian', 'bard', 'cleric', 'druid',
+      'fighter', 'monk', 'paladin', 'ranger',
+      'rogue', 'sorcerer', 'warlock', 'wizard',
+    ];
+    for (const id of expected) {
+      expect(resolved.classes.get(id), `class ${id} missing`).toBeDefined();
+    }
+  });
 });
