@@ -25,14 +25,35 @@ When working in this repo, assume any of these gaps may be the next slice the us
 
 ## System-agnostic core seam (forward-looking)
 
-dnd-engine has a clean split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. Until and unless that slice happens, follow this rule when adding new architectural code:
+dnd-engine has a conceptual split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. The seam is conceptual today, not enforced in code: several files that belong on the agnostic side already bake in D&D specifics. That's fine; Phase A was the right time to ship D&D shapes. The rule going forward is **stop the bleeding, don't fix the past.**
 
-- **System-agnostic and should stay that way:** [src/ids.ts](src/ids.ts), [src/engine/apply.ts](src/engine/apply.ts) / [replay.ts](src/engine/replay.ts) / [commit.ts](src/engine/commit.ts) / [undo-redo.ts](src/engine/undo-redo.ts), [src/content/pack.ts](src/content/pack.ts), [src/schemas/runtime/party.ts](src/schemas/runtime/party.ts) / [session.ts](src/schemas/runtime/session.ts) / [currency.ts](src/schemas/runtime/currency.ts) / [in-game-time.ts](src/schemas/runtime/in-game-time.ts), [src/schemas/predicate.ts](src/schemas/predicate.ts) + [formula.ts](src/schemas/formula.ts) (mostly).
-- **D&D-specific and that's fine:** Character / Spell / Item / Condition / Encounter / Class / Species / Background schemas; combat / spellcasting / rest / level-up reducers and planners; damage type, action economy, spell slot, concentration models.
+**Genuinely clean today (keep that way):**
+- [src/ids.ts](src/ids.ts): branded strings, no D&D coupling.
+- [src/engine/replay.ts](src/engine/replay.ts), [commit.ts](src/engine/commit.ts), [undo-redo.ts](src/engine/undo-redo.ts): operate on opaque events.
+- [src/schemas/runtime/session.ts](src/schemas/runtime/session.ts): sessions + journal, no D&D concepts.
+- [src/schemas/runtime/in-game-time.ts](src/schemas/runtime/in-game-time.ts): minute-counting only.
 
-When adding to the first list, prefer shapes that don't bake in D&D specifics (six ability scores, d20 + AC, 13 damage types, spell slot architecture) unless there's a concrete D&D reason. When adding to the second list, no need to abstract; build what 5.5e needs.
+**Partially coupled today (don't make worse; Slice 47 cleans up):**
+- [src/schemas/runtime/currency.ts](src/schemas/runtime/currency.ts): cp/sp/ep/gp/pp hardcoded.
+- [src/schemas/runtime/party.ts](src/schemas/runtime/party.ts): clean except the embedded `Currency`.
+- [src/content/pack.ts](src/content/pack.ts): D&D content categories baked into the schema shape.
+- [src/schemas/predicate.ts](src/schemas/predicate.ts), [formula.ts](src/schemas/formula.ts): machinery is agnostic, vocabulary is D&D.
+- [src/engine/apply.ts](src/engine/apply.ts): hardcoded switch over D&D event types.
 
-The seam doesn't need to be perfect today, just clean enough that a future `ttrpg-engine-core` extraction is a manageable refactor rather than a rewrite.
+**Genuinely D&D-specific (no need to abstract):**
+- All `src/schemas/content/*` schemas.
+- `src/schemas/runtime/character.ts`, `encounter.ts`, `item-instance.ts`, `effect-instance.ts`, `pending-choice.ts`.
+- D&D-mechanics event schemas (combat, spellcasting, rest, level-up, action-economy, concentration, attack, checks).
+- All reducers, planners, and derivations.
+- Effect primitive vocabulary in `src/schemas/effects.ts` (the *pattern* is agnostic; the *primitives* are D&D).
+
+### Rule for new code
+
+- Adding to a **genuinely clean** file: keep it clean. Don't bake in six ability scores, d20+AC, 13 damage types, spell slot architecture, etc. unless there's a concrete D&D reason that won't exist in other systems.
+- Adding to a **partially coupled** file: don't deepen the coupling. If you're extending currency, party, the pack loader, predicate/formula DSLs, or the apply dispatcher, prefer shapes that fit a future generic split. Don't refactor preemptively, but don't make Slice 47 worse either.
+- Adding to a **D&D-specific** file: build what 5.5e needs. No abstraction required.
+
+The seam doesn't need to be perfect today, just clean enough that Slice 47 is a manageable refactor rather than a rewrite. Don't add to the debt; don't pay it down preemptively either.
 
 ## Architecture (locked)
 
