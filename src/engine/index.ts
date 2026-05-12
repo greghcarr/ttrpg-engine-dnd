@@ -33,9 +33,15 @@ import {
   planCastSpell,
   planCheckConcentration,
   planOpportunityAttack,
+  planMove,
+  planDash,
+  planDisengage,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
+  type MoveIntent,
+  type DashIntent,
+  type DisengageIntent,
   type CreateEncounterIntent,
   type RollInitiativeIntent,
   type StartEncounterIntent,
@@ -113,6 +119,9 @@ export interface Engine {
       state: CampaignState,
       intent: Omit<CheckConcentrationIntent, 'type'>,
     ): PlanResult;
+    move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
+    dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
+    disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -207,6 +216,15 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           ...intent,
         }),
       };
+    },
+    move(state, intent) {
+      return { events: planMove(state, content, { type: 'Move', ...intent }) };
+    },
+    dash(state, intent) {
+      return { events: planDash(state, content, { type: 'Dash', ...intent }) };
+    },
+    disengage(state, intent) {
+      return { events: planDisengage(state, content, { type: 'Disengage', ...intent }) };
     },
   };
 

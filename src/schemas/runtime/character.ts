@@ -55,6 +55,7 @@ export const CharacterSchema = z.object({
   hp: HPSchema,
   deathSaves: DeathSavesSchema.default({ successes: 0, failures: 0, stable: false }),
   exhaustion: ExhaustionLevelSchema.default(0),
+  speedFeet: z.number().int().min(0).default(30),
   inventory: z.array(ULIDSchema).default([]),
   equipped: z
     .object({

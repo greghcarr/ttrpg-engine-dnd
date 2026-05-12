@@ -182,6 +182,17 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `_(${event.triggerId.split(':').slice(1).join(':')} triggers for ${characterName(stateBefore, event.characterId)})_`;
     case 'ActionEconomyConsumed':
       return `_(${characterName(stateBefore, event.combatantId)} consumes ${event.kind})_`;
+    case 'CombatantMoved': {
+      const who = characterName(stateBefore, event.combatantId);
+      const from = event.fromPosition;
+      const to = event.toPosition;
+      const fromLabel = from !== undefined ? `(${from.x}, ${from.y})` : '?';
+      return `**${who}** moves ${event.feetTraveled}ft: ${fromLabel} -> (${to.x}, ${to.y}).`;
+    }
+    case 'Dashed':
+      return `**${characterName(stateBefore, event.combatantId)}** Dashes.`;
+    case 'Disengaged':
+      return `**${characterName(stateBefore, event.combatantId)}** Disengages.`;
   }
 };
 

@@ -51,6 +51,11 @@ import {
 } from './reducers/concentration.js';
 import { applyTriggerFired } from './reducers/triggers.js';
 import { applyActionEconomyConsumed } from './reducers/action-economy.js';
+import {
+  applyCombatantMoved,
+  applyDashed,
+  applyDisengaged,
+} from './reducers/movement.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -169,6 +174,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ActionEconomyConsumed':
         applyActionEconomyConsumed(draft, event);
+        break;
+      case 'CombatantMoved':
+        applyCombatantMoved(draft, event);
+        break;
+      case 'Dashed':
+        applyDashed(draft, event);
+        break;
+      case 'Disengaged':
+        applyDisengaged(draft, event);
         break;
       default: {
         const exhaustive: never = event;

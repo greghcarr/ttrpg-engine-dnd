@@ -44,3 +44,12 @@ export {
   planCheckConcentration,
   type CheckConcentrationIntent,
 } from './concentration.js';
+export {
+  planMove,
+  planDash,
+  planDisengage,
+  chebyshevDistance,
+  type MoveIntent,
+  type DashIntent,
+  type DisengageIntent,
+} from './movement.js';
