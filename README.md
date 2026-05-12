@@ -24,23 +24,16 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 - **Event-sourced.** State changes are events. `apply(state, event) -> state` is pure. Replay any campaign from its event log.
 - **Plan/commit split.** RNG is consumed only inside `engine.plan(intent)`. Resolution events carry baked rolls, so `apply()` is deterministic. Replay never re-rolls.
 - **Effect-primitive vocabulary.** Features (class features, feats, magic item powers, conditions) are described via a fixed vocabulary of about 25 effect primitives. Wild Shape, Polymorph, Wish, Simulacrum and a handful of others drop to code handlers.
-- **Schema-only.** The library ships shapes (`Character`, `Spell`, `MagicItem`, `MonsterStatblock`, etc.) and the engine that operates on them. Consumers load rules content from their own JSON content packs.
+- **Schema-only.** The library ships shapes (`Character`, `Spell`, `MagicItem`, `MonsterStatblock`, etc.) and the engine that operates on them. Consumers load rules content from their own JSON content packs. This keeps the IP story clean.
 - **Branded IDs + ULIDs.** `CharacterId`, `SpellId`, `ItemDefinitionId` versus `ItemInstanceId`, etc. Backed by ULIDs (lexicographically sortable by time).
 - **PendingChoice protocol.** Deferred player decisions (ASI vs feat, fighting style selection, spell target selection) are first-class events in the log.
 - **Zod for validation, Immer for clean reducers, Vitest for tests.**
 
-## Architecture
-
-- **Event-sourced.** State changes are events. `apply(state, event) -> state` is pure. Replay any campaign from its event log.
-- **Plan/commit split.** RNG is consumed only inside `engine.plan(intent)`. Resolution events carry baked rolls, so `apply()` is deterministic. Replay never re-rolls.
-- **Effect-primitive vocabulary.** Features (class features, feats, magic item powers, conditions) are described via a fixed vocabulary of about 25 effect primitives. Wild Shape, Polymorph, Wish, Simulacrum and a handful of others drop to code handlers.
-- **Schema-only.** The library ships shapes (`Character`, `Spell`, `MagicItem`, `MonsterStatblock`, etc.) and the engine that operates on them. Consumers load rules content from their own JSON content packs. This keeps the IP story clean.
-- **Branded IDs + ULIDs.** `CharacterId`, `SpellId`, `ItemDefinitionId` versus `ItemInstanceId`, etc. Backed by ULIDs (lexicographically sortable by time).
-- **Zod for validation, Immer for clean reducers, Vitest for tests.**
-
 ## Status
 
-**Pre-alpha.** Foundation plus twelve slices complete, about 80% of the full mechanical coverage goal. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 360 tests across 55 files.
+**Pre-alpha.** Foundation plus eighteen slices complete. Engine compiles, builds (ESM + CJS + `.d.ts`), and ships 381 tests across 63 files. The architecture (event-sourcing, plan/commit, RNG capture, replay, branded IDs, effect primitives) is locked and proven by the test suite.
+
+Adoption surface (npm publish, starter SRD content pack, examples directory, getting-started doc) is the next phase, tracked in the Roadmap below. Until then, the library is install-via-git-URL and the test suite is the de facto API reference.
 
 Completed:
 
@@ -49,63 +42,95 @@ Completed:
 - **Slice 3.** Level-up flow with RNG-captured HP rolls (roll or average strategy), `PendingChoice` resolution protocol for deferred decisions (ASI vs feat, fighting style, subclass selection, spell selection). Resolved-choice effects feed into derivations.
 - **Slice 4.** `plan.save`, `plan.abilityCheck` (with optional skill), record-only `SaveRolled` / `AbilityCheckRolled` resolution events. Honors caller-supplied advantage or derives it from the effect stack. Skill checks apply half / proficient / expertise multipliers. `computeAbilityCheck` + `computePassiveScore` derivations.
 - **Slice 5.** Spellcasting. `plan.castSpell` handles cantrips and leveled spells; dispatches per-target attack / save / heal mechanics through the existing resolution chains; consumes standard or pact slots (auto-picks pact when both apply); upcasting via `extraDicePerSlotLevel`. `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed` events. Long rest restores all slots, short rest restores pact slots only. `computeAvailableSpellSlots` derivation.
-- **Slice 6.** Concentration enforcement. `EffectInstance` table tracks active spell effects with their applied conditions; concentration spells emit `ConcentrationStarted` and set `Character.concentrationEffectId`. `plan.checkConcentration(characterId, damage)` rolls a CON save with DC `max(10, floor(damage/2))`, emits `ConcentrationBroken` on failure which auto-removes every condition the effect installed. Casting a new concentration spell while already concentrating evicts the prior effect. `formatEvent` covers the new events so transcripts narrate concentration lifecycle.
-- **Slice 7.** OnEvent trigger system. The dispatcher walks every character's effect stack after each triggering event, evaluates the `Predicate` filter against event facts (`event.attackerIsSelf`, `event.hit`, `event.used`, `event.critical`), checks cadence (`oncePer: 'turn' | 'round' | 'shortRest' | 'longRest'`), and fires `AddDamage` actions producing rider events. `TriggerFired` event marks usage; `Character.triggerCounters` tracks per-cadence state. `TurnStarted` / `RoundEnded` / `ShortRestEnded` / `LongRestEnded` reducers reset the appropriate counters. Wired into `planAttack`. Test pack now has a Rogue with Sneak Attack as the canonical OnEvent feature.
-- **Slice 8.** Action economy. `Combatant.turnUsage: { actionUsed, bonusActionUsed, attacksMadeThisTurn, reactionUsedThisRound }` tracks per-turn usage. `ActionEconomyConsumed` event marks consumption; reducer enforces "can't double-use the Action" / "can't double-use the Bonus Action" / "can't double-use the Reaction this round" invariants. `TurnStarted` resets per-turn fields for the active combatant; `RoundEnded` resets `reactionUsedThisRound` for everyone. `computeActionEconomyBudget` derivation reads `ModifyActionEconomy` effects to determine `maxAttacksPerAction` (Extra Attack), `extraActionsPerTurn` (Action Surge), `extraBonusActionsPerTurn`. `planAttack` enforces the attack budget when the attacker is the active combatant in an active encounter; out-of-combat attacks are unmetered. Golden scenario demonstrates Fighter L1 throwing on a second attack and Fighter L5 attacking twice per Action.
-- **Slice 9.** Reactions protocol, scoped to opportunity attacks. `resolveAttack` extracted from `planAttack` as a shared helper so `planOpportunityAttack` reuses the d20 / damage / OnEvent-trigger pipeline. The new planner requires the reactor to be in the active encounter but not the active combatant, emits `ActionEconomyConsumed { kind: 'reaction' }`, then runs the attack chain; bypasses the action and attack-budget checks. Throws on a second reaction same round; refreshes at `RoundEnded`. The retroactive reactions (Shield, Counterspell, Hellish Rebuke) come in a follow-up slice.
-- **Slice 10.** Movement and positioning. Combatants gain optional `position: { x, y }` in feet and per-turn movement state (`feetMovedThisTurn`, `dashed`, `disengaged`). New `CombatantMoved`, `Dashed`, `Disengaged` events. `planMove` enforces the budget against `Character.speedFeet` (doubled if Dashed) using Chebyshev distance. `planDash` and `planDisengage` consume the Action. `TurnStarted` resets all per-turn movement state.
-- **Slice 11.** Damage mitigation order of operations. New `mitigateDamage` derivation walks the target's effect stack and applies immunity (zero), then vulnerability (×2), then resistance (½ rounded down) to each damage component. `DamageComponent` schema extended with `rawAmount` and `mitigation: 'resisted' | 'immune' | 'vulnerable'`. `resolveAttack` and `planCastSpell` route their `DamageApplied` events through mitigation. Reaction-based mitigations (Shield, Heavy Armor Master, Uncanny Dodge) plug into this layer in a later slice.
-- **Slice 12.** Inventory mechanics. New `ItemEquipped`, `ItemUnequipped`, `ItemAttuned`, `ItemUnattuned` events with reducers enforcing the 3-slot attunement cap and maintaining the `Character.equipped` / `ItemInstance.attunedTo` back-link. `computeCarryingCapacity` (STR × 15) and `computeEncumbrance` derivations compute carried weight against the carrying threshold and produce `unencumbered` / `encumbered` / `heavily-encumbered` labels.
+- **Slice 6.** Concentration enforcement. `EffectInstance` table tracks active spell effects with their applied conditions; concentration spells emit `ConcentrationStarted` and set `Character.concentrationEffectId`. `plan.checkConcentration(characterId, damage)` rolls a CON save with DC `max(10, floor(damage/2))`, emits `ConcentrationBroken` on failure which auto-removes every condition the effect installed. Casting a new concentration spell while already concentrating evicts the prior effect.
+- **Slice 7.** OnEvent trigger system. The dispatcher walks every character's effect stack after each triggering event, evaluates the `Predicate` filter against event facts, checks cadence (`oncePer: 'turn' | 'round' | 'shortRest' | 'longRest'`), and fires `AddDamage` actions producing rider events. `TriggerFired` event marks usage; `Character.triggerCounters` tracks per-cadence state. Test pack has a Rogue with Sneak Attack as the canonical OnEvent feature.
+- **Slice 8.** Action economy. `Combatant.turnUsage` tracks per-turn usage; `ActionEconomyConsumed` events enforce "can't double-use the Action" / "Bonus Action" / "Reaction this round". `computeActionEconomyBudget` reads `ModifyActionEconomy` effects (Extra Attack, Action Surge, Bonus Action grants). `planAttack` enforces the attack budget when the attacker is the active combatant in an active encounter.
+- **Slice 9.** Reactions protocol, scoped to opportunity attacks. `resolveAttack` extracted as a shared helper so `planOpportunityAttack` reuses the d20 / damage / OnEvent-trigger pipeline. Emits `ActionEconomyConsumed { kind: 'reaction' }` and bypasses the action / attack-budget checks. Throws on a second reaction same round; refreshes at `RoundEnded`.
+- **Slice 9b.** Reaction-window expansion. Action Surge resets the action consumption flag; off-hand attacks consume the bonus action and suppress ability mod on damage; `FlatDamageReduction` effect primitive (Heavy Armor Master, similar) reduces incoming damage before resistance.
+- **Slice 10.** Movement and positioning. Combatants gain optional `position: { x, y }` in feet and per-turn movement state (`feetMovedThisTurn`, `dashed`, `disengaged`). `planMove` enforces the budget against `Character.speedFeet` (doubled if Dashed) using Chebyshev distance.
+- **Slice 11.** Damage mitigation order of operations. `mitigateDamage` walks the target's effect stack and applies flat reduction, then immunity (zero), then vulnerability (×2), then resistance (½ rounded down) to each damage component.
+- **Slice 12.** Inventory mechanics. `ItemEquipped`, `ItemUnequipped`, `ItemAttuned`, `ItemUnattuned` events with reducers enforcing the 3-slot attunement cap. `computeCarryingCapacity` (STR × 15) and `computeEncumbrance` derivations.
+- **Slice 13.** Creature as a first-class combatant. `Character.kind: 'pc' | 'npc' | 'creature'` discriminator with optional `statblockId` and `multiattack` pattern. `planMultiattack` consumes a single Action and runs `resolveAttack` once per weapon swing in the pattern.
+- **Slice 14.** Environmental hazards. `planFalling` rolls 1d6 per 10ft (capped at 20d6) routed through `mitigateDamage` as bludgeoning. Cover (`half`, `three-quarters`, `total`) adds +2 / +5 AC respectively; total cover refuses the attack.
+- **Slice 15.** Full 2024 conditions library. All 15 conditions (blinded, charmed, deafened, exhaustion, frightened, grappled, incapacitated, invisible, paralyzed, petrified, poisoned, prone, restrained, stunned, unconscious) load from content packs and apply their effects to derivations.
+- **Slice 16.** Spellcasting polish. Cantrip damage scaling at character levels 5 / 11 / 17 via `cantripScalingDice`. Ritual casting via the `asRitual` flag (skips slot consumption; rejects non-ritual spells). Spell area targeting metadata (cone / cube / line / sphere / cylinder).
+- **Slice 17.** Parties, shared inventory, currency, treasure ledger. `PartyCreated`, `PartyMembersChanged`, `CurrencyAcquired`, `CurrencySpent`, `ItemDepositedToParty`, `ItemWithdrawnFromParty` events. Currency helpers (`totalInCopper`, `addCurrency`, `subtractCurrency`) refuse to let the purse go negative.
+- **Slice 18.** Sessions, journal entries (player / DM, with party / dm-only / character visibility), in-game clock (minutes from epoch, formatted as `Day NN HH:MM`). Only one session can be active at a time; starting a session syncs the campaign clock and refuses to rewind it.
 
 ## Roadmap
 
-Three phases, 22 slices total. About 15 to 25 hours of focused execution time.
+Four phases. Phase A and the first two slices of Phase B are done; B continues, then C (combat fill-in), D (adoption surface), and E (content pack).
 
-### Phase A: Engine mechanics (12 slices, 12 done)
+### Phase A: Engine mechanics (16 slices, all done)
 
-Each slice lands a load-bearing combat or rules mechanic. Order is dependency-driven. Slices 1 to 12 listed under Status above; the rest below.
-- 9b. **Reaction-window expansion** (next). Retroactive reaction modifiers (Shield's +5 AC after seeing a hit, Counterspell pausing a `SpellCastDeclared`, Hellish Rebuke triggered by damage). Action Surge and two-weapon fighting also land here. Heavy Armor Master and Uncanny Dodge plug into the damage-mitigation layer landed in slice 11.
-- 13. **NPC / Creature as first-class combatants.** `Creature` distinct from PC `Character`: multiattack, legendary actions, lair actions, regional effects.
-- 14. **Environmental hazards.** Falling, suffocation, drowning, poison and disease tracks, lighting effects (disadvantage in dim, etc.), cover (half, three-quarters, total).
-- 15. **Conditions library.** Full mechanical implementation of all 15 2024 conditions (blinded, charmed, deafened, frightened, grappled, incapacitated, invisible, paralyzed, petrified, poisoned, prone, restrained, stunned, unconscious, plus the 2024 single-track exhaustion).
-- 16. **Spellcasting polish.** Area shapes (cone / cube / line / sphere / cylinder) for spell targeting. Ritual casting path. Cantrip damage scaling at character levels 5 / 11 / 17. Always-prepared spells from class features (Cleric domains, Warlock patron spells).
+Slices 1 through 16 listed under Status above. Phase A is complete.
 
-### Phase B: Full state schemas (4 slices)
+### Phase B: Full state schemas (4 slices, 2 done)
 
-- 17. **Party + currency + shared inventory + treasure ledger.**
-- 18. **Session + journal + DM notes + in-game time.**
-- 19. **Quest + objectives + rewards.**
-- 20. **Location + NPC + travel + foraging.**
+- **17.** Party + currency + shared inventory + treasure ledger. ✓
+- **18.** Session + journal + DM notes + in-game time. ✓
+- **19.** Locations + dungeons + doors + maps + environmental terrain (difficult terrain, line of sight, line of effect, spell range checking against position).
+- **20.** Quests + objectives + rewards + milestone XP.
 
-### Phase C: 2024 content pack (6 slices)
+### Phase C: Combat fill-in (high-impact mechanics consumers will immediately want)
 
-These are heavy on data, light on engine code. Each class slice stress-tests Phase A.
+Each slice closes a gap that's currently missing or partial.
 
-- 21. **Classes group 1.** Barbarian, Bard, Cleric, Druid (1-20, all subclasses).
-- 22. **Classes group 2.** Fighter, Monk, Paladin, Ranger.
-- 23. **Classes group 3.** Rogue, Sorcerer, Warlock, Wizard.
-- 24. **All ~370 spells** (primitives where possible, code handlers for Wish / Simulacrum / Polymorph / etc.).
-- 25. **Species + backgrounds + feats + fighting styles + equipment + tools.**
-- 26. **Magic items (DMG) + monster statblocks (MM, full or curated subset).**
+- **21.** Grapple, shove, hide actions; the full action / bonus-action menu beyond Attack / Cast / Dash / Disengage.
+- **22.** Counterspell + Dispel Magic + Identify (reactive spellcasting chain that interrupts `SpellCastDeclared`).
+- **23.** Full Weapon Mastery effects (Sap, Vex, Topple, Push, Cleave, Slow, Nick, Graze) wired into the attack pipeline; today they're flagged in the schema but not enforced.
+- **24.** Mounts + vehicles + mounted combat.
+- **25.** Travel: overland movement, forced march exhaustion, navigation, foraging.
+- **26.** NPCs as a first-class kind with reaction / morale / social mechanics distinct from creatures.
+- **27.** Downtime + crafting + training.
+- **28.** Magic item charges, recharge cadence, sentient items, artifacts.
+- **29.** Resurrection variants beyond Revivify: Raise Dead, Reincarnate, True Resurrection.
+- **30.** Wild Shape, Polymorph, Simulacrum, Wish via the `CustomEffect` handler hook.
+
+### Phase D: Adoption surface
+
+These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
+
+- **31.** Starter SRD-shaped content pack (separate package, MIT or CC-BY, based on the 2024 SRD release). Without this, no consumer can instantiate a single character.
+- **32.** `/examples` directory: 2-3 small working consumer apps (CLI character sheet, encounter tracker, web demo).
+- **33.** Getting-started doc: "build your first Fighter in 30 lines." API reference generated from TypeScript types.
+- **34.** Public API conveniences: `engine.do(state, intent)` (plan + commit in one call), `loadCampaign(json)` / `serializeCampaign(c)`, `engine.createPC({species, background, classL1})`.
+- **35.** Derivation memoization keyed on `CampaignState.version`. Today derivations recompute from scratch; fine for tests, will matter for live UI with 12-combatant encounters.
+- **36.** `npm publish` to the public registry. Until this, every install is via git URL.
+- **37.** Content pack validator with helpful diagnostic errors (path-pointed Zod failures, cross-reference resolution failures with offending IDs).
+
+### Phase E: 2024 content fill-out
+
+These are heavy on data, light on engine code. Each class slice stress-tests Phases A and C.
+
+- **38.** Classes group 1: Barbarian, Bard, Cleric, Druid (1-20, all subclasses).
+- **39.** Classes group 2: Fighter, Monk, Paladin, Ranger.
+- **40.** Classes group 3: Rogue, Sorcerer, Warlock, Wizard.
+- **41.** All ~370 spells (primitives where possible, handlers for the exotic ones).
+- **42.** Species + backgrounds + feats + fighting styles + equipment + tools.
+- **43.** Magic items (DMG) + monster statblocks (MM, full or curated subset).
+- **44.** Bastions (2024 stronghold system).
+- **45.** Epic boons (post-20 progression).
+- **46.** Optional variant rules (gritty realism, hero points, sanity, mass combat).
 
 ### What "perfect" cannot mean
 
-5.5e explicitly delegates some rulings to the DM: improvised actions, narrative consequences, table houserules, ambiguous spell interactions that even Sage Advice has issued multiple clarifications on. A rules engine cannot adjudicate these. The `CustomEffect` code-handler escape hatch is the explicit spot for table-specific rulings. After Phase A + B + C the engine covers ~95% of the printed mechanics by surface area; the rest is documented as DM-discretion territory.
+5.5e explicitly delegates some rulings to the DM: improvised actions, narrative consequences, table houserules, ambiguous spell interactions that even Sage Advice has issued multiple clarifications on. A rules engine cannot adjudicate these. The `CustomEffect` code-handler escape hatch is the explicit spot for table-specific rulings. After all phases the engine covers ~95% of printed mechanics by surface area; the rest is documented as DM-discretion territory.
 
 ## Install
 
-```
-npm install dnd-engine
-```
-
-Or, while pre-alpha, link from a sibling directory:
+Not yet published to npm. While pre-alpha, install via git URL or a sibling directory:
 
 ```jsonc
 // in your consumer's package.json
 "dependencies": {
-  "dnd-engine": "file:../dnd-engine"
+  "dnd-engine": "github:greghcarr/dnd-engine"
+  // or, when developing alongside the engine:
+  // "dnd-engine": "file:../dnd-engine"
 }
 ```
+
+`npm publish` is tracked as Slice 36 in the roadmap.
 
 ## Usage (preview)
 

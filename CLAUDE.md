@@ -6,7 +6,22 @@ A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). 
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as 26 slices in three phases (A: engine mechanics, B: state schemas, C: content). After foundation + Slices 1 to 5 we are about 42% to that goal. When picking the next slice, prefer the lowest-numbered unfinished slice unless the user asks otherwise; the order is dependency-driven.
+This is a long-running build. The roadmap lives in [README.md](README.md) as five phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content). Phase A is complete (Slices 1-16); Phase B is partially done (17 and 18 shipped, 19 and 20 pending). When picking the next slice, prefer the lowest-numbered unfinished slice unless the user asks otherwise; the order is dependency-driven.
+
+## Library-quality bar (internal working note)
+
+Hold the engine to a library-quality standard: TypeScript strict mode, deterministic replay, plan/commit RNG capture, 80%+ coverage on engine/derive/effects, golden transcripts on every behavior change. Do not advertise this framing on public-facing surfaces (README, package.json, repo description). The work should speak through the code and tests; quality labels in marketing copy are noise. See [feedback memory](../../../.claude/projects/-Users-greghcarr-Documents-Visual-Studio-Code-dndbnb/memory/feedback_no_quality_self_label_public.md) for the reasoning.
+
+## Known gaps (track in README roadmap, work through in order)
+
+The engine architecture is locked and proven. The remaining work falls into four buckets:
+
+1. **Combat mechanics still missing** (Phase C in the roadmap). Grapple/shove/hide, Counterspell/Dispel, full Weapon Mastery wiring, mounted combat, travel, NPCs as first-class, downtime, magic item charges, resurrection variants, Wild Shape / Polymorph / Wish handlers.
+2. **State schemas still missing** (Phase B remainder). Locations + maps + LOS; quests + objectives + milestone XP.
+3. **Adoption surface** (Phase D). Without these, the library is useful only to its author: starter SRD content pack, examples directory, getting-started doc, `engine.do()` convenience, persistence helpers, derivation memoization, npm publish, content-pack validator with good error messages.
+4. **Content fill-out** (Phase E). The big data load: 12 classes × all subclasses × 1-20 progression, ~370 spells, all species/backgrounds/feats, magic items, monster statblocks, bastions, epic boons, variant rules.
+
+When working in this repo, assume any of these gaps may be the next slice the user picks. Don't pre-implement them; deliver each as its own slice with its own golden test.
 
 ## Architecture (locked)
 
