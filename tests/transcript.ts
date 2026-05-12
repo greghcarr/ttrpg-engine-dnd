@@ -411,7 +411,7 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const toName = event.toLocationId !== undefined
         ? (stateAfter.locations[event.toLocationId]?.name ?? event.toLocationId.slice(0, 6))
         : 'destination';
-      const note = event.notes !== undefined ? ` — ${event.notes}` : '';
+      const note = event.notes !== undefined ? ` (${event.notes})` : '';
       return `Travel: ${fromName} -> ${toName}, ${event.miles} mi over ${event.hours}h at ${event.pace} pace${note}.`;
     }
     case 'NavigationCheckRolled': {
