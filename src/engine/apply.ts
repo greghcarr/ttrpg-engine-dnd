@@ -100,6 +100,15 @@ import {
   applyItemIdentified,
 } from './reducers/reactive-spells.js';
 import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
+import {
+  applyMounted,
+  applyDismounted,
+  applyVehicleAcquired,
+  applyVehicleBoarded,
+  applyVehicleDeparted,
+  applyVehicleDamaged,
+  applyVehicleRepaired,
+} from './reducers/mounts-vehicles.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -323,6 +332,27 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'WeaponMasteryActivated':
         applyWeaponMasteryActivated(draft, event);
+        break;
+      case 'Mounted':
+        applyMounted(draft, event);
+        break;
+      case 'Dismounted':
+        applyDismounted(draft, event);
+        break;
+      case 'VehicleAcquired':
+        applyVehicleAcquired(draft, event);
+        break;
+      case 'VehicleBoarded':
+        applyVehicleBoarded(draft, event);
+        break;
+      case 'VehicleDeparted':
+        applyVehicleDeparted(draft, event);
+        break;
+      case 'VehicleDamaged':
+        applyVehicleDamaged(draft, event);
+        break;
+      case 'VehicleRepaired':
+        applyVehicleRepaired(draft, event);
         break;
       default: {
         const exhaustive: never = event;

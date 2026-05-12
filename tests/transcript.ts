@@ -374,6 +374,36 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
         : '';
       return `Mastery: ${event.mastery}${targetLabel} (${who}).`;
     }
+    case 'Mounted': {
+      const rider = characterName(stateBefore, event.riderId);
+      const mount = characterName(stateBefore, event.mountId);
+      return `**${rider}** mounts **${mount}**.`;
+    }
+    case 'Dismounted': {
+      const rider = characterName(stateBefore, event.riderId);
+      const mount = characterName(stateBefore, event.mountId);
+      const how = event.voluntary ? '' : ' (knocked off)';
+      return `**${rider}** dismounts ${mount}${how}.`;
+    }
+    case 'VehicleAcquired':
+      return `Vehicle acquired: "${event.name}" (${event.kind}, AC ${event.ac}, ${event.maxHp} HP, ${event.capacity} seats).`;
+    case 'VehicleBoarded': {
+      const vehicle = stateAfter.vehicles[event.vehicleId];
+      return `**${characterName(stateBefore, event.characterId)}** boards ${vehicle?.name ?? event.vehicleId}.`;
+    }
+    case 'VehicleDeparted': {
+      const vehicle = stateAfter.vehicles[event.vehicleId];
+      return `**${characterName(stateBefore, event.characterId)}** disembarks ${vehicle?.name ?? event.vehicleId}.`;
+    }
+    case 'VehicleDamaged': {
+      const vehicle = stateAfter.vehicles[event.vehicleId];
+      const source = event.source !== undefined ? ` from ${event.source}` : '';
+      return `${vehicle?.name ?? event.vehicleId} takes ${event.amount} damage${source}.`;
+    }
+    case 'VehicleRepaired': {
+      const vehicle = stateAfter.vehicles[event.vehicleId];
+      return `${vehicle?.name ?? event.vehicleId} repaired for ${event.amount} HP.`;
+    }
   }
 };
 

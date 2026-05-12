@@ -104,6 +104,15 @@ import {
   ItemIdentifiedEventSchema,
 } from './reactive-spells.js';
 import { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
+import {
+  MountedEventSchema,
+  DismountedEventSchema,
+  VehicleAcquiredEventSchema,
+  VehicleBoardedEventSchema,
+  VehicleDepartedEventSchema,
+  VehicleDamagedEventSchema,
+  VehicleRepairedEventSchema,
+} from './mounts-vehicles.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -179,6 +188,13 @@ export const EventSchema = z.discriminatedUnion('type', [
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
   WeaponMasteryActivatedEventSchema,
+  MountedEventSchema,
+  DismountedEventSchema,
+  VehicleAcquiredEventSchema,
+  VehicleBoardedEventSchema,
+  VehicleDepartedEventSchema,
+  VehicleDamagedEventSchema,
+  VehicleRepairedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -257,6 +273,13 @@ export const EVENT_TYPES = [
   'SpellDispelled',
   'ItemIdentified',
   'WeaponMasteryActivated',
+  'Mounted',
+  'Dismounted',
+  'VehicleAcquired',
+  'VehicleBoarded',
+  'VehicleDeparted',
+  'VehicleDamaged',
+  'VehicleRepaired',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -496,3 +519,21 @@ export type {
 } from './reactive-spells.js';
 export { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 export type { WeaponMasteryActivatedEvent } from './weapon-mastery.js';
+export {
+  MountedEventSchema,
+  DismountedEventSchema,
+  VehicleAcquiredEventSchema,
+  VehicleBoardedEventSchema,
+  VehicleDepartedEventSchema,
+  VehicleDamagedEventSchema,
+  VehicleRepairedEventSchema,
+} from './mounts-vehicles.js';
+export type {
+  MountedEvent,
+  DismountedEvent,
+  VehicleAcquiredEvent,
+  VehicleBoardedEvent,
+  VehicleDepartedEvent,
+  VehicleDamagedEvent,
+  VehicleRepairedEvent,
+} from './mounts-vehicles.js';

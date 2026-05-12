@@ -416,6 +416,30 @@ export type {
 } from './schemas/events/index.js';
 export { WeaponMasteryActivatedEventSchema } from './schemas/events/index.js';
 export type { WeaponMasteryActivatedEvent } from './schemas/events/index.js';
+export {
+  VehicleSchema,
+  VehicleKindSchema,
+  VEHICLE_KINDS,
+} from './schemas/runtime/index.js';
+export type { Vehicle, VehicleKind } from './schemas/runtime/index.js';
+export {
+  MountedEventSchema,
+  DismountedEventSchema,
+  VehicleAcquiredEventSchema,
+  VehicleBoardedEventSchema,
+  VehicleDepartedEventSchema,
+  VehicleDamagedEventSchema,
+  VehicleRepairedEventSchema,
+} from './schemas/events/index.js';
+export type {
+  MountedEvent,
+  DismountedEvent,
+  VehicleAcquiredEvent,
+  VehicleBoardedEvent,
+  VehicleDepartedEvent,
+  VehicleDamagedEvent,
+  VehicleRepairedEvent,
+} from './schemas/events/index.js';
 
 export type { HandlerRegistry, EffectHandler, HandlerContext } from './handlers/index.js';
 

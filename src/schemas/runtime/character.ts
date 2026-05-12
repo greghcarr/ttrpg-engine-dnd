@@ -110,6 +110,7 @@ export const CharacterSchema = z.object({
   featsTaken: z.array(z.string()).default([]),
   pendingChoiceIds: z.array(ULIDSchema).default([]),
   xp: z.number().int().min(0).default(0),
+  mountedOnId: ULIDSchema.optional(),
 });
 export type Character = z.infer<typeof CharacterSchema>;
 

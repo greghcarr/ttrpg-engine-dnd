@@ -11,6 +11,7 @@ import { InGameTimeSchema } from './in-game-time.js';
 import { LocationSchema, DoorSchema } from './location.js';
 import { QuestSchema } from './quest.js';
 import { MilestoneKindSchema } from '../events/quests.js';
+import { VehicleSchema } from './vehicle.js';
 
 export const CampaignStateSchema = z.object({
   characters: z.record(ULIDSchema, CharacterSchema).default({}),
@@ -25,6 +26,7 @@ export const CampaignStateSchema = z.object({
   doors: z.record(ULIDSchema, DoorSchema).default({}),
   characterLocations: z.record(ULIDSchema, ULIDSchema).default({}),
   quests: z.record(ULIDSchema, QuestSchema).default({}),
+  vehicles: z.record(ULIDSchema, VehicleSchema).default({}),
   milestones: z
     .array(
       z.object({
@@ -68,6 +70,7 @@ export const emptyCampaignState = (): CampaignState => ({
   doors: {},
   characterLocations: {},
   quests: {},
+  vehicles: {},
   milestones: [],
   inGameTime: { totalMinutes: 0 },
   version: 0,

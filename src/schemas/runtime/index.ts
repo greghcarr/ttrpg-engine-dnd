@@ -72,6 +72,13 @@ export {
   OBJECTIVE_STATUSES,
 } from './quest.js';
 export {
+  VehicleSchema,
+  type Vehicle,
+  VehicleKindSchema,
+  type VehicleKind,
+  VEHICLE_KINDS,
+} from './vehicle.js';
+export {
   SessionSchema,
   type Session,
   JournalEntrySchema,
