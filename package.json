@@ -1,0 +1,75 @@
+{
+  "name": "dnd-engine",
+  "version": "0.1.0-pre-alpha",
+  "description": "Standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only content model with effect-primitive vocabulary and code-handler escape hatch.",
+  "type": "module",
+  "main": "./dist/dnd-engine.cjs",
+  "module": "./dist/dnd-engine.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/dnd-engine.js",
+      "require": "./dist/dnd-engine.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "DEVELOPMENT.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "ci": "npm run typecheck && npm run test:coverage && npm run build"
+  },
+  "dependencies": {
+    "immer": "^10.1.1",
+    "ulid": "^2.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "fast-check": "^3.19.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^1.6.0"
+  },
+  "license": "MIT",
+  "author": "Greg Carr",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/greghcarr/dnd-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/greghcarr/dnd-engine/issues"
+  },
+  "homepage": "https://github.com/greghcarr/dnd-engine#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "dnd",
+    "dungeons-and-dragons",
+    "5e",
+    "5.5e",
+    "2024",
+    "rules-engine",
+    "domain-engine",
+    "event-sourced",
+    "ttrpg",
+    "rpg",
+    "character-sheet",
+    "vtt",
+    "game-engine",
+    "typescript"
+  ]
+}
