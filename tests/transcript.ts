@@ -8,6 +8,7 @@ import type { CampaignState } from '../src/schemas/runtime/campaign.js';
 import type { ResolvedContent } from '../src/content/pack.js';
 import { emptyCampaignState } from '../src/schemas/runtime/campaign.js';
 import { apply } from '../src/engine/apply.js';
+import { formatInGameTime } from '../src/schemas/runtime/in-game-time.js';
 
 interface FormatterContext {
   readonly stateBefore: CampaignState;
@@ -253,6 +254,29 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
         ? ` to ${characterName(stateBefore, event.recipientCharacterId)}`
         : '';
       return `${item} withdrawn from party "${partyName}"${recipientLabel}.`;
+    }
+    case 'SessionStarted':
+      return `\n## Session "${event.name}" begins (${formatInGameTime(stateAfter.sessions[event.sessionId]!.inGameStart)})\n`;
+    case 'SessionEnded': {
+      const session = stateAfter.sessions[event.sessionId]!;
+      const summary = event.summary !== undefined ? `: ${event.summary}` : '';
+      return `Session "${session.name}" ends${summary}.`;
+    }
+    case 'JournalEntryAdded': {
+      const author = event.authorKind === 'dm'
+        ? 'DM'
+        : event.authorCharacterId !== undefined
+          ? characterName(stateBefore, event.authorCharacterId)
+          : 'Player';
+      const visibilityLabel = event.visibility === 'party' ? '' : ` [${event.visibility}]`;
+      const stamp = formatInGameTime(stateBefore.inGameTime);
+      return `_Journal (${author}, ${stamp})${visibilityLabel}_: **${event.title}**: ${event.body}`;
+    }
+    case 'InGameTimeAdvanced': {
+      const before = formatInGameTime(stateBefore.inGameTime);
+      const after = formatInGameTime(stateAfter.inGameTime);
+      const reasonLabel = event.reason !== undefined ? ` (${event.reason})` : '';
+      return `Time passes: ${before} -> ${after} (+${event.minutes} min)${reasonLabel}.`;
     }
   }
 };

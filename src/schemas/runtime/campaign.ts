@@ -6,6 +6,8 @@ import { PendingChoiceSchema } from './pending-choice.js';
 import { EncounterSchema } from './encounter.js';
 import { EffectInstanceSchema } from './effect-instance.js';
 import { PartySchema } from './party.js';
+import { SessionSchema, JournalEntrySchema } from './session.js';
+import { InGameTimeSchema } from './in-game-time.js';
 
 export const CampaignStateSchema = z.object({
   characters: z.record(ULIDSchema, CharacterSchema).default({}),
@@ -14,6 +16,10 @@ export const CampaignStateSchema = z.object({
   encounters: z.record(ULIDSchema, EncounterSchema).default({}),
   effectInstances: z.record(ULIDSchema, EffectInstanceSchema).default({}),
   parties: z.record(ULIDSchema, PartySchema).default({}),
+  sessions: z.record(ULIDSchema, SessionSchema).default({}),
+  journalEntries: z.record(ULIDSchema, JournalEntrySchema).default({}),
+  inGameTime: InGameTimeSchema.default({ totalMinutes: 0 }),
+  activeSessionId: ULIDSchema.optional(),
   activeShortRest: z
     .object({
       startedAtEventId: ULIDSchema,
@@ -38,5 +44,8 @@ export const emptyCampaignState = (): CampaignState => ({
   encounters: {},
   effectInstances: {},
   parties: {},
+  sessions: {},
+  journalEntries: {},
+  inGameTime: { totalMinutes: 0 },
   version: 0,
 });

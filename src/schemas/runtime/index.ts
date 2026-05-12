@@ -41,6 +41,26 @@ export {
 } from './encounter.js';
 export { PartySchema, type Party } from './party.js';
 export {
+  SessionSchema,
+  type Session,
+  JournalEntrySchema,
+  type JournalEntry,
+  JournalAuthorKindSchema,
+  type JournalAuthorKind,
+  JournalVisibilitySchema,
+  type JournalVisibility,
+  JOURNAL_AUTHOR_KINDS,
+  JOURNAL_VISIBILITIES,
+} from './session.js';
+export {
+  InGameTimeSchema,
+  type InGameTime,
+  breakdownInGameTime,
+  formatInGameTime,
+  advanceInGameTime,
+  type InGameClockBreakdown,
+} from './in-game-time.js';
+export {
   CURRENCY_DENOMINATIONS,
   type CurrencyDenomination,
   type Currency,

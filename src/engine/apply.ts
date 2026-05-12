@@ -70,6 +70,12 @@ import {
   applyItemDepositedToParty,
   applyItemWithdrawnFromParty,
 } from './reducers/party.js';
+import {
+  applySessionStarted,
+  applySessionEnded,
+  applyJournalEntryAdded,
+  applyInGameTimeAdvanced,
+} from './reducers/session.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -227,6 +233,18 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemWithdrawnFromParty':
         applyItemWithdrawnFromParty(draft, event);
+        break;
+      case 'SessionStarted':
+        applySessionStarted(draft, event);
+        break;
+      case 'SessionEnded':
+        applySessionEnded(draft, event);
+        break;
+      case 'JournalEntryAdded':
+        applyJournalEntryAdded(draft, event);
+        break;
+      case 'InGameTimeAdvanced':
+        applyInGameTimeAdvanced(draft, event);
         break;
       default: {
         const exhaustive: never = event;

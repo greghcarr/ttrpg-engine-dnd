@@ -197,6 +197,26 @@ export {
   subtractCurrency,
 } from './schemas/runtime/index.js';
 export type { Party, CurrencyDenomination, Currency } from './schemas/runtime/index.js';
+export {
+  SessionSchema,
+  JournalEntrySchema,
+  JournalAuthorKindSchema,
+  JournalVisibilitySchema,
+  JOURNAL_AUTHOR_KINDS,
+  JOURNAL_VISIBILITIES,
+  InGameTimeSchema,
+  breakdownInGameTime,
+  formatInGameTime,
+  advanceInGameTime,
+} from './schemas/runtime/index.js';
+export type {
+  Session,
+  JournalEntry,
+  JournalAuthorKind,
+  JournalVisibility,
+  InGameTime,
+  InGameClockBreakdown,
+} from './schemas/runtime/index.js';
 
 export type * from './types/index.js';
 

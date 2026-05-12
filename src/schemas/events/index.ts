@@ -74,6 +74,12 @@ import {
   ItemDepositedToPartyEventSchema,
   ItemWithdrawnFromPartyEventSchema,
 } from './party.js';
+import {
+  SessionStartedEventSchema,
+  SessionEndedEventSchema,
+  JournalEntryAddedEventSchema,
+  InGameTimeAdvancedEventSchema,
+} from './session.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -127,6 +133,10 @@ export const EventSchema = z.discriminatedUnion('type', [
   CurrencySpentEventSchema,
   ItemDepositedToPartyEventSchema,
   ItemWithdrawnFromPartyEventSchema,
+  SessionStartedEventSchema,
+  SessionEndedEventSchema,
+  JournalEntryAddedEventSchema,
+  InGameTimeAdvancedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -183,6 +193,10 @@ export const EVENT_TYPES = [
   'CurrencySpent',
   'ItemDepositedToParty',
   'ItemWithdrawnFromParty',
+  'SessionStarted',
+  'SessionEnded',
+  'JournalEntryAdded',
+  'InGameTimeAdvanced',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -359,3 +373,15 @@ export type {
   ItemDepositedToPartyEvent,
   ItemWithdrawnFromPartyEvent,
 } from './party.js';
+export {
+  SessionStartedEventSchema,
+  SessionEndedEventSchema,
+  JournalEntryAddedEventSchema,
+  InGameTimeAdvancedEventSchema,
+} from './session.js';
+export type {
+  SessionStartedEvent,
+  SessionEndedEvent,
+  JournalEntryAddedEvent,
+  InGameTimeAdvancedEvent,
+} from './session.js';
