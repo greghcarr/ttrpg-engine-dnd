@@ -62,6 +62,14 @@ import {
   applyDashed,
   applyDisengaged,
 } from './reducers/movement.js';
+import {
+  applyPartyCreated,
+  applyPartyMembersChanged,
+  applyCurrencyAcquired,
+  applyCurrencySpent,
+  applyItemDepositedToParty,
+  applyItemWithdrawnFromParty,
+} from './reducers/party.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -201,6 +209,24 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemUnattuned':
         applyItemUnattuned(draft, event);
+        break;
+      case 'PartyCreated':
+        applyPartyCreated(draft, event);
+        break;
+      case 'PartyMembersChanged':
+        applyPartyMembersChanged(draft, event);
+        break;
+      case 'CurrencyAcquired':
+        applyCurrencyAcquired(draft, event);
+        break;
+      case 'CurrencySpent':
+        applyCurrencySpent(draft, event);
+        break;
+      case 'ItemDepositedToParty':
+        applyItemDepositedToParty(draft, event);
+        break;
+      case 'ItemWithdrawnFromParty':
+        applyItemWithdrawnFromParty(draft, event);
         break;
       default: {
         const exhaustive: never = event;

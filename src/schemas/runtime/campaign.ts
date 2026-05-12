@@ -5,6 +5,7 @@ import { ItemInstanceSchema } from './item-instance.js';
 import { PendingChoiceSchema } from './pending-choice.js';
 import { EncounterSchema } from './encounter.js';
 import { EffectInstanceSchema } from './effect-instance.js';
+import { PartySchema } from './party.js';
 
 export const CampaignStateSchema = z.object({
   characters: z.record(ULIDSchema, CharacterSchema).default({}),
@@ -12,6 +13,7 @@ export const CampaignStateSchema = z.object({
   pendingChoices: z.record(ULIDSchema, PendingChoiceSchema).default({}),
   encounters: z.record(ULIDSchema, EncounterSchema).default({}),
   effectInstances: z.record(ULIDSchema, EffectInstanceSchema).default({}),
+  parties: z.record(ULIDSchema, PartySchema).default({}),
   activeShortRest: z
     .object({
       startedAtEventId: ULIDSchema,
@@ -35,5 +37,6 @@ export const emptyCampaignState = (): CampaignState => ({
   pendingChoices: {},
   encounters: {},
   effectInstances: {},
+  parties: {},
   version: 0,
 });

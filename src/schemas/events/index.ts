@@ -66,6 +66,14 @@ import {
   ItemAttunedEventSchema,
   ItemUnattunedEventSchema,
 } from './inventory.js';
+import {
+  PartyCreatedEventSchema,
+  PartyMembersChangedEventSchema,
+  CurrencyAcquiredEventSchema,
+  CurrencySpentEventSchema,
+  ItemDepositedToPartyEventSchema,
+  ItemWithdrawnFromPartyEventSchema,
+} from './party.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -113,6 +121,12 @@ export const EventSchema = z.discriminatedUnion('type', [
   ItemUnequippedEventSchema,
   ItemAttunedEventSchema,
   ItemUnattunedEventSchema,
+  PartyCreatedEventSchema,
+  PartyMembersChangedEventSchema,
+  CurrencyAcquiredEventSchema,
+  CurrencySpentEventSchema,
+  ItemDepositedToPartyEventSchema,
+  ItemWithdrawnFromPartyEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -163,6 +177,12 @@ export const EVENT_TYPES = [
   'ItemUnequipped',
   'ItemAttuned',
   'ItemUnattuned',
+  'PartyCreated',
+  'PartyMembersChanged',
+  'CurrencyAcquired',
+  'CurrencySpent',
+  'ItemDepositedToParty',
+  'ItemWithdrawnFromParty',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -323,3 +343,19 @@ export type {
   DashedEvent,
   DisengagedEvent,
 } from './movement.js';
+export {
+  PartyCreatedEventSchema,
+  PartyMembersChangedEventSchema,
+  CurrencyAcquiredEventSchema,
+  CurrencySpentEventSchema,
+  ItemDepositedToPartyEventSchema,
+  ItemWithdrawnFromPartyEventSchema,
+} from './party.js';
+export type {
+  PartyCreatedEvent,
+  PartyMembersChangedEvent,
+  CurrencyAcquiredEvent,
+  CurrencySpentEvent,
+  ItemDepositedToPartyEvent,
+  ItemWithdrawnFromPartyEvent,
+} from './party.js';

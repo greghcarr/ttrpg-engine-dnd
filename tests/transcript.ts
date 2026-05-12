@@ -206,6 +206,54 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `**${characterName(stateBefore, event.characterId)}** attunes to ${itemName(stateBefore, content, event.instanceId)}.`;
     case 'ItemUnattuned':
       return `**${characterName(stateBefore, event.characterId)}** ends attunement to ${itemName(stateBefore, content, event.instanceId)}.`;
+    case 'PartyCreated': {
+      const members = event.memberIds.length === 0
+        ? 'no members'
+        : event.memberIds.map((id) => characterName(stateBefore, id)).join(', ');
+      return `\n## Party "${event.name}" formed (${members})\n`;
+    }
+    case 'PartyMembersChanged': {
+      const party = stateBefore.parties[event.partyId];
+      const partyName = party?.name ?? event.partyId.slice(0, 8);
+      const added = event.added.map((id) => characterName(stateBefore, id));
+      const removed = event.removed.map((id) => characterName(stateBefore, id));
+      const segments: string[] = [];
+      if (added.length > 0) segments.push(`+${added.join(', ')}`);
+      if (removed.length > 0) segments.push(`-${removed.join(', ')}`);
+      return `Party "${partyName}" membership: ${segments.join(', ')}.`;
+    }
+    case 'CurrencyAcquired': {
+      const partyName = stateBefore.parties[event.partyId]?.name ?? event.partyId.slice(0, 8);
+      const parts = Object.entries(event.amounts)
+        .filter(([, count]) => (count ?? 0) > 0)
+        .map(([denomination, count]) => `${count} ${denomination}`);
+      const sourceLabel = event.source !== undefined ? ` (${event.source})` : '';
+      return `Party "${partyName}" receives ${parts.join(', ')}${sourceLabel}.`;
+    }
+    case 'CurrencySpent': {
+      const partyName = stateBefore.parties[event.partyId]?.name ?? event.partyId.slice(0, 8);
+      const parts = Object.entries(event.amounts)
+        .filter(([, count]) => (count ?? 0) > 0)
+        .map(([denomination, count]) => `${count} ${denomination}`);
+      const purposeLabel = event.purpose !== undefined ? ` for ${event.purpose}` : '';
+      return `Party "${partyName}" spends ${parts.join(', ')}${purposeLabel}.`;
+    }
+    case 'ItemDepositedToParty': {
+      const partyName = stateBefore.parties[event.partyId]?.name ?? event.partyId.slice(0, 8);
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      const sourceLabel = event.sourceCharacterId !== undefined
+        ? ` from ${characterName(stateBefore, event.sourceCharacterId)}`
+        : '';
+      return `${item} deposited to party "${partyName}"${sourceLabel}.`;
+    }
+    case 'ItemWithdrawnFromParty': {
+      const partyName = stateBefore.parties[event.partyId]?.name ?? event.partyId.slice(0, 8);
+      const item = itemName(stateBefore, content, event.itemInstanceId);
+      const recipientLabel = event.recipientCharacterId !== undefined
+        ? ` to ${characterName(stateBefore, event.recipientCharacterId)}`
+        : '';
+      return `${item} withdrawn from party "${partyName}"${recipientLabel}.`;
+    }
   }
 };
 
