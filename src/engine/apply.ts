@@ -50,6 +50,7 @@ import {
   applyConcentrationStarted,
 } from './reducers/concentration.js';
 import { applyTriggerFired } from './reducers/triggers.js';
+import { applyActionEconomyConsumed } from './reducers/action-economy.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -165,6 +166,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'TriggerFired':
         applyTriggerFired(draft, event);
+        break;
+      case 'ActionEconomyConsumed':
+        applyActionEconomyConsumed(draft, event);
         break;
       default: {
         const exhaustive: never = event;

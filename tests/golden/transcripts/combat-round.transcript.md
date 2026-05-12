@@ -14,6 +14,8 @@ Encounter the encounter begins.
 
 ### Round 1: Borin's turn
 
+_(Borin consumes action)_
+_(Borin consumes attack)_
 **Borin** attacks **Alyx**: d20(10) + 5 = 15 vs AC 13 -> hit.
 Damage rolled:
   1d8=[7]+3 slashing
@@ -22,6 +24,8 @@ End of Borin's turn.
 
 ### Round 1: Alyx's turn
 
+_(Alyx consumes action)_
+_(Alyx consumes attack)_
 **Alyx** attacks **Borin**: d20(10) + 6 = 16 vs AC 12 -> hit.
 Damage rolled:
   1d8=[7]+4 slashing

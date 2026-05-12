@@ -54,6 +54,7 @@ import {
   ConcentrationBrokenEventSchema,
 } from './concentration.js';
 import { TriggerFiredEventSchema } from './triggers.js';
+import { ActionEconomyConsumedEventSchema } from './action-economy.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -93,6 +94,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   ConcentrationStartedEventSchema,
   ConcentrationBrokenEventSchema,
   TriggerFiredEventSchema,
+  ActionEconomyConsumedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -135,6 +137,7 @@ export const EVENT_TYPES = [
   'ConcentrationStarted',
   'ConcentrationBroken',
   'TriggerFired',
+  'ActionEconomyConsumed',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -264,3 +267,9 @@ export type {
 } from './concentration.js';
 export { TriggerFiredEventSchema } from './triggers.js';
 export type { TriggerFiredEvent } from './triggers.js';
+export {
+  ActionEconomyConsumedEventSchema,
+  ActionEconomyKindSchema,
+  ACTION_ECONOMY_KINDS,
+} from './action-economy.js';
+export type { ActionEconomyConsumedEvent, ActionEconomyKind } from './action-economy.js';

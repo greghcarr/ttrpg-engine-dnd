@@ -32,6 +32,12 @@ export const applyEncounterCreated = (
       initiative: 0,
       initiativeOrder: 0,
       hasActedThisRound: false,
+      turnUsage: {
+        actionUsed: false,
+        bonusActionUsed: false,
+        attacksMadeThisTurn: 0,
+        reactionUsedThisRound: false,
+      },
     })),
     round: 0,
     activeIndex: 0,
@@ -91,6 +97,9 @@ export const applyTurnStarted = (
   );
   invariant(encounter.round === event.round, `Round mismatch`);
   clearTurnCountersForCharacter(state, event.combatantId);
+  active.turnUsage.actionUsed = false;
+  active.turnUsage.bonusActionUsed = false;
+  active.turnUsage.attacksMadeThisTurn = 0;
 };
 
 export const applyTurnEnded = (
@@ -120,7 +129,10 @@ export const applyRoundEnded = (
     encounter.activeIndex >= encounter.combatants.length,
     'Not all combatants have acted',
   );
-  for (const combatant of encounter.combatants) combatant.hasActedThisRound = false;
+  for (const combatant of encounter.combatants) {
+    combatant.hasActedThisRound = false;
+    combatant.turnUsage.reactionUsedThisRound = false;
+  }
   encounter.round += 1;
   encounter.activeIndex = 0;
   clearRoundCountersForCharacters(

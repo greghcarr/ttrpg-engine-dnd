@@ -41,7 +41,7 @@ const findRetryingAdvantageHit = (
   startSeed: number,
 ): { engine: ReturnType<typeof createEngine>; events: ReadonlyArray<unknown> } => {
   for (let seed = startSeed; seed < startSeed + 80; seed++) {
-    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(seed) });
+    const engine = createEngine({ contentPacks: [ROGUE_WITH_EXTRA_ATTACK_PACK], rng: seededRNG(seed) });
     const events = engine.plan.attack(campaign.state, {
       attackerId: rogueId,
       targetId,
@@ -54,9 +54,40 @@ const findRetryingAdvantageHit = (
   throw new Error('could not find a hitting seed');
 };
 
+const ROGUE_WITH_EXTRA_ATTACK_PACK = {
+  ...TEST_PACK,
+  classes: TEST_PACK.classes.map((c) =>
+    c.id === 'rogue'
+      ? {
+          ...c,
+          levelTable: {
+            ...c.levelTable,
+            '1': {
+              ...c.levelTable['1']!,
+              features: [
+                ...c.levelTable['1']!.features,
+                {
+                  id: 'practice-yard-extra-attack',
+                  name: 'Practice Yard Extra Attack',
+                  effects: [
+                    {
+                      kind: 'ModifyActionEconomy' as const,
+                      op: 'extraAttack' as const,
+                      count: 1,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        }
+      : c,
+  ),
+};
+
 describe('golden: rogue Sneak Attack across turns', () => {
   it('first turn fires Sneak Attack, second attack same turn does not, next turn fires again', async () => {
-    const baseEngine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(100) });
+    const baseEngine = createEngine({ contentPacks: [ROGUE_WITH_EXTRA_ATTACK_PACK], rng: seededRNG(100) });
     const rapier = makeItemInstance('rapier');
     const vex = buildRogue();
     const dummy = buildFighter({ name: 'Training Dummy', hpMax: 100, hpCurrent: 100, DEX: 8 });

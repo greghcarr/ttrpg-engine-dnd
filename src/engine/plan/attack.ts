@@ -13,11 +13,13 @@ import { newEventId } from '../../ids.js';
 import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
+import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 
 export interface AttackIntent {
   readonly type: 'Attack';
@@ -60,6 +62,8 @@ export const planAttack = (
   if (!weaponDef || weaponDef.itemKind !== 'weapon') {
     throw new Error(`Item ${weaponInstance.definitionId} is not a weapon`);
   }
+
+  const economyPrelude = planActionEconomyForAttack(state, content, intent);
 
   const attackBonusResult = computeAttackBonus({
     character: attacker,
@@ -119,7 +123,7 @@ export const planAttack = (
   });
 
   if (!hit) {
-    return [attackRolled, ...attackTriggers];
+    return [...economyPrelude, attackRolled, ...attackTriggers];
   }
 
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
@@ -159,5 +163,67 @@ export const planAttack = (
     causedByEventId: damageRolled.id,
   };
 
-  return [attackRolled, ...attackTriggers, damageRolled, damageApplied];
+  return [...economyPrelude, attackRolled, ...attackTriggers, damageRolled, damageApplied];
+};
+
+const findActiveCombatant = (
+  state: CampaignState,
+  attackerId: string,
+): { encounterId: string; attacksMadeThisTurn: number; actionUsed: boolean } | undefined => {
+  const encounterId = state.activeEncounterId;
+  if (encounterId === undefined) return undefined;
+  const encounter = state.encounters[encounterId];
+  if (!encounter || encounter.status !== 'active') return undefined;
+  const active = encounter.combatants[encounter.activeIndex];
+  if (!active || active.combatantId !== attackerId) return undefined;
+  return {
+    encounterId,
+    attacksMadeThisTurn: active.turnUsage.attacksMadeThisTurn,
+    actionUsed: active.turnUsage.actionUsed,
+  };
+};
+
+const planActionEconomyForAttack = (
+  state: CampaignState,
+  content: ResolvedContent,
+  intent: AttackIntent,
+): ReadonlyArray<Event> => {
+  const attacker = state.characters[intent.attackerId];
+  if (!attacker) return [];
+  const active = findActiveCombatant(state, intent.attackerId);
+  if (active === undefined) return [];
+
+  const budget = computeActionEconomyBudget({
+    character: attacker,
+    itemInstances: state.itemInstances,
+    content,
+  });
+
+  if (active.attacksMadeThisTurn >= budget.maxAttacksPerAction) {
+    throw new Error(
+      `Attack budget exhausted: ${attacker.name} has already made ${active.attacksMadeThisTurn} attacks this turn (max ${budget.maxAttacksPerAction})`,
+    );
+  }
+
+  const at = intent.at ?? nowIso();
+  const events: ActionEconomyConsumedEvent[] = [];
+  if (!active.actionUsed) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ActionEconomyConsumed',
+      encounterId: active.encounterId,
+      combatantId: intent.attackerId,
+      kind: 'action',
+    });
+  }
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'ActionEconomyConsumed',
+    encounterId: active.encounterId,
+    combatantId: intent.attackerId,
+    kind: 'attack',
+  });
+  return events;
 };

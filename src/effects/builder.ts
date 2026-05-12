@@ -69,6 +69,7 @@ export class EffectAccumulator {
   private readonly acOverrides: ACOverride[] = [];
   private readonly resourceGrants: ResourceGrant[] = [];
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
+  private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
 
   addModifier(target: ModifierTarget, value: number, source: string): void {
     const key = modifierKey(target);
@@ -162,6 +163,14 @@ export class EffectAccumulator {
   proficiencyLevel(target: string, id: string): 'none' | 'half' | 'proficient' | 'expertise' {
     return this.proficiencies.get(`${target}:${id}`) ?? 'none';
   }
+
+  addActionEconomy(op: 'extraAttack' | 'extraAction' | 'extraBonusAction', count: number): void {
+    const prior = this.actionEconomyMods.get(op) ?? 0;
+    this.actionEconomyMods.set(op, prior + count);
+  }
+  actionEconomyTotal(op: 'extraAttack' | 'extraAction' | 'extraBonusAction'): number {
+    return this.actionEconomyMods.get(op) ?? 0;
+  }
 }
 
 export interface BuilderContext {
@@ -217,6 +226,9 @@ export const applyEffectToBuilder = (
     case 'GrantProficiency':
       acc.addProficiency(effect.target, effect.id, effect.level === 'none' ? 'proficient' : effect.level);
       return;
+    case 'ModifyActionEconomy':
+      acc.addActionEconomy(effect.op, effect.count);
+      return;
     case 'GrantSense':
     case 'ModifySpeed':
     case 'GrantSpellSlots':
@@ -224,7 +236,6 @@ export const applyEffectToBuilder = (
     case 'OnEvent':
     case 'RecoverResource':
     case 'GrantAction':
-    case 'ModifyActionEconomy':
     case 'GrantWeaponMastery':
     case 'ExpandSpellList':
     case 'SetHPMaxFormula':

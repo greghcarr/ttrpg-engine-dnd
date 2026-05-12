@@ -50,3 +50,8 @@ export {
   type AbilityCheckBreakdownEntry,
   type ComputeAbilityCheckInput,
 } from './ability-check.js';
+export {
+  computeActionEconomyBudget,
+  type ActionEconomyBudget,
+  type ComputeActionEconomyInput,
+} from './action-economy.js';

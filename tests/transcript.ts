@@ -180,6 +180,8 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     }
     case 'TriggerFired':
       return `_(${event.triggerId.split(':').slice(1).join(':')} triggers for ${characterName(stateBefore, event.characterId)})_`;
+    case 'ActionEconomyConsumed':
+      return `_(${characterName(stateBefore, event.combatantId)} consumes ${event.kind})_`;
   }
 };
 

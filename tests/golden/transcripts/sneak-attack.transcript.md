@@ -12,12 +12,15 @@ Encounter "Practice Yard" begins.
 
 ### Round 1: Vex's turn
 
+_(Vex consumes action)_
+_(Vex consumes attack)_
 **Vex** attacks **Training Dummy** [advantage]: d20(10/10) + 4 = 14 vs AC 9 -> hit.
 _(sneak-attack triggers for Vex)_
 **Training Dummy** takes 6 damage (6 piercing). (HP 100 -> 94)
 Damage rolled:
   1d8=[8]+4 piercing
 **Training Dummy** takes 12 damage (12 piercing). (HP 94 -> 82)
+_(Vex consumes attack)_
 **Vex** attacks **Training Dummy** [advantage]: d20(7/15) + 4 = 19 vs AC 9 -> hit.
 Damage rolled:
   1d8=[5]+4 piercing
@@ -37,6 +40,8 @@ End of round 1.
 
 ### Round 2: Vex's turn
 
+_(Vex consumes action)_
+_(Vex consumes attack)_
 **Vex** attacks **Training Dummy** [advantage]: d20(2/9) + 4 = 13 vs AC 9 -> hit.
 _(sneak-attack triggers for Vex)_
 **Training Dummy** takes 1 damage (1 piercing). (HP 73 -> 72)

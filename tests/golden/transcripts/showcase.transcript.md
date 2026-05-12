@@ -19,6 +19,8 @@ Encounter "Goblin Ambush at the Old Bridge" begins.
 
 ### Round 1: Alyx's turn
 
+_(Alyx consumes action)_
+_(Alyx consumes attack)_
 **Alyx** attacks **Goblin Boss** [advantage]: d20(19/14) + 6 = 25 vs AC 12 -> hit.
 Damage rolled:
   1d8=[7]+4 slashing
@@ -27,6 +29,8 @@ End of Alyx's turn.
 
 ### Round 1: Brother Cassius's turn
 
+_(Brother Cassius consumes action)_
+_(Brother Cassius consumes attack)_
 **Brother Cassius** attacks **Goblin Cutter**: d20(16) + 6 = 22 vs AC 12 -> hit.
 Damage rolled:
   1d8=[2]+3 slashing
