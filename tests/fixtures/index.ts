@@ -34,6 +34,7 @@ export interface BuildFighterOptions {
   readonly exhaustion?: number;
   readonly hitDiceRemaining?: number;
   readonly resources?: ReadonlyArray<{ resourceId: string; current: number; max: number }>;
+  readonly name?: string;
 }
 
 const FIGHTER_DEFAULT_HP_BY_LEVEL: Readonly<Record<number, number>> = {
@@ -49,7 +50,7 @@ export const buildFighter = (opts: BuildFighterOptions = {}): Character => {
   const hpMax = opts.hpMax ?? FIGHTER_DEFAULT_HP_BY_LEVEL[level] ?? 12;
   const character = CharacterSchema.parse({
     id: newCharacterId(),
-    name: 'Test Fighter',
+    name: opts.name ?? 'Test Fighter',
     speciesId: 'human',
     backgroundId: 'soldier',
     classes: [

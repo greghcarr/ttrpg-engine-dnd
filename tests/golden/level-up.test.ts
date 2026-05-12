@@ -4,14 +4,17 @@ import { seededRNG } from '../../src/rng/seeded.js';
 import { throwOnCallRNG } from '../../src/rng/throw.js';
 import { replay } from '../../src/engine/replay.js';
 import { commit } from '../../src/engine/commit.js';
-import { TEST_PACK, buildFighter, eventId, isoTimestamp } from '../fixtures/index.js';
+import { TEST_PACK, TEST_CONTENT, buildFighter, eventId, isoTimestamp } from '../fixtures/index.js';
 import type { CharacterCreatedEvent } from '../../src/schemas/events/progression.js';
 import type { ChoiceRequiredEvent } from '../../src/schemas/events/level-up.js';
+import { resolveContent } from '../../src/content/pack.js';
+import { formatTranscript } from '../transcript.js';
 
 describe('golden: level-up + choice resolution', () => {
-  it('character levels from 1 to 5, replay-equivalent', () => {
+  it('character levels from 1 to 5, replay-equivalent', async () => {
     const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(11) });
     const character = buildFighter({
+      name: 'Alyx',
       level: 1,
       hpMax: 12,
       hpCurrent: 12,
@@ -47,9 +50,15 @@ describe('golden: level-up + choice resolution', () => {
 
     void throwOnCallRNG();
     expect(() => replay(campaign.events)).not.toThrow();
+
+    await expect(
+      formatTranscript(campaign.events, TEST_CONTENT, {
+        title: 'A Fighter levels from 1 to 5 with rolled HP',
+      }),
+    ).toMatchFileSnapshot('./transcripts/level-up.transcript.md');
   });
 
-  it('user-supplied OfferChoice on a fighting-style feat resolves and contributes to AC', () => {
+  it('user-supplied OfferChoice on a fighting-style feat resolves and contributes to AC', async () => {
     const customPack = {
       ...TEST_PACK,
       classes: TEST_PACK.classes.map((c) =>
@@ -116,7 +125,9 @@ describe('golden: level-up + choice resolution', () => {
     };
 
     const engine = createEngine({ contentPacks: [customPack], rng: seededRNG(7) });
+    const customContent = resolveContent([customPack]);
     const character = buildFighter({
+      name: 'Alyx',
       level: 1,
       hpMax: 12,
       hpCurrent: 12,
@@ -158,5 +169,11 @@ describe('golden: level-up + choice resolution', () => {
 
     const replayed = replay(campaign.events);
     expect(JSON.stringify(replayed)).toBe(JSON.stringify(campaign.state));
+
+    await expect(
+      formatTranscript(campaign.events, customContent, {
+        title: 'Fighter L2 fighting-style choice (Defense)',
+      }),
+    ).toMatchFileSnapshot('./transcripts/level-up-fighting-style.transcript.md');
   });
 });

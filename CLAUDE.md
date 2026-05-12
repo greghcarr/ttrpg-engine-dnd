@@ -4,7 +4,7 @@ A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). 
 
 ## Goal
 
-**Full mechanical coverage of the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
+**Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
 This is a long-running build. The roadmap lives in [README.md](README.md) as 26 slices in three phases (A: engine mechanics, B: state schemas, C: content). After foundation + Slices 1 to 5 we are about 42% to that goal. When picking the next slice, prefer the lowest-numbered unfinished slice unless the user asks otherwise; the order is dependency-driven.
 
@@ -35,6 +35,7 @@ Tests are valued for what they catch, not for ceremony. The bar is high on the l
 3. **Golden-file scenarios** ([tests/golden/](tests/golden/)). End-to-end event streams plus expected final state. Doubles as living documentation of how the API is meant to be used.
 4. **Replay equivalence** (hard architectural invariant). For every golden scenario: `replay(events).state` deep-equals `campaign.state`. Catches non-determinism in `apply()` reducers.
 5. **RNG capture proof** (hard architectural invariant). `apply()` is RNG-free; `ThrowOnCallRNG` test double on `applyAll()` for a planned event stream must not throw. Proves the plan/commit split holds.
+6. **Transcript snapshots** ([tests/golden/transcripts/](tests/golden/transcripts/)). Every golden scenario emits a human-readable markdown transcript via `formatTranscript()` from [tests/transcript.ts](tests/transcript.ts) and asserts it against a checked-in file. When a slice changes engine behavior, the transcript diff shows up in the PR alongside the code change. Update transcripts intentionally with `npx vitest run -u`. Use intent-revealing character names in golden tests (`'Alyx'`, `'Goblin A'`) since they appear in the transcript.
 
 ### Coverage gates (enforced in [vitest.config.ts](vitest.config.ts))
 
@@ -50,10 +51,10 @@ Single floor of **80% lines + statements** on `src/engine/`, `src/derive/`, `src
 
 ### When adding new code
 
-- New event type → reducer test + at least one golden scenario that uses it
-- New planner → planner test asserting the resolution chain shape + RNG-capture test if it consumes randomness
-- New derivation → table-driven tests for rulebook tables, branch tests for the rest
-- New effect primitive → exercised through a real-feature golden scenario, not a coverage-matrix entry
+- New event type: reducer test + at least one golden scenario that uses it + transcript snapshot + a case in [tests/transcript.ts](tests/transcript.ts) `formatEvent`.
+- New planner: planner test asserting the resolution chain shape + RNG-capture test if it consumes randomness + golden scenario with transcript.
+- New derivation: table-driven tests for rulebook tables, branch tests for the rest.
+- New effect primitive: exercised through a real-feature golden scenario, not a coverage-matrix entry.
 
 If a test would only exist to satisfy a coverage threshold, do not write it. Add a test when you can name the bug it prevents.
 

@@ -5,6 +5,7 @@ import { throwOnCallRNG } from '../../src/rng/throw.js';
 import { replay } from '../../src/engine/replay.js';
 import {
   TEST_PACK,
+  TEST_CONTENT,
   buildFighter,
   eventId,
   isoTimestamp,
@@ -12,16 +13,17 @@ import {
 } from '../fixtures/index.js';
 import { commit } from '../../src/engine/commit.js';
 import type { CharacterCreatedEvent } from '../../src/schemas/events/progression.js';
+import { formatTranscript } from '../transcript.js';
 
 describe('golden: combat round (Layer 3)', () => {
-  it('two fighters trade blows in a one-round encounter, replays identically', () => {
+  it('two fighters trade blows in a one-round encounter, replays identically', async () => {
     const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
     const longA = makeItemInstance('longsword');
     const longB = makeItemInstance('longsword');
     const armorA = makeItemInstance('leather-armor');
     const armorB = makeItemInstance('leather-armor');
-    const a = buildFighter({ STR: 18, DEX: 14, armorInstanceId: armorA.id });
-    const b = buildFighter({ STR: 16, DEX: 12, armorInstanceId: armorB.id });
+    const a = buildFighter({ name: 'Alyx', STR: 18, DEX: 14, armorInstanceId: armorA.id });
+    const b = buildFighter({ name: 'Borin', STR: 16, DEX: 12, armorInstanceId: armorB.id });
 
     let campaign = engine.createCampaign({ name: 'duel' });
     campaign = commit(campaign, [
@@ -125,5 +127,11 @@ describe('golden: combat round (Layer 3)', () => {
 
     void throwOnCallRNG();
     expect(() => replay(campaign.events)).not.toThrow();
+
+    await expect(
+      formatTranscript(campaign.events, TEST_CONTENT, {
+        title: 'Two fighters trade blows in a one-round encounter',
+      }),
+    ).toMatchFileSnapshot('./transcripts/combat-round.transcript.md');
   });
 });

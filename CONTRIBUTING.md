@@ -46,8 +46,10 @@ Held to the standard documented in [CLAUDE.md](CLAUDE.md). Summary:
 
 - Reducer unit tests in [tests/unit/reducers/](tests/unit/reducers/) for every new event type. Happy path, every rulebook edge case, invalid-input rejection.
 - At least one golden scenario in [tests/golden/](tests/golden/) per new gameplay flow. Asserts replay equivalence.
+- Each golden scenario must emit a human-readable transcript via `formatTranscript()` from [tests/transcript.ts](tests/transcript.ts) and assert it against a snapshot in [tests/golden/transcripts/](tests/golden/transcripts/). PRs show the transcript diff. Update intentionally with `npx vitest run -u`.
 - For RNG-consuming planners: a `ThrowOnCallRNG` test confirming `apply()` never calls the RNG.
 - Derivation tests: table-driven against rulebook tables (proficiency bonus, ability modifier, etc.), branch-tested for derived values that compose.
+- New event type: extend [tests/transcript.ts](tests/transcript.ts) `formatEvent` with a case so the rendering stays readable.
 
 **Not required** (and discouraged unless they catch a real bug):
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { apply, applyAll } from '../../src/engine/apply.js';
 import { emptyCampaignState } from '../../src/schemas/runtime/campaign.js';
-import { buildFighter, eventId, isoTimestamp } from '../fixtures/index.js';
+import { buildFighter, eventId, isoTimestamp, TEST_CONTENT } from '../fixtures/index.js';
 import type { CharacterCreatedEvent } from '../../src/schemas/events/progression.js';
 import type { DamageAppliedEvent, HealedEvent } from '../../src/schemas/events/combat.js';
 import type {
@@ -10,9 +10,10 @@ import type {
 } from '../../src/schemas/events/rest.js';
 import type { Event } from '../../src/schemas/events/index.js';
 import { replay } from '../../src/engine/replay.js';
+import { formatTranscript } from '../transcript.js';
 
 describe('golden: create → damage → heal → long rest', () => {
-  it('produces expected end state', () => {
+  it('produces expected end state', async () => {
     const character = buildFighter({
       level: 3,
       hpMax: 26,
@@ -63,9 +64,13 @@ describe('golden: create → damage → heal → long rest', () => {
     expect(result?.classes[0]?.hitDiceRemaining).toBe(2);
     expect(result?.resources[0]?.current).toBe(2);
     expect(final.version).toBe(events.length);
+
+    await expect(
+      formatTranscript(events, TEST_CONTENT, { title: 'Long rest restores HP, hit dice, and resources' }),
+    ).toMatchFileSnapshot('./transcripts/long-rest.transcript.md');
   });
 
-  it('damage → 0 HP → heal revives with cleared death saves', () => {
+  it('damage to 0 HP then heal revives with cleared death saves', async () => {
     const character = buildFighter({ hpMax: 12, hpCurrent: 5 });
     const created: CharacterCreatedEvent = {
       id: eventId(),
@@ -100,6 +105,10 @@ describe('golden: create → damage → heal → long rest', () => {
     expect(result?.hp.current).toBe(5);
     expect(result?.deathSaves.failures).toBe(0);
     expect(result?.deathSaves.successes).toBe(0);
+
+    await expect(
+      formatTranscript(events, TEST_CONTENT, { title: 'Damage to 0 HP, more damage while down, then healed back up' }),
+    ).toMatchFileSnapshot('./transcripts/damage-to-zero-revive.transcript.md');
   });
 });
 

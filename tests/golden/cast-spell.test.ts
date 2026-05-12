@@ -4,11 +4,12 @@ import { seededRNG } from '../../src/rng/seeded.js';
 import { throwOnCallRNG } from '../../src/rng/throw.js';
 import { replay } from '../../src/engine/replay.js';
 import { commit } from '../../src/engine/commit.js';
-import { TEST_PACK, buildFighter, eventId, isoTimestamp } from '../fixtures/index.js';
+import { TEST_PACK, TEST_CONTENT, buildFighter, eventId, isoTimestamp } from '../fixtures/index.js';
 import { CharacterSchema, type Character } from '../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../src/ids.js';
 import { computeAvailableSpellSlots } from '../../src/derive/spell-slots.js';
 import type { CharacterCreatedEvent } from '../../src/schemas/events/progression.js';
+import { formatTranscript } from '../transcript.js';
 
 const buildWizard = (): Character =>
   CharacterSchema.parse({
@@ -24,11 +25,11 @@ const buildWizard = (): Character =>
   });
 
 describe('golden: spellcasting end to end', () => {
-  it('wizard casts fireball, slots are consumed, replay matches', () => {
+  it('wizard casts fireball, slots are consumed, replay matches', async () => {
     const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(11) });
     const wizard = buildWizard();
-    const a = buildFighter({ hpMax: 30, hpCurrent: 30 });
-    const b = buildFighter({ hpMax: 30, hpCurrent: 30 });
+    const a = buildFighter({ name: 'Goblin A', hpMax: 30, hpCurrent: 30 });
+    const b = buildFighter({ name: 'Goblin B', hpMax: 30, hpCurrent: 30 });
     let campaign = engine.createCampaign({ name: 'fireball-day' });
     campaign = commit(campaign, [
       { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
@@ -62,9 +63,15 @@ describe('golden: spellcasting end to end', () => {
 
     void throwOnCallRNG();
     expect(() => replay(campaign.events)).not.toThrow();
+
+    await expect(
+      formatTranscript(campaign.events, TEST_CONTENT, {
+        title: 'Wizard casts Fireball at two goblins',
+      }),
+    ).toMatchFileSnapshot('./transcripts/cast-spell-fireball.transcript.md');
   });
 
-  it('long rest fully restores spell slots', () => {
+  it('long rest fully restores spell slots', async () => {
     const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
     const wizard = buildWizard();
     let campaign = engine.createCampaign({ name: 'restore' });
@@ -89,5 +96,11 @@ describe('golden: spellcasting end to end', () => {
       engine.plan.longRest(campaign.state, { participantIds: [wizard.id] }).events,
     );
     expect(campaign.state.characters[wizard.id]?.spellSlotsUsed).toEqual({});
+
+    await expect(
+      formatTranscript(campaign.events, TEST_CONTENT, {
+        title: 'Cast Fireball, then long rest restores the slot',
+      }),
+    ).toMatchFileSnapshot('./transcripts/cast-spell-long-rest.transcript.md');
   });
 });
