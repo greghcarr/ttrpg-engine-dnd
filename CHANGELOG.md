@@ -2,18 +2,21 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
+## 0.1.0-alpha.1 (2026-05-12)
+
+Patch release. Documentation and attribution only; no API changes.
 
 ### Added
 
 - `NOTICE` file with full CC BY 4.0 attribution for SRD 5.2-derived starter-pack content. Shipped in the npm tarball alongside `LICENSE`.
 - `docs/content-attribution.md`: item-by-item audit of the starter content pack against SRD 5.2, flagging confidently-covered material, likely-covered items worth verifying for commercial use, and not-confirmed items (Bastions, Epic Boons).
 - `ContentPack` schema extended with optional `license`, `attribution`, and `derivedFrom` metadata fields. The starter pack carries `license: "CC-BY-4.0"` and a full attribution string.
+- npm package now also ships under name `ttrpg-engine-dnd` (renamed from `dnd-engine` because the original name was an unpublished squat on npm). GitHub repo renamed to match.
 
 ### Changed
 
 - `LICENSE` restructured to explain dual licensing: engine code MIT, starter content pack CC BY 4.0.
-- README "Intellectual property" section rewritten to point at the new attribution surface; Documentation table gains a row.
+- README "Intellectual property" section rewritten to point at the new attribution surface; Documentation table gains a row for IP / attribution.
 
 ## 0.1.0-alpha.0 (2026-05-12)
 
