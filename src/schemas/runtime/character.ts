@@ -44,8 +44,26 @@ export const ClassEnrollmentSchema = z.object({
 });
 export type ClassEnrollment = z.infer<typeof ClassEnrollmentSchema>;
 
+export const CHARACTER_KINDS = ['pc', 'npc', 'creature'] as const;
+export const CharacterKindSchema = z.enum(CHARACTER_KINDS);
+export type CharacterKind = z.infer<typeof CharacterKindSchema>;
+
+export const MultiattackPatternSchema = z.object({
+  name: z.string(),
+  attacks: z.array(
+    z.object({
+      weaponInstanceId: ULIDSchema,
+      count: z.number().int().min(1),
+    }),
+  ).min(1),
+});
+export type MultiattackPattern = z.infer<typeof MultiattackPatternSchema>;
+
 export const CharacterSchema = z.object({
   id: ULIDSchema,
+  kind: CharacterKindSchema.default('pc'),
+  statblockId: z.string().optional(),
+  multiattack: MultiattackPatternSchema.optional(),
   name: z.string().min(1),
   playerId: z.string().optional(),
   speciesId: z.string(),

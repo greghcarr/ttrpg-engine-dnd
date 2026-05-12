@@ -55,3 +55,4 @@ export {
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planOffHandAttack, type OffHandAttackIntent } from './offhand-attack.js';
+export { planMultiattack, type MultiattackIntent } from './multiattack.js';

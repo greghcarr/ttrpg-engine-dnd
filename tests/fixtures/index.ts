@@ -95,6 +95,39 @@ export const makeItemInstance = (
     ...overrides,
   });
 
+export interface BuildOgreOptions {
+  readonly name?: string;
+  readonly hpMax?: number;
+  readonly STR?: number;
+  readonly mainWeaponInstanceId?: string;
+  readonly multiattackCount?: number;
+}
+
+export const buildOgre = (opts: BuildOgreOptions = {}) => {
+  const hp = opts.hpMax ?? 59;
+  const base = CharacterSchema.parse({
+    id: newCharacterId(),
+    kind: 'creature',
+    name: opts.name ?? 'Ogre',
+    statblockId: 'ogre',
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+    abilityScores: { STR: opts.STR ?? 19, DEX: 8, CON: 16, INT: 5, WIS: 7, CHA: 7 },
+    hp: { current: hp, max: hp, temp: 0 },
+    featsTaken: ['savage-attacker'],
+    speedFeet: 40,
+    multiattack:
+      opts.mainWeaponInstanceId !== undefined
+        ? {
+            name: 'Greatclub frenzy',
+            attacks: [{ weaponInstanceId: opts.mainWeaponInstanceId, count: opts.multiattackCount ?? 2 }],
+          }
+        : undefined,
+  });
+  return base;
+};
+
 export const isoTimestamp = (offsetMs = 0): string =>
   new Date(1_700_000_000_000 + offsetMs).toISOString();
 

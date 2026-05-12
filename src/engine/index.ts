@@ -38,6 +38,7 @@ import {
   planDisengage,
   planActionSurge,
   planOffHandAttack,
+  planMultiattack,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -46,6 +47,7 @@ import {
   type DisengageIntent,
   type ActionSurgeIntent,
   type OffHandAttackIntent,
+  type MultiattackIntent,
   type CreateEncounterIntent,
   type RollInitiativeIntent,
   type StartEncounterIntent,
@@ -128,6 +130,7 @@ export interface Engine {
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
+    multiattack(state: CampaignState, intent: Omit<MultiattackIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -237,6 +240,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     offHandAttack(state, intent) {
       return { events: planOffHandAttack(state, content, rng, { type: 'OffHandAttack', ...intent }) };
+    },
+    multiattack(state, intent) {
+      return { events: planMultiattack(state, content, rng, { type: 'Multiattack', ...intent }) };
     },
   };
 
