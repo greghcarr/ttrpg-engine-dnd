@@ -217,6 +217,80 @@ export type {
   InGameTime,
   InGameClockBreakdown,
 } from './schemas/runtime/index.js';
+export {
+  LocationSchema,
+  LocationMapSchema,
+  DoorSchema,
+  TerrainKindSchema,
+  DoorStateSchema,
+  TERRAIN_KINDS,
+  DOOR_STATES,
+  DEFAULT_CELL_SIZE_FEET,
+  NORMAL_MOVEMENT_COST,
+  DIFFICULT_MOVEMENT_COST,
+} from './schemas/runtime/index.js';
+export type {
+  Location,
+  LocationMap,
+  Door,
+  TerrainKind,
+  DoorState,
+} from './schemas/runtime/index.js';
+export {
+  LocationCreatedEventSchema,
+  DoorAddedEventSchema,
+  DoorStateChangedEventSchema,
+  CharacterLocationChangedEventSchema,
+} from './schemas/events/index.js';
+export type {
+  LocationCreatedEvent,
+  DoorAddedEvent,
+  DoorStateChangedEvent,
+  CharacterLocationChangedEvent,
+} from './schemas/events/index.js';
+export {
+  QuestSchema,
+  QuestObjectiveSchema,
+  QuestRewardSchema,
+  QuestStatusSchema,
+  ObjectiveStatusSchema,
+  QUEST_STATUSES,
+  OBJECTIVE_STATUSES,
+} from './schemas/runtime/index.js';
+export type {
+  Quest,
+  QuestObjective,
+  QuestReward,
+  QuestStatus,
+  ObjectiveStatus,
+} from './schemas/runtime/index.js';
+export {
+  QuestStartedEventSchema,
+  ObjectiveProgressedEventSchema,
+  ObjectiveCompletedEventSchema,
+  ObjectiveFailedEventSchema,
+  QuestCompletedEventSchema,
+  QuestFailedEventSchema,
+  QuestAbandonedEventSchema,
+  QuestRewardClaimedEventSchema,
+  XPAwardedEventSchema,
+  MilestoneAwardedEventSchema,
+  MilestoneKindSchema,
+  MILESTONE_KINDS,
+} from './schemas/events/index.js';
+export type {
+  QuestStartedEvent,
+  ObjectiveProgressedEvent,
+  ObjectiveCompletedEvent,
+  ObjectiveFailedEvent,
+  QuestCompletedEvent,
+  QuestFailedEvent,
+  QuestAbandonedEvent,
+  QuestRewardClaimedEvent,
+  XPAwardedEvent,
+  MilestoneAwardedEvent,
+  MilestoneKind,
+} from './schemas/events/index.js';
 
 export type * from './types/index.js';
 
@@ -256,6 +330,13 @@ export {
   computeDerivedCharacter,
   computeAbilityCheck,
   computePassiveScore,
+  terrainAt,
+  movementCostFor,
+  movementCostAt,
+  chebyshevDistanceFeet,
+  isInRangeFeet,
+  hasLineOfSight,
+  hasLineOfEffect,
 } from './derive/index.js';
 export type {
   ACResult,

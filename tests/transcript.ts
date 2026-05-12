@@ -278,6 +278,78 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const reasonLabel = event.reason !== undefined ? ` (${event.reason})` : '';
       return `Time passes: ${before} -> ${after} (+${event.minutes} min)${reasonLabel}.`;
     }
+    case 'LocationCreated': {
+      const mapLabel = event.map !== undefined
+        ? ` (map ${event.map.widthCells}x${event.map.heightCells} cells)`
+        : '';
+      return `Location "${event.name}" created${mapLabel}.`;
+    }
+    case 'DoorAdded': {
+      const label = event.name ?? `door ${event.doorId.slice(0, 6)}`;
+      const location = stateAfter.locations[event.locationId]?.name ?? event.locationId.slice(0, 6);
+      return `Door "${label}" added at ${location} (${event.position.x},${event.position.y}), ${event.state}.`;
+    }
+    case 'DoorStateChanged': {
+      const door = stateAfter.doors[event.doorId];
+      const label = door?.name ?? `door ${event.doorId.slice(0, 6)}`;
+      const by = event.byCharacterId !== undefined
+        ? ` by **${characterName(stateBefore, event.byCharacterId)}**`
+        : '';
+      return `Door "${label}" is now ${event.toState}${by}.`;
+    }
+    case 'CharacterLocationChanged': {
+      const who = characterName(stateBefore, event.characterId);
+      if (event.toLocationId === undefined) return `**${who}** leaves their location.`;
+      const loc = stateAfter.locations[event.toLocationId]?.name ?? event.toLocationId.slice(0, 6);
+      return `**${who}** enters ${loc}.`;
+    }
+    case 'QuestStarted':
+      return `\n## Quest started: "${event.title}"\n`;
+    case 'ObjectiveProgressed': {
+      const objective = stateAfter.quests[event.questId]?.objectives.find((o) => o.id === event.objectiveId);
+      const required = objective?.required;
+      const progress = objective?.progress ?? 0;
+      const progressLabel = required !== undefined ? ` (${progress}/${required})` : ` (+${event.delta})`;
+      return `Objective progressed: ${objective?.description ?? event.objectiveId}${progressLabel}.`;
+    }
+    case 'ObjectiveCompleted': {
+      const objective = stateAfter.quests[event.questId]?.objectives.find((o) => o.id === event.objectiveId);
+      return `Objective completed: ${objective?.description ?? event.objectiveId}.`;
+    }
+    case 'ObjectiveFailed': {
+      const objective = stateAfter.quests[event.questId]?.objectives.find((o) => o.id === event.objectiveId);
+      return `Objective failed: ${objective?.description ?? event.objectiveId}.`;
+    }
+    case 'QuestCompleted': {
+      const quest = stateAfter.quests[event.questId];
+      return `**Quest completed:** "${quest?.title ?? event.questId}".`;
+    }
+    case 'QuestFailed': {
+      const quest = stateAfter.quests[event.questId];
+      const reason = event.reason !== undefined ? ` (${event.reason})` : '';
+      return `**Quest failed:** "${quest?.title ?? event.questId}"${reason}.`;
+    }
+    case 'QuestAbandoned': {
+      const quest = stateAfter.quests[event.questId];
+      const reason = event.reason !== undefined ? ` (${event.reason})` : '';
+      return `Quest abandoned: "${quest?.title ?? event.questId}"${reason}.`;
+    }
+    case 'QuestRewardClaimed': {
+      const quest = stateAfter.quests[event.questId];
+      const xp = quest?.reward.xpPerCharacter ?? 0;
+      const recipients = event.beneficiaryCharacterIds
+        .map((id) => characterName(stateAfter, id))
+        .join(', ');
+      const xpLabel = xp > 0 ? `${xp} XP each` : 'no XP';
+      return `Quest reward claimed: "${quest?.title ?? event.questId}" (${xpLabel}${recipients !== '' ? ` to ${recipients}` : ''}).`;
+    }
+    case 'XPAwarded': {
+      const who = characterName(stateAfter, event.characterId);
+      const source = event.source !== undefined ? ` from ${event.source}` : '';
+      return `**${who}** gains ${event.amount} XP${source}.`;
+    }
+    case 'MilestoneAwarded':
+      return `Milestone (${event.kind}): "${event.title}".`;
   }
 };
 

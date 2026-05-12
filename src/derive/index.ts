@@ -55,3 +55,12 @@ export {
   type ActionEconomyBudget,
   type ComputeActionEconomyInput,
 } from './action-economy.js';
+export {
+  terrainAt,
+  movementCostFor,
+  movementCostAt,
+  chebyshevDistanceFeet,
+  isInRangeFeet,
+  hasLineOfSight,
+  hasLineOfEffect,
+} from './terrain.js';

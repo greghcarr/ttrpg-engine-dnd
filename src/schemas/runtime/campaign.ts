@@ -8,6 +8,9 @@ import { EffectInstanceSchema } from './effect-instance.js';
 import { PartySchema } from './party.js';
 import { SessionSchema, JournalEntrySchema } from './session.js';
 import { InGameTimeSchema } from './in-game-time.js';
+import { LocationSchema, DoorSchema } from './location.js';
+import { QuestSchema } from './quest.js';
+import { MilestoneKindSchema } from '../events/quests.js';
 
 export const CampaignStateSchema = z.object({
   characters: z.record(ULIDSchema, CharacterSchema).default({}),
@@ -18,6 +21,21 @@ export const CampaignStateSchema = z.object({
   parties: z.record(ULIDSchema, PartySchema).default({}),
   sessions: z.record(ULIDSchema, SessionSchema).default({}),
   journalEntries: z.record(ULIDSchema, JournalEntrySchema).default({}),
+  locations: z.record(ULIDSchema, LocationSchema).default({}),
+  doors: z.record(ULIDSchema, DoorSchema).default({}),
+  characterLocations: z.record(ULIDSchema, ULIDSchema).default({}),
+  quests: z.record(ULIDSchema, QuestSchema).default({}),
+  milestones: z
+    .array(
+      z.object({
+        kind: MilestoneKindSchema,
+        title: z.string(),
+        atIso: z.string(),
+        partyId: ULIDSchema.optional(),
+        questId: ULIDSchema.optional(),
+      }),
+    )
+    .default([]),
   inGameTime: InGameTimeSchema.default({ totalMinutes: 0 }),
   activeSessionId: ULIDSchema.optional(),
   activeShortRest: z
@@ -46,6 +64,11 @@ export const emptyCampaignState = (): CampaignState => ({
   parties: {},
   sessions: {},
   journalEntries: {},
+  locations: {},
+  doors: {},
+  characterLocations: {},
+  quests: {},
+  milestones: [],
   inGameTime: { totalMinutes: 0 },
   version: 0,
 });

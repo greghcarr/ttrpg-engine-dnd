@@ -80,6 +80,24 @@ import {
   JournalEntryAddedEventSchema,
   InGameTimeAdvancedEventSchema,
 } from './session.js';
+import {
+  LocationCreatedEventSchema,
+  DoorAddedEventSchema,
+  DoorStateChangedEventSchema,
+  CharacterLocationChangedEventSchema,
+} from './locations.js';
+import {
+  QuestStartedEventSchema,
+  ObjectiveProgressedEventSchema,
+  ObjectiveCompletedEventSchema,
+  ObjectiveFailedEventSchema,
+  QuestCompletedEventSchema,
+  QuestFailedEventSchema,
+  QuestAbandonedEventSchema,
+  QuestRewardClaimedEventSchema,
+  XPAwardedEventSchema,
+  MilestoneAwardedEventSchema,
+} from './quests.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -137,6 +155,20 @@ export const EventSchema = z.discriminatedUnion('type', [
   SessionEndedEventSchema,
   JournalEntryAddedEventSchema,
   InGameTimeAdvancedEventSchema,
+  LocationCreatedEventSchema,
+  DoorAddedEventSchema,
+  DoorStateChangedEventSchema,
+  CharacterLocationChangedEventSchema,
+  QuestStartedEventSchema,
+  ObjectiveProgressedEventSchema,
+  ObjectiveCompletedEventSchema,
+  ObjectiveFailedEventSchema,
+  QuestCompletedEventSchema,
+  QuestFailedEventSchema,
+  QuestAbandonedEventSchema,
+  QuestRewardClaimedEventSchema,
+  XPAwardedEventSchema,
+  MilestoneAwardedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -197,6 +229,20 @@ export const EVENT_TYPES = [
   'SessionEnded',
   'JournalEntryAdded',
   'InGameTimeAdvanced',
+  'LocationCreated',
+  'DoorAdded',
+  'DoorStateChanged',
+  'CharacterLocationChanged',
+  'QuestStarted',
+  'ObjectiveProgressed',
+  'ObjectiveCompleted',
+  'ObjectiveFailed',
+  'QuestCompleted',
+  'QuestFailed',
+  'QuestAbandoned',
+  'QuestRewardClaimed',
+  'XPAwarded',
+  'MilestoneAwarded',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -385,3 +431,42 @@ export type {
   JournalEntryAddedEvent,
   InGameTimeAdvancedEvent,
 } from './session.js';
+export {
+  LocationCreatedEventSchema,
+  DoorAddedEventSchema,
+  DoorStateChangedEventSchema,
+  CharacterLocationChangedEventSchema,
+} from './locations.js';
+export type {
+  LocationCreatedEvent,
+  DoorAddedEvent,
+  DoorStateChangedEvent,
+  CharacterLocationChangedEvent,
+} from './locations.js';
+export {
+  QuestStartedEventSchema,
+  ObjectiveProgressedEventSchema,
+  ObjectiveCompletedEventSchema,
+  ObjectiveFailedEventSchema,
+  QuestCompletedEventSchema,
+  QuestFailedEventSchema,
+  QuestAbandonedEventSchema,
+  QuestRewardClaimedEventSchema,
+  XPAwardedEventSchema,
+  MilestoneAwardedEventSchema,
+  MilestoneKindSchema,
+  MILESTONE_KINDS,
+} from './quests.js';
+export type {
+  QuestStartedEvent,
+  ObjectiveProgressedEvent,
+  ObjectiveCompletedEvent,
+  ObjectiveFailedEvent,
+  QuestCompletedEvent,
+  QuestFailedEvent,
+  QuestAbandonedEvent,
+  QuestRewardClaimedEvent,
+  XPAwardedEvent,
+  MilestoneAwardedEvent,
+  MilestoneKind,
+} from './quests.js';

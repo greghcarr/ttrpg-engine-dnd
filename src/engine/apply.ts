@@ -76,6 +76,24 @@ import {
   applyJournalEntryAdded,
   applyInGameTimeAdvanced,
 } from './reducers/session.js';
+import {
+  applyLocationCreated,
+  applyDoorAdded,
+  applyDoorStateChanged,
+  applyCharacterLocationChanged,
+} from './reducers/locations.js';
+import {
+  applyQuestStarted,
+  applyObjectiveProgressed,
+  applyObjectiveCompleted,
+  applyObjectiveFailed,
+  applyQuestCompleted,
+  applyQuestFailed,
+  applyQuestAbandoned,
+  applyQuestRewardClaimed,
+  applyXPAwarded,
+  applyMilestoneAwarded,
+} from './reducers/quests.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -245,6 +263,48 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'InGameTimeAdvanced':
         applyInGameTimeAdvanced(draft, event);
+        break;
+      case 'LocationCreated':
+        applyLocationCreated(draft, event);
+        break;
+      case 'DoorAdded':
+        applyDoorAdded(draft, event);
+        break;
+      case 'DoorStateChanged':
+        applyDoorStateChanged(draft, event);
+        break;
+      case 'CharacterLocationChanged':
+        applyCharacterLocationChanged(draft, event);
+        break;
+      case 'QuestStarted':
+        applyQuestStarted(draft, event);
+        break;
+      case 'ObjectiveProgressed':
+        applyObjectiveProgressed(draft, event);
+        break;
+      case 'ObjectiveCompleted':
+        applyObjectiveCompleted(draft, event);
+        break;
+      case 'ObjectiveFailed':
+        applyObjectiveFailed(draft, event);
+        break;
+      case 'QuestCompleted':
+        applyQuestCompleted(draft, event);
+        break;
+      case 'QuestFailed':
+        applyQuestFailed(draft, event);
+        break;
+      case 'QuestAbandoned':
+        applyQuestAbandoned(draft, event);
+        break;
+      case 'QuestRewardClaimed':
+        applyQuestRewardClaimed(draft, event);
+        break;
+      case 'XPAwarded':
+        applyXPAwarded(draft, event);
+        break;
+      case 'MilestoneAwarded':
+        applyMilestoneAwarded(draft, event);
         break;
       default: {
         const exhaustive: never = event;

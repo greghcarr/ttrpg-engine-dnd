@@ -31,13 +31,13 @@ If you are building a D&D character sheet, encounter tracker, virtual tabletop, 
 
 ## Status
 
-**Pre-alpha.** Eighteen slices complete, 381 tests across 63 files. The engine compiles, builds (ESM + CJS + `.d.ts`), and the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite.
+**Pre-alpha.** Twenty slices complete (Phase A and Phase B done), 415 tests across 68 files. The engine compiles, builds (ESM + CJS + `.d.ts`), and the architectural invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven by the test suite.
 
 The next priority is the adoption surface (npm publish, starter SRD content pack, examples directory, getting-started doc), tracked as Phase D in the Roadmap below. Until then, the library is install-via-git-URL and the test suite is the de facto API reference.
 
 ## Roadmap
 
-Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending.
+Six phases. The slice catalog below is the canonical list; ✓ marks done, blank marks pending. Phase A and Phase B are complete (20 slices). Next up: Phase C (combat fill-in) followed by Phase D (adoption surface).
 
 ### Phase A: Engine mechanics (16 slices, all done)
 
@@ -61,14 +61,14 @@ Each slice landed a load-bearing combat or rules mechanic. Order was dependency-
 - ✓ **Slice 15.** Full 2024 conditions library. All 15 conditions (blinded, charmed, deafened, exhaustion, frightened, grappled, incapacitated, invisible, paralyzed, petrified, poisoned, prone, restrained, stunned, unconscious) load from content packs and apply their effects to derivations.
 - ✓ **Slice 16.** Spellcasting polish. Cantrip damage scaling at character levels 5 / 11 / 17 via `cantripScalingDice`. Ritual casting via the `asRitual` flag (skips slot consumption; rejects non-ritual spells). Spell area targeting metadata (cone / cube / line / sphere / cylinder).
 
-### Phase B: Full state schemas (4 slices, 2 done)
+### Phase B: Full state schemas (4 slices, all done)
 
 The campaign-state surface area beyond combatants.
 
 - ✓ **Slice 17.** Parties, shared inventory, currency, treasure ledger. `PartyCreated`, `PartyMembersChanged`, `CurrencyAcquired`, `CurrencySpent`, `ItemDepositedToParty`, `ItemWithdrawnFromParty` events. Currency helpers (`totalInCopper`, `addCurrency`, `subtractCurrency`) refuse to let the purse go negative.
 - ✓ **Slice 18.** Sessions, journal entries (player / DM, with party / dm-only / character visibility), in-game clock (minutes from epoch, formatted as `Day NN HH:MM`). Only one session can be active at a time; starting a session syncs the campaign clock and refuses to rewind it.
-- **Slice 19.** Locations, dungeons, doors, maps, environmental terrain (difficult terrain, line of sight, line of effect, spell range checking against position).
-- **Slice 20.** Quests, objectives, rewards, milestone XP.
+- ✓ **Slice 19.** Locations and environmental terrain. `Location` (with optional parent and `LocationMap` of cells: normal / difficult / impassable / water), `Door` (open / closed / locked, blocks LOS and movement when shut). New events `LocationCreated`, `DoorAdded`, `DoorStateChanged`, `CharacterLocationChanged`. Derivations `terrainAt`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect` (Bresenham ray, blocked by impassable cells and closed/locked doors).
+- ✓ **Slice 20.** Quests, objectives, rewards, milestone XP. `Quest` (active / completed / failed / abandoned) with required and optional `QuestObjective`s tracking progress against thresholds. New events `QuestStarted`, `ObjectiveProgressed` / `Completed` / `Failed`, `QuestCompleted` / `Failed` / `Abandoned`, `QuestRewardClaimed` (distributes XP per beneficiary and currency to the linked party), `XPAwarded` (direct grant), `MilestoneAwarded` (minor / major / campaign tags appended to the campaign state).
 
 ### Phase C: Combat fill-in (10 slices, 0 done)
 

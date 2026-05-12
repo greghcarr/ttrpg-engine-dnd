@@ -41,6 +41,37 @@ export {
 } from './encounter.js';
 export { PartySchema, type Party } from './party.js';
 export {
+  LocationSchema,
+  type Location,
+  LocationMapSchema,
+  type LocationMap,
+  DoorSchema,
+  type Door,
+  TerrainKindSchema,
+  type TerrainKind,
+  DoorStateSchema,
+  type DoorState,
+  TERRAIN_KINDS,
+  DOOR_STATES,
+  DEFAULT_CELL_SIZE_FEET,
+  NORMAL_MOVEMENT_COST,
+  DIFFICULT_MOVEMENT_COST,
+} from './location.js';
+export {
+  QuestSchema,
+  type Quest,
+  QuestObjectiveSchema,
+  type QuestObjective,
+  QuestRewardSchema,
+  type QuestReward,
+  QuestStatusSchema,
+  type QuestStatus,
+  ObjectiveStatusSchema,
+  type ObjectiveStatus,
+  QUEST_STATUSES,
+  OBJECTIVE_STATUSES,
+} from './quest.js';
+export {
   SessionSchema,
   type Session,
   JournalEntrySchema,
