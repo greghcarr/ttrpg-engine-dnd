@@ -487,6 +487,25 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const stress = event.stressApplied ? ' (took the stress)' : '';
       return `**${who}** grants a wish${stress}: ${event.description}`;
     }
+    case 'BastionFounded': {
+      const owner = characterName(stateBefore, event.ownerCharacterId);
+      return `Bastion "${event.name}" founded by **${owner}** at level ${event.level}.`;
+    }
+    case 'BastionFacilityAdded':
+      return `Bastion facility added: "${event.name}" (${event.kind}, ${event.space}).`;
+    case 'BastionHirelingAdded':
+      return `Bastion hireling hired: ${event.name} (${event.role}).`;
+    case 'BastionTurnTaken': {
+      const delta = event.treasuryDeltaGp !== 0 ? ` (${event.treasuryDeltaGp >= 0 ? '+' : ''}${event.treasuryDeltaGp} gp)` : '';
+      const summary = event.summary !== undefined ? `: ${event.summary}` : '';
+      return `Bastion turn (${event.order})${delta}${summary}.`;
+    }
+    case 'BastionDamaged': {
+      const src = event.source !== undefined ? ` from ${event.source}` : '';
+      return `Bastion takes ${event.amount} damage${src}.`;
+    }
+    case 'BastionLevelChanged':
+      return `Bastion levels up: ${event.fromLevel} -> ${event.toLevel}.`;
   }
 };
 

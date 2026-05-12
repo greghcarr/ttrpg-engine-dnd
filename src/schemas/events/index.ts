@@ -129,6 +129,14 @@ import {
   ItemRechargedEventSchema,
   SentientItemConflictEventSchema,
 } from './charges.js';
+import {
+  BastionFoundedEventSchema,
+  BastionFacilityAddedEventSchema,
+  BastionHirelingAddedEventSchema,
+  BastionTurnTakenEventSchema,
+  BastionDamagedEventSchema,
+  BastionLevelChangedEventSchema,
+} from './bastion.js';
 import { CharacterResurrectedEventSchema } from './resurrection.js';
 import {
   PolymorphAppliedEventSchema,
@@ -228,6 +236,12 @@ export const EventSchema = z.discriminatedUnion('type', [
   ItemChargeConsumedEventSchema,
   ItemRechargedEventSchema,
   SentientItemConflictEventSchema,
+  BastionFoundedEventSchema,
+  BastionFacilityAddedEventSchema,
+  BastionHirelingAddedEventSchema,
+  BastionTurnTakenEventSchema,
+  BastionDamagedEventSchema,
+  BastionLevelChangedEventSchema,
   CharacterResurrectedEventSchema,
   PolymorphAppliedEventSchema,
   PolymorphRevertedEventSchema,
@@ -328,6 +342,12 @@ export const EVENT_TYPES = [
   'ItemChargeConsumed',
   'ItemRecharged',
   'SentientItemConflict',
+  'BastionFounded',
+  'BastionFacilityAdded',
+  'BastionHirelingAdded',
+  'BastionTurnTaken',
+  'BastionDamaged',
+  'BastionLevelChanged',
   'CharacterResurrected',
   'PolymorphApplied',
   'PolymorphReverted',
@@ -638,6 +658,25 @@ export type {
   SentientItemConflictEvent,
   RechargeCadence,
 } from './charges.js';
+export {
+  BastionFoundedEventSchema,
+  BastionFacilityAddedEventSchema,
+  BastionHirelingAddedEventSchema,
+  BastionTurnTakenEventSchema,
+  BastionDamagedEventSchema,
+  BastionLevelChangedEventSchema,
+  BastionTurnOrderSchema,
+  BASTION_TURN_ORDERS,
+} from './bastion.js';
+export type {
+  BastionFoundedEvent,
+  BastionFacilityAddedEvent,
+  BastionHirelingAddedEvent,
+  BastionTurnTakenEvent,
+  BastionDamagedEvent,
+  BastionLevelChangedEvent,
+  BastionTurnOrder,
+} from './bastion.js';
 export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,

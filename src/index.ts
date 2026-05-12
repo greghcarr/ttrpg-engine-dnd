@@ -455,6 +455,25 @@ export type {
   RechargeCadence,
 } from './schemas/events/index.js';
 export {
+  BastionFoundedEventSchema,
+  BastionFacilityAddedEventSchema,
+  BastionHirelingAddedEventSchema,
+  BastionTurnTakenEventSchema,
+  BastionDamagedEventSchema,
+  BastionLevelChangedEventSchema,
+  BastionTurnOrderSchema,
+  BASTION_TURN_ORDERS,
+} from './schemas/events/index.js';
+export type {
+  BastionFoundedEvent,
+  BastionFacilityAddedEvent,
+  BastionHirelingAddedEvent,
+  BastionTurnTakenEvent,
+  BastionDamagedEvent,
+  BastionLevelChangedEvent,
+  BastionTurnOrder,
+} from './schemas/events/index.js';
+export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,
   RESURRECTION_SPELLS,

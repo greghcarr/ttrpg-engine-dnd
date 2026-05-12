@@ -125,6 +125,14 @@ import {
   applyItemRecharged,
   applySentientItemConflict,
 } from './reducers/charges.js';
+import {
+  applyBastionFounded,
+  applyBastionFacilityAdded,
+  applyBastionHirelingAdded,
+  applyBastionTurnTaken,
+  applyBastionDamaged,
+  applyBastionLevelChanged,
+} from './reducers/bastion.js';
 import { applyCharacterResurrected } from './reducers/resurrection.js';
 import {
   applyPolymorphApplied,
@@ -406,6 +414,24 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'SentientItemConflict':
         applySentientItemConflict(draft, event);
+        break;
+      case 'BastionFounded':
+        applyBastionFounded(draft, event);
+        break;
+      case 'BastionFacilityAdded':
+        applyBastionFacilityAdded(draft, event);
+        break;
+      case 'BastionHirelingAdded':
+        applyBastionHirelingAdded(draft, event);
+        break;
+      case 'BastionTurnTaken':
+        applyBastionTurnTaken(draft, event);
+        break;
+      case 'BastionDamaged':
+        applyBastionDamaged(draft, event);
+        break;
+      case 'BastionLevelChanged':
+        applyBastionLevelChanged(draft, event);
         break;
       case 'CharacterResurrected':
         applyCharacterResurrected(draft, event);
