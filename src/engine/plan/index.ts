@@ -56,3 +56,5 @@ export {
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planOffHandAttack, type OffHandAttackIntent } from './offhand-attack.js';
 export { planMultiattack, type MultiattackIntent } from './multiattack.js';
+export { planFalling, type FallingIntent } from './falling.js';
+export { coverACBonus, COVER_KINDS, type CoverKind } from './attack.js';

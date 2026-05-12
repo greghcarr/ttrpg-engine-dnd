@@ -22,12 +22,31 @@ import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 
+export const COVER_KINDS = ['none', 'half', 'three-quarters', 'total'] as const;
+export type CoverKind = (typeof COVER_KINDS)[number];
+
+const HALF_COVER_AC_BONUS = 2;
+const THREE_QUARTERS_COVER_AC_BONUS = 5;
+
+export const coverACBonus = (cover: CoverKind): number => {
+  switch (cover) {
+    case 'half':
+      return HALF_COVER_AC_BONUS;
+    case 'three-quarters':
+      return THREE_QUARTERS_COVER_AC_BONUS;
+    case 'none':
+    case 'total':
+      return 0;
+  }
+};
+
 export interface AttackIntent {
   readonly type: 'Attack';
   readonly attackerId: string;
   readonly targetId: string;
   readonly weaponInstanceId: string;
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
+  readonly cover?: CoverKind;
   readonly at?: string;
 }
 
@@ -55,6 +74,7 @@ export interface ResolveAttackInput {
   readonly targetId: string;
   readonly weaponInstanceId: string;
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
+  readonly cover?: CoverKind;
   readonly at: string;
 }
 
@@ -78,11 +98,17 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     weaponInstanceId: input.weaponInstanceId,
   });
 
-  const acResult = computeAC({
+  const cover = input.cover ?? 'none';
+  if (cover === 'total') {
+    throw new Error(`${target.name} has total cover and cannot be targeted`);
+  }
+  const acResultBase = computeAC({
     character: target,
     itemInstances: state.itemInstances,
     content,
   });
+  const coverBonus = coverACBonus(cover);
+  const acResult = { ...acResultBase, total: acResultBase.total + coverBonus };
 
   const advantage = input.advantage ?? 'none';
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
@@ -191,6 +217,7 @@ export const planAttack = (
     attackerId: intent.attackerId,
     targetId: intent.targetId,
     weaponInstanceId: intent.weaponInstanceId,
+    ...(intent.cover !== undefined ? { cover: intent.cover } : {}),
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
     at,
   });
