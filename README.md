@@ -85,13 +85,13 @@ High-impact mechanics consumers will immediately want. Each slice closes a gap t
 - ✓ **Slice 29.** Resurrection variants. `CharacterResurrected` event with `spell` discriminator (`revivify`, `raise-dead`, `reincarnate`, `resurrection`, `true-resurrection`) restores the target to `hpAfter` HP, clears temp HP, resets death saves, and zeroes exhaustion. Reincarnate may set `newSpeciesId` to swap the character's species. Currency cost is left to the caller via the existing `CurrencySpent` event so consumers can apply table-specific economies.
 - ✓ **Slice 30.** Wild Shape, Polymorph, Simulacrum, Wish. `PolymorphApplied` swaps HP, ability scores, speed, and species into a new form and snapshots the originals to `Character.polymorphedSnapshot`; `PolymorphReverted` restores them. `wild-shape`, `polymorph`, and `true-polymorph` share the machinery via a `kind` discriminator. `SimulacrumCreated` clones a character into a creature-kind duplicate at half-HP (transient state reset). `WishGranted` records a freeform wish description; `stressApplied: true` increments the granter's exhaustion. Concrete spell effects beyond the form swap stay in the consumer's hands.
 
-### Phase D: Adoption surface (7 slices, 2 done)
+### Phase D: Adoption surface (7 slices, 3 done)
 
 These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
 
 - ✓ **Slice 31.** Starter content pack bundled in the package as `src/content/packs/starter-pack.json` and exported via `loadStarterPack()`. Includes Fighter, Wizard, Rogue, Paladin, and Warlock classes (levels 1-5 for combat-relevant features), Human species, Soldier background, all 15 conditions, ~6 spells, ~10 items, plus the canonical Sneak Attack OnEvent feature. Enough to instantiate a character and run combat without writing any content from scratch; consumers extend it from the 2024 SRD CC-BY release as their needs grow.
 - ✓ **Slice 32.** `/examples` directory with three runnable TypeScript apps: a character-sheet printer ([01-character-sheet](examples/01-character-sheet/)), an encounter-and-replay demo ([02-combat-encounter](examples/02-combat-encounter/)), and a save/load round-trip ([03-save-and-load](examples/03-save-and-load/)). Each is a single `npx tsx`-runnable file. An integration test in [tests/integration/examples.test.ts](tests/integration/examples.test.ts) executes them in CI so regressions in the public API surface get caught immediately.
-- **Slice 33.** Getting-started doc ("build your first Fighter in 30 lines") plus API reference generated from TypeScript types.
+- ✓ **Slice 33.** Getting-started doc at [docs/getting-started.md](docs/getting-started.md) walking through install, engine setup, character creation, attack resolution, and save/load round-trip. API reference at [docs/api-overview.md](docs/api-overview.md) maps every public symbol by namespace (planners, derivations, events, schemas, content packs, RNG, IDs, migrations).
 - **Slice 34.** Public API conveniences: `engine.do(state, intent)` (plan + commit in one call), `loadCampaign(json)` / `serializeCampaign(c)`, `engine.createPC({species, background, classL1})`.
 - **Slice 35.** Derivation memoization keyed on `CampaignState.version`. Today derivations recompute from scratch; fine for tests, will matter for live UI with 12-combatant encounters.
 - **Slice 36.** `npm publish` to the public registry. Until this, every install is via git URL.
@@ -179,7 +179,7 @@ const sheet = engine.derive.character(campaign.state, alyx.id);
 // sheet.ac, sheet.savingThrows, sheet.spellSlots, etc.
 ```
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and [CLAUDE.md](CLAUDE.md) for conventions.
+For a step-by-step walkthrough, see [docs/getting-started.md](docs/getting-started.md). For the full surface, see [docs/api-overview.md](docs/api-overview.md). See [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and [CLAUDE.md](CLAUDE.md) for architecture conventions.
 
 ## Intellectual property
 
