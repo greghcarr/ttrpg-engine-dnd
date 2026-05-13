@@ -2,6 +2,47 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
+## 0.1.0-alpha.2 (2026-05-13)
+
+Alpha refinement. A multi-round D&D-correctness audit surfaced a long list of bugs across the engine, the starter pack content, and the showcase; this release closes them. The README's status and roadmap sections are also rewritten to mark partial slices honestly instead of claiming uniform completeness.
+
+### Added
+
+- **Spell mechanic kinds**: `auto-hit` (Magic Missile-style spells with N darts, no save / no attack roll), `buff` (Bless / Mage Armor / Faerie Fire-style condition application with no save), `remove-condition` (Lesser Restoration-style targeted condition stripping).
+- **Effect kind `GrantAdvantageToAttackers`** — when present on a character's effect stack, attacks against them have advantage. Used by Faerie Fire's condition and the Restrained status; the attack planner now consults the *target's* effect stack rather than only the attacker's.
+- **`engine.plan.resurrect`** — new planner with proper validation: caster must know or prepare the spell, must have a slot of sufficient level, target must be at 0 HP. Supports `via: 'spell-slot' | 'scroll' | 'special'` so scroll consumption and special revivals can skip caster validation. Replaces consumer-side hand-emitted `CharacterResurrected` events.
+- **`SaveRolled` / `AbilityCheckRolled` breakdown** — both events gain an optional `breakdown: Array<{source, value}>` field. The transcript formatter shows the breakdown when the flat bonus has two or more contributing sources, so a +0 save reads as "+2 CON-mod, -2 exhaustion" rather than an apparently missing modifier.
+- **`Character.armorClass`** — optional natural-armor AC override. When set, `computeAC` uses it directly (effect modifiers still stack); used by creature statblocks and polymorph forms. Polymorph reducers copy `form.ac` into this field and the snapshot preserves the prior value for revert.
+- **Heal mechanic `flatAmount`** — fixed-value heal supplement for spells like Aid (+5 per target).
+- **`tests/unit/rules-truth.test.ts`** — ~58 short PHB 2024 assertions covering ability modifiers, proficiency bonus, single-class spell slots, AC under several armor scenarios, attack and save derivations, spell save DC and attack bonus, Sneak Attack dice at every odd Rogue level, and Blessed-condition propagation. Writing this surfaced the half/third caster slot bug.
+- **`tests/unit/engine/spell-coverage.test.ts`** — per-shipped-spell smoke test. Each spell either has an explicit event-kind expectation or a `skip` with reason. Catches Magic-Missile-class bugs where a spell ships with no mechanical effect at all.
+- **`Character.armorClass` + `CharacterResurrectedEvent.via`** event-shape fields propagated through schemas and reducers.
+
+### Fixed
+
+- **Fireball-class AoE damage rolled once** (PHB 2024 "Areas of Effect"). Previously `planSaveMechanic` rolled damage inside the per-target loop, so each target got an independent roll; now the dice roll once for the whole effect and each target's save determines full vs half.
+- **Half / third-caster spell slots use round-up (RAW 2024)**. The previous engine used `floor(level/2)` (the 2014 multiclass rule); 2024 changed it to round-up and gave half-casters slots starting at level 1. Paladin 5 now correctly returns 4 first + 2 second slots (was 3 / 0). Eldritch Knight 4 returns 3 first-level slots (was 2).
+- **Sneak Attack scales per Rogue level**. Starter pack previously shipped only the L1 entry (1d6); the class table now declares the feature at every odd level (1d6 -> 10d6 at L19), and the effect-stack dedupes class features by id so only the highest-level instance fires.
+- **Creature natural-armor AC** honored via `Character.armorClass`. Ogre 11, Young Red Dragon 18, Goblin Scout 15, etc. Previously every creature defaulted to 10 + DEX.
+- **Polymorph AC applies** in combat. Previously a polymorphed character kept their original AC; the form's AC is now copied onto the character.
+- **Counterspell consumes the original caster's slot** (RAW 2024: the slot is still spent on a successful counter). `CounterspellIntent.originalSpellLevel` is now required.
+- **Long rest ends concentration**. Sleep -> unconscious -> concentration breaks per RAW. The reducer also lifts conditions the broken effect had applied on other targets.
+- **Many inert starter-pack spells now wired**: Magic Missile (5 darts at 3rd level), Bless (+2 to attack and all six saves via the new `blessed` condition), Bane (-2 via `baned`), Mage Armor (AC override via `mage-armored`), Faerie Fire (DEX save -> `faerie-fired` -> attackers get advantage), Aid (+5 HP flat heal per target), Web (DEX save -> `restrained`), Lesser Restoration (removes one of: blinded / deafened / paralyzed / poisoned), Polymorph (now in the content pack so slot consumption reads).
+- **Dragon weapon dice**. The showcase dragon used a longsword stand-in for both bite and claws (1d8 slashing). Added `dragon-bite` (2d10 piercing) and `dragon-claw` (2d6 slashing) creature-statblock items.
+- **Ogre weapon dice**. The "greatclub" in the showcase was secretly a greatsword (2d6 slashing). Added a proper PC `greatclub` (1d8 bludgeoning) and a creature `ogre-greatclub` (2d8 bludgeoning).
+- **Restrained condition** gains `GrantAdvantageToAttackers` (the RAW status was missing the "attackers have advantage" leg).
+- **Transcript formatter improvements**: damage events show source attribution; sized markdown headings with blank-line paragraph breaks so the rendered preview shows one action per line; creatures and NPCs no longer render as "fighter 1"; spell slots use ordinal labels; polymorph displays the caster.
+
+### Documentation
+
+- **README Status section** rewritten with a three-bucket split (fully wired / partially wired / known engine gaps), an honest 563-tests / 90-files count, and explicit notes on what alpha consumers can rely on versus author.
+- **README Roadmap** uses a new ✓/◐/blank legend; every ◐ entry names what's missing. Phase C is "7 fully wired + 3 partial", Phase D is "6 + 1", Phase E is "2 + 7" with class L2+ features, subclasses, the full spell catalog, the DMG / MM catalogs, and variant-rule enforcement all flagged as content-layer gaps.
+- **docs/getting-started.md** content-pack description updated to match the recalibrated story; points at the README Status section.
+
+### Internal
+
+- Stale `dnd-engine` references cleaned out of DEVELOPMENT.md, README.md, CLAUDE.md, and the bug-report issue template (the historical CHANGELOG note remains).
+
 ## 0.1.0-alpha.1 (2026-05-12)
 
 Patch release. Documentation and attribution only; no API changes.
