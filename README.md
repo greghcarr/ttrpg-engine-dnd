@@ -209,7 +209,7 @@ You can also pin to a git ref while iterating alongside the engine:
 "dependencies": {
   "ttrpg-engine-dnd": "github:greghcarr/ttrpg-engine-dnd"
   // or, when developing alongside the engine:
-  // "ttrpg-engine-dnd": "file:../dnd-engine"
+  // "ttrpg-engine-dnd": "file:../ttrpg-engine-dnd"
 }
 ```
 

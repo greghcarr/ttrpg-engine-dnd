@@ -56,7 +56,7 @@ For local development from a consumer app (e.g. `dndbnb`):
 ```jsonc
 // in the consumer's package.json
 "dependencies": {
-  "ttrpg-engine-dnd": "file:../dnd-engine"
+  "ttrpg-engine-dnd": "file:../ttrpg-engine-dnd"
 }
 ```
 

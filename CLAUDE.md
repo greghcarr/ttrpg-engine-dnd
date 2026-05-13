@@ -25,7 +25,7 @@ When working in this repo, assume any of these gaps may be the next slice the us
 
 ## System-agnostic core seam (forward-looking)
 
-dnd-engine has a conceptual split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. The seam is conceptual today, not enforced in code: several files that belong on the agnostic side already bake in D&D specifics. That's fine; Phase A was the right time to ship D&D shapes. The rule going forward is **stop the bleeding, don't fix the past.**
+ttrpg-engine-dnd has a conceptual split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. The seam is conceptual today, not enforced in code: several files that belong on the agnostic side already bake in D&D specifics. That's fine; Phase A was the right time to ship D&D shapes. The rule going forward is **stop the bleeding, don't fix the past.**
 
 **Genuinely clean today (keep that way):**
 - [src/ids.ts](src/ids.ts): branded strings, no D&D coupling.
