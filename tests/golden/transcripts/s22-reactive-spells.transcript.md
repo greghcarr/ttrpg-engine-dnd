@@ -8,6 +8,8 @@ Item acquired: Longsword.
 
 Slot consumed: 3rd-level.
 
+Slot consumed: 3rd-level.
+
 **Enemy Mage** CON save: d20(6) + 2 = 8 vs DC 15 -> failure.
 
 **Mira** counterspells **Enemy Mage**'s Fireball: the spell fails.

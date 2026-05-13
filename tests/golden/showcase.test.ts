@@ -210,7 +210,8 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     const goblinBClub = makeItemInstance('handaxe');
     const goblinShamanQuarterstaff = makeItemInstance('quarterstaff');
     const ogreClub = makeItemInstance('greatsword');
-    const dragonClaws = makeItemInstance('longsword'); // Stand-in for natural weapons.
+    const dragonBite = makeItemInstance('dragon-bite');
+    const dragonClaws = makeItemInstance('dragon-claw');
     const mainQuestId = newJournalEntryId();
     const obj1 = newJournalEntryId();
     const obj2 = newJournalEntryId();
@@ -380,20 +381,10 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       }),
     ]);
 
-    // Forced-march exhaustion stacks on Cassius (he insists on heavy armor).
-    campaign = commit(campaign, [
-      evt<DamageAppliedEvent>({
-        type: 'DamageApplied',
-        targetId: cassius.id,
-        components: [{ amount: 0, type: 'bludgeoning' }],
-      }),
-      evt({
-        type: 'ExhaustionChanged',
-        targetId: cassius.id,
-        fromLevel: 0,
-        toLevel: 1,
-      } as never),
-    ]);
+    // (No forced-march save yet — RAW only kicks in past 8 hours of
+    // travel in a single day. The morning leg is 6h; the cumulative
+    // total reaches 10h after the afternoon push, so the save fires
+    // there instead.)
 
     // Navigation check by Mira; she succeeds.
     campaign = commit(
@@ -677,6 +668,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         spellId: 'hold-person',
         castingClassId: 'wizard',
         slotLevelToConsume: 3,
+        originalSpellLevel: 2,
       }).events,
     );
     advance();
@@ -774,7 +766,11 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     ]);
     campaign = commit(campaign, [shortRestEvents[1]!]);
 
-    // Travel onward. Forced march cost: another point of exhaustion for Cassius.
+    // Travel onward. The party has now traveled 6h (morning) + 4h
+    // (afternoon) = 10h in a single day, crossing the 8-hour forced-
+    // march threshold. RAW requires a CON save vs DC 10 per extra hour;
+    // Cassius (heavy armor, no CON proficiency) fails one and gains a
+    // level of exhaustion.
     campaign = commit(campaign, [
       evt<InGameTimeAdvancedEvent>({ type: 'InGameTimeAdvanced', minutes: SHORT_REST_MINUTES, reason: 'short rest' }),
       evt<InGameTimeAdvancedEvent>({ type: 'InGameTimeAdvanced', minutes: TRAVEL_AFTERNOON_MINUTES, reason: 'press into the forest' }),
@@ -786,8 +782,14 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         miles: 12,
         fromLocationId: villageId,
         toLocationId: forestPathId,
-        notes: 'Forest path, dusk approaching.',
+        notes: 'Forest path, dusk approaching. Day total: 10h travel.',
       }),
+      evt({
+        type: 'ExhaustionChanged',
+        targetId: cassius.id,
+        fromLevel: 0,
+        toLevel: 1,
+      } as never),
       evt<ObjectiveCompletedEvent>({ type: 'ObjectiveCompleted', questId: mainQuestId, objectiveId: obj1 }),
     ]);
 
@@ -1192,11 +1194,15 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       speedFeet: 40,
       multiattack: {
         name: 'Bite + Claw + Claw',
-        attacks: [{ weaponInstanceId: dragonClaws.id, count: 3 }],
+        attacks: [
+          { weaponInstanceId: dragonBite.id, count: 1 },
+          { weaponInstanceId: dragonClaws.id, count: 2 },
+        ],
       },
     });
 
     campaign = commit(campaign, [
+      evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: dragonBite }),
       evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: dragonClaws }),
       evt<CharacterCreatedEvent>({ type: 'CharacterCreated', snapshot: dragon }),
     ]);
@@ -1293,7 +1299,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
           targetId: id,
           components: [{ amount: 25, type: 'fire', rawAmount: 50, mitigation: 'resisted' }],
           sourceCharacterId: dragon.id,
-          source: 'Fire Breath (DEX save; resisted by warding)',
+          source: 'Fire Breath (DC 17 CON save; resisted by warding)',
         }),
       ]);
     }

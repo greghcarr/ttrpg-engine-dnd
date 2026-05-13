@@ -68,10 +68,6 @@ Time passes: Day 00 07:00 -> Day 00 13:00 (+360 min) (ride to Riverside).
 
 Travel: Riverside (burned) -> destination, 24 mi over 6h at fast pace (Forced march, fast pace.).
 
-**Brother Cassius** takes 0 damage (0 bludgeoning).
-
-**Brother Cassius** exhaustion 0 -> 1.
-
 Navigation check (Mira): d20(16)+1=17 vs DC 10 -> on course.
 
 Vex forages: d20(9)+1=10 vs DC 12 -> nothing found.
@@ -82,7 +78,7 @@ Vex forages: d20(9)+1=10 vs DC 12 -> nothing found.
 
 **Alyx** enters Riverside (burned).
 
-**Brother Cassius** persuasion: d20(19) + 1 (+3 CHA-mod, -2 exhaustion) = 20 vs DC 10 -> success.
+**Brother Cassius** persuasion: d20(19) + 3 = 22 vs DC 10 -> success.
 
 Elder Ymra attitude -> helpful (social-check shift).
 
@@ -174,6 +170,12 @@ End of Goblin Scout A's turn.
 
 Slot consumed: 1st-level.
 
+**Alyx** is now Blessed.
+
+**Vex** is now Blessed.
+
+**Brother Cassius** is now Blessed.
+
 **Brother Cassius** is now concentrating on Bless.
 
 End of Brother Cassius's turn.
@@ -183,6 +185,8 @@ End of Brother Cassius's turn.
 **Goblin Shaman** casts Hold Person (2nd-level slot) at Brother Cassius.
 
 _(Mira consumes reaction)_
+
+Slot consumed: 2nd-level.
 
 Slot consumed: 3rd-level.
 
@@ -194,11 +198,11 @@ End of Goblin Shaman's turn.
 
 **Brother Cassius** takes 6 damage from **Goblin Scout B** (6 slashing). (HP 44 -> 38)
 
-**Brother Cassius** CON save: d20(10) + 0 (+2 CON-mod, -2 exhaustion) = 10 vs DC 10 -> success.
+**Brother Cassius** CON save: d20(10) + 4 (+2 CON-mod, +2 modifier) = 14 vs DC 10 -> success.
 
 _(Brother Cassius consumes reaction)_
 
-**Brother Cassius** attacks **Goblin Scout B**: d20(10) + 6 = 16 vs AC 15 -> hit.
+**Brother Cassius** attacks **Goblin Scout B**: d20(10) + 8 = 18 vs AC 15 -> hit.
 
 Damage rolled: 1d8=[1]+3 slashing.
 
@@ -248,7 +252,9 @@ Time passes: Day 00 13:00 -> Day 00 14:00 (+60 min) (short rest).
 
 Time passes: Day 00 14:00 -> Day 00 18:00 (+240 min) (press into the forest).
 
-Travel: Riverside (burned) -> Whispering Forest Road, 12 mi over 4h at normal pace (Forest path, dusk approaching.).
+Travel: Riverside (burned) -> Whispering Forest Road, 12 mi over 4h at normal pace (Forest path, dusk approaching. Day total: 10h travel.).
+
+**Brother Cassius** exhaustion 0 -> 1.
 
 Objective completed: Cross the Whispering Forest.
 
@@ -320,7 +326,7 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Slag the Ogre** [advantage]: d20(12/6) + 7 = 19 vs AC 11 -> hit.
+**Vex** attacks **Slag the Ogre** [advantage]: d20(12/6) + 9 = 21 vs AC 11 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
@@ -338,7 +344,7 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Slag the Ogre**: d20(6) + 7 = 13 vs AC 11 -> hit.
+**Alyx** attacks **Slag the Ogre**: d20(6) + 9 = 15 vs AC 11 -> hit.
 
 Damage rolled: 1d8=[3]+4 slashing.
 
@@ -400,7 +406,9 @@ Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd leve
 
 **Alyx** reverts (voluntary).
 
-Item acquired: Longsword.
+Item acquired: Bite (Young Red Dragon).
+
+Item acquired: Claw (Young Red Dragon).
 
 **Stoneheart, the Young Red** appears (young-red-dragon, 178/178 HP).
 
@@ -416,7 +424,7 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(2/17) + 7 = 24 vs AC 18 -> hit.
+**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(2/17) + 9 = 26 vs AC 18 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
@@ -434,6 +442,16 @@ End of Vex's turn.
 
 Slot consumed: 3rd-level.
 
+**Stoneheart, the Young Red** takes 5 damage from **Mira** (5 force). (HP 162 -> 157)
+
+**Stoneheart, the Young Red** takes 4 damage from **Mira** (4 force). (HP 157 -> 153)
+
+**Stoneheart, the Young Red** takes 4 damage from **Mira** (4 force). (HP 153 -> 149)
+
+**Stoneheart, the Young Red** takes 2 damage from **Mira** (2 force). (HP 149 -> 147)
+
+**Stoneheart, the Young Red** takes 3 damage from **Mira** (3 force). (HP 147 -> 144)
+
 End of Mira's turn.
 
 ### Round 1: Alyx's turn
@@ -446,11 +464,7 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Stoneheart, the Young Red**: d20(18) + 7 = 25 vs AC 18 -> hit.
-
-Damage rolled: 1d8=[5]+4 slashing.
-
-**Stoneheart, the Young Red** takes 9 damage (9 slashing). (HP 162 -> 153)
+**Alyx** attacks **Stoneheart, the Young Red**: d20(2) + 9 = 11 vs AC 18 -> miss.
 
 End of Alyx's turn.
 
@@ -466,23 +480,23 @@ End of Alyx's turn.
 
 _(Stoneheart, the Young Red consumes action)_
 
-**Stoneheart, the Young Red** attacks **Alyx**: d20(12) + 10 = 22 vs AC 15 -> hit.
-
-Damage rolled: 1d8=[2]+6 slashing.
-
-**Alyx** takes 8 damage (8 slashing). (HP 19 -> 11)
-
-**Stoneheart, the Young Red** attacks **Alyx**: d20(10) + 10 = 20 vs AC 15 -> hit.
-
-Damage rolled: 1d8=[1]+6 slashing.
-
-**Alyx** takes 7 damage (7 slashing). (HP 11 -> 4)
-
 **Stoneheart, the Young Red** attacks **Alyx**: d20(18) + 10 = 28 vs AC 15 -> hit.
 
-Damage rolled: 1d8=[1]+6 slashing.
+Damage rolled: 2d10=[2,2]+6 piercing.
 
-**Alyx** takes 7 damage (7 slashing). (HP 4 -> -3)
+**Alyx** takes 10 damage (10 piercing). (HP 19 -> 9)
+
+**Stoneheart, the Young Red** attacks **Alyx**: d20(17) + 10 = 27 vs AC 15 -> hit.
+
+Damage rolled: 2d6=[2,6]+6 slashing.
+
+**Alyx** takes 14 damage (14 slashing). (HP 9 -> -5)
+
+**Stoneheart, the Young Red** attacks **Alyx**: d20(8) + 10 = 18 vs AC 15 -> hit.
+
+Damage rolled: 2d6=[6,4]+6 slashing.
+
+**Alyx** takes 16 damage (16 slashing). (HP -5 -> -21)
 
 End of Stoneheart, the Young Red's turn.
 
@@ -492,17 +506,17 @@ End of Stoneheart, the Young Red's turn.
 
 Slot consumed: 1st-level.
 
-**Alyx** healed 2 from healing-word. (HP -3 -> 2)
+**Alyx** healed 5 from healing-word. (HP -21 -> 5)
 
 _(Brother Cassius consumes action)_
 
 _(Brother Cassius consumes attack)_
 
-**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(17) + 6 = 23 vs AC 18 -> hit.
+**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(12) + 8 = 20 vs AC 18 -> hit.
 
-Damage rolled: 1d8=[3]+3 slashing.
+Damage rolled: 1d8=[5]+3 slashing.
 
-**Stoneheart, the Young Red** takes 6 damage (6 slashing). (HP 153 -> 147)
+**Stoneheart, the Young Red** takes 8 damage (8 slashing). (HP 144 -> 136)
 
 End of Brother Cassius's turn.
 
@@ -510,7 +524,7 @@ End of round 1.
 
 ### Round 2: Vex's turn
 
-**Stoneheart, the Young Red** takes 24 damage from **Vex** (24 piercing). (HP 147 -> 123)
+**Stoneheart, the Young Red** takes 24 damage from **Vex** (24 piercing). (HP 136 -> 112)
 
 End of Vex's turn.
 
@@ -518,13 +532,13 @@ End of Vex's turn.
 
 Wand of Magic Missiles loses 3 charge(s) by **Mira** for Magic Missile (3rd level).
 
-**Stoneheart, the Young Red** takes 22 damage from **Mira** (22 force). (HP 123 -> 101)
+**Stoneheart, the Young Red** takes 22 damage from **Mira** (22 force). (HP 112 -> 90)
 
 End of Mira's turn.
 
 ### Round 2: Alyx's turn
 
-**Stoneheart, the Young Red** takes 22 damage from **Alyx** (22 slashing). (HP 101 -> 79)
+**Stoneheart, the Young Red** takes 22 damage from **Alyx** (22 slashing). (HP 90 -> 68)
 
 End of Alyx's turn.
 
@@ -534,7 +548,7 @@ End of Stoneheart, the Young Red's turn.
 
 ### Round 2: Brother Cassius's turn
 
-**Stoneheart, the Young Red** takes 35 damage from **Brother Cassius** (35 radiant). (HP 79 -> 44)
+**Stoneheart, the Young Red** takes 35 damage from **Brother Cassius** (35 radiant). (HP 68 -> 33)
 
 ## Encounter ends: victory.
 

@@ -614,7 +614,15 @@
       "concentration": false,
       "ritual": false,
       "classes": ["wizard", "sorcerer"],
-      "mechanicalEffects": []
+      "mechanicalEffects": [
+        {
+          "kind": "auto-hit",
+          "damageDicePerDart": "1d4+1",
+          "damageType": "force",
+          "dartsAtBaseSlot": 3,
+          "extraDartsPerSlotLevel": 1
+        }
+      ]
     },
     {
       "id": "fireball",
@@ -817,7 +825,10 @@
       "duration": "Up to 1 minute",
       "concentration": true,
       "ritual": false,
-      "classes": ["cleric", "paladin"]
+      "classes": ["cleric", "paladin"],
+      "mechanicalEffects": [
+        { "kind": "buff", "conditionId": "blessed" }
+      ]
     },
     {
       "id": "healing-word",
@@ -1063,6 +1074,26 @@
       "versatileDice": "1d10",
       "properties": ["versatile"],
       "mastery": "Sap"
+    },
+    {
+      "id": "dragon-bite",
+      "itemKind": "weapon",
+      "name": "Bite (Young Red Dragon)",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "piercing",
+      "damageDice": "2d10",
+      "properties": []
+    },
+    {
+      "id": "dragon-claw",
+      "itemKind": "weapon",
+      "name": "Claw (Young Red Dragon)",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "slashing",
+      "damageDice": "2d6",
+      "properties": []
     },
     {
       "id": "rapier",
@@ -1326,11 +1357,13 @@
       "stackable": false,
       "endsOn": [],
       "effects": [
-        {
-          "kind": "AddModifier",
-          "target": { "kind": "save", "ability": "WIS" },
-          "value": 4
-        }
+        { "kind": "AddModifier", "target": "attack", "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "STR" }, "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "DEX" }, "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CON" }, "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": 2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": 2 }
       ]
     },
     {

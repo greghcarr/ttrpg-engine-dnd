@@ -58,6 +58,12 @@ export interface CounterspellIntent {
   readonly spellId: string;
   readonly castingClassId: string;
   readonly slotLevelToConsume?: number;
+  // The slot level the target caster used. Counterspell doesn't "save"
+  // the original caster's slot — the act of casting still spent it,
+  // even on a successful counter (2024 RAW). Set to 0 if the countered
+  // spell was a cantrip. Required so the engine can emit the original
+  // caster's SpellSlotConsumed and the transcript reflects the loss.
+  readonly originalSpellLevel: number;
   readonly at?: string;
 }
 
@@ -90,6 +96,18 @@ export const planCounterspell = (
   const events: Event[] = [];
   const reaction = economyConsumedIfEncountered(state, intent.counterCasterId, at, 'reaction');
   if (reaction !== undefined) events.push(reaction);
+  // The original caster spent their slot the moment they began casting;
+  // RAW the slot is lost even when the spell is countered. Emit that
+  // first so the transcript reads in cast-then-react order.
+  if (intent.originalSpellLevel > 0) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'SpellSlotConsumed',
+      characterId: intent.targetCasterId,
+      slotLevel: intent.originalSpellLevel,
+    } satisfies SpellSlotConsumedEvent);
+  }
   events.push({
     id: newEventId() as ULID,
     at,

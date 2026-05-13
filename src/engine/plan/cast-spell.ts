@@ -369,6 +369,93 @@ const planHealMechanic = (
   return events;
 };
 
+interface BuffOutcome {
+  readonly events: Event[];
+  readonly conditionsApplied: AppliedConditionRef[];
+}
+
+const planBuffMechanic = (
+  intent: CastSpellIntent,
+  mechanic: Extract<SpellMechanic, { kind: 'buff' }>,
+  declaredEventId: string,
+  at: string,
+): BuffOutcome => {
+  // Buff spells (Bless, Aid, etc.) apply a beneficial condition to each
+  // target. The condition holds the actual mechanical bonuses; this
+  // planner just stages the ConditionApplied events and threads the
+  // appliedConditionIds back to ConcentrationStarted (when applicable)
+  // so the condition lifts together with the spell.
+  const events: Event[] = [];
+  const conditionsApplied: AppliedConditionRef[] = [];
+  for (const targetId of intent.targetIds) {
+    const appliedConditionId = newAppliedConditionId();
+    const cond: ConditionAppliedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionApplied',
+      targetId,
+      conditionId: mechanic.conditionId,
+      appliedConditionId,
+      causedByEventId: declaredEventId as ULID,
+    };
+    events.push(cond);
+    conditionsApplied.push({
+      targetId: targetId as ULID,
+      conditionId: mechanic.conditionId,
+      appliedConditionId,
+    });
+  }
+  return { events, conditionsApplied };
+};
+
+const planAutoHitMechanic = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: CastSpellIntent,
+  spell: Spell,
+  mechanic: Extract<SpellMechanic, { kind: 'auto-hit' }>,
+  declaredEventId: string,
+  at: string,
+): Event[] => {
+  // Auto-hit spells (Magic Missile, etc.) fire N darts; the dart count
+  // scales with the slot level used. Each dart hits an independently
+  // targeted creature (the targetIds list is expected to be padded to
+  // dartCount; Magic Missile can repeat the same target). Each dart's
+  // damage is rolled separately and mitigated independently so a target
+  // with resistance benefits per dart.
+  const slotsAboveBase = Math.max(0, intent.slotLevel - spell.level);
+  const dartCount = mechanic.dartsAtBaseSlot + slotsAboveBase * (mechanic.extraDartsPerSlotLevel ?? 0);
+  const events: Event[] = [];
+  for (let i = 0; i < dartCount; i++) {
+    const targetId = intent.targetIds[i] ?? intent.targetIds[intent.targetIds.length - 1];
+    if (targetId === undefined) continue;
+    const target = state.characters[targetId];
+    if (!target) continue;
+    const { rolls, modifier } = rollDamage(mechanic.damageDicePerDart, 0, rng, false);
+    const raw = rolls.reduce((s, v) => s + v, 0) + modifier;
+    if (raw <= 0) continue;
+    const mitigated = mitigateDamage({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      rawComponents: [{ amount: raw, type: mechanic.damageType }],
+    });
+    const damageApplied: DamageAppliedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'DamageApplied',
+      targetId,
+      components: mitigated,
+      causedByEventId: declaredEventId as ULID,
+      sourceCharacterId: intent.characterId as ULID,
+      source: `${spell.id} (dart ${i + 1})`,
+    };
+    events.push(damageApplied);
+  }
+  return events;
+};
+
 export const planCastSpell = (
   state: CampaignState,
   content: ResolvedContent,
@@ -462,6 +549,12 @@ export const planCastSpell = (
       const outcome = planSaveMechanic(
         state, content, rng, intent, spell, mechanic, declared.id, at, castingClassId,
       );
+      events.push(...outcome.events);
+      conditionsApplied.push(...outcome.conditionsApplied);
+    } else if (mechanic.kind === 'auto-hit') {
+      events.push(...planAutoHitMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
+    } else if (mechanic.kind === 'buff') {
+      const outcome = planBuffMechanic(intent, mechanic, declared.id, at);
       events.push(...outcome.events);
       conditionsApplied.push(...outcome.conditionsApplied);
     } else {

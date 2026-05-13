@@ -49,6 +49,7 @@ describe('golden: counterspell, dispel magic, identify (Slice 22)', () => {
         spellId: 'fireball',
         castingClassId: 'wizard',
         slotLevelToConsume: 3,
+        originalSpellLevel: 3,
       }).events,
     );
 
