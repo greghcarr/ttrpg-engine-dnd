@@ -21,7 +21,7 @@ const engine = createEngine({
 });
 ```
 
-The starter pack ships in the package and includes Fighter, Wizard, Rogue, Paladin, and Warlock classes through level 5, Human species, Soldier background, all 15 conditions, common weapons and armor, and a handful of spells. Bring your own content pack when you outgrow it.
+The starter pack ships in the package and includes all 12 PHB classes with 1-20 level tables (though most levels past 1 carry empty `features: []` arrays — only Sneak Attack actually scales at the content layer), 7 species, 8 backgrounds, ~22 feats, ~33 spells (about two-thirds with fully wired mechanical effects), ~25 items including 9 magic items, 6 monster statblocks, the 2024 Bastion system, and all 15 conditions. **No subclasses ship.** It's enough to instantiate a character and run combat at levels 1-5; for higher-level play, subclasses, or the full 2024 spell catalog, extend the pack yourself or compose multiple packs. See the [Status section of the README](../README.md#status) for what's wired vs schema-only.
 
 ## 3. Build a character
 
