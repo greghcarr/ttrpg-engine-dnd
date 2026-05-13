@@ -30,7 +30,11 @@ const SpellSaveMechanicSchema = z.object({
 
 const SpellHealMechanicSchema = z.object({
   kind: z.literal('heal'),
-  amountDice: DiceExpressionSchema,
+  amountDice: DiceExpressionSchema.optional(),
+  // Flat amount applied in addition to (or in place of) the rolled
+  // amount. Useful for spells with fixed-value heals like Aid (+5 per
+  // target). At least one of amountDice or flatAmount must be present.
+  flatAmount: z.number().int().min(0).optional(),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
 });
 

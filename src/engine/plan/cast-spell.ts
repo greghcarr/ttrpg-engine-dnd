@@ -351,10 +351,15 @@ const planHealMechanic = (
   if (!character) throw new Error(`Unknown character ${intent.characterId}`);
   const castingAbilityMod = abilityModifier(character.abilityScores.WIS);
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
+  const flatAmount = mechanic.flatAmount ?? 0;
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
-    const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
-    const amount = Math.max(0, rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod);
+    let rolledAmount = 0;
+    if (mechanic.amountDice !== undefined) {
+      const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
+      rolledAmount = rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod;
+    }
+    const amount = Math.max(0, rolledAmount + flatAmount);
     const heal: HealedEvent = {
       id: newEventId() as ULID,
       at,

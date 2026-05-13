@@ -70,13 +70,13 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'mage-armor': { kind: 'buff', conditionId: 'mage-armored' },
   'misty-step': { kind: 'skip', reason: 'teleport movement (TODO)' },
   // Control / crowd-control spells not yet mechanically modeled.
-  'faerie-fire': { kind: 'skip', reason: 'save + grant-advantage debuff (TODO)' },
+  'faerie-fire': { kind: 'save' },
   'bane': { kind: 'save' },
   'sleep': { kind: 'skip', reason: 'HP-threshold knockout (TODO)' },
   'web': { kind: 'skip', reason: 'save + restrained area condition (TODO)' },
   'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
   // Buffs / utility spells with simple shapes not yet wired.
-  'aid': { kind: 'skip', reason: 'HP-max buff (TODO)' },
+  'aid': { kind: 'heal' },
   'lesser-restoration': { kind: 'skip', reason: 'condition removal (TODO)' },
 };
 

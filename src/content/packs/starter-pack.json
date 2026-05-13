@@ -915,7 +915,10 @@
       "concentration": true,
       "ritual": false,
       "classes": ["bard", "druid"],
-      "targeting": { "shape": "cube", "size": 20 }
+      "targeting": { "shape": "cube", "size": 20 },
+      "mechanicalEffects": [
+        { "kind": "save", "ability": "DEX", "conditionOnFail": "faerie-fired" }
+      ]
     },
     {
       "id": "bane",
@@ -999,7 +1002,10 @@
       "duration": "8 hours",
       "concentration": false,
       "ritual": false,
-      "classes": ["bard", "cleric", "paladin"]
+      "classes": ["bard", "cleric", "paladin"],
+      "mechanicalEffects": [
+        { "kind": "heal", "flatAmount": 5 }
+      ]
     },
     {
       "id": "lesser-restoration",
@@ -1394,6 +1400,15 @@
       "endsOn": [],
       "effects": [
         { "kind": "OverrideACFormula", "base": 13, "abilityModifiers": ["DEX"], "priority": 100 }
+      ]
+    },
+    {
+      "id": "faerie-fired",
+      "name": "Faerie Fired",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantAdvantageToAttackers" }
       ]
     },
     {

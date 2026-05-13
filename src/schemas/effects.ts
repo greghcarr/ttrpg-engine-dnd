@@ -139,6 +139,12 @@ export type Effect =
   | { kind: 'SetHPMaxFormula'; formula: Formula }
   | { kind: 'OfferChoice'; choiceId: string; prompt: string; options: ChoiceOptionShape[]; oneOf: number; when: 'onAcquire' | 'onLevelUp' | 'onLongRest' }
   | { kind: 'FlatDamageReduction'; damageTypes: DamageType[]; amount: number }
+  // Cross-character effect: while this is active on a character, attacks
+  // against that character are made with advantage. Used by Faerie Fire,
+  // Hex (kind of), Hunter's Mark variants. The attack planner consults
+  // the *target's* effect stack to pick this up; the attacker doesn't
+  // need to know.
+  | { kind: 'GrantAdvantageToAttackers'; condition?: Predicate }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -290,6 +296,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       amount: z.number().int().min(1),
     }),
     z.object({
+      kind: z.literal('GrantAdvantageToAttackers'),
+      condition: PredicateSchema.optional(),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -322,5 +332,6 @@ export const EFFECT_KINDS = [
   'SetHPMaxFormula',
   'OfferChoice',
   'FlatDamageReduction',
+  'GrantAdvantageToAttackers',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

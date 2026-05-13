@@ -12,6 +12,7 @@ import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
 import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
@@ -110,7 +111,20 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const coverBonus = coverACBonus(cover);
   const acResult = { ...acResultBase, total: acResultBase.total + coverBonus };
 
-  const advantage = input.advantage ?? 'none';
+  // The target's effect stack may grant attackers advantage (Faerie
+  // Fire, restrained, etc.). If the caller asked for plain 'none' but
+  // the target's state implies advantage, upgrade. If they explicitly
+  // asked for disadvantage, that wins (advantage and disadvantage from
+  // separate sources cancel per RAW).
+  const targetEffects = buildEffectStack({
+    character: target,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const targetGrantsAdvantage = targetEffects.grantsAdvantageToAttackers();
+  let advantage = input.advantage ?? 'none';
+  if (advantage === 'none' && targetGrantsAdvantage) advantage = 'advantage';
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
   if (advantage !== 'none') {
     rolls.push(rollDie(D20_SIDES, rng));

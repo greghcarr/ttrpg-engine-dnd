@@ -140,6 +140,20 @@ export class EffectAccumulator {
     return this.advantages.get(rollKey(target)) ?? emptyAdvantage();
   }
 
+  // True when this character has any effect that grants attackers
+  // advantage against them (Faerie Fire, Restrained, paralyzed-while-
+  // attacker-within-5-feet, etc.). Called on the *target's* effect
+  // stack by the attack planner.
+  grantsAdvantageToAttackers(): boolean {
+    return this.advantageToAttackersFlag;
+  }
+
+  markGrantsAdvantageToAttackers(): void {
+    this.advantageToAttackersFlag = true;
+  }
+
+  private advantageToAttackersFlag = false;
+
   hasResistance(type: DamageType): boolean {
     return this.resistances.has(type) || this.resistances.has('all');
   }
@@ -241,6 +255,9 @@ export const applyEffectToBuilder = (
       for (const damageType of effect.damageTypes) {
         acc.addFlatDamageReduction(damageType, effect.amount);
       }
+      return;
+    case 'GrantAdvantageToAttackers':
+      acc.markGrantsAdvantageToAttackers();
       return;
     case 'GrantSense':
     case 'ModifySpeed':
