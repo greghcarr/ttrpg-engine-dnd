@@ -90,18 +90,72 @@ Beyond the architecture, here's the honest split:
   - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
   - Spells (Slice 41): ~33 spells in the pack; ~21 of those have full mechanical effects wired, ~10 are schema-only TODOs (Sleep, Shield, Misty Step, Guidance, Spirit Guardians, etc.).
   - Variant rules (Slice 46): the `CampaignSettings` flags exist (`grittyRest`, `heroPoints`, `sanity`, `massCombat`) but the engine does not enforce them — consumer's job.
-- **Known engine gaps** (not assigned to a slice but worth flagging):
-  - Spell duration isn't tracked; concentration spells last until the caster's concentration breaks (e.g., damage, new concentration spell, unconsciousness), never by time.
-  - Concentration ends on long rest (just landed) but not on dropping to 0 HP.
-  - Death saves are recorded as events but not auto-rolled at start of an unconscious character's turn.
-  - `hpMax` is a valid `ModifierTarget` but no derivation reads it (Aid's +5-HP-max aspect is not wired; +5 current HP is).
-  - Property tests with fast-check (Layer 7 of the testing standard) are not written.
-  - No public API contract / `.d.ts` snapshot test.
-  - No feature-coverage matrix beyond the spell-coverage smoke test.
+- **Known engine gaps**: see the dedicated [Known engine gaps](#known-engine-gaps) section below for the canonical list (16 items, scattered across the slice ◐ entries are aggregated there).
+- **Test infrastructure gaps**: Property tests with fast-check (Layer 7 of the testing standard) are not written. No public API contract / `.d.ts` snapshot test. No feature-coverage matrix beyond the spell-coverage smoke test.
 
-**What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The README's roadmap below tracks exactly what each slice ships.
+**What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
 
 Phase F (`ttrpg-engine-core` extraction) is explicitly optional; it remains the only fully un-attempted slice.
+
+## Known engine gaps
+
+The canonical list of engine-level features that ship as partial or not at all. Sixteen items, grouped by category. Each entry says what's missing and which slice (if any) it sits under. Use this as the punch-list for engine PRs.
+
+The list is roughly ordered by how often a level-1-to-5 family-tabletop run would notice the gap. Severity column: 🔴 immediately visible to a player at low levels, 🟡 visible in specific situations, ⚪ rare or content-bound.
+
+### Missing planners — events and reducers exist, no `plan.*` method
+
+| Gap | Severity | Slice | What's missing |
+|---|---|---|---|
+| `planPolymorph` | 🟡 | 30 | `PolymorphApplied` reducer swaps form correctly. No planner validates slot consumption, target willingness, the form-by-CR rule, or the concentration link. Consumers emit `PolymorphApplied` directly. |
+| `planWildShape` | 🟡 | 30 | Same machinery as Polymorph; no planner. The form library, transformation cadence, and Wild Shape resource consumption are all consumer-side. |
+| `planSimulacrum` | ⚪ | 30 | `SimulacrumCreated` reducer clones a character into a creature at half-HP. No planner validates the 12-hour cast, 1500gp ruby, or shared-concentration constraints. |
+| `planWish` | ⚪ | 30 | `WishGranted` records a freeform wish + stress flag. No planner validates the 9th-level slot, the predefined-effects shortcut list, or applies the stress cascade beyond exhaustion. |
+
+### Missing event automation — engine doesn't auto-emit when it should
+
+| Gap | Severity | Slice | What's missing |
+|---|---|---|---|
+| Death save auto-roll at start of turn | 🔴 | A1 | `DeathSaveRolledEvent` exists. The encounter advance reducer doesn't emit one for unconscious-at-0-HP combatants at their turn start. Consumers must emit it manually. |
+| Concentration ends on drop to 0 HP | 🔴 | A6 | Long-rest concentration-clearing landed; the 0-HP path didn't. RAW: falling unconscious ends concentration immediately. |
+| Spell duration expiry | 🟡 | A5/A6 | Concentration spells stay active until the caster's concentration breaks. The engine never expires them after their listed duration (1 minute, 1 hour, etc.) even if the consumer tracks time via `InGameTimeAdvanced` events. |
+| Forced-march CON-save loop | ⚪ | 25 | Slice 25 explicitly punts. After 8 hours of travel each additional hour requires a DC 10 + 1/hour CON save; the engine doesn't model this loop. |
+
+### Missing derivations
+
+| Gap | Severity | Slice | What's missing |
+|---|---|---|---|
+| `hpMax` modifier derivation | 🟡 | A1 | `'hpMax'` is a valid `ModifierTarget` in the schema (Aid +5 HP max, Aspect of the Beast, etc.) but no derivation reads it. Effective max comes straight from `Character.hp.max`. Aid's +5-current-HP works; its +5-max doesn't. |
+
+### Missing mechanics inside otherwise-wired primitives
+
+| Gap | Severity | Slice | What's missing |
+|---|---|---|---|
+| Cleave / Nick / Flex weapon masteries | 🟡 | 23 | Slice 23 explicitly deferred. Each is a sequencing concern inside `planAttack`: Cleave (extra attack on adjacent if first hit), Nick (light-weapon extra attack as part of the attack action), Flex (versatile damage die at use time). The other 6 of 9 masteries work. |
+
+### Specific spells with no mechanics wired
+
+These need engine extensions (new mechanic kinds or planners), not just JSON content. The starter pack ships them schema-only.
+
+| Spell | Severity | Slice | Why it's hard |
+|---|---|---|---|
+| Sleep | 🔴 | 41 | HP-threshold knockout (rolls a 5d8+ pool, applies unconscious to the lowest-HP creatures from the pool until it runs out). No mechanic kind supports this shape. |
+| Shield | 🔴 | 41 | Reactive +5 AC against the triggering attack. Needs reaction-interrupt timing similar to Counterspell, in `planAttack`'s resolution path. |
+| Misty Step | 🟡 | 41 | Bonus action 30-ft teleport. The movement model exists but no planner for a teleport-with-bonus-action. |
+| Guidance | 🟡 | 41 | Single-use buff that expires on first ability check. Needs a "consume-on-use" condition kind (or an `OnEvent` trigger that auto-removes its own source condition). |
+| Spirit Guardians | 🟡 | 41 | Concentration aura that ticks radiant damage per round on enemies in the area. Needs per-turn aura ticking, friend/foe targeting, and area-leaving-or-entering triggers. |
+
+### Variant-rule enforcement
+
+| Gap | Severity | Slice | What's missing |
+|---|---|---|---|
+| `CampaignSettings` flags don't gate behavior | ⚪ | 46 | The slice ships the toggle plumbing only. `grittyRest` doesn't change rest durations, `heroPoints` doesn't grant a hero-point resource pool, `sanity` and `massCombat` are inert. Consumers must branch their own planner logic on the flags. |
+
+### Triage suggestions
+
+If you're closing gaps in priority order for a family-tabletop run at levels 1-5, the 🔴 items hit first: death-save auto-roll, concentration-on-0-HP, and the Sleep / Shield spells. After that, spell duration expiry is the next most likely to be noticed.
+
+The 🟡 items become relevant at higher levels or in specific class scenarios. The ⚪ items are edge cases or wait for content that uses them.
 
 ## Roadmap
 
