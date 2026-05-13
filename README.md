@@ -50,6 +50,7 @@ Pick the doc that matches what you want:
 | Understand the mental model (events, plan/commit, content packs) | [docs/concepts.md](docs/concepts.md) |
 | Look up a specific public symbol | [docs/api-overview.md](docs/api-overview.md) |
 | See common patterns (save, undo, houserules, multiplayer sync) | [docs/recipes.md](docs/recipes.md) |
+| Author content packs (spells, classes, feats, items, monsters) | [docs/authoring-content-packs.md](docs/authoring-content-packs.md) |
 | Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
 | Know what each version means (alpha / beta / rc / 1.0) | [VERSIONING.md](VERSIONING.md) |
 | Read the change history | [CHANGELOG.md](CHANGELOG.md) |
