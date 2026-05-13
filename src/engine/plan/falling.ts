@@ -5,6 +5,7 @@ import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { planConcentrationBreakOnDrop } from './concentration.js';
 import type { ULID } from '../ids-utils.js';
 
 const FALLING_FEET_PER_DIE = 10;
@@ -54,5 +55,11 @@ export const planFalling = (
     components: mitigated,
     source: `falling ${intent.distanceFeet} ft`,
   };
-  return [damageApplied];
+  const concentrationBreak = planConcentrationBreakOnDrop(
+    character,
+    mitigated,
+    damageApplied.id,
+    at,
+  );
+  return [damageApplied, ...concentrationBreak];
 };

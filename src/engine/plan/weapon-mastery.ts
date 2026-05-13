@@ -15,6 +15,7 @@ import type { WeaponMasteryActivatedEvent } from '../../schemas/events/weapon-ma
 import type { ConditionAppliedEvent, DamageAppliedEvent } from '../../schemas/events/combat.js';
 import type { CombatantMovedEvent } from '../../schemas/events/movement.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
+import { planConcentrationBreakOnDrop } from './concentration.js';
 
 const UNARMED_DC_BASE = 8;
 const CELL_SIZE_FEET = 5;
@@ -175,13 +176,17 @@ export const planWeaponMastery = (
       const damageType = weapon.damageType;
       const grazeAmount = Math.max(0, abilityModifier(attacker.abilityScores.STR));
       if (grazeAmount > 0) {
-        events.push({
+        const grazeDamage: DamageAppliedEvent = {
           id: newEventId() as ULID,
           at,
           type: 'DamageApplied',
           targetId: intent.targetId,
           components: [{ amount: grazeAmount, type: damageType, rawAmount: grazeAmount }],
-        } satisfies DamageAppliedEvent);
+        };
+        events.push(grazeDamage);
+        events.push(
+          ...planConcentrationBreakOnDrop(target, grazeDamage.components, grazeDamage.id, at),
+        );
       }
       break;
     }

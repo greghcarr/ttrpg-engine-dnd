@@ -35,10 +35,12 @@ import {
   planAbilityCheck,
   planCastSpell,
   planCheckConcentration,
+  planExpireSpellDurations,
   planOpportunityAttack,
   planMove,
   planDash,
   planDisengage,
+  planMistyStep,
   planActionSurge,
   planOffHandAttack,
   planMultiattack,
@@ -49,6 +51,7 @@ import {
   planCounterspell,
   planDispelMagic,
   planIdentify,
+  planShield,
   planWeaponMastery,
   planForage,
   planNavigationCheck,
@@ -61,6 +64,8 @@ import {
   type CounterspellIntent,
   type DispelMagicIntent,
   type IdentifyIntent,
+  type ShieldIntent,
+  type ShieldOutcome,
   type WeaponMasteryIntent,
   type ForageIntent,
   type NavigationCheckIntent,
@@ -73,6 +78,7 @@ import {
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
+  type MistyStepIntent,
   type ActionSurgeIntent,
   type OffHandAttackIntent,
   type MultiattackIntent,
@@ -89,6 +95,7 @@ import {
   type AbilityCheckIntent,
   type CastSpellIntent,
   type CheckConcentrationIntent,
+  type ExpireSpellDurationsIntent,
 } from './plan/index.js';
 import { newCampaignId } from '../ids.js';
 import { SCHEMA_VERSION } from '../version.js';
@@ -155,9 +162,14 @@ export interface Engine {
       state: CampaignState,
       intent: Omit<CheckConcentrationIntent, 'type'>,
     ): PlanResult;
+    expireSpellDurations(
+      state: CampaignState,
+      intent?: Omit<ExpireSpellDurationsIntent, 'type'>,
+    ): PlanResult;
     move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
     dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
+    mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
     multiattack(state: CampaignState, intent: Omit<MultiattackIntent, 'type'>): PlanResult;
@@ -168,6 +180,7 @@ export interface Engine {
     counterspell(state: CampaignState, intent: Omit<CounterspellIntent, 'type'>): PlanResult;
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
+    shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
     forage(state: CampaignState, intent: Omit<ForageIntent, 'type'>): PlanResult;
     navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
@@ -238,10 +251,10 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
       return { events: planStartEncounter(state, content, { type: 'StartEncounter', ...intent }) };
     },
     beginFirstTurn(state, intent) {
-      return { events: planBeginFirstTurn(state, content, { type: 'BeginFirstTurn', ...intent }) };
+      return { events: planBeginFirstTurn(state, content, rng, { type: 'BeginFirstTurn', ...intent }) };
     },
     advanceTurn(state, intent) {
-      return { events: planAdvanceTurn(state, content, { type: 'AdvanceTurn', ...intent }) };
+      return { events: planAdvanceTurn(state, content, rng, { type: 'AdvanceTurn', ...intent }) };
     },
     endEncounter(state, intent) {
       return { events: planEndEncounter(state, content, { type: 'EndEncounter', ...intent }) };
@@ -269,6 +282,14 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
         }),
       };
     },
+    expireSpellDurations(state, intent) {
+      return {
+        events: planExpireSpellDurations(state, content, {
+          type: 'ExpireSpellDurations',
+          ...(intent ?? {}),
+        }),
+      };
+    },
     move(state, intent) {
       return { events: planMove(state, content, { type: 'Move', ...intent }) };
     },
@@ -277,6 +298,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     disengage(state, intent) {
       return { events: planDisengage(state, content, { type: 'Disengage', ...intent }) };
+    },
+    mistyStep(state, intent) {
+      return { events: planMistyStep(state, content, { type: 'MistyStep', ...intent }) };
     },
     actionSurge(state, intent) {
       return { events: planActionSurge(state, content, { type: 'ActionSurge', ...intent }) };
@@ -307,6 +331,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };
+    },
+    shield(state, intent) {
+      return planShield(state, content, { type: 'Shield', ...intent });
     },
     weaponMastery(state, intent) {
       return { events: planWeaponMastery(state, content, rng, { type: 'WeaponMastery', ...intent }) };

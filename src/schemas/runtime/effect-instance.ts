@@ -16,6 +16,13 @@ export const EffectInstanceSchema = z.object({
   conditionsApplied: z.array(AppliedConditionRefSchema).default([]),
   requiresConcentration: z.boolean(),
   durationRounds: z.number().int().min(0).optional(),
+  // Wall-clock duration of the spell in in-game minutes. Set when the
+  // effect starts; used by planExpireSpellDurations to clear effects
+  // whose listed duration has elapsed (Bless 1 min, Heroes' Feast 24h).
+  durationMinutes: z.number().int().min(0).optional(),
+  // In-game time (state.inGameTime.totalMinutes) at which the effect
+  // started. Combined with durationMinutes to determine expiry.
+  startedAtMinutes: z.number().int().min(0).optional(),
   startedAtEventId: ULIDSchema,
 });
 export type EffectInstance = z.infer<typeof EffectInstanceSchema>;

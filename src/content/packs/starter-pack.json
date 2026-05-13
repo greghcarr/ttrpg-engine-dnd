@@ -961,7 +961,15 @@
       "concentration": true,
       "ritual": false,
       "classes": ["bard", "sorcerer", "wizard"],
-      "targeting": { "shape": "sphere", "size": 20 }
+      "targeting": { "shape": "sphere", "size": 20 },
+      "mechanicalEffects": [
+        {
+          "kind": "hp-pool-knockout",
+          "poolDice": "5d8",
+          "extraPoolDicePerSlotLevel": "2d8",
+          "conditionId": "unconscious"
+        }
+      ]
     },
     {
       "id": "misty-step",
@@ -1020,7 +1028,8 @@
       "ritual": false,
       "classes": ["bard", "cleric", "paladin"],
       "mechanicalEffects": [
-        { "kind": "heal", "flatAmount": 5 }
+        { "kind": "heal", "flatAmount": 5 },
+        { "kind": "buff", "conditionId": "aid-buffed" }
       ]
     },
     {
@@ -1451,6 +1460,26 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantAdvantageToAttackers" }
+      ]
+    },
+    {
+      "id": "shielded",
+      "name": "Shielded",
+      "description": "+5 bonus to AC until the start of the caster's next turn (Shield spell).",
+      "stackable": false,
+      "endsOn": [{ "kind": "turnEnd", "ownerId": "caster" }],
+      "effects": [
+        { "kind": "AddModifier", "target": "ac", "value": 5 }
+      ]
+    },
+    {
+      "id": "aid-buffed",
+      "name": "Aided",
+      "description": "+5 to hit point maximum for the duration (Aid spell).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "AddModifier", "target": "hpMax", "value": 5 }
       ]
     },
     {

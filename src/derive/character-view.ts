@@ -8,6 +8,7 @@ import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { computeAC, type ACResult } from './ac.js';
 import { computeSavingThrow, type SaveResult } from './save.js';
 import { computeSpellSlots, type SpellSlotsResult } from './spell-slots.js';
+import { buildEffectStack } from './effect-stack.js';
 
 const ABILITIES: ReadonlyArray<AbilityScore> = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
@@ -18,6 +19,13 @@ export interface DerivedCharacter {
   readonly proficiencyBonus: number;
   readonly abilityModifiers: Readonly<Record<AbilityScore, number>>;
   readonly hp: HP;
+  // Sum of `AddModifier { target: 'hpMax' }` effects from the character's
+  // active effect stack (Aid, Aspect of the Beast, etc.). The stored
+  // `hp.max` does not include this; consumers display
+  // `effectiveHpMax = hp.max + hpMaxBonus`. Reducer-side rules (massive
+  // damage threshold, heal clamping) still use the stored `hp.max`.
+  readonly hpMaxBonus: number;
+  readonly effectiveHpMax: number;
   readonly ac: ACResult;
   readonly savingThrows: Readonly<Record<AbilityScore, SaveResult>>;
   readonly spellSlots: SpellSlotsResult;
@@ -44,6 +52,7 @@ export const computeDerivedCharacter = (
   const savingThrows = Object.fromEntries(
     ABILITIES.map((a) => [a, computeSavingThrow({ ...input, ability: a })]),
   ) as Record<AbilityScore, SaveResult>;
+  const hpMaxBonus = buildEffectStack(input).modifierSum('hpMax');
 
   return {
     id: input.character.id,
@@ -52,6 +61,8 @@ export const computeDerivedCharacter = (
     proficiencyBonus: proficiencyBonus(totalLevel),
     abilityModifiers: abilityMods,
     hp: input.character.hp,
+    hpMaxBonus,
+    effectiveHpMax: input.character.hp.max + hpMaxBonus,
     ac,
     savingThrows,
     spellSlots: computeSpellSlots(input.character, input.content.classes),

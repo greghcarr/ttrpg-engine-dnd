@@ -72,6 +72,20 @@ const SpellRemoveConditionMechanicSchema = z.object({
   eligibleConditionIds: z.array(z.string()).min(1),
 });
 
+// Rolls a pool of dice; the total is "how many hit points of creatures"
+// the spell can knock out. Targets within range are walked in ascending
+// order of current HP — each target's full HP is subtracted from the
+// pool and `conditionId` (typically `unconscious`) is applied, until
+// the pool can no longer cover the next target. Used by Sleep. The
+// planner skips targets that already have `conditionId` (per the 2024
+// Sleep rewrite, an already-unconscious creature isn't affected).
+const SpellHPPoolKnockoutMechanicSchema = z.object({
+  kind: z.literal('hp-pool-knockout'),
+  poolDice: DiceExpressionSchema,
+  extraPoolDicePerSlotLevel: DiceExpressionSchema.optional(),
+  conditionId: z.string(),
+});
+
 export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
 export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
 export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
@@ -97,6 +111,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellAutoHitMechanicSchema,
   SpellBuffMechanicSchema,
   SpellRemoveConditionMechanicSchema,
+  SpellHPPoolKnockoutMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;
 

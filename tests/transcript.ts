@@ -404,6 +404,11 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const item = itemName(stateBefore, content, event.itemInstanceId);
       return `**${who}** identifies ${item}.`;
     }
+    case 'ShieldCast': {
+      const who = characterName(stateBefore, event.casterId);
+      const outcome = event.preventedHit ? 'turns the hit into a miss' : 'the attack still lands';
+      return `**${who}** casts Shield: +5 AC, ${outcome}.`;
+    }
     case 'WeaponMasteryActivated': {
       const who = characterName(stateBefore, event.attackerId);
       const targetLabel = event.targetId !== undefined

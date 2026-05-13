@@ -102,6 +102,7 @@ import {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
+  ShieldCastEventSchema,
 } from './reactive-spells.js';
 import { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 import {
@@ -219,6 +220,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
+  ShieldCastEventSchema,
   WeaponMasteryActivatedEventSchema,
   MountedEventSchema,
   DismountedEventSchema,
@@ -587,11 +589,13 @@ export {
   SpellCounteredEventSchema,
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
+  ShieldCastEventSchema,
 } from './reactive-spells.js';
 export type {
   SpellCounteredEvent,
   SpellDispelledEvent,
   ItemIdentifiedEvent,
+  ShieldCastEvent,
 } from './reactive-spells.js';
 export { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 export type { WeaponMasteryActivatedEvent } from './weapon-mastery.js';

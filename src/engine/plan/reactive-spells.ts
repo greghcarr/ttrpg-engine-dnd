@@ -18,7 +18,10 @@ import type {
   SpellCounteredEvent,
   SpellDispelledEvent,
   ItemIdentifiedEvent,
+  ShieldCastEvent,
 } from '../../schemas/events/reactive-spells.js';
+import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
+import { newAppliedConditionId } from '../../ids.js';
 import type {
   SpellSlotConsumedEvent,
 } from '../../schemas/events/spellcasting.js';
@@ -254,4 +257,86 @@ export const planIdentify = (
     identifiedByCharacterId: intent.casterId,
   } satisfies ItemIdentifiedEvent);
   return events;
+};
+
+const SHIELD_AC_BONUS = 5;
+const SHIELD_MIN_SLOT_LEVEL = 1;
+
+export interface ShieldIntent {
+  readonly type: 'Shield';
+  readonly casterId: string;
+  // The AttackRolled event id that triggered the reaction. Recorded on
+  // the ShieldCast event for the transcript and for later auditing.
+  readonly triggeringAttackEventId: string;
+  // The d20 total (d20 + all attack modifiers) on the triggering attack.
+  // Consumers extract this from the AttackRolledEvent. Used to determine
+  // whether +5 AC would reduce the hit to a miss.
+  readonly triggeringAttackTotal: number;
+  // The AC of the caster against which the attack resolved (pre-shield).
+  // Consumers extract this from the AttackRolledEvent.
+  readonly originalAC: number;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+export interface ShieldOutcome {
+  readonly events: ReadonlyArray<Event>;
+  readonly preventedHit: boolean;
+}
+
+/**
+ * RAW 2024 PHB Shield: reaction triggered when you're hit by an attack or
+ * targeted by Magic Missile. +5 to AC against the triggering attack and
+ * until the start of your next turn; immune to Magic Missile damage for
+ * the duration.
+ *
+ * The planner emits the reaction, slot, and ConditionApplied('shielded')
+ * events, plus a ShieldCast notification with `preventedHit` set to
+ * indicate whether the +5 was enough to convert the hit into a miss.
+ * The consumer is responsible for omitting the DamageRolled/DamageApplied
+ * chain when `preventedHit === true`.
+ *
+ * Magic Missile immunity is not yet modeled (would need per-spell
+ * immunity primitive); the AC bonus is.
+ */
+export const planShield = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  intent: ShieldIntent,
+): ShieldOutcome => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const slotLevel = intent.slotLevel ?? SHIELD_MIN_SLOT_LEVEL;
+  invariant(slotLevel >= SHIELD_MIN_SLOT_LEVEL, 'Shield is a 1st-level spell');
+  const at = intent.at ?? nowIso();
+
+  const events: Event[] = [];
+  const reaction = economyConsumedIfEncountered(state, intent.casterId, at, 'reaction');
+  if (reaction !== undefined) events.push(reaction);
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  } satisfies SpellSlotConsumedEvent);
+  const shieldedApplied: ConditionAppliedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ConditionApplied',
+    targetId: intent.casterId,
+    conditionId: 'shielded',
+    appliedConditionId: newAppliedConditionId(),
+  };
+  events.push(shieldedApplied);
+  const preventedHit = intent.triggeringAttackTotal < intent.originalAC + SHIELD_AC_BONUS;
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'ShieldCast',
+    casterId: intent.casterId,
+    triggeringAttackEventId: intent.triggeringAttackEventId,
+    preventedHit,
+  } satisfies ShieldCastEvent);
+  return { events, preventedHit };
 };

@@ -16,6 +16,7 @@ import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { planConcentrationBreakOnDrop } from './concentration.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import type { ULID } from '../ids-utils.js';
 
@@ -161,6 +162,18 @@ export const planOffHandAttack = (
     components: mitigated,
     causedByEventId: damageRolled.id,
   };
+  const concentrationBreak = planConcentrationBreakOnDrop(
+    target,
+    mitigated,
+    damageApplied.id,
+    at,
+  );
 
-  return [bonusActionConsumed, attackRolled, damageRolled, damageApplied];
+  return [
+    bonusActionConsumed,
+    attackRolled,
+    damageRolled,
+    damageApplied,
+    ...concentrationBreak,
+  ];
 };

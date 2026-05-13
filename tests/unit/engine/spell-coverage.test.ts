@@ -35,6 +35,7 @@ type Expectation =
   | { kind: 'auto-hit'; minDarts: number }
   | { kind: 'buff'; conditionId: string }
   | { kind: 'remove-condition'; seedConditionId: string }
+  | { kind: 'hp-pool-knockout' }
   | { kind: 'skip'; reason: string };
 
 const SPELL_EXPECTATIONS: Record<string, Expectation> = {
@@ -67,13 +68,13 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'detect-magic': { kind: 'skip', reason: 'detection only, no mechanical effect' },
   'guidance': { kind: 'skip', reason: 'not yet wired (TODO: buff/inspiration roll)' },
   // Defensive / movement spells not yet mechanically modeled.
-  'shield': { kind: 'skip', reason: 'reactive +5 AC (TODO)' },
+  'shield': { kind: 'skip', reason: 'has dedicated planShield (reaction, not planCastSpell)' },
   'mage-armor': { kind: 'buff', conditionId: 'mage-armored' },
-  'misty-step': { kind: 'skip', reason: 'teleport movement (TODO)' },
+  'misty-step': { kind: 'skip', reason: 'has dedicated planMistyStep (bonus action teleport, not planCastSpell)' },
   // Control / crowd-control spells not yet mechanically modeled.
   'faerie-fire': { kind: 'save' },
   'bane': { kind: 'save' },
-  'sleep': { kind: 'skip', reason: 'HP-threshold knockout (TODO)' },
+  'sleep': { kind: 'hp-pool-knockout' },
   'web': { kind: 'save' },
   'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
   // Buffs / utility spells with simple shapes not yet wired.
@@ -217,6 +218,42 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
           const removals = events.filter((e): e is Extract<Event, { type: 'ConditionRemoved' }> => e.type === 'ConditionRemoved');
           expect(removals.length, 'expected at least one ConditionRemoved').toBeGreaterThanOrEqual(1);
           expect(removals.some((e) => e.conditionId === expectation.seedConditionId)).toBe(true);
+          break;
+        }
+        case 'hp-pool-knockout': {
+          // Sleep needs low-HP targets to knock out — Dummy's 50 HP exceeds
+          // the typical 5d8 pool average. The smoke test asserts that at
+          // least one creature in range gets the configured condition for
+          // a pool that *does* cover one of them (so we use a targeted
+          // wounded subject seeded directly).
+          // Targets in this test default to 50 HP, which 5d8 (avg 22.5)
+          // can't knock out. We re-cast against a target with 4 HP to
+          // confirm the planner emits ConditionApplied when the pool fits.
+          const lowTarget = CharacterSchema.parse({
+            id: newCharacterId(),
+            name: 'Sleepy',
+            speciesId: 'human',
+            backgroundId: 'soldier',
+            classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+            abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+            hp: { current: 4, max: 4, temp: 0 },
+            featsTaken: ['savage-attacker'],
+          });
+          let c2 = engine.createCampaign({ name: `spell-${spellId}-low` });
+          c2 = commit(c2, [
+            { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: caster } satisfies CharacterCreatedEvent,
+            { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: lowTarget } satisfies CharacterCreatedEvent,
+          ]);
+          const lowEvents = engine.plan.castSpell(c2.state, {
+            characterId: caster.id,
+            spellId,
+            slotLevel: spell.level,
+            targetIds: [lowTarget.id],
+          }).events;
+          const applied = lowEvents.filter(
+            (e): e is Extract<Event, { type: 'ConditionApplied' }> => e.type === 'ConditionApplied',
+          );
+          expect(applied.length, 'expected the low-HP target to be knocked out').toBeGreaterThanOrEqual(1);
           break;
         }
       }

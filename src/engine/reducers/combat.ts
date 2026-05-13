@@ -155,8 +155,11 @@ export const applyDeathSaveRolled = (
   event: DeathSaveRolledEvent,
 ): void => {
   const character = requireCharacter(state, event.targetId);
+  // RAW: death saves apply whenever you're at 0 HP. This engine lets
+  // hp.current go negative internally to track massive-damage overflow,
+  // but rules-side anything ≤ 0 is "at 0 HP" for death-save purposes.
   invariant(
-    character.hp.current === 0,
+    character.hp.current <= 0,
     `Death saves only apply at 0 HP (character ${event.targetId} has ${character.hp.current})`,
   );
 

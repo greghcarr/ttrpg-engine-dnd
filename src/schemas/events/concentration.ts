@@ -11,6 +11,11 @@ export const ConcentrationStartedEventSchema = EventEnvelopeSchema.extend({
   targetIds: z.array(ULIDSchema).default([]),
   conditionsApplied: z.array(AppliedConditionRefSchema).default([]),
   durationRounds: z.number().int().min(0).optional(),
+  // Wall-clock duration in in-game minutes (parsed from the spell's
+  // duration string at plan time). The reducer pairs this with the
+  // current state.inGameTime to populate EffectInstance.durationMinutes
+  // and startedAtMinutes, used by planExpireSpellDurations.
+  durationMinutes: z.number().int().min(0).optional(),
 });
 export type ConcentrationStartedEvent = z.infer<typeof ConcentrationStartedEventSchema>;
 
@@ -19,6 +24,7 @@ export const ConcentrationBrokenReasonSchema = z.enum([
   'newConcentrationSpell',
   'voluntary',
   'incapacitated',
+  'unconscious',
   'dead',
   'durationEnded',
 ]);

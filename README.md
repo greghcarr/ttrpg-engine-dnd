@@ -104,7 +104,7 @@ Severity column throughout: 🔴 immediately visible to a player at low levels, 
 
 ### Engine gaps
 
-Engine-level features that ship as partial or not at all. Sixteen items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
+Engine-level features that ship as partial or not at all. Eleven items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
 
 #### Missing planners — events and reducers exist, no `plan.*` method
 
@@ -119,16 +119,13 @@ Engine-level features that ship as partial or not at all. Sixteen items, grouped
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
-| Death save auto-roll at start of turn | 🔴 | A1 | `DeathSaveRolledEvent` exists. The encounter advance reducer doesn't emit one for unconscious-at-0-HP combatants at their turn start. Consumers must emit it manually. |
-| Concentration ends on drop to 0 HP | 🔴 | A6 | Long-rest concentration-clearing landed; the 0-HP path didn't. RAW: falling unconscious ends concentration immediately. |
-| Spell duration expiry | 🟡 | A5/A6 | Concentration spells stay active until the caster's concentration breaks. The engine never expires them after their listed duration (1 minute, 1 hour, etc.) even if the consumer tracks time via `InGameTimeAdvanced` events. |
 | Forced-march CON-save loop | ⚪ | 25 | Slice 25 explicitly punts. After 8 hours of travel each additional hour requires a DC 10 + 1/hour CON save; the engine doesn't model this loop. |
 
 #### Missing derivations
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
-| `hpMax` modifier derivation | 🟡 | A1 | `'hpMax'` is a valid `ModifierTarget` in the schema (Aid +5 HP max, Aspect of the Beast, etc.) but no derivation reads it. Effective max comes straight from `Character.hp.max`. Aid's +5-current-HP works; its +5-max doesn't. |
+| `hpMax` modifier derivation (reducer-side enforcement) | ⚪ | A1 | `DerivedCharacter.hpMaxBonus` / `effectiveHpMax` now surface the modifier sum, and Aid applies an `aid-buffed` condition that grants +5. The reducer-side massive-damage threshold still compares against the stored `hp.max` (not the effective max). Visible only in the edge case where damage = effective hpMax exactly. |
 
 #### Missing mechanics inside otherwise-wired primitives
 
@@ -142,9 +139,6 @@ These need engine extensions (new mechanic kinds or planners), not just JSON con
 
 | Spell | Severity | Slice | Why it's hard |
 |---|---|---|---|
-| Sleep | 🔴 | 41 | HP-threshold knockout (rolls a 5d8+ pool, applies unconscious to the lowest-HP creatures from the pool until it runs out). No mechanic kind supports this shape. |
-| Shield | 🔴 | 41 | Reactive +5 AC against the triggering attack. Needs reaction-interrupt timing similar to Counterspell, in `planAttack`'s resolution path. |
-| Misty Step | 🟡 | 41 | Bonus action 30-ft teleport. The movement model exists but no planner for a teleport-with-bonus-action. |
 | Guidance | 🟡 | 41 | Single-use buff that expires on first ability check. Needs a "consume-on-use" condition kind (or an `OnEvent` trigger that auto-removes its own source condition). |
 | Spirit Guardians | 🟡 | 41 | Concentration aura that ticks radiant damage per round on enemies in the area. Needs per-turn aura ticking, friend/foe targeting, and area-leaving-or-entering triggers. |
 
@@ -156,7 +150,7 @@ These need engine extensions (new mechanic kinds or planners), not just JSON con
 
 #### Engine triage
 
-If you're closing engine gaps in priority order for a family-tabletop run at levels 1-5, the 🔴 items hit first: death-save auto-roll, concentration-on-0-HP, and the Sleep / Shield spells. After that, spell duration expiry is the next most likely to be noticed.
+All 🔴 items are now closed. The remaining gaps are 🟡 (visible in specific scenarios) and ⚪ (rare or content-bound).
 
 The 🟡 items become relevant at higher levels or in specific class scenarios. The ⚪ items are edge cases or wait for content that uses them.
 

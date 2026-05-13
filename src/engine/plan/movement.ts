@@ -9,8 +9,10 @@ import type {
   DisengagedEvent,
 } from '../../schemas/events/movement.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import type { SpellCastDeclaredEvent, SpellSlotConsumedEvent } from '../../schemas/events/spellcasting.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
+import { invariant } from '../../internal/invariants.js';
 import type { ULID } from '../ids-utils.js';
 
 export interface MoveIntent {
@@ -128,6 +130,96 @@ export const planDash = (
     combatantId: intent.combatantId,
   };
   return [actionConsumed, dashed];
+};
+
+const MISTY_STEP_RANGE_FEET = 30;
+const MISTY_STEP_MIN_SLOT_LEVEL = 2;
+
+export interface MistyStepIntent {
+  readonly type: 'MistyStep';
+  readonly casterId: string;
+  readonly to: Position;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+/**
+ * RAW 2024 Misty Step: bonus action, 2nd-level conjuration, teleport up
+ * to 30 feet to an unoccupied space you can see. Range is enforced by
+ * Chebyshev distance against the caster's current position; obstacle /
+ * occupancy checks are the consumer's responsibility (the engine doesn't
+ * model line-of-sight beyond the locations grid).
+ *
+ * Emits SpellCastDeclared, SpellSlotConsumed(2+), ActionEconomyConsumed
+ * (bonus), and CombatantMoved.
+ */
+export const planMistyStep = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  intent: MistyStepIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const slotLevel = intent.slotLevel ?? MISTY_STEP_MIN_SLOT_LEVEL;
+  invariant(slotLevel >= MISTY_STEP_MIN_SLOT_LEVEL, 'Misty Step is a 2nd-level spell');
+  const knowsSpell =
+    caster.knownSpells.includes('misty-step') || caster.preparedSpells.includes('misty-step');
+  invariant(knowsSpell, `Caster ${intent.casterId} does not know Misty Step`);
+
+  const { encounterId, combatant, isActive } = findCombatant(state, intent.casterId);
+  if (!isActive) {
+    throw new Error('Only the active combatant may cast Misty Step on their turn');
+  }
+  if (combatant.position === undefined) {
+    throw new Error('Combatant has no position set');
+  }
+  if (combatant.turnUsage.bonusActionUsed) {
+    throw new Error('Bonus action already used this turn');
+  }
+  const distance = chebyshevDistance(combatant.position, intent.to);
+  if (distance > MISTY_STEP_RANGE_FEET) {
+    throw new Error(`Misty Step destination is ${distance}ft away (max 30ft)`);
+  }
+
+  const at = intent.at ?? nowIso();
+  const declared: SpellCastDeclaredEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'misty-step',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.casterId],
+    castAsRitual: false,
+  };
+  const slotConsumed: SpellSlotConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  };
+  const bonusConsumed: ActionEconomyConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ActionEconomyConsumed',
+    encounterId,
+    combatantId: intent.casterId,
+    kind: 'bonusAction',
+  };
+  const moved: CombatantMovedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'CombatantMoved',
+    encounterId,
+    combatantId: intent.casterId,
+    fromPosition: { ...combatant.position },
+    toPosition: { ...intent.to },
+    // RAW: teleportation doesn't consume the caster's normal movement.
+    feetTraveled: 0,
+  };
+  return [declared, slotConsumed, bonusConsumed, moved];
 };
 
 export const planDisengage = (

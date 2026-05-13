@@ -11,13 +11,51 @@ import type {
   TurnEndedEvent,
   TurnStartedEvent,
 } from '../../schemas/events/encounter.js';
+import type { DeathSaveRolledEvent } from '../../schemas/events/combat.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newEventId, newEncounterId } from '../../ids.js';
 import { abilityModifier } from '../../derive/ability.js';
-import { D20_SIDES } from '../../internal/constants.js';
+import { D20_SIDES, NAT_20 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
+import type { Character } from '../../schemas/runtime/character.js';
+
+const DEATH_SAVE_SUCCESS_THRESHOLD = 10;
+const DEATH_SAVE_FAILURES_TO_DIE = 3;
+const DEATH_SAVE_SUCCESSES_TO_STABILIZE = 3;
+
+/**
+ * RAW 2024 PHB ch.1: at the start of an unconscious creature's turn at 0 HP,
+ * if it's neither stable nor already dead (3 failures), it rolls a death save.
+ * The roll is part of the turn-start event chain.
+ */
+const planDeathSaveAtTurnStart = (
+  character: Character | undefined,
+  rng: RNG,
+  causedByEventId: ULID,
+  at: string,
+): ReadonlyArray<DeathSaveRolledEvent> => {
+  if (!character) return [];
+  if (character.hp.current > 0) return [];
+  if (character.deathSaves.stable) return [];
+  if (character.deathSaves.failures >= DEATH_SAVE_FAILURES_TO_DIE) return [];
+  if (character.deathSaves.successes >= DEATH_SAVE_SUCCESSES_TO_STABILIZE) return [];
+  const d20 = rollDie(D20_SIDES, rng);
+  const success = d20 >= DEATH_SAVE_SUCCESS_THRESHOLD;
+  const critical = d20 === NAT_20;
+  const save: DeathSaveRolledEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'DeathSaveRolled',
+    targetId: character.id as ULID,
+    d20,
+    success,
+    critical,
+    causedByEventId,
+  };
+  return [save];
+};
 
 export interface CreateEncounterIntent {
   readonly type: 'CreateEncounter';
@@ -110,6 +148,7 @@ export interface AdvanceTurnIntent {
 export const planAdvanceTurn = (
   state: CampaignState,
   _content: ResolvedContent,
+  rng: RNG,
   intent: AdvanceTurnIntent,
 ): ReadonlyArray<Event> => {
   const encounter = state.encounters[intent.encounterId];
@@ -144,7 +183,13 @@ export const planAdvanceTurn = (
       combatantId: first.combatantId,
       round: encounter.round + 1,
     };
-    return [turnEnd, roundEnd, nextTurn];
+    const deathSave = planDeathSaveAtTurnStart(
+      state.characters[first.combatantId],
+      rng,
+      nextTurn.id,
+      at,
+    );
+    return [turnEnd, roundEnd, nextTurn, ...deathSave];
   }
   const next = encounter.combatants[encounter.activeIndex + 1];
   if (!next) throw new Error('Bad combatant index');
@@ -156,7 +201,13 @@ export const planAdvanceTurn = (
     combatantId: next.combatantId,
     round: encounter.round,
   };
-  return [turnEnd, nextTurn];
+  const deathSave = planDeathSaveAtTurnStart(
+    state.characters[next.combatantId],
+    rng,
+    nextTurn.id,
+    at,
+  );
+  return [turnEnd, nextTurn, ...deathSave];
 };
 
 export interface BeginFirstTurnIntent {
@@ -168,21 +219,29 @@ export interface BeginFirstTurnIntent {
 export const planBeginFirstTurn = (
   state: CampaignState,
   _content: ResolvedContent,
+  rng: RNG,
   intent: BeginFirstTurnIntent,
 ): ReadonlyArray<Event> => {
   const encounter = state.encounters[intent.encounterId];
   if (!encounter) throw new Error(`Unknown encounter ${intent.encounterId}`);
   const first = encounter.combatants[0];
   if (!first) throw new Error('No combatants');
+  const at = intent.at ?? nowIso();
   const turnStart: TurnStartedEvent = {
     id: newEventId() as ULID,
-    at: intent.at ?? nowIso(),
+    at,
     type: 'TurnStarted',
     encounterId: intent.encounterId,
     combatantId: first.combatantId,
     round: encounter.round,
   };
-  return [turnStart];
+  const deathSave = planDeathSaveAtTurnStart(
+    state.characters[first.combatantId],
+    rng,
+    turnStart.id,
+    at,
+  );
+  return [turnStart, ...deathSave];
 };
 
 export interface EndEncounterIntent {

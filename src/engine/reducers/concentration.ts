@@ -24,6 +24,12 @@ export const applyConcentrationStarted = (
     conditionsApplied: [...event.conditionsApplied],
     requiresConcentration: true,
     ...(event.durationRounds !== undefined ? { durationRounds: event.durationRounds } : {}),
+    ...(event.durationMinutes !== undefined
+      ? {
+          durationMinutes: event.durationMinutes,
+          startedAtMinutes: state.inGameTime.totalMinutes,
+        }
+      : {}),
     startedAtEventId: event.id,
   };
   caster.concentrationEffectId = event.effectInstanceId;

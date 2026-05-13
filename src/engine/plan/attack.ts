@@ -16,6 +16,7 @@ import { buildEffectStack } from '../../derive/effect-stack.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { planConcentrationBreakOnDrop } from './concentration.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
@@ -212,8 +213,20 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     components: mitigatedComponents,
     causedByEventId: damageRolled.id,
   };
+  const concentrationBreak = planConcentrationBreakOnDrop(
+    target,
+    mitigatedComponents,
+    damageApplied.id,
+    at,
+  );
 
-  return [attackRolled, ...attackTriggers, damageRolled, damageApplied];
+  return [
+    attackRolled,
+    ...attackTriggers,
+    damageRolled,
+    damageApplied,
+    ...concentrationBreak,
+  ];
 };
 
 export const planAttack = (

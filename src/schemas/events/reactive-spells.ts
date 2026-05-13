@@ -24,3 +24,13 @@ export const ItemIdentifiedEventSchema = EventEnvelopeSchema.extend({
   identifiedByCharacterId: ULIDSchema,
 });
 export type ItemIdentifiedEvent = z.infer<typeof ItemIdentifiedEventSchema>;
+
+export const ShieldCastEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ShieldCast'),
+  casterId: ULIDSchema,
+  triggeringAttackEventId: ULIDSchema,
+  // Whether +5 AC was enough to convert the triggering hit into a miss.
+  // The consumer uses this to decide whether to commit the damage chain.
+  preventedHit: z.boolean(),
+});
+export type ShieldCastEvent = z.infer<typeof ShieldCastEventSchema>;

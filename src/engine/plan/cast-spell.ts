@@ -37,6 +37,8 @@ import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { planConcentrationBreakOnDrop } from './concentration.js';
+import { parseSpellDurationMinutes } from '../../internal/spell-duration.js';
 import {
   CANTRIP_LEVEL,
   D20_SIDES,
@@ -224,6 +226,9 @@ const planAttackMechanic = (
       source: spell.id,
     };
     events.push(damageApplied);
+    events.push(
+      ...planConcentrationBreakOnDrop(target, mitigated, damageApplied.id, at),
+    );
   }
   return events;
 };
@@ -315,6 +320,9 @@ const planSaveMechanic = (
           source: spell.id,
         };
         events.push(damageApplied);
+        events.push(
+          ...planConcentrationBreakOnDrop(target, mitigated, damageApplied.id, at),
+        );
       }
     }
     if (!success && mechanic.conditionOnFail !== undefined) {
@@ -467,6 +475,10 @@ const planAutoHitMechanic = (
   const slotsAboveBase = Math.max(0, intent.slotLevel - spell.level);
   const dartCount = mechanic.dartsAtBaseSlot + slotsAboveBase * (mechanic.extraDartsPerSlotLevel ?? 0);
   const events: Event[] = [];
+  // Track simulated remaining HP per target across darts so we only emit
+  // ConcentrationBroken on the single dart that actually drops them.
+  const simulatedHp = new Map<string, number>();
+  const brokenConcentrationFor = new Set<string>();
   for (let i = 0; i < dartCount; i++) {
     const targetId = intent.targetIds[i] ?? intent.targetIds[intent.targetIds.length - 1];
     if (targetId === undefined) continue;
@@ -492,6 +504,85 @@ const planAutoHitMechanic = (
       source: `${spell.id} (dart ${i + 1})`,
     };
     events.push(damageApplied);
+    if (
+      target.concentrationEffectId !== undefined &&
+      !brokenConcentrationFor.has(targetId)
+    ) {
+      const hpBefore = simulatedHp.get(targetId) ?? target.hp.current;
+      const dartTotal = mitigated.reduce((s, c) => s + c.amount, 0);
+      const hpAfter = Math.max(-target.hp.max, hpBefore - dartTotal);
+      simulatedHp.set(targetId, hpAfter);
+      if (hpBefore > 0 && hpAfter <= 0) {
+        const broken: ConcentrationBrokenEvent = {
+          id: newEventId() as ULID,
+          at,
+          type: 'ConcentrationBroken',
+          effectInstanceId: target.concentrationEffectId,
+          casterId: targetId as ULID,
+          reason: 'unconscious',
+          causedByEventId: damageApplied.id,
+        };
+        events.push(broken);
+        brokenConcentrationFor.add(targetId);
+      }
+    }
+  }
+  return events;
+};
+
+const rollDicePool = (expression: string, rng: RNG): { rolls: number[]; total: number } => {
+  const parsed = parseDiceExpression(expression);
+  const rolls: number[] = [];
+  for (let i = 0; i < parsed.count; i++) {
+    rolls.push(rollDie(parsed.die, rng));
+  }
+  const total = rolls.reduce((s, v) => s + v, 0) + parsed.modifier;
+  return { rolls, total };
+};
+
+const planHPPoolKnockoutMechanic = (
+  state: CampaignState,
+  rng: RNG,
+  intent: CastSpellIntent,
+  spell: Spell,
+  mechanic: Extract<SpellMechanic, { kind: 'hp-pool-knockout' }>,
+  declaredEventId: string,
+  at: string,
+): Event[] => {
+  // 2024 Sleep: roll a pool of dice (5d8 at base, +2d8 per level above 1st).
+  // Walk targets in ascending current-HP order, applying `conditionId`
+  // (typically `unconscious`) and subtracting their HP from the pool, until
+  // the pool can't cover the next target. Targets already carrying the
+  // condition are skipped — they wouldn't waste pool HP, and re-applying
+  // would be a no-op anyway.
+  const { total: basePool } = rollDicePool(mechanic.poolDice, rng);
+  const slotsAbove = Math.max(0, intent.slotLevel - spell.level);
+  let pool = basePool;
+  if (mechanic.extraPoolDicePerSlotLevel !== undefined && slotsAbove > 0) {
+    for (let i = 0; i < slotsAbove; i++) {
+      pool += rollDicePool(mechanic.extraPoolDicePerSlotLevel, rng).total;
+    }
+  }
+  const candidates = intent.targetIds
+    .map((id) => state.characters[id])
+    .filter((c): c is NonNullable<typeof c> => c !== undefined)
+    .filter((c) => !c.appliedConditions.some((cond) => cond.conditionId === mechanic.conditionId))
+    .sort((a, b) => a.hp.current - b.hp.current);
+  const events: Event[] = [];
+  for (const target of candidates) {
+    if (target.hp.current <= 0) continue;
+    if (pool < target.hp.current) break;
+    pool -= target.hp.current;
+    const cond: ConditionAppliedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionApplied',
+      targetId: target.id as ULID,
+      conditionId: mechanic.conditionId,
+      appliedConditionId: newAppliedConditionId(),
+      causedByEventId: declaredEventId as ULID,
+    };
+    events.push(cond);
   }
   return events;
 };
@@ -599,6 +690,10 @@ export const planCastSpell = (
       conditionsApplied.push(...outcome.conditionsApplied);
     } else if (mechanic.kind === 'remove-condition') {
       events.push(...planRemoveConditionMechanic(state, intent, mechanic, declared.id, at));
+    } else if (mechanic.kind === 'hp-pool-knockout') {
+      events.push(
+        ...planHPPoolKnockoutMechanic(state, rng, intent, spell, mechanic, declared.id, at),
+      );
     } else {
       events.push(...planHealMechanic(state, rng, intent, spell, mechanic, declared.id, at));
     }
@@ -617,6 +712,7 @@ export const planCastSpell = (
       };
       events.push(priorBroken);
     }
+    const durationMinutes = parseSpellDurationMinutes(spell.duration);
     const started: ConcentrationStartedEvent = {
       id: newEventId() as ULID,
       at,
@@ -626,6 +722,7 @@ export const planCastSpell = (
       spellId: intent.spellId,
       targetIds: [...intent.targetIds] as ULID[],
       conditionsApplied,
+      ...(durationMinutes !== undefined ? { durationMinutes } : {}),
       causedByEventId: declared.id,
     };
     events.push(started);

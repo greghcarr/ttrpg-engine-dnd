@@ -362,6 +362,11 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
       case 'ItemIdentified':
         applyItemIdentified(draft, event);
         break;
+      case 'ShieldCast':
+        // Pure notification — the AC bump comes from ConditionApplied
+        // ('shielded'), and the consumer decides whether to commit the
+        // damage chain based on the `preventedHit` flag.
+        break;
       case 'WeaponMasteryActivated':
         applyWeaponMasteryActivated(draft, event);
         break;

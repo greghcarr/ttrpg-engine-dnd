@@ -42,16 +42,20 @@ export {
 } from './cast-spell.js';
 export {
   planCheckConcentration,
+  planExpireSpellDurations,
   type CheckConcentrationIntent,
+  type ExpireSpellDurationsIntent,
 } from './concentration.js';
 export {
   planMove,
   planDash,
   planDisengage,
+  planMistyStep,
   chebyshevDistance,
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
+  type MistyStepIntent,
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planOffHandAttack, type OffHandAttackIntent } from './offhand-attack.js';
@@ -70,9 +74,12 @@ export {
   planCounterspell,
   planDispelMagic,
   planIdentify,
+  planShield,
   type CounterspellIntent,
   type DispelMagicIntent,
   type IdentifyIntent,
+  type ShieldIntent,
+  type ShieldOutcome,
 } from './reactive-spells.js';
 export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js';
 export {
