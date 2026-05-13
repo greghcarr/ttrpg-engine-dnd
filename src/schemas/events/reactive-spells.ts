@@ -34,3 +34,19 @@ export const ShieldCastEventSchema = EventEnvelopeSchema.extend({
   preventedHit: z.boolean(),
 });
 export type ShieldCastEvent = z.infer<typeof ShieldCastEventSchema>;
+
+export const GuidanceUsedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('GuidanceUsed'),
+  targetId: ULIDSchema,
+  // The 1d4 roll the target adds to their ability check. The consumer
+  // is responsible for surfacing this number to whoever made the check
+  // (Guidance lets the target see the roll and decide whether to apply
+  // it, but mechanically the engine has already rolled the d4 — the
+  // d4 just goes onto the check's total).
+  d4: z.number().int().min(1).max(4),
+  // Optional reference to the AbilityCheckRolled event this d4 is being
+  // applied to, when the consumer is consuming Guidance in tandem with
+  // a check. Purely informational.
+  abilityCheckEventId: ULIDSchema.optional(),
+});
+export type GuidanceUsedEvent = z.infer<typeof GuidanceUsedEventSchema>;

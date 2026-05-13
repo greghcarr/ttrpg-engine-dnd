@@ -694,6 +694,13 @@ export const planCastSpell = (
       events.push(
         ...planHPPoolKnockoutMechanic(state, rng, intent, spell, mechanic, declared.id, at),
       );
+    } else if (mechanic.kind === 'aura-damage') {
+      // Cast-time no-op: the aura's damage is applied later via
+      // planTickAura, called by the consumer each time the per-turn
+      // tick condition fires (creature enters / starts a turn in range).
+      // The aura's parameters are read from the spell content at tick
+      // time; concentration tracking is enough to know which aura is
+      // active.
     } else {
       events.push(...planHealMechanic(state, rng, intent, spell, mechanic, declared.id, at));
     }
@@ -723,6 +730,7 @@ export const planCastSpell = (
       targetIds: [...intent.targetIds] as ULID[],
       conditionsApplied,
       ...(durationMinutes !== undefined ? { durationMinutes } : {}),
+      slotLevel: intent.slotLevel,
       causedByEventId: declared.id,
     };
     events.push(started);

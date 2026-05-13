@@ -30,6 +30,7 @@ export const applyConcentrationStarted = (
           startedAtMinutes: state.inGameTime.totalMinutes,
         }
       : {}),
+    ...(event.slotLevel !== undefined ? { slotLevel: event.slotLevel } : {}),
     startedAtEventId: event.id,
   };
   caster.concentrationEffectId = event.effectInstanceId;

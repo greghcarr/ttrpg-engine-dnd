@@ -66,7 +66,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'prestidigitation': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
   'light': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
   'detect-magic': { kind: 'skip', reason: 'detection only, no mechanical effect' },
-  'guidance': { kind: 'skip', reason: 'not yet wired (TODO: buff/inspiration roll)' },
+  'guidance': { kind: 'buff', conditionId: 'guided' },
   // Defensive / movement spells not yet mechanically modeled.
   'shield': { kind: 'skip', reason: 'has dedicated planShield (reaction, not planCastSpell)' },
   'mage-armor': { kind: 'buff', conditionId: 'mage-armored' },
@@ -76,10 +76,10 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'bane': { kind: 'save' },
   'sleep': { kind: 'hp-pool-knockout' },
   'web': { kind: 'save' },
-  'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
+  'spirit-guardians': { kind: 'skip', reason: 'aura-damage mechanic: cast itself emits only ConcentrationStarted; damage fires via engine.plan.tickAura per-turn' },
   // Buffs / utility spells with simple shapes not yet wired.
   'aid': { kind: 'heal' },
-  'polymorph': { kind: 'skip', reason: 'transformation spell driven via PolymorphApplied event, not planCastSpell' },
+  'polymorph': { kind: 'skip', reason: 'has dedicated planPolymorph (not planCastSpell)' },
   'lesser-restoration': { kind: 'remove-condition', seedConditionId: 'poisoned' },
 };
 

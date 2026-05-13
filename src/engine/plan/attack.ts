@@ -173,14 +173,27 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
 
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
   const damageAbilityMod = abilityModifier(attacker.abilityScores[damageAbility]);
-  const parsed = parseDiceExpression(weaponDef.damageDice);
+  // Flex mastery: a versatile weapon wielded two-handed (off-hand empty)
+  // uses the larger versatileDice instead of damageDice. RAW 2024.
+  const wieldedTwoHanded =
+    attacker.equipped.mainHand === input.weaponInstanceId &&
+    attacker.equipped.offHand === undefined;
+  const useFlex =
+    weaponDef.mastery === 'Flex' &&
+    weaponDef.properties.includes('versatile') &&
+    weaponDef.versatileDice !== undefined &&
+    wieldedTwoHanded;
+  const damageExpression = useFlex && weaponDef.versatileDice !== undefined
+    ? weaponDef.versatileDice
+    : weaponDef.damageDice;
+  const parsed = parseDiceExpression(damageExpression);
   const totalRolls = critical ? parsed.count * 2 : parsed.count;
   const damageRolls: number[] = [];
   for (let i = 0; i < totalRolls; i++) {
     damageRolls.push(rollDie(parsed.die, rng));
   }
   const damageRollPayload: DamageRoll = {
-    expression: weaponDef.damageDice,
+    expression: damageExpression,
     rolls: damageRolls,
     modifier: damageAbilityMod + parsed.modifier,
     type: weaponDef.damageType,
@@ -249,6 +262,120 @@ export const planAttack = (
     at,
   });
   return [...economyPrelude, ...resolution];
+};
+
+const CLEAVE_TRIGGER_ID = 'mastery:cleave';
+
+export interface CleaveIntent {
+  readonly type: 'Cleave';
+  readonly attackerId: string;
+  readonly secondaryTargetId: string;
+  readonly weaponInstanceId: string;
+  readonly triggeringAttackEventId: string;
+  readonly at?: string;
+}
+
+/**
+ * RAW 2024 Cleave: after hitting a creature with a melee attack using a
+ * weapon with the Cleave mastery, the attacker may attack a second
+ * creature within 5 ft of the first (also within reach). The second
+ * attack uses the same weapon; on a hit it deals the weapon's damage,
+ * but the attacker doesn't add their ability modifier to that damage
+ * unless the modifier is negative. Once per turn.
+ *
+ * The consumer calls this AFTER the triggering attack has been planned
+ * and committed (so they know it hit). The engine validates that the
+ * weapon has Cleave mastery and that Cleave hasn't already been used
+ * this turn (via the `mastery:cleave` trigger counter).
+ *
+ * The 5-ft adjacency check is not enforced — the engine doesn't always
+ * know primary-target position. The consumer is responsible for picking
+ * a legal secondary target.
+ */
+export const planCleave = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: CleaveIntent,
+): ReadonlyArray<Event> => {
+  const attacker = state.characters[intent.attackerId];
+  if (!attacker) throw new Error(`Unknown attacker ${intent.attackerId}`);
+  const weaponInstance = state.itemInstances[intent.weaponInstanceId];
+  if (!weaponInstance) throw new Error(`Unknown weapon ${intent.weaponInstanceId}`);
+  const weaponDef = content.items.get(weaponInstance.definitionId);
+  if (!weaponDef || weaponDef.itemKind !== 'weapon') {
+    throw new Error(`Item ${weaponInstance.definitionId} is not a weapon`);
+  }
+  if (weaponDef.mastery !== 'Cleave') {
+    throw new Error(`Weapon ${weaponDef.name} does not have the Cleave mastery`);
+  }
+  if (weaponDef.attackKind !== 'melee') {
+    throw new Error('Cleave requires a melee weapon');
+  }
+  if (attacker.triggerCounters[CLEAVE_TRIGGER_ID]?.firedThisTurn === true) {
+    throw new Error('Cleave already used this turn');
+  }
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+
+  const resolution = resolveAttack({
+    state,
+    content,
+    rng,
+    attackerId: intent.attackerId,
+    targetId: intent.secondaryTargetId,
+    weaponInstanceId: intent.weaponInstanceId,
+    at,
+  });
+
+  // Strip the attacker's ability modifier from the DamageRolled and
+  // DamageApplied events on the cleave hit, per RAW. Keep negative
+  // ability modifiers (a -1 STR penalty still applies).
+  const damageAbility = chooseDamageAbility(attacker, weaponDef);
+  const abilityMod = abilityModifier(attacker.abilityScores[damageAbility]);
+  const abilityModToStrip = abilityMod > 0 ? abilityMod : 0;
+
+  for (const evt of resolution) {
+    if (evt.type === 'DamageRolled' && abilityModToStrip > 0) {
+      const adjusted = {
+        ...evt,
+        rolls: evt.rolls.map((r) => ({
+          ...r,
+          modifier: r.modifier - abilityModToStrip,
+        })),
+      };
+      events.push(adjusted);
+    } else if (evt.type === 'DamageApplied' && abilityModToStrip > 0) {
+      // Reduce each mitigated component by the proportion attributable
+      // to the ability modifier. Simplest correct treatment: subtract
+      // the ability mod from the *first* component (representing the
+      // weapon's primary damage type) and clamp to 0. Multi-type damage
+      // from Cleave is rare — the mastery is on weapons that deal a
+      // single damage type — so this is fine in practice.
+      const components = [...evt.components];
+      const first = components[0];
+      if (first !== undefined) {
+        const reduced = Math.max(0, first.amount - abilityModToStrip);
+        components[0] = { ...first, amount: reduced };
+      }
+      events.push({ ...evt, components });
+    } else {
+      events.push(evt);
+    }
+  }
+
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'TriggerFired',
+    characterId: intent.attackerId,
+    triggerId: CLEAVE_TRIGGER_ID,
+    cadence: { firedThisTurn: true },
+    causedByEventId: intent.triggeringAttackEventId as ULID,
+  });
+
+  return events;
 };
 
 const findActiveCombatant = (

@@ -6,9 +6,11 @@ import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type { DamageComponent } from '../../schemas/events/combat.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import type { RNG } from '../../rng/index.js';
-import { rollDie } from '../../rng/dice.js';
+import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
 import { computeSavingThrow } from '../../derive/save.js';
+import { computeSpellSaveDC } from '../../derive/spell-dc.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { D20_SIDES } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
@@ -170,4 +172,137 @@ export const planExpireSpellDurations = (
     } satisfies ConcentrationBrokenEvent);
   }
   return events;
+};
+
+export interface TickAuraIntent {
+  readonly type: 'TickAura';
+  readonly casterId: string;
+  readonly targetIds: ReadonlyArray<string>;
+  readonly at?: string;
+}
+
+/**
+ * Runs one tick of the caster's active concentration aura against the
+ * specified targets. Used by Spirit Guardians and similar concentration
+ * auras with the `aura-damage` mechanic. The consumer is responsible
+ * for choosing which targets are affected this turn — RAW Spirit
+ * Guardians: "creatures you choose within 15 feet of you, when they
+ * enter the area for the first time on a turn or start their turn
+ * there." The engine doesn't enforce position / per-turn deduplication;
+ * it just rolls saves and emits damage.
+ */
+export const planTickAura = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: TickAuraIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  if (!caster) throw new Error(`Unknown caster ${intent.casterId}`);
+  const effectId = caster.concentrationEffectId;
+  if (effectId === undefined) {
+    throw new Error('Caster has no active concentration');
+  }
+  const effect = state.effectInstances[effectId];
+  if (!effect) throw new Error('Caster concentration effect not found');
+  const spell = content.spells.get(effect.spellId);
+  if (!spell) throw new Error(`Spell ${effect.spellId} not found in content`);
+  const aura = spell.mechanicalEffects.find((m) => m.kind === 'aura-damage');
+  if (aura === undefined || aura.kind !== 'aura-damage') {
+    throw new Error(`Spell ${spell.id} has no aura-damage mechanic`);
+  }
+
+  const slotLevel = effect.slotLevel ?? spell.level;
+  const slotsAboveBase = Math.max(0, slotLevel - spell.level);
+  const at = intent.at ?? nowIso();
+
+  // Compute the spell's save DC from the caster.
+  const dcResult = computeSpellSaveDC({
+    character: caster,
+    itemInstances: state.itemInstances,
+    content,
+    classId: findCastingClassForSpell(caster, content, spell.id),
+  });
+
+  const events: Event[] = [];
+  for (const targetId of intent.targetIds) {
+    const target = state.characters[targetId];
+    if (!target) continue;
+    const saveDerivation = computeSavingThrow({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      ability: aura.saveAbility,
+    });
+    const d20 = rollDie(D20_SIDES, rng);
+    const total = d20 + saveDerivation.total;
+    const success = total >= dcResult.total;
+    const saveEvent: SaveRolledEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'SaveRolled',
+      targetId: targetId as ULID,
+      ability: aura.saveAbility,
+      dc: dcResult.total,
+      d20: [d20],
+      used: 'none',
+      bonus: saveDerivation.total,
+      total,
+      success,
+      breakdown: [...saveDerivation.breakdown],
+    };
+    events.push(saveEvent);
+
+    // Roll the damage once per target (per-target rolling is the RAW
+    // for per-turn aura ticks — Spirit Guardians says "the creature
+    // takes 3d8 damage" not "the spell rolls 3d8 once for all
+    // creatures hit").
+    const extraDice = (aura.extraDicePerSlotLevel ?? 0) * slotsAboveBase;
+    const parsed = parseDiceExpression(aura.damageDice);
+    const dieCount = parsed.count + extraDice;
+    let rawDamage = parsed.modifier;
+    for (let i = 0; i < dieCount; i++) {
+      rawDamage += rollDie(parsed.die, rng);
+    }
+    const halfOnSuccess = aura.halfOnSuccess !== false;
+    const final = success && halfOnSuccess ? Math.floor(rawDamage / 2) : success ? 0 : rawDamage;
+    if (final <= 0) continue;
+    const mitigated = mitigateDamage({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      rawComponents: [{ amount: final, type: aura.damageType }],
+    });
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'DamageApplied',
+      targetId: targetId as ULID,
+      components: mitigated,
+      causedByEventId: saveEvent.id,
+      sourceCharacterId: intent.casterId as ULID,
+      source: spell.id,
+    });
+  }
+  return events;
+};
+
+const findCastingClassForSpell = (
+  caster: Character,
+  content: ResolvedContent,
+  spellId: string,
+): string => {
+  // Pick the first of the caster's classes that the spell lists as one
+  // of its eligible casting classes. The spell's `classes` array is the
+  // source of truth for "who can cast this." Falls back to the caster's
+  // primary class so the DC computation always has something to work
+  // with — for ill-formed content this at least produces a sensible
+  // number.
+  const spell = content.spells.get(spellId);
+  if (spell !== undefined) {
+    for (const cls of caster.classes) {
+      if (spell.classes.includes(cls.classId)) return cls.classId;
+    }
+  }
+  return caster.classes[0]?.classId ?? 'cleric';
 };

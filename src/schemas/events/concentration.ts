@@ -16,6 +16,11 @@ export const ConcentrationStartedEventSchema = EventEnvelopeSchema.extend({
   // current state.inGameTime to populate EffectInstance.durationMinutes
   // and startedAtMinutes, used by planExpireSpellDurations.
   durationMinutes: z.number().int().min(0).optional(),
+  // The slot level the spell was cast at, copied onto the EffectInstance
+  // so later planners (planTickAura for Spirit Guardians, etc.) can
+  // scale per-cast effects without the consumer holding onto the cast
+  // intent.
+  slotLevel: z.number().int().min(0).optional(),
 });
 export type ConcentrationStartedEvent = z.infer<typeof ConcentrationStartedEventSchema>;
 
@@ -27,6 +32,7 @@ export const ConcentrationBrokenReasonSchema = z.enum([
   'unconscious',
   'dead',
   'durationEnded',
+  'used',
 ]);
 export type ConcentrationBrokenReason = z.infer<typeof ConcentrationBrokenReasonSchema>;
 

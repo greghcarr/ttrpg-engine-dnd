@@ -65,20 +65,39 @@ export const planOffHandAttack = (
   if (active === undefined) {
     throw new Error('Off-hand attack requires being the active combatant in an active encounter');
   }
-  if (active.bonusActionUsed) {
+  // Nick mastery: the off-hand attack becomes part of the Attack action
+  // instead of a Bonus Action, once per turn. RAW 2024.
+  const NICK_TRIGGER_ID = 'mastery:nick';
+  const nickAvailable =
+    weaponDef.mastery === 'Nick' &&
+    (attacker.triggerCounters[NICK_TRIGGER_ID]?.firedThisTurn !== true);
+  if (!nickAvailable && active.bonusActionUsed) {
     throw new Error('Bonus action already used this turn');
   }
 
   const at = intent.at ?? nowIso();
 
-  const bonusActionConsumed: ActionEconomyConsumedEvent = {
-    id: newEventId() as ULID,
-    at,
-    type: 'ActionEconomyConsumed',
-    encounterId: active.encounterId,
-    combatantId: intent.attackerId,
-    kind: 'bonusAction',
-  };
+  const economyEvents: Event[] = [];
+  if (nickAvailable) {
+    // Use Nick: no bonus action consumed; mark the once-per-turn slot used.
+    economyEvents.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'TriggerFired',
+      characterId: intent.attackerId,
+      triggerId: NICK_TRIGGER_ID,
+      cadence: { firedThisTurn: true },
+    });
+  } else {
+    economyEvents.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ActionEconomyConsumed',
+      encounterId: active.encounterId,
+      combatantId: intent.attackerId,
+      kind: 'bonusAction',
+    } satisfies ActionEconomyConsumedEvent);
+  }
 
   const attackBonusResult = computeAttackBonus({
     character: attacker,
@@ -115,7 +134,7 @@ export const planOffHandAttack = (
   };
 
   if (!hit) {
-    return [bonusActionConsumed, attackRolled];
+    return [...economyEvents, attackRolled];
   }
 
   // Off-hand attacks do NOT add ability modifier to damage (except negative).
@@ -170,7 +189,7 @@ export const planOffHandAttack = (
   );
 
   return [
-    bonusActionConsumed,
+    ...economyEvents,
     attackRolled,
     damageRolled,
     damageApplied,

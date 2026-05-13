@@ -432,6 +432,29 @@
       "mastery": "Sap"
     },
     {
+      "id": "battleaxe",
+      "itemKind": "weapon",
+      "name": "Battleaxe",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "slashing",
+      "damageDice": "1d8",
+      "versatileDice": "1d10",
+      "properties": ["versatile"],
+      "mastery": "Flex"
+    },
+    {
+      "id": "greataxe",
+      "itemKind": "weapon",
+      "name": "Greataxe",
+      "category": "martial",
+      "attackKind": "melee",
+      "damageType": "slashing",
+      "damageDice": "1d12",
+      "properties": ["heavy", "two-handed"],
+      "mastery": "Cleave"
+    },
+    {
       "id": "rapier",
       "itemKind": "weapon",
       "name": "Rapier",

@@ -19,8 +19,10 @@ import type {
   SpellDispelledEvent,
   ItemIdentifiedEvent,
   ShieldCastEvent,
+  GuidanceUsedEvent,
 } from '../../schemas/events/reactive-spells.js';
 import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
+import type { ConcentrationBrokenEvent } from '../../schemas/events/concentration.js';
 import { newAppliedConditionId } from '../../ids.js';
 import type {
   SpellSlotConsumedEvent,
@@ -339,4 +341,94 @@ export const planShield = (
     preventedHit,
   } satisfies ShieldCastEvent);
   return { events, preventedHit };
+};
+
+const GUIDANCE_DIE_SIDES = 4;
+
+export interface ConsumeGuidanceIntent {
+  readonly type: 'ConsumeGuidance';
+  readonly targetId: string;
+  // Optional reference to the AbilityCheckRolledEvent the d4 is being
+  // added to — purely informational, surfaces on the GuidanceUsed event
+  // for transcript clarity.
+  readonly abilityCheckEventId?: string;
+  readonly at?: string;
+}
+
+export interface ConsumeGuidanceOutcome {
+  readonly events: ReadonlyArray<Event>;
+  readonly d4: number;
+}
+
+/**
+ * RAW 2024 Guidance: cantrip, V/S, touch, concentration up to 1 minute.
+ * The target rolls a d4 and adds the result to one ability check of
+ * their choice; can roll before or after making the check; the spell
+ * then ends.
+ *
+ * Implementation: the consumer calls this planner when the target wants
+ * to spend their Guidance d4. The engine rolls the d4 and emits a
+ * `GuidanceUsed` event with the value, plus a `ConcentrationBroken`
+ * (reason='used') that lifts the `guided` condition from the target
+ * via the standard concentration-cleanup path.
+ *
+ * The d4 value is returned in the outcome so the consumer can add it
+ * to whichever ability check they're applying it to. The engine does
+ * not modify the check's stored bonus — Guidance is the player's
+ * choice to apply, and the consumer is responsible for the addition.
+ */
+export const planConsumeGuidance = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  rng: RNG,
+  intent: ConsumeGuidanceIntent,
+): ConsumeGuidanceOutcome => {
+  const target = state.characters[intent.targetId];
+  invariant(target !== undefined, `Target ${intent.targetId} not found`);
+  const applied = target.appliedConditions.find((c) => c.conditionId === 'guided');
+  invariant(
+    applied !== undefined,
+    `Target ${intent.targetId} does not have the guided condition`,
+  );
+  const effectInstanceId = (() => {
+    for (const inst of Object.values(state.effectInstances)) {
+      if (inst.spellId !== 'guidance') continue;
+      if (inst.conditionsApplied.some((c) => c.appliedConditionId === applied.id)) {
+        return inst.id;
+      }
+    }
+    return undefined;
+  })();
+  invariant(
+    effectInstanceId !== undefined,
+    'No active Guidance effect instance backs the guided condition',
+  );
+  const caster = (() => {
+    const inst = state.effectInstances[effectInstanceId];
+    return inst === undefined ? undefined : state.characters[inst.casterId];
+  })();
+  invariant(caster !== undefined, 'Guidance caster not found');
+
+  const at = intent.at ?? nowIso();
+  const d4 = rollDie(GUIDANCE_DIE_SIDES, rng);
+  const events: Event[] = [];
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'GuidanceUsed',
+    targetId: intent.targetId as ULID,
+    d4,
+    ...(intent.abilityCheckEventId !== undefined
+      ? { abilityCheckEventId: intent.abilityCheckEventId as ULID }
+      : {}),
+  } satisfies GuidanceUsedEvent);
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'ConcentrationBroken',
+    effectInstanceId: effectInstanceId as ULID,
+    casterId: caster.id as ULID,
+    reason: 'used',
+  } satisfies ConcentrationBrokenEvent);
+  return { events, d4 };
 };

@@ -5,7 +5,14 @@ export {
   type LongRestIntent,
   type RestIntent,
 } from './rest.js';
-export { planAttack, resolveAttack, type AttackIntent, type ResolveAttackInput } from './attack.js';
+export {
+  planAttack,
+  planCleave,
+  resolveAttack,
+  type AttackIntent,
+  type CleaveIntent,
+  type ResolveAttackInput,
+} from './attack.js';
 export {
   planOpportunityAttack,
   type OpportunityAttackIntent,
@@ -43,8 +50,10 @@ export {
 export {
   planCheckConcentration,
   planExpireSpellDurations,
+  planTickAura,
   type CheckConcentrationIntent,
   type ExpireSpellDurationsIntent,
+  type TickAuraIntent,
 } from './concentration.js';
 export {
   planMove,
@@ -75,11 +84,14 @@ export {
   planDispelMagic,
   planIdentify,
   planShield,
+  planConsumeGuidance,
   type CounterspellIntent,
   type DispelMagicIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
+  type ConsumeGuidanceIntent,
+  type ConsumeGuidanceOutcome,
 } from './reactive-spells.js';
 export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js';
 export {
@@ -99,3 +111,10 @@ export {
   type ResurrectIntent,
   type ResurrectVia,
 } from './resurrect.js';
+export {
+  planPolymorph,
+  planWildShape,
+  type PolymorphIntent,
+  type PolymorphOutcome,
+  type WildShapeIntent,
+} from './transformations.js';

@@ -86,6 +86,23 @@ const SpellHPPoolKnockoutMechanicSchema = z.object({
   conditionId: z.string(),
 });
 
+// Concentration aura that ticks per-turn against creatures in range.
+// Cast-time emits ConcentrationStarted only — no save or damage fires.
+// The consumer calls `engine.plan.tickAura({ casterId, targetIds })` at
+// the appropriate moments (entering the area / starting a turn in it,
+// per RAW) and the engine rolls a save and applies damage per target.
+// Used by Spirit Guardians (3d8 radiant or necrotic) and similar
+// concentration auras.
+const SpellAuraDamageMechanicSchema = z.object({
+  kind: z.literal('aura-damage'),
+  rangeFeet: z.number().int().min(0),
+  saveAbility: AbilityScoreSchema,
+  damageDice: DiceExpressionSchema,
+  damageType: DamageTypeSchema,
+  halfOnSuccess: z.boolean().default(true),
+  extraDicePerSlotLevel: z.number().int().min(0).optional(),
+});
+
 export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
 export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
 export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
@@ -112,6 +129,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellBuffMechanicSchema,
   SpellRemoveConditionMechanicSchema,
   SpellHPPoolKnockoutMechanicSchema,
+  SpellAuraDamageMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;
 

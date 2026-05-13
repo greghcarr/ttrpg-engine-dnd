@@ -409,6 +409,10 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const outcome = event.preventedHit ? 'turns the hit into a miss' : 'the attack still lands';
       return `**${who}** casts Shield: +5 AC, ${outcome}.`;
     }
+    case 'GuidanceUsed': {
+      const who = characterName(stateBefore, event.targetId);
+      return `**${who}** spends Guidance: +${event.d4} to the ability check.`;
+    }
     case 'WeaponMasteryActivated': {
       const who = characterName(stateBefore, event.attackerId);
       const targetLabel = event.targetId !== undefined

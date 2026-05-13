@@ -23,6 +23,11 @@ export const EffectInstanceSchema = z.object({
   // In-game time (state.inGameTime.totalMinutes) at which the effect
   // started. Combined with durationMinutes to determine expiry.
   startedAtMinutes: z.number().int().min(0).optional(),
+  // The slot level the spell was cast at. Needed by planTickAura (and
+  // any future planner that needs to scale per-cast effects based on the
+  // upcasted slot level) since the consumer doesn't always have the cast
+  // intent in hand at tick time.
+  slotLevel: z.number().int().min(0).optional(),
   startedAtEventId: ULIDSchema,
 });
 export type EffectInstance = z.infer<typeof EffectInstanceSchema>;

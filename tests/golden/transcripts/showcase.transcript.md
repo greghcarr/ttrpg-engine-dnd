@@ -122,7 +122,7 @@ Damage rolled: 1d4=[4]+4 piercing.
 
 **Goblin Scout A** takes 8 damage (8 piercing). (HP 4 -> -4)
 
-_(Vex consumes bonusAction)_
+_(nick triggers for Vex)_
 
 **Vex** attacks **Goblin Scout A**: d20(1) + 7 = 8 vs AC 15 -> miss.
 

@@ -4,7 +4,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
-Engine-gap punch-list: closed 7 of 16 items from the README's Known-gaps section — all 4 🔴 entries plus 3 🟡. Test count grew from 563 to 585 (22 new tests across 7 new files); all replay-equivalence and RNG-capture invariants still hold.
+Engine-gap punch-list: closed 12 of 16 items from the README's Known-gaps section — all 4 🔴 entries, all 7 🟡, plus 1 ⚪ (hpMax derivation). The remaining 5 are all ⚪ or content-bound. Test count grew from 563 to 607 (44 new tests across 12 new files); all replay-equivalence and RNG-capture invariants still hold.
 
 ### Added
 
@@ -13,7 +13,14 @@ Engine-gap punch-list: closed 7 of 16 items from the README's Known-gaps section
 - **`engine.plan.mistyStep`** — dedicated bonus-action teleport planner. Validates spell knowledge, slot, bonus-action availability, and 30-ft Chebyshev range; emits `SpellCastDeclared`, `SpellSlotConsumed(2+)`, `ActionEconomyConsumed(bonusAction)`, and `CombatantMoved(feetTraveled: 0)`.
 - **`engine.plan.expireSpellDurations`** — emits `ConcentrationBroken(reason='durationEnded')` events for every active effect whose listed duration has elapsed by the current in-game clock. New `parseSpellDurationMinutes` parses common 2024 duration phrasings. `EffectInstance` gains `durationMinutes` / `startedAtMinutes`; `ConcentrationStarted` carries `durationMinutes` which the reducer pairs with the in-game clock.
 - **`DerivedCharacter.hpMaxBonus` / `effectiveHpMax`** — character-view derivation now surfaces the sum of `AddModifier{target:'hpMax'}` effects. Aid adds a new `aid-buffed` condition that grants +5 hpMax. Reducer-side massive-damage threshold still compares against the stored `hp.max` (full enforcement is a larger refactor).
-- **`ShieldCastEvent`** and `ConcentrationBrokenReason` value `'unconscious'`.
+- **`engine.plan.consumeGuidance`** — rolls the Guidance d4 for the target, removes the `guided` condition, and ends the caster's concentration (`reason='used'`). Pairs with a new `GuidanceUsed` event and a new `'guided'` condition (no static effects; the d4 is rolled at consume time so the player can choose when to apply it).
+- **`engine.plan.cleave`** — companion to a successful melee hit with a Cleave-mastery weapon. Rolls a follow-up attack against a second target, strips the attacker's positive ability modifier from damage per RAW, and marks `mastery:cleave` as fired this turn (re-invocation in the same turn throws).
+- **Nick mastery in `engine.plan.offHandAttack`** — when the off-hand weapon has Nick, the planner emits `TriggerFired('mastery:nick')` instead of `ActionEconomyConsumed('bonusAction')` once per turn.
+- **Flex mastery in `engine.plan.attack`** — versatile weapons with Flex mastery wielded two-handed (off-hand empty) roll the larger `versatileDice` at attack time.
+- **`engine.plan.tickAura`** + `aura-damage` `SpellMechanic` — concentration auras like Spirit Guardians register at cast time (only `ConcentrationStarted` fires) and the consumer calls `tickAura({ casterId, targetIds })` per turn for the affected creatures. Each tick rolls a save and applies damage independently per target.
+- **`engine.plan.polymorph`** — full RAW validation: caster knowledge, 4th+ slot, target's level caps the form CR, optional WIS save for unwilling targets (the slot is still spent on a successful save), breaks the caster's prior concentration before starting the new one. Returns `{ events, resisted }`.
+- **`engine.plan.wildShape`** — druid bonus-action transform. Validates druid level ≥ 2, available `wild-shape` resource pool, form CR cap by level (1/4 / 1/2 / 1 at L2 / L4 / L8), and flying-speed gating until L8. Emits `ActionEconomyConsumed('bonusAction')` (when in an encounter), `ResourceSpent('wild-shape', 1)`, and `PolymorphApplied(kind='wild-shape')`.
+- **Events / enums**: `ShieldCastEvent`, `GuidanceUsedEvent`, new `ConcentrationBrokenReason` values `'unconscious'` and `'used'`, new `SpellMechanic` kinds `aura-damage` and `hp-pool-knockout`, new `EffectInstance` fields `slotLevel` / `durationMinutes` / `startedAtMinutes`, new `ConcentrationStartedEvent.slotLevel` (so planners that need the upcast level at tick time can read it off the instance).
 
 ### Fixed
 
@@ -22,8 +29,9 @@ Engine-gap punch-list: closed 7 of 16 items from the README's Known-gaps section
 
 ### Documentation
 
-- **README "Known gaps"** updated as each gap closed — engine count 16 → 10, spell-coverage row updated, partial-status bullets reworded, Slice 41 roadmap entry rewritten.
-- **docs/authoring-content-packs.md** SpellMechanic table updated from six kinds to seven (adds `hp-pool-knockout` row).
+- **README "Known gaps"** updated as each gap closed — engine count 16 → 5, spell-coverage row updated, partial-status bullets reworded, Slice 41 roadmap entry rewritten.
+- **docs/authoring-content-packs.md** SpellMechanic table now lists eight kinds (adds `hp-pool-knockout` and `aura-damage`).
+- **docs/api-overview.md** planner lists updated with `mistyStep`, `shield`, `expireSpellDurations`, `consumeGuidance`, `cleave`, `tickAura`, `polymorph`, `wildShape`.
 
 ## 0.1.0-alpha.2 (2026-05-13)
 

@@ -367,6 +367,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // ('shielded'), and the consumer decides whether to commit the
         // damage chain based on the `preventedHit` flag.
         break;
+      case 'GuidanceUsed':
+        // Pure notification — the 'guided' condition is lifted by the
+        // ConcentrationBroken(reason='used') that the planner emits
+        // alongside this event. The d4 value is informational; the
+        // consumer adds it to whatever ability check it applies to.
+        break;
       case 'WeaponMasteryActivated':
         applyWeaponMasteryActivated(draft, event);
         break;

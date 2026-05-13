@@ -84,13 +84,13 @@ Beyond the architecture, here's the honest split:
 
 - **Fully wired** (engine + content for the slice ships and works): Phases A and B in their entirety. In Phase C: grapple/shove/hide, the reactive trio (Counterspell / Dispel Magic / Identify), mounts and vehicles, NPC reactions and morale, downtime, magic-item charges, and resurrection. In Phase D: examples, docs, public API conveniences, memoization, npm publish, content validator. In Phase E: Bastions, epic boons.
 - **Partially wired** (machinery exists, scope is narrower than the slice title implies):
-  - Weapon Mastery (Slice 23): six of the nine masteries (Sap / Vex / Topple / Push / Graze / Slow); Cleave / Nick / Flex are deferred sequencing concerns.
+  - Weapon Mastery (Slice 23): all nine masteries land. Sap / Vex / Topple / Push / Graze / Slow run via `planWeaponMastery`; Cleave / Nick / Flex are sequencing concerns wired into the attack pipeline (Flex switches the damage die at use time, Nick converts the bonus-action off-hand attack into a once-per-turn freebie, Cleave runs via `engine.plan.cleave`).
   - Travel (Slice 25): per-leg events ship, but forced-march CON saves are a consumer responsibility (no auto-loop).
-  - Transformations (Slice 30): `PolymorphApplied` / `PolymorphReverted` reducers swap form correctly, but there's no `planPolymorph` or `planWildShape`. Wish records stress only. Simulacrum is a shallow HP clone.
+  - Transformations (Slice 30): `engine.plan.polymorph` and `engine.plan.wildShape` land. `planSimulacrum` is still a shallow HP clone (no 12-hour cast / 1500gp ruby / shared-concentration checks); `planWish` records stress only.
   - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
   - Spells (Slice 41): ~33 spells in the pack; ~26 of those have full mechanical effects wired. Guidance and Spirit Guardians remain schema-only TODOs; the utility cantrips (Mage Hand, Prestidigitation, Light, Detect Magic) are intentionally narrative-only.
   - Variant rules (Slice 46): the `CampaignSettings` flags exist (`grittyRest`, `heroPoints`, `sanity`, `massCombat`) but the engine does not enforce them — consumer's job.
-- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (10 items), content (inventory), and test infrastructure (3 items) — all in one place.
+- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (5 items), content (inventory), and test infrastructure (3 items) — all in one place.
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
 
@@ -104,14 +104,12 @@ Severity column throughout: 🔴 immediately visible to a player at low levels, 
 
 ### Engine gaps
 
-Engine-level features that ship as partial or not at all. Ten items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
+Engine-level features that ship as partial or not at all. Five items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
 
 #### Missing planners — events and reducers exist, no `plan.*` method
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
-| `planPolymorph` | 🟡 | 30 | `PolymorphApplied` reducer swaps form correctly. No planner validates slot consumption, target willingness, the form-by-CR rule, or the concentration link. Consumers emit `PolymorphApplied` directly. |
-| `planWildShape` | 🟡 | 30 | Same machinery as Polymorph; no planner. The form library, transformation cadence, and Wild Shape resource consumption are all consumer-side. |
 | `planSimulacrum` | ⚪ | 30 | `SimulacrumCreated` reducer clones a character into a creature at half-HP. No planner validates the 12-hour cast, 1500gp ruby, or shared-concentration constraints. |
 | `planWish` | ⚪ | 30 | `WishGranted` records a freeform wish + stress flag. No planner validates the 9th-level slot, the predefined-effects shortcut list, or applies the stress cascade beyond exhaustion. |
 
@@ -126,21 +124,6 @@ Engine-level features that ship as partial or not at all. Ten items, grouped by 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `hpMax` modifier derivation (reducer-side enforcement) | ⚪ | A1 | `DerivedCharacter.hpMaxBonus` / `effectiveHpMax` now surface the modifier sum, and Aid applies an `aid-buffed` condition that grants +5. The reducer-side massive-damage threshold still compares against the stored `hp.max` (not the effective max). Visible only in the edge case where damage = effective hpMax exactly. |
-
-#### Missing mechanics inside otherwise-wired primitives
-
-| Gap | Severity | Slice | What's missing |
-|---|---|---|---|
-| Cleave / Nick / Flex weapon masteries | 🟡 | 23 | Slice 23 explicitly deferred. Each is a sequencing concern inside `planAttack`: Cleave (extra attack on adjacent if first hit), Nick (light-weapon extra attack as part of the attack action), Flex (versatile damage die at use time). The other 6 of 9 masteries work. |
-
-#### Specific spells with no mechanics wired
-
-These need engine extensions (new mechanic kinds or planners), not just JSON content. The starter pack ships them schema-only.
-
-| Spell | Severity | Slice | Why it's hard |
-|---|---|---|---|
-| Guidance | 🟡 | 41 | Single-use buff that expires on first ability check. Needs a "consume-on-use" condition kind (or an `OnEvent` trigger that auto-removes its own source condition). |
-| Spirit Guardians | 🟡 | 41 | Concentration aura that ticks radiant damage per round on enemies in the area. Needs per-turn aura ticking, friend/foe targeting, and area-leaving-or-entering triggers. |
 
 #### Variant-rule enforcement
 

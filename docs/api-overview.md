@@ -23,13 +23,15 @@ Every planner returns `{ events: Event[] }` with the resolution chain baked in (
 
 **Resting & resources**: `shortRest`, `longRest`, `rest` (generic).
 
-**Combat**: `attack`, `opportunityAttack`, `actionSurge`, `offHandAttack`, `multiattack`, `falling`.
+**Combat**: `attack`, `cleave`, `opportunityAttack`, `actionSurge`, `offHandAttack`, `multiattack`, `falling`.
 
 **Encounter lifecycle**: `createEncounter`, `rollInitiative`, `startEncounter`, `beginFirstTurn`, `advanceTurn`, `endEncounter`.
 
 **Movement**: `move`, `dash`, `disengage`, `mistyStep`.
 
-**Spellcasting**: `castSpell`, `checkConcentration`, `expireSpellDurations`, `counterspell`, `dispelMagic`, `identify`, `shield`.
+**Spellcasting**: `castSpell`, `checkConcentration`, `expireSpellDurations`, `tickAura`, `consumeGuidance`, `counterspell`, `dispelMagic`, `identify`, `shield`.
+
+**Transformations**: `polymorph`, `wildShape`.
 
 **Checks & saves**: `save`, `abilityCheck`.
 
@@ -61,7 +63,7 @@ Every state transition is an event. The discriminated union `Event` lives at `Ev
 Categories:
 
 - **Combat**: `DamageApplied`, `Healed`, `TempHPGranted`, `ConditionApplied/Removed`, `DeathSaveRolled`, `Stabilized`, `ExhaustionChanged`, `AttackRolled`, `DamageRolled`, `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed`, `ConcentrationStarted/Broken`, `TriggerFired`, `ActionEconomyConsumed`, `CombatantMoved`, `Dashed`, `Disengaged`, `SaveRolled`, `AbilityCheckRolled`.
-- **Spellcasting (reactive)**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`.
+- **Spellcasting (reactive)**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`, `GuidanceUsed`.
 - **Weapon mastery**: `WeaponMasteryActivated`.
 - **Encounter**: `EncounterCreated/Started/Ended`, `InitiativeRolled`, `TurnStarted/Ended`, `RoundEnded`.
 - **Resting**: `ShortRestStarted/Ended`, `LongRestStarted/Ended`, `HitDieSpent`, `ResourceSpent/Restored`.

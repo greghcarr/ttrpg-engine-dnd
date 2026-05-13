@@ -23,6 +23,7 @@ import {
   planShortRest,
   planLongRest,
   planAttack,
+  planCleave,
   planCreateEncounter,
   planRollInitiative,
   planStartEncounter,
@@ -36,6 +37,7 @@ import {
   planCastSpell,
   planCheckConcentration,
   planExpireSpellDurations,
+  planTickAura,
   planOpportunityAttack,
   planMove,
   planDash,
@@ -52,12 +54,15 @@ import {
   planDispelMagic,
   planIdentify,
   planShield,
+  planConsumeGuidance,
   planWeaponMastery,
   planForage,
   planNavigationCheck,
   planMoraleCheck,
   planReactionRoll,
   planResurrect,
+  planPolymorph,
+  planWildShape,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -66,14 +71,20 @@ import {
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
+  type ConsumeGuidanceIntent,
+  type ConsumeGuidanceOutcome,
   type WeaponMasteryIntent,
   type ForageIntent,
   type NavigationCheckIntent,
   type MoraleCheckIntent,
   type ReactionRollIntent,
   type ResurrectIntent,
+  type PolymorphIntent,
+  type PolymorphOutcome,
+  type WildShapeIntent,
   type RestIntent,
   type AttackIntent,
+  type CleaveIntent,
   type OpportunityAttackIntent,
   type MoveIntent,
   type DashIntent,
@@ -96,6 +107,7 @@ import {
   type CastSpellIntent,
   type CheckConcentrationIntent,
   type ExpireSpellDurationsIntent,
+  type TickAuraIntent,
 } from './plan/index.js';
 import { newCampaignId } from '../ids.js';
 import { SCHEMA_VERSION } from '../version.js';
@@ -143,6 +155,7 @@ export interface Engine {
     longRest(state: CampaignState, intent: { participantIds: ReadonlyArray<string>; at?: string }): PlanResult;
     rest(state: CampaignState, intent: RestIntent): PlanResult;
     attack(state: CampaignState, intent: Omit<AttackIntent, 'type'>): PlanResult;
+    cleave(state: CampaignState, intent: Omit<CleaveIntent, 'type'>): PlanResult;
     opportunityAttack(state: CampaignState, intent: Omit<OpportunityAttackIntent, 'type'>): PlanResult;
     createEncounter(
       state: CampaignState,
@@ -166,6 +179,7 @@ export interface Engine {
       state: CampaignState,
       intent?: Omit<ExpireSpellDurationsIntent, 'type'>,
     ): PlanResult;
+    tickAura(state: CampaignState, intent: Omit<TickAuraIntent, 'type'>): PlanResult;
     move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
     dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
@@ -181,12 +195,18 @@ export interface Engine {
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
+    consumeGuidance(
+      state: CampaignState,
+      intent: Omit<ConsumeGuidanceIntent, 'type'>,
+    ): ConsumeGuidanceOutcome;
     weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
     forage(state: CampaignState, intent: Omit<ForageIntent, 'type'>): PlanResult;
     navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
     moraleCheck(state: CampaignState, intent: Omit<MoraleCheckIntent, 'type'>): PlanResult;
     reactionRoll(state: CampaignState, intent: Omit<ReactionRollIntent, 'type'>): PlanResult;
     resurrect(state: CampaignState, intent: Omit<ResurrectIntent, 'type'>): PlanResult;
+    polymorph(state: CampaignState, intent: Omit<PolymorphIntent, 'type'>): PolymorphOutcome;
+    wildShape(state: CampaignState, intent: Omit<WildShapeIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -230,6 +250,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     attack(state, intent) {
       return { events: planAttack(state, content, rng, { type: 'Attack', ...intent }) };
+    },
+    cleave(state, intent) {
+      return { events: planCleave(state, content, rng, { type: 'Cleave', ...intent }) };
     },
     opportunityAttack(state, intent) {
       return {
@@ -290,6 +313,11 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
         }),
       };
     },
+    tickAura(state, intent) {
+      return {
+        events: planTickAura(state, content, rng, { type: 'TickAura', ...intent }),
+      };
+    },
     move(state, intent) {
       return { events: planMove(state, content, { type: 'Move', ...intent }) };
     },
@@ -335,6 +363,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     shield(state, intent) {
       return planShield(state, content, { type: 'Shield', ...intent });
     },
+    consumeGuidance(state, intent) {
+      return planConsumeGuidance(state, content, rng, {
+        type: 'ConsumeGuidance',
+        ...intent,
+      });
+    },
     weaponMastery(state, intent) {
       return { events: planWeaponMastery(state, content, rng, { type: 'WeaponMastery', ...intent }) };
     },
@@ -352,6 +386,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     resurrect(state, intent) {
       return { events: planResurrect(state, content, { type: 'Resurrect', ...intent }) };
+    },
+    polymorph(state, intent) {
+      return planPolymorph(state, content, rng, { type: 'Polymorph', ...intent });
+    },
+    wildShape(state, intent) {
+      return { events: planWildShape(state, content, rng, { type: 'WildShape', ...intent }) };
     },
   };
 

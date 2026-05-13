@@ -773,7 +773,10 @@
       "duration": "1 minute",
       "concentration": true,
       "ritual": false,
-      "classes": ["cleric", "druid"]
+      "classes": ["cleric", "druid"],
+      "mechanicalEffects": [
+        { "kind": "buff", "conditionId": "guided" }
+      ]
     },
     {
       "id": "light",
@@ -1089,7 +1092,18 @@
       "concentration": true,
       "ritual": false,
       "classes": ["cleric"],
-      "targeting": { "shape": "sphere", "size": 15 }
+      "targeting": { "shape": "sphere", "size": 15 },
+      "mechanicalEffects": [
+        {
+          "kind": "aura-damage",
+          "rangeFeet": 15,
+          "saveAbility": "WIS",
+          "damageDice": "3d8",
+          "damageType": "radiant",
+          "halfOnSuccess": true,
+          "extraDicePerSlotLevel": 1
+        }
+      ]
     },
     {
       "id": "identify",
@@ -1481,6 +1495,14 @@
       "effects": [
         { "kind": "AddModifier", "target": "hpMax", "value": 5 }
       ]
+    },
+    {
+      "id": "guided",
+      "name": "Guided",
+      "description": "May add 1d4 to one ability check; consumed on use (Guidance spell).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "blinded",
