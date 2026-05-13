@@ -415,6 +415,8 @@ export type {
   NavigationCheckIntent,
   MoraleCheckIntent,
   ReactionRollIntent,
+  ResurrectIntent,
+  ResurrectVia,
 } from './engine/plan/index.js';
 export {
   AttitudeChangedEventSchema,
@@ -483,11 +485,14 @@ export type { CampaignSettingsChangedEvent } from './schemas/events/index.js';
 export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,
+  ResurrectionViaSchema,
   RESURRECTION_SPELLS,
+  RESURRECTION_VIAS,
 } from './schemas/events/index.js';
 export type {
   CharacterResurrectedEvent,
   ResurrectionSpell,
+  ResurrectionVia,
 } from './schemas/events/index.js';
 export {
   PolymorphAppliedEventSchema,

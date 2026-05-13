@@ -238,6 +238,46 @@ describe('engine.plan.castSpell', () => {
     expect(() => engine.applyAll(campaign.state, events)).not.toThrow();
   });
 
+  it('AoE save mechanic rolls damage once for the whole effect', () => {
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
+    const wizard = buildWizard();
+    const a = buildFighter({ hpMax: 30, hpCurrent: 30 });
+    const b = buildFighter({ hpMax: 30, hpCurrent: 30 });
+    const c = buildFighter({ hpMax: 30, hpCurrent: 30 });
+    let campaign = engine.createCampaign({ name: 'aoe' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: a } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: b } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: c } satisfies CharacterCreatedEvent,
+    ]);
+    const events = engine.plan.castSpell(campaign.state, {
+      characterId: wizard.id,
+      spellId: 'fireball',
+      slotLevel: 3,
+      targetIds: [a.id, b.id, c.id],
+    }).events;
+    const damageEvents = events.filter((e) => e.type === 'DamageApplied');
+    expect(damageEvents.length).toBeGreaterThan(0);
+    // Bucket each target's raw (pre-mitigation) damage. Full-fail targets
+    // should all share one bucket; half-on-save targets share another that
+    // is exactly floor(full / 2). Distinct rolls would scatter across many
+    // independent buckets and break this invariant.
+    const fullByTarget = new Map<string, number>();
+    for (const ev of damageEvents) {
+      const e = ev as { targetId: string; components: ReadonlyArray<{ amount: number }> };
+      const total = e.components.reduce((s, c) => s + c.amount, 0);
+      fullByTarget.set(e.targetId, total);
+    }
+    const sums = [...fullByTarget.values()].sort((a, b) => a - b);
+    const fullDamage = sums[sums.length - 1] ?? 0;
+    for (const s of sums) {
+      const isFull = s === fullDamage;
+      const isHalf = s === Math.floor(fullDamage / 2);
+      expect(isFull || isHalf).toBe(true);
+    }
+  });
+
   it('declared event carries the right metadata', () => {
     const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(1) });
     const wizard = buildWizard();

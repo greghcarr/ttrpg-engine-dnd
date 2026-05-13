@@ -219,6 +219,8 @@ const planAttackMechanic = (
       targetId,
       components: mitigated,
       causedByEventId: damageRolled.id,
+      sourceCharacterId: intent.characterId as ULID,
+      source: spell.id,
     };
     events.push(damageApplied);
   }
@@ -254,6 +256,15 @@ const planSaveMechanic = (
   const events: Event[] = [];
   const conditionsApplied: AppliedConditionRef[] = [];
 
+  // Per PHB 2024 "Areas of Effect" — damage is rolled once for the spell and
+  // applied to every target (halved on a successful save where applicable).
+  let rawDamage = 0;
+  if (mechanic.damageDice !== undefined && mechanic.damageType !== undefined) {
+    const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, false);
+    const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, false);
+    rawDamage = [...baseRolls, ...scalingRolls].reduce((s, v) => s + v, 0) + modifier;
+  }
+
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
     if (!target) continue;
@@ -283,11 +294,7 @@ const planSaveMechanic = (
     events.push(saveEvent);
 
     if (mechanic.damageDice !== undefined && mechanic.damageType !== undefined) {
-      const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, false);
-      const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, false);
-      const rolls = [...baseRolls, ...scalingRolls];
-      const raw = rolls.reduce((s, v) => s + v, 0) + modifier;
-      const finalAmount = success && mechanic.halfOnSuccess === true ? halveDamage(raw) : success ? 0 : raw;
+      const finalAmount = success && mechanic.halfOnSuccess === true ? halveDamage(rawDamage) : success ? 0 : rawDamage;
       if (finalAmount > 0) {
         const mitigated = mitigateDamage({
           character: target,
@@ -302,6 +309,8 @@ const planSaveMechanic = (
           targetId,
           components: mitigated,
           causedByEventId: saveEvent.id,
+          sourceCharacterId: intent.characterId as ULID,
+          source: spell.id,
         };
         events.push(damageApplied);
       }

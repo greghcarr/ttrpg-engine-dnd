@@ -88,7 +88,6 @@ import type {
   ItemChargeConsumedEvent,
   ItemRechargedEvent,
 } from '../../src/schemas/events/charges.js';
-import type { CharacterResurrectedEvent } from '../../src/schemas/events/resurrection.js';
 import type {
   PolymorphAppliedEvent,
   PolymorphRevertedEvent,
@@ -1104,20 +1103,20 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       }).events,
     );
 
-    // Vex is unconscious-at-0. Brother Cassius (Paladin 5, prepares
-    // Revivify) casts it; per RAW he consumes a 300 gp diamond from
-    // his component pouch (the showcase doesn't model component
-    // consumption explicitly to avoid coupling to the party purse).
-    // Vex returns at 1 HP.
-    campaign = commit(campaign, [
-      evt<CharacterResurrectedEvent>({
-        type: 'CharacterResurrected',
-        characterId: vex.id,
+    // Vex is unconscious-at-0. Brother Cassius is a Paladin 5 and so
+    // has no 3rd-level slots of his own to cast Revivify natively; he
+    // burns a Scroll of Revivify the party found in act 2 (consumers
+    // are expected to model scroll inventory; the showcase elides
+    // that). Vex returns at 1 HP.
+    campaign = commit(
+      campaign,
+      engine.plan.resurrect(campaign.state, {
+        casterId: cassius.id,
+        targetId: vex.id,
         spell: 'revivify',
-        byCharacterId: cassius.id,
-        hpAfter: 1,
-      }),
-    ]);
+        via: 'scroll',
+      }).events,
+    );
     // Vex drinks a Potion of Greater Healing to recover further.
     campaign = commit(campaign, [
       evt({

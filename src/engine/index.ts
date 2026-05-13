@@ -54,6 +54,7 @@ import {
   planNavigationCheck,
   planMoraleCheck,
   planReactionRoll,
+  planResurrect,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -65,6 +66,7 @@ import {
   type NavigationCheckIntent,
   type MoraleCheckIntent,
   type ReactionRollIntent,
+  type ResurrectIntent,
   type RestIntent,
   type AttackIntent,
   type OpportunityAttackIntent,
@@ -171,6 +173,7 @@ export interface Engine {
     navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
     moraleCheck(state: CampaignState, intent: Omit<MoraleCheckIntent, 'type'>): PlanResult;
     reactionRoll(state: CampaignState, intent: Omit<ReactionRollIntent, 'type'>): PlanResult;
+    resurrect(state: CampaignState, intent: Omit<ResurrectIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -319,6 +322,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     reactionRoll(state, intent) {
       return { events: planReactionRoll(state, content, rng, { type: 'ReactionRoll', ...intent }) };
+    },
+    resurrect(state, intent) {
+      return { events: planResurrect(state, content, { type: 'Resurrect', ...intent }) };
     },
   };
 

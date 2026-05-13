@@ -87,3 +87,8 @@ export {
   type MoraleCheckIntent,
   type ReactionRollIntent,
 } from './npc.js';
+export {
+  planResurrect,
+  type ResurrectIntent,
+  type ResurrectVia,
+} from './resurrect.js';

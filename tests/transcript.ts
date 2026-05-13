@@ -485,8 +485,13 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const caster = event.byCharacterId !== undefined
         ? ` by **${characterName(stateBefore, event.byCharacterId)}**`
         : '';
+      const viaLabel = event.via === 'scroll'
+        ? ' (from a scroll)'
+        : event.via === 'special'
+          ? ' (special)'
+          : '';
       const newSpecies = event.newSpeciesId !== undefined ? `, reborn as ${event.newSpeciesId}` : '';
-      return `**${who}** is restored via ${event.spell}${caster} (now ${event.hpAfter} HP)${newSpecies}.`;
+      return `**${who}** is restored via ${event.spell}${caster}${viaLabel} (now ${event.hpAfter} HP)${newSpecies}.`;
     }
     case 'PolymorphApplied': {
       const who = characterName(stateBefore, event.targetId);

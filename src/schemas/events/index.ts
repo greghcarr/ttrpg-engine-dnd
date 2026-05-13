@@ -685,11 +685,14 @@ export type { CampaignSettingsChangedEvent } from './settings.js';
 export {
   CharacterResurrectedEventSchema,
   ResurrectionSpellSchema,
+  ResurrectionViaSchema,
   RESURRECTION_SPELLS,
+  RESURRECTION_VIAS,
 } from './resurrection.js';
 export type {
   CharacterResurrectedEvent,
   ResurrectionSpell,
+  ResurrectionVia,
 } from './resurrection.js';
 export {
   PolymorphAppliedEventSchema,
