@@ -70,6 +70,6 @@ describe('golden: downtime, crafting, training (Slice 27)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 27: Downtime, Crafting, Training',
       }),
-    ).toMatchFileSnapshot('./transcripts/s27-downtime.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s27-downtime.transcript.rtf');
   });
 });

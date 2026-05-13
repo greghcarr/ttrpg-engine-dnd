@@ -173,6 +173,6 @@ describe('golden: opportunity attack as a reaction', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Opportunity attack: once per round, refreshes at round boundary',
       }),
-    ).toMatchFileSnapshot('./transcripts/s9-opportunity-attack.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s9-opportunity-attack.transcript.rtf');
   });
 });

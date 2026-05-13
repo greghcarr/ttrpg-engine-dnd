@@ -91,7 +91,7 @@ describe('golden: spellcasting polish (Slice 16)', () => {
       formatTranscript(campaignL5.events, TEST_CONTENT, {
         title: 'L5 wizard casts Fire Bolt: cantrip scaling rolls 2d10',
       }),
-    ).toMatchFileSnapshot('./transcripts/s16-spellcasting-polish.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s16-spellcasting-polish.transcript.rtf');
   });
 
   it('Detect Magic cast as ritual: no slot consumed, ritual flag set', () => {

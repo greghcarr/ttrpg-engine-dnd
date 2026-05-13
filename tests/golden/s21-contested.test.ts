@@ -68,6 +68,6 @@ describe('golden: grapple, shove, hide (Slice 21)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 21: Grapple, Shove, Hide',
       }),
-    ).toMatchFileSnapshot('./transcripts/s21-contested.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s21-contested.transcript.rtf');
   });
 });

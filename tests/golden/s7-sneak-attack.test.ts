@@ -239,6 +239,6 @@ describe('golden: rogue Sneak Attack across turns', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Rogue Sneak Attack: once per turn cadence',
       }),
-    ).toMatchFileSnapshot('./transcripts/s7-sneak-attack.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s7-sneak-attack.transcript.rtf');
   });
 });

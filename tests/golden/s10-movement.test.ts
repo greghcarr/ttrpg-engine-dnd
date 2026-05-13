@@ -139,7 +139,7 @@ describe('golden: movement and positioning', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Movement, Dash, and the movement budget enforcement',
       }),
-    ).toMatchFileSnapshot('./transcripts/s10-movement.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s10-movement.transcript.rtf');
   });
 
   it('disengaged combatant has the flag set', () => {

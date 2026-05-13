@@ -107,7 +107,7 @@ describe('golden: party + treasure ledger (Slice 17)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'A party forms, hauls loot, and divvies the spoils',
       }),
-    ).toMatchFileSnapshot('./transcripts/s17-party-treasure.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s17-party-treasure.transcript.rtf');
   });
 
   it('rejects spending more than the purse holds', () => {

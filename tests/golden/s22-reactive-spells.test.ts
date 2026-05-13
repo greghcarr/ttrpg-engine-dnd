@@ -73,7 +73,7 @@ describe('golden: counterspell, dispel magic, identify (Slice 22)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 22: Counterspell + Identify',
       }),
-    ).toMatchFileSnapshot('./transcripts/s22-reactive-spells.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s22-reactive-spells.transcript.rtf');
   });
 
   it('Dispel Magic auto-ends a level-1 effect when cast at level 3', () => {

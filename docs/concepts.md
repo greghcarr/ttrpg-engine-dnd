@@ -151,4 +151,4 @@ This is invisible to callers: the API is just "give me the derived sheet"; perfo
 - **Walk through the tutorial**: [docs/getting-started.md](getting-started.md).
 - **Look up an API**: [docs/api-overview.md](api-overview.md).
 - **Common how-to recipes**: [docs/recipes.md](recipes.md).
-- **See it all at once**: the showcase transcript at [tests/golden/transcripts/showcase.transcript.md](../tests/golden/transcripts/showcase.transcript.md).
+- **See it all at once**: the showcase transcript at [tests/golden/transcripts/showcase.transcript.rtf](../tests/golden/transcripts/showcase.transcript.rtf).

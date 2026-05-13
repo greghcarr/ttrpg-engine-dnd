@@ -113,7 +113,7 @@ describe('golden: bastions (Slice 44)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 44: Stoneheart Keep',
       }),
-    ).toMatchFileSnapshot('./transcripts/s44-bastions.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s44-bastions.transcript.rtf');
   });
 
   it('rejects a level-change that does not match the current level', () => {

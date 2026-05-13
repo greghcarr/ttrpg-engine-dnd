@@ -142,7 +142,7 @@ describe('golden: session, journal, in-game clock (Slice 18)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Session One: The Goblin Caves',
       }),
-    ).toMatchFileSnapshot('./transcripts/s18-session-journal.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s18-session-journal.transcript.rtf');
   });
 
   it('rejects starting a second session while one is active', () => {

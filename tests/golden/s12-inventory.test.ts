@@ -123,6 +123,6 @@ describe('golden: inventory mechanics', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Equipping, attuning, hitting the 3-slot attunement limit',
       }),
-    ).toMatchFileSnapshot('./transcripts/s12-inventory.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s12-inventory.transcript.rtf');
   });
 });

@@ -186,6 +186,6 @@ describe('golden: slice 9b reaction-window expansion', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Action Surge + off-hand attack in a single turn',
       }),
-    ).toMatchFileSnapshot('./transcripts/s9b-reaction-window.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s9b-reaction-window.transcript.rtf');
   });
 });

@@ -122,7 +122,7 @@ describe('golden: action economy (Extra Attack enforcement)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Fighter L5 makes two attacks per Action thanks to Extra Attack',
       }),
-    ).toMatchFileSnapshot('./transcripts/s8-action-economy.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s8-action-economy.transcript.rtf');
   });
 
   it('attacks outside an active encounter ignore the budget (free practice)', () => {

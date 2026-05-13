@@ -121,7 +121,7 @@ describe('golden: damage mitigation order of operations', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Fireball vs mundane, fire-resistant, fire-immune targets',
       }),
-    ).toMatchFileSnapshot('./transcripts/s11-damage-mitigation.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s11-damage-mitigation.transcript.rtf');
   });
 
   it('vulnerability doubles damage', () => {

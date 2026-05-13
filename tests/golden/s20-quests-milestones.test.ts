@@ -194,6 +194,6 @@ describe('golden: quests, objectives, milestone XP (Slice 20)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 20: Clear the Goblin Caves',
       }),
-    ).toMatchFileSnapshot('./transcripts/s20-quests-milestones.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s20-quests-milestones.transcript.rtf');
   });
 });

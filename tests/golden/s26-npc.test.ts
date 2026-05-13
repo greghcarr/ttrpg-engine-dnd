@@ -88,6 +88,6 @@ describe('golden: NPC reactions and morale (Slice 26)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 26: NPC Reactions and Morale',
       }),
-    ).toMatchFileSnapshot('./transcripts/s26-npc.transcript.md');
+    ).toMatchFileSnapshot('./transcripts/s26-npc.transcript.rtf');
   });
 });
