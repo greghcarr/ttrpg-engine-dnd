@@ -81,7 +81,7 @@ describe('golden: magic item charges, recharge, sentient conflict (Slice 28)', (
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 28: Magic Item Charges and Sentient Items',
       }),
-    ).toMatchFileSnapshot('./transcripts/s28-charges.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s28-charges.transcript.md');
   });
 
   it('refuses to consume more charges than remain', () => {

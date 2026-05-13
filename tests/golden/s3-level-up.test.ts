@@ -55,7 +55,7 @@ describe('golden: level-up + choice resolution', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'A Fighter levels from 1 to 5 with rolled HP',
       }),
-    ).toMatchFileSnapshot('./transcripts/s3-level-up.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s3-level-up.transcript.md');
   });
 
   it('user-supplied OfferChoice on a fighting-style feat resolves and contributes to AC', async () => {
@@ -174,6 +174,6 @@ describe('golden: level-up + choice resolution', () => {
       formatTranscript(campaign.events, customContent, {
         title: 'Fighter L2 fighting-style choice (Defense)',
       }),
-    ).toMatchFileSnapshot('./transcripts/s3-level-up-fighting-style.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s3-level-up-fighting-style.transcript.md');
   });
 });

@@ -142,6 +142,6 @@ describe('golden: concentration cast, taken damage, broken', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Hold Person broken by failed concentration save',
       }),
-    ).toMatchFileSnapshot('./transcripts/s6-concentration.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s6-concentration.transcript.md');
   });
 });

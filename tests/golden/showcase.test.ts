@@ -1444,6 +1444,6 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       formatTranscript(campaign.events, STARTER_CONTENT, {
         title: 'The Stoneheart Saga',
       }),
-    ).toMatchFileSnapshot('./transcripts/showcase.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/showcase.transcript.md');
   });
 });

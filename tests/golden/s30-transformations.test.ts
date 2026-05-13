@@ -87,7 +87,7 @@ describe('golden: transformations (Slice 30)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 30: Polymorph, Simulacrum, Wish',
       }),
-    ).toMatchFileSnapshot('./transcripts/s30-transformations.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s30-transformations.transcript.md');
   });
 
   it('Wild Shape uses the same Polymorph machinery with a different kind tag', () => {

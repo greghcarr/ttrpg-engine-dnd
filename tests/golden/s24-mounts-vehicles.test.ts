@@ -102,7 +102,7 @@ describe('golden: mounts and vehicles (Slice 24)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 24: Mounts and Vehicles',
       }),
-    ).toMatchFileSnapshot('./transcripts/s24-mounts-vehicles.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s24-mounts-vehicles.transcript.md');
   });
 
   it('refuses to board a vehicle at capacity', () => {

@@ -151,6 +151,6 @@ describe('golden: locations, doors, environmental terrain (Slice 19)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 19: The Guard Room',
       }),
-    ).toMatchFileSnapshot('./transcripts/s19-locations-terrain.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s19-locations-terrain.transcript.md');
   });
 });

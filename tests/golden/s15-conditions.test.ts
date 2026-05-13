@@ -67,7 +67,7 @@ describe('golden: full conditions library', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Paralyzed condition applies',
       }),
-    ).toMatchFileSnapshot('./transcripts/s15-conditions.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s15-conditions.transcript.md');
   });
 
   it('Petrified: resistance to all damage, immunity to Poisoned', () => {

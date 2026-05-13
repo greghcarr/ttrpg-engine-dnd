@@ -110,6 +110,6 @@ describe('golden: travel (Slice 25)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 25: Travel and Foraging',
       }),
-    ).toMatchFileSnapshot('./transcripts/s25-travel.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s25-travel.transcript.md');
   });
 });

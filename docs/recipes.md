@@ -299,4 +299,4 @@ Or look at `tests/transcript.ts` for the full formatter as a reference implement
 - **Conceptual orientation**: [docs/concepts.md](concepts.md).
 - **API reference**: [docs/api-overview.md](api-overview.md).
 - **Working examples**: [examples/](../examples/).
-- **A full campaign in one transcript**: [tests/golden/transcripts/showcase.transcript.rtf](../tests/golden/transcripts/showcase.transcript.rtf).
+- **A full campaign in one transcript**: [tests/golden/transcripts/showcase.transcript.md](../tests/golden/transcripts/showcase.transcript.md).

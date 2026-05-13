@@ -50,7 +50,7 @@ describe('golden: resurrection (Slice 29)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 29: Revivify',
       }),
-    ).toMatchFileSnapshot('./transcripts/s29-resurrection.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s29-resurrection.transcript.md');
   });
 
   it('Reincarnate restores at full HP and can change species', () => {

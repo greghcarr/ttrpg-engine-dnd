@@ -53,7 +53,7 @@ describe('golden: creature as a first-class combatant', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Ogre multiattack: two longsword swings in one action',
       }),
-    ).toMatchFileSnapshot('./transcripts/s13-creature.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s13-creature.transcript.md');
   });
 
   it('rejects multiattack on a character with no multiattack pattern', () => {

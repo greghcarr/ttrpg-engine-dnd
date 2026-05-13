@@ -132,6 +132,6 @@ describe('golden: combat round (Layer 3)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Two fighters trade blows in a one-round encounter',
       }),
-    ).toMatchFileSnapshot('./transcripts/s2-combat-round.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s2-combat-round.transcript.md');
   });
 });

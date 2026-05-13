@@ -67,7 +67,7 @@ describe('golden: create → damage → heal → long rest', () => {
 
     await expect(
       formatTranscript(events, TEST_CONTENT, { title: 'Long rest restores HP, hit dice, and resources' }),
-    ).toMatchFileSnapshot('./transcripts/s1-long-rest.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s1-long-rest.transcript.md');
   });
 
   it('damage to 0 HP then heal revives with cleared death saves', async () => {
@@ -108,7 +108,7 @@ describe('golden: create → damage → heal → long rest', () => {
 
     await expect(
       formatTranscript(events, TEST_CONTENT, { title: 'Damage to 0 HP, more damage while down, then healed back up' }),
-    ).toMatchFileSnapshot('./transcripts/s1-damage-to-zero-revive.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s1-damage-to-zero-revive.transcript.md');
   });
 });
 

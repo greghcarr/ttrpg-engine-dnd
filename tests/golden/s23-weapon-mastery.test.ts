@@ -89,7 +89,7 @@ describe('golden: weapon mastery (Slice 23)', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Slice 23: Weapon Mastery (Sap, Vex, Slow, Topple)',
       }),
-    ).toMatchFileSnapshot('./transcripts/s23-weapon-mastery.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s23-weapon-mastery.transcript.md');
 
     const replayed = replay(campaign.events);
     expect(JSON.stringify(replayed)).toBe(JSON.stringify(campaign.state));

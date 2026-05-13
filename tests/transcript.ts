@@ -1,9 +1,9 @@
 // Human-readable transcript formatter for golden test scenarios.
-// Each event becomes a single paragraph; encounter and turn events insert
-// grouping headers. Used via vitest `toMatchFileSnapshot` so every golden
-// scenario writes a checked-in .transcript.rtf alongside it. RTF was
-// chosen so a non-engineer reviewer (DMs, players) can open the snapshot
-// in TextEdit / Word and read it as rich text rather than parsing raw
+// Each event becomes a single markdown line; encounter and turn events
+// insert grouping headers. Used via vitest `toMatchFileSnapshot` so every
+// golden scenario writes a checked-in .transcript.md alongside it. Open
+// the file in VS Code and run "Open Preview" (Cmd+Shift+V) to read it as
+// rich text with bold names and sized headings rather than parsing raw
 // markdown markers.
 
 import type { Event } from '../src/schemas/events/index.js';
@@ -551,100 +551,31 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
   }
 };
 
-// --- RTF rendering ----------------------------------------------------------
-//
-// The event formatters above emit lightweight markdown-ish strings (`**bold**`,
-// `_italic_`, `# Title`, `## Section`, `### Subsection`). The functions below
-// rewrite that intermediate form into RTF so the on-disk snapshots render as
-// rich text when opened in TextEdit / Word.
-
-const escapeRtf = (s: string): string => {
-  // RTF metacharacters first, then non-ASCII as unicode escapes.
-  let out = '';
-  for (const ch of s) {
-    const code = ch.codePointAt(0) ?? 0;
-    if (ch === '\\') out += '\\\\';
-    else if (ch === '{') out += '\\{';
-    else if (ch === '}') out += '\\}';
-    else if (code < 128) out += ch;
-    else out += `\\u${code}?`;
-  }
-  return out;
-};
-
-const renderInlineRtf = (text: string): string => {
-  // Split on bold and italic markers, preserving non-marker text. Bold first
-  // (it uses `**`), then italic (`_..._`).
-  const parts: string[] = [];
-  const boldRe = /\*\*([^*]+)\*\*/g;
-  let lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = boldRe.exec(text)) !== null) {
-    parts.push(renderItalicRtf(text.slice(lastIndex, m.index)));
-    parts.push(`{\\b ${renderItalicRtf(m[1] ?? '')}}`);
-    lastIndex = m.index + m[0].length;
-  }
-  parts.push(renderItalicRtf(text.slice(lastIndex)));
-  return parts.join('');
-};
-
-const renderItalicRtf = (text: string): string => {
-  const parts: string[] = [];
-  const italicRe = /_([^_]+)_/g;
-  let lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = italicRe.exec(text)) !== null) {
-    parts.push(escapeRtf(text.slice(lastIndex, m.index)));
-    parts.push(`{\\i ${escapeRtf(m[1] ?? '')}}`);
-    lastIndex = m.index + m[0].length;
-  }
-  parts.push(escapeRtf(text.slice(lastIndex)));
-  return parts.join('');
-};
-
-const RTF_HEADER =
-  '{\\rtf1\\ansi\\ansicpg1252\\deff0\\nouicompat\\deflang1033' +
-  '{\\fonttbl{\\f0\\fnil\\fcharset0 Helvetica;}}' +
-  '\\f0\\fs22\n';
-
-const RTF_FOOTER = '}\n';
-
-const renderLineRtf = (line: string): string => {
-  if (line === '') return '\\par';
-  const h1 = line.match(/^# (.*)$/);
-  if (h1) return `{\\fs36\\b ${renderInlineRtf(h1[1] ?? '')}}\\par`;
-  const h2 = line.match(/^## (.*)$/);
-  if (h2) return `{\\fs28\\b ${renderInlineRtf(h2[1] ?? '')}}\\par`;
-  const h3 = line.match(/^### (.*)$/);
-  if (h3) return `{\\fs24\\b ${renderInlineRtf(h3[1] ?? '')}}\\par`;
-  return `${renderInlineRtf(line)}\\par`;
-};
-
 export const formatTranscript = (
   events: ReadonlyArray<Event>,
   content: ResolvedContent,
   options: { readonly title?: string } = {},
 ): string => {
-  const intermediate: string[] = [];
+  // Each event formatter emits one or more lines; we treat each non-empty
+  // line as its own markdown paragraph. Markdown collapses single-newline-
+  // separated lines into a single rendered paragraph, so the snapshot uses
+  // blank lines between every action: the rendered preview then shows one
+  // action per line as written, which is what a reviewer expects.
+  const paragraphs: string[] = [];
   if (options.title !== undefined) {
-    intermediate.push(`# ${options.title}`);
-    intermediate.push('');
+    paragraphs.push(`# ${options.title}`);
   }
   let state = emptyCampaignState();
   for (const event of events) {
     const next = apply(state, event);
-    intermediate.push(formatEvent(event, { stateBefore: state, stateAfter: next, content }));
+    const chunk = formatEvent(event, { stateBefore: state, stateAfter: next, content });
+    for (const line of chunk.split('\n')) {
+      if (line === '') continue;
+      paragraphs.push(line);
+    }
     state = next;
   }
-  // Split each event's output on internal newlines so every action lands on
-  // its own paragraph in the rendered document.
-  const flat: string[] = [];
-  for (const chunk of intermediate) {
-    const pieces = chunk.split('\n');
-    for (const p of pieces) flat.push(p);
-  }
-  const body = flat.map(renderLineRtf).join('\n');
-  return RTF_HEADER + body + '\n' + RTF_FOOTER;
+  return paragraphs.join('\n\n') + '\n';
 };
 
 export const writeTranscript = formatTranscript;

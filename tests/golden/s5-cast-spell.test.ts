@@ -68,7 +68,7 @@ describe('golden: spellcasting end to end', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Wizard casts Fireball at two goblins',
       }),
-    ).toMatchFileSnapshot('./transcripts/s5-cast-spell-fireball.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s5-cast-spell-fireball.transcript.md');
   });
 
   it('long rest fully restores spell slots', async () => {
@@ -101,6 +101,6 @@ describe('golden: spellcasting end to end', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Cast Fireball, then long rest restores the slot',
       }),
-    ).toMatchFileSnapshot('./transcripts/s5-cast-spell-long-rest.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s5-cast-spell-long-rest.transcript.md');
   });
 });

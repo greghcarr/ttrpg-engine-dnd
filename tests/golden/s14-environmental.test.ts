@@ -49,7 +49,7 @@ describe('golden: environmental hazards', () => {
       formatTranscript(campaign.events, TEST_CONTENT, {
         title: 'Falling damage: 30ft then 300ft (capped)',
       }),
-    ).toMatchFileSnapshot('./transcripts/s14-environmental.transcript.rtf');
+    ).toMatchFileSnapshot('./transcripts/s14-environmental.transcript.md');
   });
 
   it('half cover adds +2 AC; total cover rejects the attack', () => {
