@@ -60,6 +60,18 @@ const SpellBuffMechanicSchema = z.object({
   conditionId: z.string(),
 });
 
+// Strips one of a fixed list of conditions from each target (Lesser
+// Restoration removes one of: blinded / deafened / paralyzed /
+// poisoned). The planner emits a ConditionRemoved event for the first
+// matching condition the target currently has from the eligible list;
+// if the target has none of them, nothing happens. The spell still
+// resolves as a cast (declared + slot consumed); the lack of effect is
+// a feature, not an error.
+const SpellRemoveConditionMechanicSchema = z.object({
+  kind: z.literal('remove-condition'),
+  eligibleConditionIds: z.array(z.string()).min(1),
+});
+
 export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
 export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
 export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
@@ -84,6 +96,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellHealMechanicSchema,
   SpellAutoHitMechanicSchema,
   SpellBuffMechanicSchema,
+  SpellRemoveConditionMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;
 

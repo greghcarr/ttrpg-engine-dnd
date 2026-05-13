@@ -34,6 +34,7 @@ type Expectation =
   | { kind: 'heal' }
   | { kind: 'auto-hit'; minDarts: number }
   | { kind: 'buff'; conditionId: string }
+  | { kind: 'remove-condition'; seedConditionId: string }
   | { kind: 'skip'; reason: string };
 
 const SPELL_EXPECTATIONS: Record<string, Expectation> = {
@@ -73,12 +74,12 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'faerie-fire': { kind: 'save' },
   'bane': { kind: 'save' },
   'sleep': { kind: 'skip', reason: 'HP-threshold knockout (TODO)' },
-  'web': { kind: 'skip', reason: 'save + restrained area condition (TODO)' },
+  'web': { kind: 'save' },
   'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
   // Buffs / utility spells with simple shapes not yet wired.
   'aid': { kind: 'heal' },
   'polymorph': { kind: 'skip', reason: 'transformation spell driven via PolymorphApplied event, not planCastSpell' },
-  'lesser-restoration': { kind: 'skip', reason: 'condition removal (TODO)' },
+  'lesser-restoration': { kind: 'remove-condition', seedConditionId: 'poisoned' },
 };
 
 const buildWizard = (preparedSpells: string[]): Character =>
@@ -143,8 +144,11 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
     it(`${spellId}: emits a ${expectation.kind} event chain`, () => {
       const spell = PACK.spells.find((s) => s.id === spellId)!;
       const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
-      // Use a cleric for heal/buff spells (clerical list); wizard for damage spells.
-      const isClericalList = expectation.kind === 'heal' || expectation.kind === 'buff';
+      // Use a cleric for heal / buff / remove-condition spells; wizard
+      // for damage spells.
+      const isClericalList = expectation.kind === 'heal'
+        || expectation.kind === 'buff'
+        || expectation.kind === 'remove-condition';
       const caster = isClericalList
         ? buildCleric([spellId])
         : buildWizard([spellId]);
@@ -156,6 +160,19 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: t1 } satisfies CharacterCreatedEvent,
         { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: t2 } satisfies CharacterCreatedEvent,
       ]);
+      // For remove-condition spells, seed the target with the condition
+      // we expect to be removed.
+      if (expectation.kind === 'remove-condition') {
+        campaign = commit(campaign, [
+          {
+            id: eventId(),
+            at: isoTimestamp(),
+            type: 'ConditionApplied',
+            targetId: t1.id,
+            conditionId: expectation.seedConditionId,
+          } as Extract<Event, { type: 'ConditionApplied' }>,
+        ]);
+      }
       // Magic Missile needs one target per dart; for other spells one or
       // two targets is fine.
       const targetIds = expectation.kind === 'auto-hit'
@@ -194,6 +211,12 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
           const conditions = events.filter((e): e is Extract<Event, { type: 'ConditionApplied' }> => e.type === 'ConditionApplied');
           expect(conditions.length, 'expected at least one ConditionApplied').toBeGreaterThanOrEqual(1);
           expect(conditions.some((e) => e.conditionId === expectation.conditionId)).toBe(true);
+          break;
+        }
+        case 'remove-condition': {
+          const removals = events.filter((e): e is Extract<Event, { type: 'ConditionRemoved' }> => e.type === 'ConditionRemoved');
+          expect(removals.length, 'expected at least one ConditionRemoved').toBeGreaterThanOrEqual(1);
+          expect(removals.some((e) => e.conditionId === expectation.seedConditionId)).toBe(true);
           break;
         }
       }

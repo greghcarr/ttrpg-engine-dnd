@@ -1002,7 +1002,10 @@
       "concentration": true,
       "ritual": false,
       "classes": ["sorcerer", "wizard"],
-      "targeting": { "shape": "cube", "size": 20 }
+      "targeting": { "shape": "cube", "size": 20 },
+      "mechanicalEffects": [
+        { "kind": "save", "ability": "DEX", "conditionOnFail": "restrained" }
+      ]
     },
     {
       "id": "aid",
@@ -1031,7 +1034,13 @@
       "duration": "Instantaneous",
       "concentration": false,
       "ritual": false,
-      "classes": ["bard", "cleric", "druid", "paladin", "ranger"]
+      "classes": ["bard", "cleric", "druid", "paladin", "ranger"],
+      "mechanicalEffects": [
+        {
+          "kind": "remove-condition",
+          "eligibleConditionIds": ["blinded", "deafened", "paralyzed", "poisoned"]
+        }
+      ]
     },
     {
       "id": "counterspell",
@@ -1543,7 +1552,8 @@
       "effects": [
         { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
         { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "disadvantage" }
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "disadvantage" },
+        { "kind": "GrantAdvantageToAttackers" }
       ]
     },
     {

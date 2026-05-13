@@ -15,6 +15,7 @@ import type {
 import type {
   DamageAppliedEvent,
   ConditionAppliedEvent,
+  ConditionRemovedEvent,
   HealedEvent,
 } from '../../schemas/events/combat.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
@@ -413,6 +414,40 @@ const planBuffMechanic = (
   return { events, conditionsApplied };
 };
 
+const planRemoveConditionMechanic = (
+  state: CampaignState,
+  intent: CastSpellIntent,
+  mechanic: Extract<SpellMechanic, { kind: 'remove-condition' }>,
+  declaredEventId: string,
+  at: string,
+): Event[] => {
+  // Strips the first matching condition from each target. The eligible
+  // list is the spell's allowed set (e.g. Lesser Restoration: blinded,
+  // deafened, paralyzed, poisoned); we lift the *first* one each target
+  // has from that set. Targets carrying none of the eligible conditions
+  // get nothing — the spell still resolved, it just had no effect on
+  // that target.
+  const events: Event[] = [];
+  for (const targetId of intent.targetIds) {
+    const target = state.characters[targetId];
+    if (!target) continue;
+    const match = target.appliedConditions.find((c) =>
+      mechanic.eligibleConditionIds.includes(c.conditionId),
+    );
+    if (match === undefined) continue;
+    const removed: ConditionRemovedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionRemoved',
+      targetId: targetId as ULID,
+      conditionId: match.conditionId,
+      causedByEventId: declaredEventId as ULID,
+    };
+    events.push(removed);
+  }
+  return events;
+};
+
 const planAutoHitMechanic = (
   state: CampaignState,
   content: ResolvedContent,
@@ -562,6 +597,8 @@ export const planCastSpell = (
       const outcome = planBuffMechanic(intent, mechanic, declared.id, at);
       events.push(...outcome.events);
       conditionsApplied.push(...outcome.conditionsApplied);
+    } else if (mechanic.kind === 'remove-condition') {
+      events.push(...planRemoveConditionMechanic(state, intent, mechanic, declared.id, at));
     } else {
       events.push(...planHealMechanic(state, rng, intent, spell, mechanic, declared.id, at));
     }
