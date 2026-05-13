@@ -90,20 +90,23 @@ Beyond the architecture, here's the honest split:
   - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
   - Spells (Slice 41): ~33 spells in the pack; ~21 of those have full mechanical effects wired, ~10 are schema-only TODOs (Sleep, Shield, Misty Step, Guidance, Spirit Guardians, etc.).
   - Variant rules (Slice 46): the `CampaignSettings` flags exist (`grittyRest`, `heroPoints`, `sanity`, `massCombat`) but the engine does not enforce them — consumer's job.
-- **Known engine gaps**: see the dedicated [Known engine gaps](#known-engine-gaps) section below for the canonical list (16 items, scattered across the slice ◐ entries are aggregated there).
-- **Test infrastructure gaps**: Property tests with fast-check (Layer 7 of the testing standard) are not written. No public API contract / `.d.ts` snapshot test. No feature-coverage matrix beyond the spell-coverage smoke test.
+- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (16 items), content (inventory), and test infrastructure (3 items) — all in one place.
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
 
 Phase F (`ttrpg-engine-core` extraction) is explicitly optional; it remains the only fully un-attempted slice.
 
-## Known engine gaps
+## Known gaps
 
-The canonical list of engine-level features that ship as partial or not at all. Sixteen items, grouped by category. Each entry says what's missing and which slice (if any) it sits under. Use this as the punch-list for engine PRs.
+The canonical "what's missing" surface. Three subsections — engine, content, test infrastructure — covering things the project ships partial or not at all. Use this as the punch-list for PRs.
 
-The list is roughly ordered by how often a level-1-to-5 family-tabletop run would notice the gap. Severity column: 🔴 immediately visible to a player at low levels, 🟡 visible in specific situations, ⚪ rare or content-bound.
+Severity column throughout: 🔴 immediately visible to a player at low levels, 🟡 visible in specific situations, ⚪ rare or content-bound.
 
-### Missing planners — events and reducers exist, no `plan.*` method
+### Engine gaps
+
+Engine-level features that ship as partial or not at all. Sixteen items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
+
+#### Missing planners — events and reducers exist, no `plan.*` method
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
@@ -112,7 +115,7 @@ The list is roughly ordered by how often a level-1-to-5 family-tabletop run woul
 | `planSimulacrum` | ⚪ | 30 | `SimulacrumCreated` reducer clones a character into a creature at half-HP. No planner validates the 12-hour cast, 1500gp ruby, or shared-concentration constraints. |
 | `planWish` | ⚪ | 30 | `WishGranted` records a freeform wish + stress flag. No planner validates the 9th-level slot, the predefined-effects shortcut list, or applies the stress cascade beyond exhaustion. |
 
-### Missing event automation — engine doesn't auto-emit when it should
+#### Missing event automation — engine doesn't auto-emit when it should
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
@@ -121,19 +124,19 @@ The list is roughly ordered by how often a level-1-to-5 family-tabletop run woul
 | Spell duration expiry | 🟡 | A5/A6 | Concentration spells stay active until the caster's concentration breaks. The engine never expires them after their listed duration (1 minute, 1 hour, etc.) even if the consumer tracks time via `InGameTimeAdvanced` events. |
 | Forced-march CON-save loop | ⚪ | 25 | Slice 25 explicitly punts. After 8 hours of travel each additional hour requires a DC 10 + 1/hour CON save; the engine doesn't model this loop. |
 
-### Missing derivations
+#### Missing derivations
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `hpMax` modifier derivation | 🟡 | A1 | `'hpMax'` is a valid `ModifierTarget` in the schema (Aid +5 HP max, Aspect of the Beast, etc.) but no derivation reads it. Effective max comes straight from `Character.hp.max`. Aid's +5-current-HP works; its +5-max doesn't. |
 
-### Missing mechanics inside otherwise-wired primitives
+#### Missing mechanics inside otherwise-wired primitives
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | Cleave / Nick / Flex weapon masteries | 🟡 | 23 | Slice 23 explicitly deferred. Each is a sequencing concern inside `planAttack`: Cleave (extra attack on adjacent if first hit), Nick (light-weapon extra attack as part of the attack action), Flex (versatile damage die at use time). The other 6 of 9 masteries work. |
 
-### Specific spells with no mechanics wired
+#### Specific spells with no mechanics wired
 
 These need engine extensions (new mechanic kinds or planners), not just JSON content. The starter pack ships them schema-only.
 
@@ -145,17 +148,52 @@ These need engine extensions (new mechanic kinds or planners), not just JSON con
 | Guidance | 🟡 | 41 | Single-use buff that expires on first ability check. Needs a "consume-on-use" condition kind (or an `OnEvent` trigger that auto-removes its own source condition). |
 | Spirit Guardians | 🟡 | 41 | Concentration aura that ticks radiant damage per round on enemies in the area. Needs per-turn aura ticking, friend/foe targeting, and area-leaving-or-entering triggers. |
 
-### Variant-rule enforcement
+#### Variant-rule enforcement
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `CampaignSettings` flags don't gate behavior | ⚪ | 46 | The slice ships the toggle plumbing only. `grittyRest` doesn't change rest durations, `heroPoints` doesn't grant a hero-point resource pool, `sanity` and `massCombat` are inert. Consumers must branch their own planner logic on the flags. |
 
-### Triage suggestions
+#### Engine triage
 
-If you're closing gaps in priority order for a family-tabletop run at levels 1-5, the 🔴 items hit first: death-save auto-roll, concentration-on-0-HP, and the Sleep / Shield spells. After that, spell duration expiry is the next most likely to be noticed.
+If you're closing engine gaps in priority order for a family-tabletop run at levels 1-5, the 🔴 items hit first: death-save auto-roll, concentration-on-0-HP, and the Sleep / Shield spells. After that, spell duration expiry is the next most likely to be noticed.
 
 The 🟡 items become relevant at higher levels or in specific class scenarios. The ⚪ items are edge cases or wait for content that uses them.
+
+### Content gaps
+
+The starter pack is intentionally a slice, not the full 2024 catalogs. This table is the canonical inventory of what's shipped vs what the books contain. Content gaps are *fillable by anyone* (no engine work required, just JSON) — see [docs/authoring-content-packs.md](docs/authoring-content-packs.md).
+
+| Category | Shipped | RAW total (approx) | Severity | Notes |
+|---|---|---|---|---|
+| Classes (table scaffolding) | 12 of 12 | 12 | 🔴 | Tables ship 1-20, but most levels carry empty `features: []`. Only Rogue's Sneak Attack scales. Rage, Action Surge, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration scaling, Extra Attack at all the right levels, Stunning Strike, Evasion, Hunter's Mark mechanics — all unwired. |
+| Subclasses | 0 | ~50+ | 🔴 | Every PC at level 3+ picks a subclass; none are in the pack. Champion, Battle Master, Eldritch Knight, Berserker, College of Lore, Life Domain, Circle of the Land, etc. |
+| Spells | ~33 (~21 fully wired) | ~370 | 🔴 | The starter slice. The ~10 schema-only spells (Sleep, Shield, Misty Step, Guidance, Spirit Guardians, ...) need engine work first; the other ~330 missing spells are pure content authoring. |
+| Magic items | 9 | hundreds (DMG) | 🟡 | Bag of Holding, Wand of Magic Missiles, Cloak of Protection, etc. through legendary Deck of Many Things. Most DMG items missing. |
+| Monster statblocks | 6 | hundreds (MM) | 🟡 | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. Most MM creatures missing. |
+| Species | 7 | ~10 in PHB 2024 | ⚪ | Human, Elf, Dwarf, Halfling, Tiefling, Dragonborn, Gnome. Missing: Aasimar, Goliath, Orc, others. |
+| Backgrounds | 8 | ~16 in PHB 2024 | ⚪ | Soldier, Sage, Criminal, Acolyte, Folk Hero, Noble, Guild Artisan, Outlander. Half the PHB list missing. |
+| Feats | ~22 | ~50+ in PHB 2024 | ⚪ | Origin feats, general feats, all 6 Fighting Styles. Many general feats missing. |
+| Weapons / armors / tools / gear | ~25 + 5 tools + 7 gear | full PHB chapter | ⚪ | Common weapons and armors ship; many situational and exotic items missing. |
+| Conditions | 15 of 15 | 15 | ✓ | Complete (this is what makes the table look honest). |
+| Epic boons | 9 | ~16 in DMG 2024 | ⚪ | About half of the published list. |
+| Separate `ttrpg-engine-dnd-srd-2024` package | not built | — | 🟡 | Phase D Slice 31's deeper intent — extracting an SRD-derived pack as its own published package — was never done. The starter pack stands in. |
+
+#### Content triage
+
+The 🔴 items are the ones a level-1-to-5 family-tabletop run notices immediately: a Fighter at level 5 with no Extra Attack hooked up, a Rogue at level 3 with no subclass to pick, a Wizard wanting to cast Web (but it's in the spell list with no mechanics). Closing them is mostly JSON authoring — see the authoring guide.
+
+The 🟡 items become relevant as the campaign progresses past low levels. The ⚪ items are the long tail.
+
+### Test infrastructure gaps
+
+Test-suite expansions that the testing standard in [CLAUDE.md](CLAUDE.md) calls out but were never written. The engine ships 563 tests across 90 files with replay-equivalence and RNG-capture invariants; these would extend the safety net further.
+
+| Gap | Severity | What's missing |
+|---|---|---|
+| Property tests with fast-check (Layer 7) | 🟡 | The testing standard requires property-based tests with `fast-check`. None are written. Generators for valid characters / valid event sequences with assertions on invariants (`replay(events).state === campaign.state`, `AC ≥ 1`, derivations never throw, no negative slot counts). Catches combinatorial bugs the targeted tests miss. |
+| Public API contract test | 🟡 | The testing standard's Layer 9. A `.d.ts` snapshot or `tsd` test that locks the exported type surface so accidental API breakage is caught at the type level. |
+| Feature-coverage matrix | 🟡 | The plan called for `tests/coverage/features.test.ts` enumerating real 5.5e features (class features, magic-item powers, condition interactions, etc.) and asserting each loads + computes. `tests/unit/engine/spell-coverage.test.ts` is the only piece written; the broader matrix is open. |
 
 ## Roadmap
 
