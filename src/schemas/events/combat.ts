@@ -46,6 +46,12 @@ export const ConditionAppliedEventSchema = EventEnvelopeSchema.extend({
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
   appliedConditionId: ULIDSchema.optional(),
+  // Pre-computed sum of this condition's `AddModifier { target: 'hpMax' }`
+  // effects (Aid's `aid-buffed` carries +5). The planner sets it at cast
+  // time using the content pack; the reducer stamps it on the applied-
+  // condition entry and bumps `hp.maxBonus`. Removal reverses the same
+  // delta without re-running content lookups.
+  hpMaxBonusDelta: z.number().int().optional(),
 });
 export type ConditionAppliedEvent = z.infer<typeof ConditionAppliedEventSchema>;
 
@@ -78,3 +84,14 @@ export const StabilizedEventSchema = EventEnvelopeSchema.extend({
   targetId: ULIDSchema,
 });
 export type StabilizedEvent = z.infer<typeof StabilizedEventSchema>;
+
+export const HPMaxBonusChangedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('HPMaxBonusChanged'),
+  targetId: ULIDSchema,
+  // Signed delta applied to `Character.hp.maxBonus`. Positive when a
+  // buff (Aid, Aspect of the Beast, etc.) goes up; negative when the
+  // buff ends. The planner that emits it is responsible for keeping
+  // delta-applied / delta-reversed paired across the buff's lifetime.
+  delta: z.number().int(),
+});
+export type HPMaxBonusChangedEvent = z.infer<typeof HPMaxBonusChangedEventSchema>;

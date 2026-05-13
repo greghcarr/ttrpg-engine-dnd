@@ -74,7 +74,7 @@ describe('createPC', () => {
       hpMax: 12,
     });
     expect(pc.name).toBe('Defaults');
-    expect(pc.hp).toEqual({ current: 12, max: 12, temp: 0 });
+    expect(pc.hp).toEqual({ current: 12, max: 12, temp: 0, maxBonus: 0 });
     expect(pc.classes[0]?.level).toBe(1);
     expect(pc.abilityScores.STR).toBe(14);
   });

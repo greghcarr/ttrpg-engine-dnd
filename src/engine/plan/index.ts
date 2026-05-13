@@ -97,9 +97,18 @@ export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js
 export {
   planForage,
   planNavigationCheck,
+  planForcedMarch,
   type ForageIntent,
   type NavigationCheckIntent,
+  type ForcedMarchIntent,
 } from './travel.js';
+export {
+  planGrantInitialHeroPoints,
+  planSpendHeroPoint,
+  type GrantInitialHeroPointsIntent,
+  type SpendHeroPointIntent,
+  type SpendHeroPointOutcome,
+} from './hero-points.js';
 export {
   planMoraleCheck,
   planReactionRoll,
@@ -114,7 +123,13 @@ export {
 export {
   planPolymorph,
   planWildShape,
+  planSimulacrum,
+  planWish,
   type PolymorphIntent,
   type PolymorphOutcome,
   type WildShapeIntent,
+  type SimulacrumIntent,
+  type SimulacrumOutcome,
+  type WishIntent,
+  type WishOutcome,
 } from './transformations.js';

@@ -4,7 +4,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
-Engine-gap punch-list: closed 12 of 16 items from the README's Known-gaps section — all 4 🔴 entries, all 7 🟡, plus 1 ⚪ (hpMax derivation). The remaining 5 are all ⚪ or content-bound. Test count grew from 563 to 607 (44 new tests across 12 new files); all replay-equivalence and RNG-capture invariants still hold.
+Engine-gap punch-list cleanup: of the 16 items the punch-list opened with, only two ⚪ items remain (sanity and mass-combat variant rules, each its own slice). Closed 14 items across this development cycle — all 4 🔴, all 7 🟡, and 3 of the 5 ⚪. Test count grew from 563 to 626 (63 new tests across 16 new files); all replay-equivalence and RNG-capture invariants still hold.
 
 ### Added
 
@@ -21,6 +21,12 @@ Engine-gap punch-list: closed 12 of 16 items from the README's Known-gaps sectio
 - **`engine.plan.polymorph`** — full RAW validation: caster knowledge, 4th+ slot, target's level caps the form CR, optional WIS save for unwilling targets (the slot is still spent on a successful save), breaks the caster's prior concentration before starting the new one. Returns `{ events, resisted }`.
 - **`engine.plan.wildShape`** — druid bonus-action transform. Validates druid level ≥ 2, available `wild-shape` resource pool, form CR cap by level (1/4 / 1/2 / 1 at L2 / L4 / L8), and flying-speed gating until L8. Emits `ActionEconomyConsumed('bonusAction')` (when in an encounter), `ResourceSpent('wild-shape', 1)`, and `PolymorphApplied(kind='wild-shape')`.
 - **Events / enums**: `ShieldCastEvent`, `GuidanceUsedEvent`, new `ConcentrationBrokenReason` values `'unconscious'` and `'used'`, new `SpellMechanic` kinds `aura-damage` and `hp-pool-knockout`, new `EffectInstance` fields `slotLevel` / `durationMinutes` / `startedAtMinutes`, new `ConcentrationStartedEvent.slotLevel` (so planners that need the upcast level at tick time can read it off the instance).
+- **`engine.plan.forcedMarch`** — RAW 2024 ch.4 forced-march CON-save loop. For each hour past 8, every traveler makes a Constitution save at climbing DC (10 + 1 per hour past 8); failures gain a level of exhaustion. Travelers already at exhaustion max are skipped.
+- **`engine.plan.simulacrum`** — RAW 2024 7th-level illusion. Validates caster knowledge, slot, materials (1500 gp ruby dust via `materialsConsumed` flag), and the "one Simulacrum per source creature" constraint. Returns `{ events, simulacrumId }` so consumers can wire UI to the new creature pre-commit.
+- **`engine.plan.wish`** — RAW 2024 9th-level conjuration. Eight predefined effects bypass the stress cascade; anything else rolls a d100 and applies exhaustion on a result of 33 or lower. Returns `{ events, stressApplied }`.
+- **`hp.maxBonus`** field on Character + `Character.appliedConditions[].hpMaxBonusDelta` stamping. The damage reducer's massive-damage threshold now compares against `hp.max + hp.maxBonus`, so an Aid-buffed character (effective max 17 instead of 12) doesn't die instantly to a 12-damage hit when at -4 HP. The buff planner sets the delta on `ConditionAppliedEvent.hpMaxBonusDelta`; the reducer copies it into the applied-condition entry and bumps `hp.maxBonus`. Removal (ConditionRemoved, ConcentrationBroken, LongRestStarted concentration-clearing) reads the stored delta and reverses it.
+- **`grittyRest` flag wired**: rest events carry `expectedDurationMinutes` (60/480 standard, 480/10080 gritty). The planner reads `state.settings.grittyRest` and stamps the right value.
+- **`heroPoints` flag wired**: `Character.heroPoints` field, `HeroPointGranted` / `HeroPointSpent` events, `engine.plan.grantInitialHeroPoints` (5 + level − 1 per PC), `engine.plan.spendHeroPoint` (rolls a d6 the consumer adds to the augmented roll, decrements the pool).
 
 ### Fixed
 

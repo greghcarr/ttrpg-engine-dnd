@@ -31,7 +31,11 @@ Every planner returns `{ events: Event[] }` with the resolution chain baked in (
 
 **Spellcasting**: `castSpell`, `checkConcentration`, `expireSpellDurations`, `tickAura`, `consumeGuidance`, `counterspell`, `dispelMagic`, `identify`, `shield`.
 
-**Transformations**: `polymorph`, `wildShape`.
+**Transformations**: `polymorph`, `wildShape`, `simulacrum`, `wish`.
+
+**Travel & exploration (Slice 25)**: `forage`, `navigationCheck`, `forcedMarch`.
+
+**Variant rules**: `grantInitialHeroPoints`, `spendHeroPoint` (require `CampaignSettings.heroPoints: true`).
 
 **Checks & saves**: `save`, `abilityCheck`.
 
@@ -41,7 +45,6 @@ Every planner returns `{ events: Event[] }` with the resolution chain baked in (
 
 **Weapon mastery (Slice 23)**: `weaponMastery({mastery, attackerId, targetId, weaponInstanceId})`.
 
-**Travel & exploration (Slice 25)**: `forage`, `navigationCheck`.
 
 **NPC mechanics (Slice 26)**: `moraleCheck`, `reactionRoll`.
 

@@ -388,8 +388,24 @@ interface BuffOutcome {
   readonly conditionsApplied: AppliedConditionRef[];
 }
 
+const hpMaxBonusFromCondition = (
+  content: ResolvedContent,
+  conditionId: string,
+): number => {
+  const def = content.conditions.get(conditionId);
+  if (def === undefined) return 0;
+  let total = 0;
+  for (const eff of def.effects) {
+    if (eff.kind !== 'AddModifier') continue;
+    if (eff.target !== 'hpMax') continue;
+    if (typeof eff.value === 'number') total += eff.value;
+  }
+  return total;
+};
+
 const planBuffMechanic = (
   intent: CastSpellIntent,
+  content: ResolvedContent,
   mechanic: Extract<SpellMechanic, { kind: 'buff' }>,
   declaredEventId: string,
   at: string,
@@ -399,8 +415,14 @@ const planBuffMechanic = (
   // planner just stages the ConditionApplied events and threads the
   // appliedConditionIds back to ConcentrationStarted (when applicable)
   // so the condition lifts together with the spell.
+  //
+  // Conditions whose effects include `AddModifier { target: 'hpMax' }`
+  // (Aid's `aid-buffed` +5) additionally bump the target's stored
+  // `hp.maxBonus` via an `HPMaxBonusChanged` event so the damage
+  // reducer's massive-damage threshold accounts for the buffed max.
   const events: Event[] = [];
   const conditionsApplied: AppliedConditionRef[] = [];
+  const hpMaxDelta = hpMaxBonusFromCondition(content, mechanic.conditionId);
   for (const targetId of intent.targetIds) {
     const appliedConditionId = newAppliedConditionId();
     const cond: ConditionAppliedEvent = {
@@ -411,6 +433,7 @@ const planBuffMechanic = (
       conditionId: mechanic.conditionId,
       appliedConditionId,
       causedByEventId: declaredEventId as ULID,
+      ...(hpMaxDelta !== 0 ? { hpMaxBonusDelta: hpMaxDelta } : {}),
     };
     events.push(cond);
     conditionsApplied.push({
@@ -685,7 +708,7 @@ export const planCastSpell = (
     } else if (mechanic.kind === 'auto-hit') {
       events.push(...planAutoHitMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     } else if (mechanic.kind === 'buff') {
-      const outcome = planBuffMechanic(intent, mechanic, declared.id, at);
+      const outcome = planBuffMechanic(intent, content, mechanic, declared.id, at);
       events.push(...outcome.events);
       conditionsApplied.push(...outcome.conditionsApplied);
     } else if (mechanic.kind === 'remove-condition') {

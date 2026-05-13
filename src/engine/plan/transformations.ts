@@ -6,6 +6,8 @@ import type {
   PolymorphAppliedEvent,
   PolymorphForm,
   PolymorphKind,
+  SimulacrumCreatedEvent,
+  WishGrantedEvent,
 } from '../../schemas/events/transformations.js';
 import type {
   SpellCastDeclaredEvent,
@@ -19,7 +21,7 @@ import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type { ResourceSpentEvent } from '../../schemas/events/resources.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 import { rollDie } from '../../rng/dice.js';
-import { newEventId, newEffectInstanceId } from '../../ids.js';
+import { newEventId, newEffectInstanceId, newCharacterId } from '../../ids.js';
 import { invariant } from '../../internal/invariants.js';
 import { nowIso } from '../../internal/clock.js';
 import { computeTotalLevel } from '../../schemas/runtime/character.js';
@@ -322,3 +324,233 @@ export const planWildShape = (
 // Re-export the duration constants so test code can reference them
 // without re-deriving the values.
 export { WILD_SHAPE_DURATION_MINUTES };
+
+const SIMULACRUM_MIN_SLOT = 7;
+const SIMULACRUM_HP_DIVISOR = 2;
+const SIMULACRUM_RUBY_DUST_GP = 1500;
+
+export interface SimulacrumIntent {
+  readonly type: 'Simulacrum';
+  readonly casterId: string;
+  readonly targetId: string;
+  readonly slotLevel?: number;
+  // The consumer affirms that the 1500 gp of ruby dust has been
+  // procured and consumed. The engine doesn't track this commodity
+  // directly (it's not a standard inventory item); flagging it here
+  // lets the planner refuse a cast that forgot the material cost.
+  readonly materialsConsumed: boolean;
+  // Pre-allocated ID for the new creature, so consumers can wire UI to
+  // the result before commit. Optional — the planner mints one if
+  // omitted.
+  readonly simulacrumId?: string;
+  readonly at?: string;
+}
+
+export interface SimulacrumOutcome {
+  readonly events: ReadonlyArray<Event>;
+  readonly simulacrumId: string;
+}
+
+/**
+ * RAW 2024 Simulacrum: 7th-level illusion (Wizard), 12-hour casting
+ * time, range Touch, duration Until Dispelled. Creates a Beast or
+ * Humanoid duplicate of a creature you can see and touch, with half
+ * the original's hit point maximum. Consumes 1500 gp of ruby dust.
+ *
+ * Validates: caster knows Simulacrum, has a 7th+ level slot, the
+ * materials were consumed, target is alive (HP max >= 2 so the
+ * Simulacrum has at least 1 HP), and the caster doesn't already
+ * have an active Simulacrum. The 12-hour cast time is a consumer
+ * concern (advance the in-game clock 12h around the call); the
+ * engine doesn't enforce it.
+ */
+export const planSimulacrum = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  _rng: RNG,
+  intent: SimulacrumIntent,
+): SimulacrumOutcome => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const target = state.characters[intent.targetId];
+  invariant(target !== undefined, `Target ${intent.targetId} not found`);
+
+  const knowsSpell =
+    caster.knownSpells.includes('simulacrum') || caster.preparedSpells.includes('simulacrum');
+  invariant(knowsSpell, `Caster ${intent.casterId} does not know Simulacrum`);
+  const slotLevel = intent.slotLevel ?? SIMULACRUM_MIN_SLOT;
+  invariant(slotLevel >= SIMULACRUM_MIN_SLOT, 'Simulacrum is a 7th-level spell');
+  invariant(
+    intent.materialsConsumed === true,
+    `Simulacrum requires ${SIMULACRUM_RUBY_DUST_GP} gp of ruby dust (consumed); pass materialsConsumed: true`,
+  );
+  invariant(target.hp.max >= 2, 'Simulacrum target needs at least 2 HP max to leave the duplicate with 1');
+
+  // "A creature can have only one Simulacrum at a time." Per RAW this
+  // is the *target* — two simulacrums of the same person can't
+  // coexist. (A wizard can have simulacrums of different targets.)
+  // The reducer names the new creature `Simulacrum of <target.name>`,
+  // so we look up by that pattern.
+  const existing = Object.values(state.characters).some(
+    (c) => c.kind === 'creature' && c.name === `Simulacrum of ${target.name}`,
+  );
+  invariant(!existing, `${target.name} already has an active Simulacrum`);
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  const declared: SpellCastDeclaredEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'simulacrum',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.targetId],
+    castAsRitual: false,
+  };
+  events.push(declared);
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  } satisfies SpellSlotConsumedEvent);
+
+  const simulacrumId = intent.simulacrumId ?? newCharacterId();
+  const hpMax = Math.max(1, Math.floor(target.hp.max / SIMULACRUM_HP_DIVISOR));
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SimulacrumCreated',
+    simulacrumId,
+    originalId: intent.targetId,
+    hpMax,
+    causedByEventId: declared.id,
+  } satisfies SimulacrumCreatedEvent);
+
+  return { events, simulacrumId };
+};
+
+const WISH_MIN_SLOT = 9;
+const WISH_STRESS_FAILURE_THRESHOLD = 33;
+
+// The eight predefined Wish effects (PHB 2024). Choosing one of these
+// avoids the stress cascade entirely. Anything else carries
+// `couldStress: true` — the consumer rolls a d100 and, on a result of
+// 33 or lower (RAW: "you can never cast Wish again, and you take
+// 1d10 force damage per level of every spell cast in the previous turn"
+// — simplified here to "you gain a level of exhaustion and may take a
+// permanent reduction in CON" later), gets `stressApplied: true` and a
+// level of exhaustion. The engine records the freeform description on
+// the event for transcript purposes.
+const WISH_PREDEFINED_EFFECTS = [
+  'duplicate-8th-or-lower-spell',
+  'cure-wounds-mass',
+  'create-non-magical-item',
+  'undo-damage',
+  'undo-condition',
+  'grant-resistance',
+  'grant-immunity',
+  'restore-from-death',
+] as const;
+type WishPredefinedEffect = (typeof WISH_PREDEFINED_EFFECTS)[number];
+
+export interface WishIntent {
+  readonly type: 'Wish';
+  readonly granterId: string;
+  readonly description: string;
+  // When set, the wish is one of the eight predefined PHB effects.
+  // RAW: choosing a predefined effect avoids the stress cascade
+  // (and the "may never cast Wish again" lockout).
+  readonly predefinedEffect?: WishPredefinedEffect;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+export interface WishOutcome {
+  readonly events: ReadonlyArray<Event>;
+  readonly stressApplied: boolean;
+}
+
+/**
+ * RAW 2024 Wish: 9th-level conjuration (Sorcerer / Wizard), action,
+ * range Self, V, duration Instantaneous. The simplest effect is to
+ * duplicate any other spell of 8th level or lower. Eight predefined
+ * effects avoid the stress cascade entirely. Anything else stresses
+ * the caster: they roll a d100 and, on 33 or lower, "you can't cast
+ * Wish again until you finish 1d4 long rests" plus 1d10 necrotic
+ * damage per level of every spell cast in the previous turn (RAW
+ * 2014; 2024 simplifies to exhaustion + lockout).
+ *
+ * The engine records:
+ *   - SpellSlotConsumed (9th slot)
+ *   - WishGranted (description, stressApplied flag)
+ *   - ExhaustionChanged (when stressApplied)
+ *
+ * The d100 is rolled by the planner; consumers can short-circuit it
+ * by passing a predefined effect.
+ */
+export const planWish = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  rng: RNG,
+  intent: WishIntent,
+): WishOutcome => {
+  const granter = state.characters[intent.granterId];
+  invariant(granter !== undefined, `Granter ${intent.granterId} not found`);
+  const knowsSpell =
+    granter.knownSpells.includes('wish') || granter.preparedSpells.includes('wish');
+  invariant(knowsSpell, `${intent.granterId} does not know Wish`);
+  const slotLevel = intent.slotLevel ?? WISH_MIN_SLOT;
+  invariant(slotLevel >= WISH_MIN_SLOT, 'Wish is a 9th-level spell');
+  invariant(intent.description.length > 0, 'Wish requires a description of the desired effect');
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.granterId,
+    spellId: 'wish',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.granterId],
+    castAsRitual: false,
+  } satisfies SpellCastDeclaredEvent);
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.granterId,
+    slotLevel,
+  } satisfies SpellSlotConsumedEvent);
+
+  // Stress cascade. Predefined effects bypass it entirely.
+  let stressApplied = false;
+  if (intent.predefinedEffect === undefined) {
+    const d100 = rollDie(100, rng);
+    stressApplied = d100 <= WISH_STRESS_FAILURE_THRESHOLD;
+  }
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'WishGranted',
+    granterId: intent.granterId,
+    description: intent.description,
+    stressApplied,
+  } satisfies WishGrantedEvent);
+  if (stressApplied) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ExhaustionChanged',
+      targetId: intent.granterId as ULID,
+      fromLevel: granter.exhaustion,
+      toLevel: Math.min(6, granter.exhaustion + 1),
+    });
+  }
+  return { events, stressApplied };
+};

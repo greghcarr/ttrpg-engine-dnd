@@ -69,5 +69,48 @@ describe('Derived character: hpMax modifier from effect stack', () => {
     const derived = engine.derive.character(campaign.state, t1.id);
     expect(derived.hpMaxBonus).toBe(5);
     expect(derived.effectiveHpMax).toBe(17); // 12 stored + 5
+    // Reducer-side enforcement: the character's hp.maxBonus is stored
+    // on state, not just derived.
+    expect(campaign.state.characters[t1.id]?.hp.maxBonus).toBe(5);
+  });
+
+  it('Aid-buffed character: massive-damage threshold uses effective hpMax', () => {
+    // T1 has 12 hpMax. Aid bumps maxBonus to 5 (effective 17). A
+    // single hit of 17 damage from positive HP should trigger
+    // massive damage (≥ effective max); a hit of 16 should not.
+    // We verify by applying damage and checking death-save state.
+    const PACK = loadStarterPack();
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+    const cleric = buildCleric(['aid']);
+    const t1 = buildTarget('T1');
+    let campaign = engine.createCampaign({ name: 'aid-massive' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: cleric } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: t1 } satisfies CharacterCreatedEvent,
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.castSpell(campaign.state, {
+        characterId: cleric.id,
+        spellId: 'aid',
+        slotLevel: 2,
+        targetIds: [t1.id],
+      }).events,
+    );
+    // Pre-Aid hp.max = 12; effective max = 17 (with the buff).
+    // A 16-damage hit from full HP (12) leaves them at -4; not massive
+    // (massive requires |overflow| >= effective max = 17).
+    campaign = commit(campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'DamageApplied',
+        targetId: t1.id,
+        components: [{ amount: 16, type: 'slashing' }],
+      },
+    ]);
+    const afterModerate = campaign.state.characters[t1.id]!;
+    expect(afterModerate.deathSaves.failures).toBe(0);
+    expect(afterModerate.hp.current).toBe(-4);
   });
 });

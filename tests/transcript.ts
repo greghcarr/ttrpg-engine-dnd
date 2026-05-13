@@ -413,6 +413,21 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const who = characterName(stateBefore, event.targetId);
       return `**${who}** spends Guidance: +${event.d4} to the ability check.`;
     }
+    case 'HPMaxBonusChanged': {
+      const who = characterName(stateBefore, event.targetId);
+      const sign = event.delta >= 0 ? '+' : '';
+      return `_(${who} HP max bonus ${sign}${event.delta})_`;
+    }
+    case 'HeroPointGranted': {
+      const who = characterName(stateBefore, event.characterId);
+      const sign = event.amount >= 0 ? '+' : '';
+      return `_(${who} Hero Points ${sign}${event.amount})_`;
+    }
+    case 'HeroPointSpent': {
+      const who = characterName(stateBefore, event.characterId);
+      const ctx = event.appliedTo !== undefined ? ` on ${event.appliedTo}` : '';
+      return `**${who}** spends a Hero Point${ctx}: +${event.d6}.`;
+    }
     case 'WeaponMasteryActivated': {
       const who = characterName(stateBefore, event.attackerId);
       const targetLabel = event.targetId !== undefined

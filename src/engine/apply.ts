@@ -10,6 +10,7 @@ import {
   applyExhaustionChanged,
   applyHealed,
   applyStabilized,
+  applyHPMaxBonusChanged,
   applyTempHPGranted,
 } from './reducers/combat.js';
 import {
@@ -133,7 +134,11 @@ import {
   applyBastionDamaged,
   applyBastionLevelChanged,
 } from './reducers/bastion.js';
-import { applyCampaignSettingsChanged } from './reducers/settings.js';
+import {
+  applyCampaignSettingsChanged,
+  applyHeroPointGranted,
+  applyHeroPointSpent,
+} from './reducers/settings.js';
 import { applyCharacterResurrected } from './reducers/resurrection.js';
 import {
   applyPolymorphApplied,
@@ -172,6 +177,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'Stabilized':
         applyStabilized(draft, event);
+        break;
+      case 'HPMaxBonusChanged':
+        applyHPMaxBonusChanged(draft, event);
         break;
       case 'ResourceSpent':
         applyResourceSpent(draft, event);
@@ -462,6 +470,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);
+        break;
+      case 'HeroPointGranted':
+        applyHeroPointGranted(draft, event);
+        break;
+      case 'HeroPointSpent':
+        applyHeroPointSpent(draft, event);
         break;
       default: {
         const exhaustive: never = event;

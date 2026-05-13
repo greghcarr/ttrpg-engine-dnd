@@ -19,6 +19,11 @@ export const AppliedConditionSchema = z.object({
   sourceEventId: ULIDSchema.optional(),
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
+  // The hpMax-modifier delta this applied condition contributed to
+  // the character's `hp.maxBonus`. Stored here so removal (via
+  // ConditionRemoved or ConcentrationBroken) can reverse exactly the
+  // same delta without re-running content lookups from the reducer.
+  hpMaxBonusDelta: z.number().int().optional(),
 });
 export type AppliedCondition = z.infer<typeof AppliedConditionSchema>;
 
@@ -26,6 +31,13 @@ export const HPSchema = z.object({
   current: z.number().int(),
   max: z.number().int().min(1),
   temp: z.number().int().min(0).default(0),
+  // Running sum of `AddModifier { target: 'hpMax' }` effects from
+  // active conditions (Aid, Aspect of the Beast, etc.). The damage
+  // reducer reads `max + maxBonus` when checking the massive-damage
+  // threshold, so a low-HP character buffed by Aid is correctly
+  // harder to instakill. The buff/remove-buff planners maintain this
+  // value via `HPMaxBonusChanged` events.
+  maxBonus: z.number().int().default(0),
 });
 export type HP = z.infer<typeof HPSchema>;
 
@@ -114,6 +126,13 @@ export const CharacterSchema = z.object({
     .default({}),
   featsTaken: z.array(z.string()).default([]),
   pendingChoiceIds: z.array(ULIDSchema).default([]),
+  // Hero Points pool (DMG 2024 variant rule, gated by
+  // `CampaignSettings.heroPoints`). Each character starts with
+  // `5 + 1 per level above 1`. Spent for a 1d6 bonus on an attack /
+  // save / ability check, or to spend one to stabilize when downed.
+  // The engine tracks the integer here; planSpendHeroPoint enforces
+  // availability + rolls the d6.
+  heroPoints: z.number().int().min(0).default(0),
   xp: z.number().int().min(0).default(0),
   mountedOnId: ULIDSchema.optional(),
   attitude: z.enum(['hostile', 'unfriendly', 'indifferent', 'friendly', 'helpful']).optional(),
@@ -130,6 +149,7 @@ export const CharacterSchema = z.object({
         current: z.number().int(),
         max: z.number().int().min(1),
         temp: z.number().int().min(0).default(0),
+        maxBonus: z.number().int().default(0),
       }),
       abilityScores: AbilityScoresSchema,
       speedFeet: z.number().int().min(0),

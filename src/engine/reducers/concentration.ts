@@ -46,6 +46,12 @@ export const applyConcentrationBroken = (
   for (const applied of effect.conditionsApplied) {
     const target = state.characters[applied.targetId];
     if (!target) continue;
+    // Reverse any hpMax bonus the dropped condition contributed,
+    // mirroring applyConditionRemoved.
+    const entry = target.appliedConditions.find((c) => c.id === applied.appliedConditionId);
+    if (entry?.hpMaxBonusDelta !== undefined && entry.hpMaxBonusDelta !== 0) {
+      target.hp.maxBonus = (target.hp.maxBonus ?? 0) - entry.hpMaxBonusDelta;
+    }
     target.appliedConditions = target.appliedConditions.filter(
       (c) => c.id !== applied.appliedConditionId,
     );

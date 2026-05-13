@@ -8,6 +8,7 @@ import {
   ExhaustionChangedEventSchema,
   DeathSaveRolledEventSchema,
   StabilizedEventSchema,
+  HPMaxBonusChangedEventSchema,
 } from './combat.js';
 import {
   ResourceSpentEventSchema,
@@ -139,7 +140,11 @@ import {
   BastionDamagedEventSchema,
   BastionLevelChangedEventSchema,
 } from './bastion.js';
-import { CampaignSettingsChangedEventSchema } from './settings.js';
+import {
+  CampaignSettingsChangedEventSchema,
+  HeroPointGrantedEventSchema,
+  HeroPointSpentEventSchema,
+} from './settings.js';
 import { CharacterResurrectedEventSchema } from './resurrection.js';
 import {
   PolymorphAppliedEventSchema,
@@ -158,6 +163,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   ExhaustionChangedEventSchema,
   DeathSaveRolledEventSchema,
   StabilizedEventSchema,
+  HPMaxBonusChangedEventSchema,
   ResourceSpentEventSchema,
   ResourceRestoredEventSchema,
   HitDieSpentEventSchema,
@@ -253,6 +259,8 @@ export const EventSchema = z.discriminatedUnion('type', [
   SimulacrumCreatedEventSchema,
   WishGrantedEventSchema,
   CampaignSettingsChangedEventSchema,
+  HeroPointGrantedEventSchema,
+  HeroPointSpentEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -267,6 +275,7 @@ export const EVENT_TYPES = [
   'ExhaustionChanged',
   'DeathSaveRolled',
   'Stabilized',
+  'HPMaxBonusChanged',
   'ResourceSpent',
   'ResourceRestored',
   'HitDieSpent',
@@ -362,6 +371,8 @@ export const EVENT_TYPES = [
   'SimulacrumCreated',
   'WishGranted',
   'CampaignSettingsChanged',
+  'HeroPointGranted',
+  'HeroPointSpent',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -374,6 +385,7 @@ export type {
   ExhaustionChangedEvent,
   DeathSaveRolledEvent,
   StabilizedEvent,
+  HPMaxBonusChangedEvent,
 } from './combat.js';
 export type {
   ResourceSpentEvent,
@@ -413,6 +425,7 @@ export {
   ExhaustionChangedEventSchema,
   DeathSaveRolledEventSchema,
   StabilizedEventSchema,
+  HPMaxBonusChangedEventSchema,
 } from './combat.js';
 export {
   ResourceSpentEventSchema,
@@ -690,7 +703,15 @@ export type {
   BastionLevelChangedEvent,
   BastionTurnOrder,
 } from './bastion.js';
-export { CampaignSettingsChangedEventSchema } from './settings.js';
+export {
+  CampaignSettingsChangedEventSchema,
+  HeroPointGrantedEventSchema,
+  HeroPointSpentEventSchema,
+} from './settings.js';
+export type {
+  HeroPointGrantedEvent,
+  HeroPointSpentEvent,
+} from './settings.js';
 export type { CampaignSettingsChangedEvent } from './settings.js';
 export {
   CharacterResurrectedEventSchema,

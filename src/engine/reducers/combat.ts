@@ -7,6 +7,7 @@ import type {
   DeathSaveRolledEvent,
   ExhaustionChangedEvent,
   HealedEvent,
+  HPMaxBonusChangedEvent,
   StabilizedEvent,
   TempHPGrantedEvent,
 } from '../../schemas/events/combat.js';
@@ -29,6 +30,9 @@ const requireCharacter = (state: Draft<CampaignState>, id: string): Draft<Charac
   invariant(c !== undefined, `Character ${id} not found`);
   return c;
 };
+
+const effectiveHpMax = (character: Pick<Character, 'hp'>): number =>
+  character.hp.max + (character.hp.maxBonus ?? 0);
 
 const isMassiveDamage = (
   hpBeforeDamage: number,
@@ -72,8 +76,13 @@ export const applyDamageApplied = (
     character.deathSaves.stable = false;
     return;
   }
-  if (isMassiveDamage(character.hp.current + remainingAfterTemp, hpBeforeClamp, character.hp.max)) {
-    character.hp.current = -character.hp.max;
+  // Massive-damage threshold compares against effective HP max
+  // (stored max + active modifier bonus from Aid etc.). RAW: a 30-HP
+  // character with Aid (+5 hpMax) has an effective max of 35 and only
+  // dies instantly when a single hit drops them past -35 HP.
+  const effMax = effectiveHpMax(character);
+  if (isMassiveDamage(character.hp.current + remainingAfterTemp, hpBeforeClamp, effMax)) {
+    character.hp.current = -effMax;
     character.deathSaves.failures = DEATH_SAVE_FAILURES_TO_DIE;
     character.deathSaves.stable = false;
     return;
@@ -125,7 +134,13 @@ export const applyConditionApplied = (
     sourceEventId: event.id,
     ...(event.level !== undefined ? { level: event.level } : {}),
     ...(event.expiresOnRound !== undefined ? { expiresOnRound: event.expiresOnRound } : {}),
+    ...(event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0
+      ? { hpMaxBonusDelta: event.hpMaxBonusDelta }
+      : {}),
   });
+  if (event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0) {
+    character.hp.maxBonus = (character.hp.maxBonus ?? 0) + event.hpMaxBonusDelta;
+  }
 };
 
 export const applyConditionRemoved = (
@@ -133,6 +148,15 @@ export const applyConditionRemoved = (
   event: ConditionRemovedEvent,
 ): void => {
   const character = requireCharacter(state, event.targetId);
+  // Reverse any hpMax bonus the condition had contributed, then drop
+  // it. Walking the matching entries keeps the math symmetric with
+  // applyConditionApplied (which stamps the delta on the entry).
+  for (const applied of character.appliedConditions) {
+    if (applied.conditionId !== event.conditionId) continue;
+    if (applied.hpMaxBonusDelta !== undefined && applied.hpMaxBonusDelta !== 0) {
+      character.hp.maxBonus = (character.hp.maxBonus ?? 0) - applied.hpMaxBonusDelta;
+    }
+  }
   character.appliedConditions = character.appliedConditions.filter(
     (c) => c.conditionId !== event.conditionId,
   );
@@ -193,4 +217,12 @@ export const applyStabilized = (
   const character = requireCharacter(state, event.targetId);
   resetDeathSaves(character.deathSaves);
   character.deathSaves.stable = true;
+};
+
+export const applyHPMaxBonusChanged = (
+  state: Draft<CampaignState>,
+  event: HPMaxBonusChangedEvent,
+): void => {
+  const character = requireCharacter(state, event.targetId);
+  character.hp.maxBonus = (character.hp.maxBonus ?? 0) + event.delta;
 };

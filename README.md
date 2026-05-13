@@ -85,12 +85,12 @@ Beyond the architecture, here's the honest split:
 - **Fully wired** (engine + content for the slice ships and works): Phases A and B in their entirety. In Phase C: grapple/shove/hide, the reactive trio (Counterspell / Dispel Magic / Identify), mounts and vehicles, NPC reactions and morale, downtime, magic-item charges, and resurrection. In Phase D: examples, docs, public API conveniences, memoization, npm publish, content validator. In Phase E: Bastions, epic boons.
 - **Partially wired** (machinery exists, scope is narrower than the slice title implies):
   - Weapon Mastery (Slice 23): all nine masteries land. Sap / Vex / Topple / Push / Graze / Slow run via `planWeaponMastery`; Cleave / Nick / Flex are sequencing concerns wired into the attack pipeline (Flex switches the damage die at use time, Nick converts the bonus-action off-hand attack into a once-per-turn freebie, Cleave runs via `engine.plan.cleave`).
-  - Travel (Slice 25): per-leg events ship, but forced-march CON saves are a consumer responsibility (no auto-loop).
-  - Transformations (Slice 30): `engine.plan.polymorph` and `engine.plan.wildShape` land. `planSimulacrum` is still a shallow HP clone (no 12-hour cast / 1500gp ruby / shared-concentration checks); `planWish` records stress only.
+  - Travel (Slice 25): per-leg events and the forced-march CON-save loop (`engine.plan.forcedMarch`) both ship.
+  - Transformations (Slice 30): `engine.plan.polymorph`, `engine.plan.wildShape`, `engine.plan.simulacrum`, and `engine.plan.wish` all land. The 12-hour Simulacrum cast time is the consumer's responsibility (advance the in-game clock around the call); the engine validates everything else (slot, materials, "one Simulacrum per source creature").
   - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
   - Spells (Slice 41): ~33 spells in the pack; ~26 of those have full mechanical effects wired. Guidance and Spirit Guardians remain schema-only TODOs; the utility cantrips (Mage Hand, Prestidigitation, Light, Detect Magic) are intentionally narrative-only.
-  - Variant rules (Slice 46): the `CampaignSettings` flags exist (`grittyRest`, `heroPoints`, `sanity`, `massCombat`) but the engine does not enforce them — consumer's job.
-- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (5 items), content (inventory), and test infrastructure (3 items) — all in one place.
+  - Variant rules (Slice 46): `grittyRest` (rest events stamp the right durations) and `heroPoints` (`engine.plan.grantInitialHeroPoints` / `engine.plan.spendHeroPoint`) both ship. `sanity` and `massCombat` still toggle but the engine doesn't yet enforce their mechanics (own slices, see Known gaps).
+- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (2 items), content (inventory), and test infrastructure (3 items) — all in one place.
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
 
@@ -104,38 +104,18 @@ Severity column throughout: 🔴 immediately visible to a player at low levels, 
 
 ### Engine gaps
 
-Engine-level features that ship as partial or not at all. Five items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
-
-#### Missing planners — events and reducers exist, no `plan.*` method
-
-| Gap | Severity | Slice | What's missing |
-|---|---|---|---|
-| `planSimulacrum` | ⚪ | 30 | `SimulacrumCreated` reducer clones a character into a creature at half-HP. No planner validates the 12-hour cast, 1500gp ruby, or shared-concentration constraints. |
-| `planWish` | ⚪ | 30 | `WishGranted` records a freeform wish + stress flag. No planner validates the 9th-level slot, the predefined-effects shortcut list, or applies the stress cascade beyond exhaustion. |
-
-#### Missing event automation — engine doesn't auto-emit when it should
-
-| Gap | Severity | Slice | What's missing |
-|---|---|---|---|
-| Forced-march CON-save loop | ⚪ | 25 | Slice 25 explicitly punts. After 8 hours of travel each additional hour requires a DC 10 + 1/hour CON save; the engine doesn't model this loop. |
-
-#### Missing derivations
-
-| Gap | Severity | Slice | What's missing |
-|---|---|---|---|
-| `hpMax` modifier derivation (reducer-side enforcement) | ⚪ | A1 | `DerivedCharacter.hpMaxBonus` / `effectiveHpMax` now surface the modifier sum, and Aid applies an `aid-buffed` condition that grants +5. The reducer-side massive-damage threshold still compares against the stored `hp.max` (not the effective max). Visible only in the edge case where damage = effective hpMax exactly. |
+Engine-level features that ship as partial or not at all. Two items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
 
 #### Variant-rule enforcement
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
-| `CampaignSettings` flags don't gate behavior | ⚪ | 46 | The slice ships the toggle plumbing only. `grittyRest` doesn't change rest durations, `heroPoints` doesn't grant a hero-point resource pool, `sanity` and `massCombat` are inert. Consumers must branch their own planner logic on the flags. |
+| `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
+| `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
 
 #### Engine triage
 
-All 🔴 items are now closed. The remaining gaps are 🟡 (visible in specific scenarios) and ⚪ (rare or content-bound).
-
-The 🟡 items become relevant at higher levels or in specific class scenarios. The ⚪ items are edge cases or wait for content that uses them.
+All 🔴 and 🟡 items are now closed. The remaining ⚪ gaps are large variant-rule slices (`sanity` is a 7th-stat refactor, `massCombat` is a Squad system) deferred to their own future slices.
 
 ### Content gaps
 

@@ -58,11 +58,16 @@ import {
   planWeaponMastery,
   planForage,
   planNavigationCheck,
+  planForcedMarch,
+  planGrantInitialHeroPoints,
+  planSpendHeroPoint,
   planMoraleCheck,
   planReactionRoll,
   planResurrect,
   planPolymorph,
   planWildShape,
+  planSimulacrum,
+  planWish,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -76,12 +81,20 @@ import {
   type WeaponMasteryIntent,
   type ForageIntent,
   type NavigationCheckIntent,
+  type ForcedMarchIntent,
+  type GrantInitialHeroPointsIntent,
+  type SpendHeroPointIntent,
+  type SpendHeroPointOutcome,
   type MoraleCheckIntent,
   type ReactionRollIntent,
   type ResurrectIntent,
   type PolymorphIntent,
   type PolymorphOutcome,
   type WildShapeIntent,
+  type SimulacrumIntent,
+  type SimulacrumOutcome,
+  type WishIntent,
+  type WishOutcome,
   type RestIntent,
   type AttackIntent,
   type CleaveIntent,
@@ -202,11 +215,22 @@ export interface Engine {
     weaponMastery(state: CampaignState, intent: Omit<WeaponMasteryIntent, 'type'>): PlanResult;
     forage(state: CampaignState, intent: Omit<ForageIntent, 'type'>): PlanResult;
     navigationCheck(state: CampaignState, intent: Omit<NavigationCheckIntent, 'type'>): PlanResult;
+    forcedMarch(state: CampaignState, intent: Omit<ForcedMarchIntent, 'type'>): PlanResult;
+    grantInitialHeroPoints(
+      state: CampaignState,
+      intent: Omit<GrantInitialHeroPointsIntent, 'type'>,
+    ): PlanResult;
+    spendHeroPoint(
+      state: CampaignState,
+      intent: Omit<SpendHeroPointIntent, 'type'>,
+    ): SpendHeroPointOutcome;
     moraleCheck(state: CampaignState, intent: Omit<MoraleCheckIntent, 'type'>): PlanResult;
     reactionRoll(state: CampaignState, intent: Omit<ReactionRollIntent, 'type'>): PlanResult;
     resurrect(state: CampaignState, intent: Omit<ResurrectIntent, 'type'>): PlanResult;
     polymorph(state: CampaignState, intent: Omit<PolymorphIntent, 'type'>): PolymorphOutcome;
     wildShape(state: CampaignState, intent: Omit<WildShapeIntent, 'type'>): PlanResult;
+    simulacrum(state: CampaignState, intent: Omit<SimulacrumIntent, 'type'>): SimulacrumOutcome;
+    wish(state: CampaignState, intent: Omit<WishIntent, 'type'>): WishOutcome;
   };
 
   derive: {
@@ -378,6 +402,20 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     navigationCheck(state, intent) {
       return { events: planNavigationCheck(state, content, rng, { type: 'NavigationCheck', ...intent }) };
     },
+    forcedMarch(state, intent) {
+      return { events: planForcedMarch(state, content, rng, { type: 'ForcedMarch', ...intent }) };
+    },
+    grantInitialHeroPoints(state, intent) {
+      return {
+        events: planGrantInitialHeroPoints(state, content, {
+          type: 'GrantInitialHeroPoints',
+          ...intent,
+        }),
+      };
+    },
+    spendHeroPoint(state, intent) {
+      return planSpendHeroPoint(state, content, rng, { type: 'SpendHeroPoint', ...intent });
+    },
     moraleCheck(state, intent) {
       return { events: planMoraleCheck(state, content, rng, { type: 'MoraleCheck', ...intent }) };
     },
@@ -392,6 +430,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     wildShape(state, intent) {
       return { events: planWildShape(state, content, rng, { type: 'WildShape', ...intent }) };
+    },
+    simulacrum(state, intent) {
+      return planSimulacrum(state, content, rng, { type: 'Simulacrum', ...intent });
+    },
+    wish(state, intent) {
+      return planWish(state, content, rng, { type: 'Wish', ...intent });
     },
   };
 

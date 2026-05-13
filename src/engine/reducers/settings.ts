@@ -1,6 +1,11 @@
 import type { Draft } from 'immer';
 import type { CampaignState } from '../../schemas/runtime/campaign.js';
-import type { CampaignSettingsChangedEvent } from '../../schemas/events/settings.js';
+import type {
+  CampaignSettingsChangedEvent,
+  HeroPointGrantedEvent,
+  HeroPointSpentEvent,
+} from '../../schemas/events/settings.js';
+import { invariant } from '../../internal/invariants.js';
 
 export const applyCampaignSettingsChanged = (
   state: Draft<CampaignState>,
@@ -20,4 +25,23 @@ export const applyCampaignSettingsChanged = (
   if (event.customHouserulesRemove !== undefined) {
     s.customHouserules = s.customHouserules.filter((r) => !event.customHouserulesRemove!.includes(r));
   }
+};
+
+export const applyHeroPointGranted = (
+  state: Draft<CampaignState>,
+  event: HeroPointGrantedEvent,
+): void => {
+  const character = state.characters[event.characterId];
+  invariant(character !== undefined, `Character ${event.characterId} not found`);
+  character.heroPoints = Math.max(0, character.heroPoints + event.amount);
+};
+
+export const applyHeroPointSpent = (
+  state: Draft<CampaignState>,
+  event: HeroPointSpentEvent,
+): void => {
+  const character = state.characters[event.characterId];
+  invariant(character !== undefined, `Character ${event.characterId} not found`);
+  invariant(character.heroPoints >= 1, `${event.characterId} has no hero points to spend`);
+  character.heroPoints -= 1;
 };

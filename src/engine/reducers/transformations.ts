@@ -19,7 +19,12 @@ export const applyPolymorphApplied = (
     `${event.targetId} is already polymorphed`,
   );
   character.polymorphedSnapshot = {
-    hp: { current: character.hp.current, max: character.hp.max, temp: character.hp.temp },
+    hp: {
+      current: character.hp.current,
+      max: character.hp.max,
+      temp: character.hp.temp,
+      maxBonus: character.hp.maxBonus ?? 0,
+    },
     abilityScores: { ...character.abilityScores },
     speedFeet: character.speedFeet,
     speciesId: character.speciesId,
@@ -30,6 +35,9 @@ export const applyPolymorphApplied = (
   character.hp.current = event.form.hp;
   character.hp.max = event.form.hp;
   character.hp.temp = 0;
+  // The form's HP replaces the buffed max, so the running bonus
+  // doesn't apply to the new form. Stash on the snapshot for revert.
+  character.hp.maxBonus = 0;
   character.abilityScores = { ...event.form.abilityScores };
   character.speedFeet = event.form.speedFeet;
   if (event.form.speciesId !== undefined) character.speciesId = event.form.speciesId;
@@ -44,7 +52,12 @@ export const applyPolymorphReverted = (
   invariant(character !== undefined, `Target ${event.targetId} not found`);
   const snap = character.polymorphedSnapshot;
   invariant(snap !== undefined, `${event.targetId} is not polymorphed`);
-  character.hp = { current: snap.hp.current, max: snap.hp.max, temp: snap.hp.temp };
+  character.hp = {
+    current: snap.hp.current,
+    max: snap.hp.max,
+    temp: snap.hp.temp,
+    maxBonus: snap.hp.maxBonus ?? 0,
+  };
   character.abilityScores = { ...snap.abilityScores };
   character.speedFeet = snap.speedFeet;
   character.speciesId = snap.speciesId;
@@ -64,7 +77,7 @@ export const applySimulacrumCreated = (
     id: event.simulacrumId,
     name: `Simulacrum of ${original.name}`,
     kind: 'creature',
-    hp: { current: event.hpMax, max: event.hpMax, temp: 0 },
+    hp: { current: event.hpMax, max: event.hpMax, temp: 0, maxBonus: 0 },
     appliedConditions: [],
     triggerCounters: {},
     spellSlotsUsed: {},
