@@ -310,7 +310,7 @@ Door "Iron portcullis" is now open by **Vex**.
 
 **Vex** takes 7 damage from falling 20 ft (7 bludgeoning). (HP 35 -> 28)
 
-Item acquired: Greatsword.
+Item acquired: Greatclub (Ogre).
 
 **Slag the Ogre** appears (ogre, 59/59 HP).
 
@@ -326,7 +326,7 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Slag the Ogre** [advantage]: d20(12/6) + 9 = 21 vs AC 11 -> hit.
+**Vex** attacks **Slag the Ogre** [advantage]: d20(12/6) + 7 = 19 vs AC 11 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
@@ -344,7 +344,7 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Slag the Ogre**: d20(6) + 9 = 15 vs AC 11 -> hit.
+**Alyx** attacks **Slag the Ogre**: d20(6) + 7 = 13 vs AC 11 -> hit.
 
 Damage rolled: 1d8=[3]+4 slashing.
 
@@ -372,9 +372,9 @@ _(Slag the Ogre consumes action)_
 
 **Slag the Ogre** attacks **Alyx**: d20(16) + 6 = 22 vs AC 12 -> hit.
 
-Damage rolled: 2d6=[5,4]+4 slashing.
+Damage rolled: 2d8=[7,6]+4 bludgeoning.
 
-**Alyx** takes 13 damage (13 slashing). (HP 157 -> 144)
+**Alyx** takes 17 damage (17 bludgeoning). (HP 157 -> 140)
 
 End of Slag the Ogre's turn.
 
@@ -424,7 +424,7 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(2/17) + 9 = 26 vs AC 18 -> hit.
+**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(2/17) + 7 = 24 vs AC 18 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
@@ -464,7 +464,7 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Stoneheart, the Young Red**: d20(2) + 9 = 11 vs AC 18 -> miss.
+**Alyx** attacks **Stoneheart, the Young Red**: d20(2) + 7 = 9 vs AC 18 -> miss.
 
 End of Alyx's turn.
 
@@ -512,7 +512,7 @@ _(Brother Cassius consumes action)_
 
 _(Brother Cassius consumes attack)_
 
-**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(12) + 8 = 20 vs AC 18 -> hit.
+**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(12) + 6 = 18 vs AC 18 -> hit.
 
 Damage rolled: 1d8=[5]+3 slashing.
 

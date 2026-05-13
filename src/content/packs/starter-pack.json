@@ -1098,6 +1098,26 @@
       "properties": []
     },
     {
+      "id": "greatclub",
+      "itemKind": "weapon",
+      "name": "Greatclub",
+      "category": "simple",
+      "attackKind": "melee",
+      "damageType": "bludgeoning",
+      "damageDice": "1d8",
+      "properties": ["two-handed"]
+    },
+    {
+      "id": "ogre-greatclub",
+      "itemKind": "weapon",
+      "name": "Greatclub (Ogre)",
+      "category": "simple",
+      "attackKind": "melee",
+      "damageType": "bludgeoning",
+      "damageDice": "2d8",
+      "properties": ["two-handed"]
+    },
+    {
       "id": "dragon-claw",
       "itemKind": "weapon",
       "name": "Claw (Young Red Dragon)",

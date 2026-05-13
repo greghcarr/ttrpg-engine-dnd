@@ -52,6 +52,31 @@ export const applyLongRestStarted = (
     startedAtEventId: event.id,
     participantIds: [...event.participantIds],
   };
+  // RAW 2024: a long rest involves at least 6 hours of sleep, and the
+  // concentration rules end concentration when the caster falls
+  // unconscious. So as soon as a long rest starts, every participant's
+  // concentration (and the conditions it had applied on other targets)
+  // should clear. Iterate the participants, find each one's concentration
+  // effect, lift the conditions on any tracked targets, and free the
+  // effect instance.
+  for (const id of event.participantIds) {
+    const character = state.characters[id];
+    if (!character) continue;
+    const effectId = character.concentrationEffectId;
+    if (effectId === undefined) continue;
+    const effect = state.effectInstances[effectId];
+    if (effect !== undefined) {
+      for (const applied of effect.conditionsApplied) {
+        const target = state.characters[applied.targetId];
+        if (!target) continue;
+        target.appliedConditions = target.appliedConditions.filter(
+          (c) => c.id !== applied.appliedConditionId,
+        );
+      }
+      delete state.effectInstances[effectId];
+    }
+    character.concentrationEffectId = undefined;
+  }
 };
 
 export const applyLongRestEnded = (
