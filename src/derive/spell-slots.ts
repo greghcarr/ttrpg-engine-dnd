@@ -57,9 +57,14 @@ const casterLevelContribution = (
     case 'full':
       return enrollment.level;
     case 'half':
-      return enrollment.level >= 2 ? Math.floor(enrollment.level / 2) : 0;
+      // PHB 2024 multiclassing + single-class half-caster tables:
+      // contribution = level rounded UP. Paladin 5 -> caster level 3,
+      // mapping to 4 first + 2 second slots in the slot table.
+      return Math.ceil(enrollment.level / 2);
     case 'third':
-      return enrollment.level >= 3 ? Math.floor(enrollment.level / 3) : 0;
+      // Same round-up rule for third casters (Eldritch Knight, Arcane
+      // Trickster). EK 4 -> ceil(4/3) = 2 -> 3 first-level slots.
+      return enrollment.level >= 3 ? Math.ceil(enrollment.level / 3) : 0;
     case 'pact':
       return 0;
   }
@@ -107,9 +112,9 @@ export const computeSpellSlots = (
     ) {
       const cls = classesById.get(onlyOneFullOrHalfClass.classId);
       const progression = cls?.spellcasting;
-      if (progression?.type === 'half' && onlyOneFullOrHalfClass.level === 1) {
-        effectiveLevel = 0;
-      }
+      // 2024 third-casters (Eldritch Knight, Arcane Trickster) don't
+      // pick up spellcasting until level 3. Below that the single-class
+      // table is empty; above that the caster level is ceil(level/3).
       if (progression?.type === 'third' && onlyOneFullOrHalfClass.level < 3) {
         effectiveLevel = 0;
       }

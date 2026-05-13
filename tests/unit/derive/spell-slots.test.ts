@@ -47,10 +47,10 @@ describe('computeSpellSlots', () => {
     expect(result.slotsByLevel[0]).toBe(2);
   });
 
-  it('half caster level 1 → no slots', () => {
+  it('half caster level 1 → 2 first-level slots (PHB 2024 changed from 2014)', () => {
     const char = buildChar([{ classId: 'paladin', level: 1 }]);
     const result = computeSpellSlots(char, TEST_CONTENT.classes);
-    expect(result.slotsByLevel).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(result.slotsByLevel).toEqual([2, 0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it('pact magic level 1 → 1 first-level pact slot', () => {
