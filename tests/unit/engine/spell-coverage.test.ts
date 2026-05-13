@@ -1,0 +1,201 @@
+// Spell-by-spell smoke test. For each spell shipped in the starter pack,
+// we cast it under a controlled scenario and assert that the engine
+// emits the events a D&D-knowledgeable reader expects to see. A leveled
+// spell that ships in the pack with no mechanical effect at all (Magic
+// Missile, Bless before they were wired up) fails this test, surfacing
+// the gap.
+//
+// The intent table below is the source of truth for "what should this
+// spell do, mechanically?". Each entry is short: just enough to identify
+// the expected event kinds. Damage values aren't asserted (those are
+// owned by tighter unit tests); we're catching omissions and shape
+// drift here, not exact dice.
+//
+// `skip` is used for spells that have their own dedicated planner
+// (counterspell, dispel-magic, identify) where planCastSpell isn't the
+// right entry point, and for pure utility cantrips whose entire effect
+// is narrative (mage-hand, prestidigitation, light, detect-magic). Every
+// `skip` line carries a reason so it stays auditable.
+
+import { describe, expect, it } from 'vitest';
+import { createEngine } from '../../../src/engine/index.js';
+import { seededRNG } from '../../../src/rng/seeded.js';
+import { commit } from '../../../src/engine/commit.js';
+import { eventId, isoTimestamp } from '../../fixtures/index.js';
+import { loadStarterPack } from '../../../src/content/packs/starter.js';
+import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
+import { newCharacterId } from '../../../src/ids.js';
+import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
+import type { Event } from '../../../src/schemas/events/index.js';
+
+type Expectation =
+  | { kind: 'attack' }
+  | { kind: 'save' }
+  | { kind: 'heal' }
+  | { kind: 'auto-hit'; minDarts: number }
+  | { kind: 'buff'; conditionId: string }
+  | { kind: 'skip'; reason: string };
+
+const SPELL_EXPECTATIONS: Record<string, Expectation> = {
+  // Cantrips with explicit attack rolls
+  'fire-bolt': { kind: 'attack' },
+  'eldritch-blast': { kind: 'attack' },
+  'ray-of-frost': { kind: 'attack' },
+  'shocking-grasp': { kind: 'attack' },
+  // Cantrip save spells
+  'sacred-flame': { kind: 'save' },
+  // L1+
+  'magic-missile': { kind: 'auto-hit', minDarts: 3 },
+  'fireball': { kind: 'save' },
+  'burning-hands': { kind: 'save' },
+  'thunderwave': { kind: 'save' },
+  'hold-person': { kind: 'save' },
+  'cure-wounds': { kind: 'heal' },
+  'healing-word': { kind: 'heal' },
+  'bless': { kind: 'buff', conditionId: 'blessed' },
+  'spiritual-weapon': { kind: 'attack' },
+  // Spells with dedicated planners (planCounterspell, planDispelMagic,
+  // planIdentify) — castSpell isn't the right call site.
+  'counterspell': { kind: 'skip', reason: 'has dedicated planCounterspell' },
+  'dispel-magic': { kind: 'skip', reason: 'has dedicated planDispelMagic' },
+  'identify': { kind: 'skip', reason: 'has dedicated planIdentify' },
+  // Utility / narrative-only — cast emits no mechanical event.
+  'mage-hand': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'prestidigitation': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'light': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'detect-magic': { kind: 'skip', reason: 'detection only, no mechanical effect' },
+  'guidance': { kind: 'skip', reason: 'not yet wired (TODO: buff/inspiration roll)' },
+  // Defensive / movement spells not yet mechanically modeled.
+  'shield': { kind: 'skip', reason: 'reactive +5 AC (TODO)' },
+  'mage-armor': { kind: 'buff', conditionId: 'mage-armored' },
+  'misty-step': { kind: 'skip', reason: 'teleport movement (TODO)' },
+  // Control / crowd-control spells not yet mechanically modeled.
+  'faerie-fire': { kind: 'skip', reason: 'save + grant-advantage debuff (TODO)' },
+  'bane': { kind: 'save' },
+  'sleep': { kind: 'skip', reason: 'HP-threshold knockout (TODO)' },
+  'web': { kind: 'skip', reason: 'save + restrained area condition (TODO)' },
+  'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
+  // Buffs / utility spells with simple shapes not yet wired.
+  'aid': { kind: 'skip', reason: 'HP-max buff (TODO)' },
+  'lesser-restoration': { kind: 'skip', reason: 'condition removal (TODO)' },
+};
+
+const buildWizard = (preparedSpells: string[]): Character =>
+  CharacterSchema.parse({
+    id: newCharacterId(),
+    name: 'Spell Tester',
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    classes: [{ classId: 'wizard', level: 5, hitDiceRemaining: 5 }],
+    abilityScores: { STR: 8, DEX: 14, CON: 12, INT: 18, WIS: 12, CHA: 10 },
+    hp: { current: 28, max: 28, temp: 0 },
+    featsTaken: ['savage-attacker'],
+    preparedSpells,
+  });
+
+const buildCleric = (preparedSpells: string[]): Character =>
+  CharacterSchema.parse({
+    id: newCharacterId(),
+    name: 'Spell Tester',
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    classes: [{ classId: 'cleric', level: 5, hitDiceRemaining: 5 }],
+    abilityScores: { STR: 12, DEX: 10, CON: 14, INT: 10, WIS: 18, CHA: 12 },
+    hp: { current: 35, max: 35, temp: 0 },
+    featsTaken: ['savage-attacker'],
+    preparedSpells,
+  });
+
+const buildTarget = (): Character =>
+  CharacterSchema.parse({
+    id: newCharacterId(),
+    name: 'Dummy',
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+    abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+    hp: { current: 50, max: 50, temp: 0 },
+    featsTaken: ['savage-attacker'],
+    armorClass: 8, // low so attack-roll spells reliably hit at a wizard's spell attack bonus
+  });
+
+const PACK = loadStarterPack();
+const ALL_SPELL_IDS = PACK.spells.map((s) => s.id);
+
+describe('spell coverage: each shipped spell emits the expected event kinds when cast', () => {
+  it('every shipped spell has an entry in SPELL_EXPECTATIONS', () => {
+    // The expectation table doubles as a check that the test wasn't
+    // accidentally narrowed when new spells were added.
+    const tableIds = new Set(Object.keys(SPELL_EXPECTATIONS));
+    const missing = ALL_SPELL_IDS.filter((id) => !tableIds.has(id));
+    expect(missing, `missing expectations for: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  for (const spellId of ALL_SPELL_IDS) {
+    const expectation = SPELL_EXPECTATIONS[spellId];
+    if (expectation === undefined) continue;
+    if (expectation.kind === 'skip') {
+      it.skip(`${spellId}: ${expectation.reason}`, () => {});
+      continue;
+    }
+
+    it(`${spellId}: emits a ${expectation.kind} event chain`, () => {
+      const spell = PACK.spells.find((s) => s.id === spellId)!;
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+      // Use a cleric for heal/buff spells (clerical list); wizard for damage spells.
+      const isClericalList = expectation.kind === 'heal' || expectation.kind === 'buff';
+      const caster = isClericalList
+        ? buildCleric([spellId])
+        : buildWizard([spellId]);
+      const t1 = buildTarget();
+      const t2 = buildTarget();
+      let campaign = engine.createCampaign({ name: `spell-${spellId}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: caster } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: t1 } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: t2 } satisfies CharacterCreatedEvent,
+      ]);
+      // Magic Missile needs one target per dart; for other spells one or
+      // two targets is fine.
+      const targetIds = expectation.kind === 'auto-hit'
+        ? Array.from({ length: expectation.minDarts }, () => t1.id)
+        : [t1.id, t2.id];
+
+      const events = engine.plan.castSpell(campaign.state, {
+        characterId: caster.id,
+        spellId,
+        slotLevel: spell.level,
+        targetIds,
+      }).events as ReadonlyArray<Event>;
+      const types = events.map((e) => e.type);
+
+      // Always: SpellCastDeclared.
+      expect(types).toContain('SpellCastDeclared');
+      // Leveled spells consume a slot.
+      if (spell.level > 0) expect(types).toContain('SpellSlotConsumed');
+
+      switch (expectation.kind) {
+        case 'attack':
+          expect(types, 'expected at least one AttackRolled').toContain('AttackRolled');
+          break;
+        case 'save':
+          expect(types, 'expected at least one SaveRolled').toContain('SaveRolled');
+          break;
+        case 'heal':
+          expect(types, 'expected at least one Healed').toContain('Healed');
+          break;
+        case 'auto-hit': {
+          const damageEvents = events.filter((e): e is Extract<Event, { type: 'DamageApplied' }> => e.type === 'DamageApplied');
+          expect(damageEvents.length, 'expected one DamageApplied per dart').toBeGreaterThanOrEqual(expectation.minDarts);
+          break;
+        }
+        case 'buff': {
+          const conditions = events.filter((e): e is Extract<Event, { type: 'ConditionApplied' }> => e.type === 'ConditionApplied');
+          expect(conditions.length, 'expected at least one ConditionApplied').toBeGreaterThanOrEqual(1);
+          expect(conditions.some((e) => e.conditionId === expectation.conditionId)).toBe(true);
+          break;
+        }
+      }
+    });
+  }
+});

@@ -897,6 +897,9 @@
       "components": { "verbal": true, "somatic": true, "material": "a piece of cured leather" },
       "duration": "8 hours",
       "concentration": false,
+      "mechanicalEffects": [
+        { "kind": "buff", "conditionId": "mage-armored" }
+      ],
       "ritual": false,
       "classes": ["sorcerer", "wizard"]
     },
@@ -925,7 +928,10 @@
       "duration": "Up to 1 minute",
       "concentration": true,
       "ritual": false,
-      "classes": ["bard", "cleric"]
+      "classes": ["bard", "cleric"],
+      "mechanicalEffects": [
+        { "kind": "save", "ability": "CHA", "conditionOnFail": "baned" }
+      ]
     },
     {
       "id": "sleep",
@@ -1364,6 +1370,30 @@
         { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": 2 },
         { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": 2 },
         { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": 2 }
+      ]
+    },
+    {
+      "id": "baned",
+      "name": "Baned",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "AddModifier", "target": "attack", "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "STR" }, "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "DEX" }, "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CON" }, "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": -2 },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": -2 }
+      ]
+    },
+    {
+      "id": "mage-armored",
+      "name": "Mage Armored",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideACFormula", "base": 13, "abilityModifiers": ["DEX"], "priority": 100 }
       ]
     },
     {
