@@ -194,13 +194,19 @@ End of Goblin Shaman's turn.
 
 ### Round 1: Goblin Scout B's turn
 
-_(Brother Cassius consumes reaction)_
-
-**Brother Cassius** attacks **Goblin Scout B**: d20(5) + 6 = 11 vs AC 12 -> miss.
-
 **Brother Cassius** takes 22 damage from **Goblin Scout B** (22 slashing). (HP 44 -> 22)
 
-**Brother Cassius** CON save: d20(19) + 0 = 19 vs DC 11 -> success.
+**Brother Cassius** CON save: d20(5) + 0 = 5 vs DC 11 -> failure.
+
+**Brother Cassius**'s concentration on Bless broke (failedSave).
+
+_(Brother Cassius consumes reaction)_
+
+**Brother Cassius** attacks **Goblin Scout B**: d20(19) + 6 = 25 vs AC 12 -> hit.
+
+Damage rolled: 1d8=[4]+3 slashing.
+
+**Goblin Scout B** takes 7 damage (7 slashing). (HP 12 -> 5)
 
 End of Goblin Scout B's turn.
 
@@ -210,17 +216,17 @@ End of Goblin Scout B's turn.
 
 Slot consumed: 3rd-level.
 
-**Goblin Scout A** DEX save: d20(6) + 2 = 8 vs DC 15 -> failure.
+**Goblin Scout A** DEX save: d20(11) + 2 = 13 vs DC 15 -> failure.
 
-**Goblin Scout A** takes 23 damage from **Mira** (23 fire). (HP 2 -> -14)
+**Goblin Scout A** takes 22 damage from **Mira** (22 fire). (HP 2 -> -14)
 
-**Goblin Scout B** DEX save: d20(11) + 2 = 13 vs DC 15 -> failure.
+**Goblin Scout B** DEX save: d20(17) + 2 = 19 vs DC 15 -> success.
 
-**Goblin Scout B** takes 23 damage from **Mira** (23 fire). (HP 12 -> -11)
+**Goblin Scout B** takes 11 damage from **Mira** (11 fire). (HP 5 -> -6)
 
-**Goblin Shaman** DEX save: d20(17) + 2 = 19 vs DC 15 -> success.
+**Goblin Shaman** DEX save: d20(10) + 2 = 12 vs DC 15 -> failure.
 
-**Goblin Shaman** takes 11 damage from **Mira** (11 fire). (HP 10 -> -1)
+**Goblin Shaman** takes 22 damage from **Mira** (22 fire). (HP 10 -> -12)
 
 End of Mira's turn.
 
@@ -318,15 +324,15 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Slag the Ogre** [advantage]: d20(10/15) + 7 = 22 vs AC 9 -> hit.
+**Vex** attacks **Slag the Ogre** [advantage]: d20(15/13) + 7 = 22 vs AC 9 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
 **Slag the Ogre** takes 4 damage (4 piercing). (HP 59 -> 55)
 
-Damage rolled: 1d4=[3]+4 piercing.
+Damage rolled: 1d4=[2]+4 piercing.
 
-**Slag the Ogre** takes 7 damage (7 piercing). (HP 55 -> 48)
+**Slag the Ogre** takes 6 damage (6 piercing). (HP 55 -> 49)
 
 End of Vex's turn.
 
@@ -336,11 +342,11 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Slag the Ogre**: d20(6) + 7 = 13 vs AC 9 -> hit.
+**Alyx** attacks **Slag the Ogre**: d20(4) + 7 = 11 vs AC 9 -> hit.
 
 Damage rolled: 1d8=[2]+4 slashing.
 
-**Slag the Ogre** takes 6 damage (6 slashing). (HP 48 -> 42)
+**Slag the Ogre** takes 6 damage (6 slashing). (HP 49 -> 43)
 
 End of Alyx's turn.
 
@@ -352,17 +358,13 @@ End of Mira's turn.
 
 ### Round 1: Brother Cassius's turn
 
-**Vex** takes 28 damage from **Slag the Ogre** (28 bludgeoning). (HP 28 -> 0)
-
-**Vex** death save: d20(11) -> success.
-
 End of Brother Cassius's turn.
 
 ### Round 1: Slag the Ogre's turn
 
-_(Slag the Ogre consumes action)_
+**Vex** takes 28 damage from **Slag the Ogre** (28 bludgeoning). (HP 28 -> 0)
 
-**Slag the Ogre** attacks **Alyx**: d20(4) + 6 = 10 vs AC 15 -> miss.
+_(Slag the Ogre consumes action)_
 
 **Slag the Ogre** attacks **Alyx**: d20(18) + 6 = 24 vs AC 15 -> hit.
 
@@ -370,15 +372,27 @@ Damage rolled: 2d6=[4,2]+4 slashing.
 
 **Alyx** takes 10 damage (10 slashing). (HP 157 -> 147)
 
+**Slag the Ogre** attacks **Alyx**: d20(6) + 6 = 12 vs AC 15 -> miss.
+
 End of Slag the Ogre's turn.
 
 End of round 1.
 
 ### Round 2: Vex's turn
 
+**Vex** death save: d20(11) -> success.
+
+End of Vex's turn.
+
+### Round 2: Alyx's turn
+
+End of Alyx's turn.
+
+### Round 2: Mira's turn
+
 Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd level).
 
-**Slag the Ogre** takes 42 damage (42 force). (HP 42 -> 0)
+**Slag the Ogre** takes 43 damage from **Mira** (43 force). (HP 43 -> 0)
 
 ## Encounter ends: victory.
 
@@ -404,15 +418,15 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(6/4) + 7 = 13 vs AC 10 -> hit.
+**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(4/16) + 7 = 23 vs AC 10 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
 **Stoneheart, the Young Red** takes 5 damage (5 piercing). (HP 178 -> 173)
 
-Damage rolled: 1d4=[4]+4 piercing.
+Damage rolled: 1d4=[3]+4 piercing.
 
-**Stoneheart, the Young Red** takes 8 damage (8 piercing). (HP 173 -> 165)
+**Stoneheart, the Young Red** takes 7 damage (7 piercing). (HP 173 -> 166)
 
 End of Vex's turn.
 
@@ -426,6 +440,20 @@ End of Mira's turn.
 
 ### Round 1: Alyx's turn
 
+Mastery: Sap against **Stoneheart, the Young Red** (Alyx).
+
+**Stoneheart, the Young Red** is now sapped.
+
+_(Alyx consumes action)_
+
+_(Alyx consumes attack)_
+
+**Alyx** attacks **Stoneheart, the Young Red**: d20(2) + 7 = 9 vs AC 10 -> miss.
+
+End of Alyx's turn.
+
+### Round 1: Stoneheart, the Young Red's turn
+
 **Alyx** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
 
 **Mira** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 32 -> 7)
@@ -434,33 +462,21 @@ End of Mira's turn.
 
 **Vex** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 31 -> 6)
 
-**Stoneheart, the Young Red** attacks **Alyx**: d20(14) + 10 = 24 vs AC 15 -> hit.
-
-Damage rolled: 1d8=[1]+6 slashing.
-
-**Alyx** takes 7 damage (7 slashing). (HP 19 -> 12)
+_(Stoneheart, the Young Red consumes action)_
 
 **Stoneheart, the Young Red** attacks **Alyx**: d20(17) + 10 = 27 vs AC 15 -> hit.
 
 Damage rolled: 1d8=[8]+6 slashing.
 
-**Alyx** takes 14 damage (14 slashing). (HP 12 -> -2)
+**Alyx** takes 14 damage (14 slashing). (HP 19 -> 5)
 
 **Stoneheart, the Young Red** attacks **Alyx**: d20(2) + 10 = 12 vs AC 15 -> miss.
 
-End of Alyx's turn.
+**Stoneheart, the Young Red** attacks **Alyx**: d20(9) + 10 = 19 vs AC 15 -> hit.
 
-### Round 1: Stoneheart, the Young Red's turn
+Damage rolled: 1d8=[4]+6 slashing.
 
-Mastery: Sap against **Stoneheart, the Young Red** (Alyx).
-
-**Stoneheart, the Young Red** is now sapped.
-
-**Alyx** attacks **Stoneheart, the Young Red**: d20(9) + 7 = 16 vs AC 10 -> hit.
-
-Damage rolled: 1d8=[4]+4 slashing.
-
-**Stoneheart, the Young Red** takes 8 damage (8 slashing). (HP 165 -> 157)
+**Alyx** takes 10 damage (10 slashing). (HP 5 -> -5)
 
 End of Stoneheart, the Young Red's turn.
 
@@ -470,7 +486,7 @@ End of Stoneheart, the Young Red's turn.
 
 Slot consumed: 1st-level.
 
-**Alyx** healed 5 from healing-word. (HP -2 -> 5)
+**Alyx** healed 5 from healing-word. (HP -5 -> 5)
 
 _(Brother Cassius consumes action)_
 
@@ -480,7 +496,7 @@ _(Brother Cassius consumes attack)_
 
 Damage rolled: 1d8=[5]+3 slashing.
 
-**Stoneheart, the Young Red** takes 8 damage (8 slashing). (HP 157 -> 149)
+**Stoneheart, the Young Red** takes 8 damage (8 slashing). (HP 166 -> 158)
 
 End of Brother Cassius's turn.
 
@@ -488,7 +504,7 @@ End of round 1.
 
 ### Round 2: Vex's turn
 
-**Stoneheart, the Young Red** takes 149 damage (149 slashing). (HP 149 -> 0)
+**Stoneheart, the Young Red** takes 158 damage from **Vex** (158 slashing). (HP 158 -> 0)
 
 ## Encounter ends: victory.
 

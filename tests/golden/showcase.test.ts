@@ -678,19 +678,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     );
     advance();
 
-    // Goblin B's turn: charges Vex, leaving Cassius's reach. Cassius
-    // uses his reaction to make an opportunity attack on the goblin as
-    // it disengages.
-    campaign = commit(
-      campaign,
-      engine.plan.opportunityAttack(campaign.state, {
-        reactorId: cassius.id,
-        targetId: goblinB.id,
-        weaponInstanceId: cassiusSword.id,
-      }).events,
-    );
-    // Goblin B reaches Cassius and lands a hit that breaks his
-    // concentration on Bless.
+    // Goblin B's turn: lands a handaxe on Cassius (forcing a CON save to
+    // hold concentration), then withdraws toward Vex; the withdrawal
+    // leaves Cassius's reach and provokes an opportunity attack.
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
@@ -705,6 +695,14 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.checkConcentration(campaign.state, {
         characterId: cassius.id,
         damageTaken: 22,
+      }).events,
+    );
+    campaign = commit(
+      campaign,
+      engine.plan.opportunityAttack(campaign.state, {
+        reactorId: cassius.id,
+        targetId: goblinB.id,
+        weaponInstanceId: cassiusSword.id,
       }).events,
     );
     advance();
@@ -1042,9 +1040,17 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Vex catches Slag's swing while flanking; drops to 0. Synthetic
-    // damage attributed to the ogre so the cause reads cleanly. Vex
-    // then succeeds a death save.
+    // Brother Cassius's turn: holds the line; no offensive action this
+    // round (he's repositioning between the front and a downed Vex).
+    campaign = commit(
+      campaign,
+      engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
+    );
+
+    // Slag's turn. Initiative places him after the whole party. He
+    // swings at Vex first (synthetic damage attributed to the ogre so
+    // the cause reads cleanly), dropping her to 0, then pivots to Alyx
+    // (in ape form) with his greatclub multiattack.
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
@@ -1053,6 +1059,22 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         sourceCharacterId: ogre.id,
         source: 'greatclub',
       }),
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.multiattack(campaign.state, {
+        attackerId: ogre.id,
+        targetId: alyx.id,
+      }).events,
+    );
+    campaign = commit(
+      campaign,
+      engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
+    );
+
+    // Round 2 begins. Vex is unconscious at 0 — she rolls her death
+    // save at the start of her turn (RAW). She succeeds.
+    campaign = commit(campaign, [
       evt<DeathSaveRolledEvent>({
         type: 'DeathSaveRolled',
         targetId: vex.id,
@@ -1066,21 +1088,14 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // The ogre's multiattack. Vex is already down so it pivots to
-    // Alyx (in ape form). Polymorphed HP soaks it.
-    campaign = commit(
-      campaign,
-      engine.plan.multiattack(campaign.state, {
-        attackerId: ogre.id,
-        targetId: alyx.id,
-      }).events,
-    );
+    // Alyx (giant ape) holds Slag in a wrestling clinch this turn,
+    // doing no further damage (no event emitted).
     campaign = commit(
       campaign,
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Mira finishes the ogre with a wand charge.
+    // Mira's round 2 turn. She finishes the ogre with a wand charge.
     campaign = commit(campaign, [
       evt<ItemChargeConsumedEvent>({
         type: 'ItemChargeConsumed',
@@ -1093,6 +1108,8 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         type: 'DamageApplied',
         targetId: ogre.id,
         components: [{ amount: campaign.state.characters[ogre.id]?.hp.current ?? 0, type: 'force' }],
+        sourceCharacterId: mira.id,
+        source: 'Wand of Magic Missiles',
       }),
     ]);
     campaign = commit(
@@ -1221,40 +1238,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
     );
 
-    // Stoneheart breathes fire. Inject manually-shaped fire damage
-    // showing mitigation against the entire party. In strict RAW the
-    // dice would be rolled ONCE for the breath and each target would
-    // make a DEX save (success = half); the engine currently models
-    // AoE damage per target instead, so this is approximate.
-    // Each target ends up at 25 fire damage (resisted from 50 raw),
-    // attributed to the dragon.
-    for (const id of [alyx.id, mira.id, cassius.id, vex.id]) {
-      campaign = commit(campaign, [
-        evt<DamageAppliedEvent>({
-          type: 'DamageApplied',
-          targetId: id,
-          components: [{ amount: 25, type: 'fire', rawAmount: 50, mitigation: 'resisted' }],
-          sourceCharacterId: dragon.id,
-          source: 'Fire Breath (DEX save; resisted by warding)',
-        }),
-      ]);
-    }
-    // Dragon also takes a swipe with its multiattack.
-    campaign = commit(
-      campaign,
-      engine.plan.multiattack(campaign.state, {
-        attackerId: dragon.id,
-        targetId: alyx.id,
-      }).events,
-    );
-    campaign = commit(
-      campaign,
-      engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
-    );
-
-    // Alyx topples the dragon with a Weapon Mastery: Topple. Even on a
-    // success the dragon is huge, so just use Push instead. Then attacks
-    // with two-handed swing.
+    // Alyx's turn. Initiative places her before the dragon. She uses
+    // the Sap weapon mastery on the dragon (debuffing its next attack),
+    // then swings two-handed for damage.
     campaign = commit(
       campaign,
       engine.plan.weaponMastery(campaign.state, {
@@ -1270,6 +1256,35 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         attackerId: alyx.id,
         targetId: dragon.id,
         weaponInstanceId: alyxSword.id,
+      }).events,
+    );
+    campaign = commit(
+      campaign,
+      engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
+    );
+
+    // Stoneheart's turn. The dragon breathes fire on the whole party
+    // (synthetic AoE — in strict RAW the dice are rolled ONCE for the
+    // breath and each target makes a DEX save for half; this engine
+    // currently rolls per target, so the breath is injected manually so
+    // each party member ends at 25 fire damage from a raw 50, resisted
+    // by warding) and follows up with a multiattack against Alyx.
+    for (const id of [alyx.id, mira.id, cassius.id, vex.id]) {
+      campaign = commit(campaign, [
+        evt<DamageAppliedEvent>({
+          type: 'DamageApplied',
+          targetId: id,
+          components: [{ amount: 25, type: 'fire', rawAmount: 50, mitigation: 'resisted' }],
+          sourceCharacterId: dragon.id,
+          source: 'Fire Breath (DEX save; resisted by warding)',
+        }),
+      ]);
+    }
+    campaign = commit(
+      campaign,
+      engine.plan.multiattack(campaign.state, {
+        attackerId: dragon.id,
+        targetId: alyx.id,
       }).events,
     );
     campaign = commit(
@@ -1302,8 +1317,10 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
     );
 
-    // The dragon falls. Drop the last hit synthetically so we don't
-    // depend on the RNG for the killing blow.
+    // Round 2 begins with Vex's turn. She lines up a finishing blow
+    // (synthetic so the killing-strike total is RNG-independent, but
+    // attributed to her so the transcript reads as a deliberate
+    // execute rather than damage from nowhere).
     const dragonRemaining = campaign.state.characters[dragon.id]?.hp.current ?? 0;
     if (dragonRemaining > 0) {
       campaign = commit(campaign, [
@@ -1311,6 +1328,8 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
           type: 'DamageApplied',
           targetId: dragon.id,
           components: [{ amount: dragonRemaining, type: 'slashing' }],
+          sourceCharacterId: vex.id,
+          source: 'finishing strike',
         }),
       ]);
     }
