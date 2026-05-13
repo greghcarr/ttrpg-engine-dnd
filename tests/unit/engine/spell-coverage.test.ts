@@ -77,6 +77,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'spirit-guardians': { kind: 'skip', reason: 'damaging aura with per-turn ticks (TODO)' },
   // Buffs / utility spells with simple shapes not yet wired.
   'aid': { kind: 'heal' },
+  'polymorph': { kind: 'skip', reason: 'transformation spell driven via PolymorphApplied event, not planCastSpell' },
   'lesser-restoration': { kind: 'skip', reason: 'condition removal (TODO)' },
 };
 

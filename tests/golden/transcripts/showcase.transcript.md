@@ -20,11 +20,11 @@ Item acquired: Quarterstaff.
 
 **Alyx** joined (fighter 5, 44/44 HP).
 
-**Mira** joined (wizard 5, 32/32 HP).
+**Mira** joined (wizard 7, 44/44 HP).
 
 **Brother Cassius** joined (paladin 5, 44/44 HP).
 
-**Vex** joined (rogue 5, 35/35 HP).
+**Vex** joined (rogue 5, 38/38 HP).
 
 **Alyx** equips Chain Shirt (armor).
 
@@ -160,7 +160,7 @@ End of Alyx's turn.
 
 ### Round 1: Goblin Scout A's turn
 
-**Vex** takes 12 damage from **Goblin Scout A** (12 piercing [resisted from 15]). (HP 35 -> 23)
+**Vex** takes 12 damage from **Goblin Scout A** (12 piercing [resisted from 15]). (HP 38 -> 26)
 
 End of Goblin Scout A's turn.
 
@@ -191,6 +191,8 @@ Slot consumed: 2nd-level.
 Slot consumed: 3rd-level.
 
 **Goblin Shaman** CON save: d20(19) + 2 = 21 vs DC 15 -> success.
+
+**Brother Cassius** WIS save: d20(13) + 4 (+1 WIS-mod, +3 proficiency) = 17 vs DC 15 -> success.
 
 End of Goblin Shaman's turn.
 
@@ -308,7 +310,7 @@ Door "Iron portcullis" added at Stoneheart Caverns (5,2), locked.
 
 Door "Iron portcullis" is now open by **Vex**.
 
-**Vex** takes 7 damage from falling 20 ft (7 bludgeoning). (HP 35 -> 28)
+**Vex** takes 7 damage from falling 20 ft (7 bludgeoning). (HP 38 -> 31)
 
 Item acquired: Greatclub (Ogre).
 
@@ -354,6 +356,10 @@ End of Alyx's turn.
 
 ### Round 1: Mira's turn
 
+**Mira** casts Polymorph (4th-level slot) at Alyx.
+
+Slot consumed: 4th-level.
+
 **Mira** casts Polymorph on **Alyx**: new form is Giant Ape (157 HP, AC 12, speed 40).
 
 End of Mira's turn.
@@ -364,7 +370,11 @@ End of Brother Cassius's turn.
 
 ### Round 1: Slag the Ogre's turn
 
-**Vex** takes 28 damage from **Slag the Ogre** (28 bludgeoning). (HP 28 -> 0)
+**Slag the Ogre** attacks **Vex**: d20(20) + 6 = 26 vs AC 12 -> CRITICAL HIT!.
+
+Damage rolled (critical, doubled dice): 2d8=[7,8,6,6]+4 bludgeoning.
+
+**Vex** takes 31 damage from **Slag the Ogre** (31 bludgeoning). (HP 31 -> 0)
 
 _(Slag the Ogre consumes action)_
 
@@ -472,7 +482,7 @@ End of Alyx's turn.
 
 **Alyx** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
 
-**Mira** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 32 -> 7)
+**Mira** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
 
 **Brother Cassius** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
 

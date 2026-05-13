@@ -937,6 +937,19 @@
       ]
     },
     {
+      "id": "polymorph",
+      "name": "Polymorph",
+      "level": 4,
+      "school": "transmutation",
+      "castingTime": "Action",
+      "range": "60 feet",
+      "components": { "verbal": true, "somatic": true, "material": "a caterpillar cocoon" },
+      "duration": "Up to 1 hour",
+      "concentration": true,
+      "ritual": false,
+      "classes": ["bard", "druid", "sorcerer", "wizard"]
+    },
+    {
       "id": "sleep",
       "name": "Sleep",
       "level": 1,

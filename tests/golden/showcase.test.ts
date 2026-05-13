@@ -43,6 +43,15 @@ import type {
   DamageAppliedEvent,
   DeathSaveRolledEvent,
 } from '../../src/schemas/events/combat.js';
+import type { SaveRolledEvent } from '../../src/schemas/events/checks.js';
+import type {
+  SpellCastDeclaredEvent,
+  SpellSlotConsumedEvent,
+} from '../../src/schemas/events/spellcasting.js';
+import type {
+  AttackRolledEvent,
+  DamageRolledEvent,
+} from '../../src/schemas/events/attack.js';
 import type { HitDieSpentEvent } from '../../src/schemas/events/resources.js';
 import type {
   EncounterStartedEvent,
@@ -104,18 +113,26 @@ import type { CampaignSettingsChangedEvent } from '../../src/schemas/events/sett
 import type { Event } from '../../src/schemas/events/index.js';
 import { formatTranscript } from '../transcript.js';
 
-const buildWizard = (name: string, hp: number): Character =>
-  CharacterSchema.parse({
+const buildWizard = (
+  name: string,
+  hp: number,
+  opts: { level?: number; preparedSpells?: string[] } = {},
+): Character => {
+  const level = opts.level ?? 5;
+  return CharacterSchema.parse({
     id: newCharacterId(),
     name,
     speciesId: 'human',
     backgroundId: 'soldier',
-    classes: [{ classId: 'wizard', level: 5, hitDiceRemaining: 5 }],
+    classes: [{ classId: 'wizard', level, hitDiceRemaining: level }],
     abilityScores: { STR: 8, DEX: 14, CON: 14, INT: 18, WIS: 12, CHA: 10 },
     hp: { current: hp, max: hp, temp: 0 },
     featsTaken: ['savage-attacker'],
-    preparedSpells: ['fire-bolt', 'fireball', 'magic-missile', 'hold-person', 'misty-step', 'shield', 'mage-armor'],
+    preparedSpells:
+      opts.preparedSpells ??
+      ['fire-bolt', 'fireball', 'magic-missile', 'hold-person', 'misty-step', 'shield', 'mage-armor', 'polymorph'],
   });
+};
 
 const buildPaladin = (name: string, hp: number): Character =>
   CharacterSchema.parse({
@@ -174,9 +191,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         { resourceId: 'action-surge', current: 1, max: 1 },
       ],
     });
-    const mira = buildWizard('Mira', 32);
+    const mira = buildWizard('Mira', 44, { level: 7 });
     const cassius = buildPaladin('Brother Cassius', 44);
-    const vex = buildRogue('Vex', 35);
+    const vex = buildRogue('Vex', 38);
 
     // ---------- Equipment ----------
     const alyxSword = makeItemInstance('longsword');
@@ -503,7 +520,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       armorClass: 15, // leather armor + shield per MM 2024
       featsTaken: ['savage-attacker'],
     });
-    const goblinShaman = buildWizard('Goblin Shaman', 22);
+    const goblinShaman = buildWizard('Goblin Shaman', 22, {
+      preparedSpells: ['fire-bolt', 'hold-person', 'mage-armor'],
+    });
 
     campaign = commit(campaign, [
       evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: goblinAClub }),
@@ -659,18 +678,43 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         castAsRitual: false,
       } satisfies Event,
     ]);
-    campaign = commit(
-      campaign,
-      engine.plan.counterspell(campaign.state, {
-        counterCasterId: mira.id,
-        targetCasterId: goblinShaman.id,
-        originalSpellEventId: shamanCastEventId,
-        spellId: 'hold-person',
-        castingClassId: 'wizard',
-        slotLevelToConsume: 3,
-        originalSpellLevel: 2,
-      }).events,
-    );
+    const counterspellEvents = engine.plan.counterspell(campaign.state, {
+      counterCasterId: mira.id,
+      targetCasterId: goblinShaman.id,
+      originalSpellEventId: shamanCastEventId,
+      spellId: 'hold-person',
+      castingClassId: 'wizard',
+      slotLevelToConsume: 3,
+      originalSpellLevel: 2,
+    }).events;
+    campaign = commit(campaign, counterspellEvents);
+    // If the shaman makes the CON save against Mira's Counterspell, the
+    // counter fails and Hold Person resolves normally — Cassius needs to
+    // make a WIS save against the shaman's spell save DC (15) or be
+    // paralyzed. Shaman: INT 18 (+4), PB +3 → DC 8+4+3 = 15. Cassius:
+    // WIS 12 (+1), Paladin WIS-save proficient (+3) → +4. Synthetic save
+    // result baked here so the scene remains deterministic regardless of
+    // how the engine's RNG rolls.
+    const counterSucceeded = counterspellEvents.some((e) => e.type === 'SpellCountered');
+    if (!counterSucceeded) {
+      campaign = commit(campaign, [
+        evt<SaveRolledEvent>({
+          type: 'SaveRolled',
+          targetId: cassius.id,
+          ability: 'WIS',
+          dc: 15,
+          d20: [13],
+          used: 'none',
+          bonus: 4,
+          total: 17,
+          success: true,
+          breakdown: [
+            { source: 'WIS-mod', value: 1 },
+            { source: 'proficiency', value: 3 },
+          ],
+        }),
+      ]);
+    }
     advance();
 
     // Goblin B's turn: lands a handaxe on Cassius (forcing a CON save to
@@ -1025,8 +1069,29 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Mira polymorphs Alyx into a giant ape for the brawl.
+    // Mira polymorphs Alyx into a giant ape for the brawl. Polymorph
+    // is a 4th-level spell and Mira (Wizard 7) has one 4th-level slot;
+    // the showcase emits the declared + slot-consumed events alongside
+    // the PolymorphApplied so the slot accounting reads correctly.
+    const polymorphCastId = eventId();
     campaign = commit(campaign, [
+      {
+        id: polymorphCastId,
+        at: at(),
+        type: 'SpellCastDeclared',
+        characterId: mira.id,
+        spellId: 'polymorph',
+        slotLevel: 4,
+        slotSource: 'standard',
+        targetIds: [alyx.id],
+        castAsRitual: false,
+      } satisfies SpellCastDeclaredEvent,
+      evt<SpellSlotConsumedEvent>({
+        type: 'SpellSlotConsumed',
+        characterId: mira.id,
+        slotLevel: 4,
+        causedByEventId: polymorphCastId,
+      }),
       evt<PolymorphAppliedEvent>({
         type: 'PolymorphApplied',
         targetId: alyx.id,
@@ -1054,16 +1119,53 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     );
 
     // Slag's turn. Initiative places him after the whole party. He
-    // swings at Vex first (synthetic damage attributed to the ogre so
-    // the cause reads cleanly), dropping her to 0, then pivots to Alyx
-    // (in ape form) with his greatclub multiattack.
+    // crits Vex first — synthesizing a natural-20 + maxed-out greatclub
+    // damage so the dropping-her-to-0 isn't a damage-from-nowhere
+    // event. Vex's AC at this point is 12 (Studded Leather 12 + DEX
+    // capped at +2 for medium-style fit). Crit dice: greatclub is 2d8,
+    // doubled on crit -> 4d8 + STR 4. Rolls baked here so the
+    // transcript reads as a single luckless swing.
+    const vexHpAtHit = campaign.state.characters[vex.id]?.hp.current ?? 0;
+    const slagCritAttackId = eventId();
+    const slagCritRollId = eventId();
+    const critTotalRolls = [7, 8, 6, 6]; // 27 base, +4 STR = 31. Vex drops.
+    void critTotalRolls; // referenced via the literal in the event payload
     campaign = commit(campaign, [
+      {
+        id: slagCritAttackId,
+        at: at(),
+        type: 'AttackRolled',
+        attackerId: ogre.id,
+        targetId: vex.id,
+        weaponInstanceId: ogreClub.id,
+        d20: [20],
+        used: 'none',
+        attackBonus: 6,
+        total: 26,
+        targetAC: 12,
+        hit: true,
+        critical: true,
+      } satisfies AttackRolledEvent,
+      {
+        id: slagCritRollId,
+        at: at(),
+        type: 'DamageRolled',
+        attackerId: ogre.id,
+        targetId: vex.id,
+        weaponInstanceId: ogreClub.id,
+        rolls: [
+          { expression: '2d8', rolls: [7, 8, 6, 6], modifier: 4, type: 'bludgeoning' },
+        ],
+        critical: true,
+        causedByEventId: slagCritAttackId,
+      } satisfies DamageRolledEvent,
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
         targetId: vex.id,
-        components: [{ amount: campaign.state.characters[vex.id]?.hp.current ?? 0, type: 'bludgeoning' }],
+        components: [{ amount: vexHpAtHit, type: 'bludgeoning' }],
         sourceCharacterId: ogre.id,
-        source: 'greatclub',
+        source: 'greatclub (critical)',
+        causedByEventId: slagCritRollId,
       }),
     ]);
     campaign = commit(
