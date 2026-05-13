@@ -74,6 +74,11 @@ export const CharacterSchema = z.object({
   deathSaves: DeathSavesSchema.default({ successes: 0, failures: 0, stable: false }),
   exhaustion: ExhaustionLevelSchema.default(0),
   speedFeet: z.number().int().min(0).default(30),
+  // Optional natural-armor AC. When set, computeAC uses this in place of
+  // the armor + DEX computation. Intended for creatures whose AC comes
+  // from a statblock (hide, scales, plate-skin) rather than worn armor.
+  // PCs leave it undefined.
+  armorClass: z.number().int().min(0).optional(),
   inventory: z.array(ULIDSchema).default([]),
   equipped: z
     .object({
@@ -131,6 +136,7 @@ export const CharacterSchema = z.object({
       speciesId: z.string(),
       kind: z.enum(['polymorph', 'wild-shape', 'true-polymorph']),
       formName: z.string(),
+      armorClass: z.number().int().min(0).optional(),
     })
     .optional(),
 });

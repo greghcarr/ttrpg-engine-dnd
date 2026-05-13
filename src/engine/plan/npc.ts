@@ -116,6 +116,7 @@ export const planReactionRoll = (
       used: 'none',
       bonus: derivation.total,
       total,
+      breakdown: [...derivation.breakdown],
     } satisfies AbilityCheckRolledEvent,
     {
       id: newEventId() as ULID,

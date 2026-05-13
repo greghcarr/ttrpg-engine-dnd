@@ -25,6 +25,7 @@ export const applyPolymorphApplied = (
     speciesId: character.speciesId,
     kind: event.kind,
     formName: event.form.name,
+    ...(character.armorClass !== undefined ? { armorClass: character.armorClass } : {}),
   };
   character.hp.current = event.form.hp;
   character.hp.max = event.form.hp;
@@ -32,6 +33,7 @@ export const applyPolymorphApplied = (
   character.abilityScores = { ...event.form.abilityScores };
   character.speedFeet = event.form.speedFeet;
   if (event.form.speciesId !== undefined) character.speciesId = event.form.speciesId;
+  character.armorClass = event.form.ac;
 };
 
 export const applyPolymorphReverted = (
@@ -46,6 +48,7 @@ export const applyPolymorphReverted = (
   character.abilityScores = { ...snap.abilityScores };
   character.speedFeet = snap.speedFeet;
   character.speciesId = snap.speciesId;
+  character.armorClass = snap.armorClass;
   character.polymorphedSnapshot = undefined;
 };
 

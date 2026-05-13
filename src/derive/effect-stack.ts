@@ -21,26 +21,45 @@ const collectResolvedChoiceEffects = (
   return effects;
 };
 
+// When the same feature id appears at multiple class levels (e.g. Sneak
+// Attack at 1, 3, 5...), keep only the highest-level instance. Class
+// features that scale with level (Sneak Attack dice, Channel Divinity
+// uses, ki points, etc.) can then be expressed as one feature per scale
+// step in the content pack, with the engine selecting the right one.
+const dedupeFeaturesByLatestLevel = <T extends { id: string }>(
+  perLevelFeatures: ReadonlyArray<ReadonlyArray<T>>,
+): T[] => {
+  const latest = new Map<string, T>();
+  for (const features of perLevelFeatures) {
+    for (const feature of features) latest.set(feature.id, feature);
+  }
+  return [...latest.values()];
+};
+
 const collectClassEffects = (character: Character, content: ResolvedContent): Effect[] => {
   const effects: Effect[] = [];
   for (const enrollment of character.classes) {
     const cls = content.classes.get(enrollment.classId);
     if (!cls) continue;
+    const perLevel: ReadonlyArray<ReadonlyArray<{ id: string; effects: Effect[] }>>[] = [];
+    const classLevels: { id: string; effects: Effect[] }[][] = [];
     for (let level = 1; level <= enrollment.level; level++) {
       const entry = cls.levelTable[String(level)];
-      if (!entry) continue;
-      for (const feature of entry.features) {
-        effects.push(...feature.effects);
-      }
+      classLevels.push(entry ? [...entry.features] : []);
+    }
+    void perLevel;
+    for (const feature of dedupeFeaturesByLatestLevel(classLevels)) {
+      effects.push(...feature.effects);
     }
     if (enrollment.subclassId !== undefined) {
       const subclass = content.subclasses.get(enrollment.subclassId);
       if (subclass) {
+        const subclassLevels: { id: string; effects: Effect[] }[][] = [];
         for (let level = 1; level <= enrollment.level; level++) {
-          const features = subclass.levelGrants[String(level)] ?? [];
-          for (const feature of features) {
-            effects.push(...feature.effects);
-          }
+          subclassLevels.push([...(subclass.levelGrants[String(level)] ?? [])]);
+        }
+        for (const feature of dedupeFeaturesByLatestLevel(subclassLevels)) {
+          effects.push(...feature.effects);
         }
       }
     }

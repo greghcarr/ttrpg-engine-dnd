@@ -81,6 +81,7 @@ export const planSave = (
     bonus: derivation.total,
     total,
     success: total >= intent.dc,
+    breakdown: [...derivation.breakdown],
   };
   return [event];
 };
@@ -130,6 +131,7 @@ export const planAbilityCheck = (
     used,
     bonus: derivation.total,
     total,
+    breakdown: [...derivation.breakdown],
   };
   return [event];
 };

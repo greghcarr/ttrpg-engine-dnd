@@ -52,6 +52,22 @@ const hpChange = (before: number | undefined, after: number | undefined): string
   return ` (HP ${before} -> ${after})`;
 };
 
+// Render a roll's component breakdown next to the flat bonus so a reader
+// can tell where a small or zero bonus came from. Returns "" when the
+// breakdown is absent, has one entry, or contains only zero contributions
+// — those cases would just repeat the bonus number with no new information.
+const formatBreakdown = (
+  breakdown: ReadonlyArray<{ source: string; value: number }> | undefined,
+): string => {
+  if (breakdown === undefined || breakdown.length <= 1) return '';
+  const meaningful = breakdown.filter((e) => e.value !== 0);
+  if (meaningful.length <= 1) return '';
+  const parts = meaningful.map(
+    (e) => `${e.value >= 0 ? '+' : ''}${e.value} ${e.source}`,
+  );
+  return ` (${parts.join(', ')})`;
+};
+
 const sumDamage = (event: Extract<Event, { type: 'DamageApplied' }>): { total: number; summary: string } => {
   let total = 0;
   const parts: string[] = [];
@@ -169,11 +185,11 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `Damage rolled${event.critical ? ' (critical, doubled dice)' : ''}: ${parts.join(', ')}.`;
     }
     case 'SaveRolled':
-      return `**${characterName(stateBefore, event.targetId)}** ${event.ability} save: d20(${event.d20[0]}) + ${event.bonus} = ${event.total} vs DC ${event.dc} -> ${event.success ? 'success' : 'failure'}.`;
+      return `**${characterName(stateBefore, event.targetId)}** ${event.ability} save: d20(${event.d20[0]}) + ${event.bonus}${formatBreakdown(event.breakdown)} = ${event.total} vs DC ${event.dc} -> ${event.success ? 'success' : 'failure'}.`;
     case 'AbilityCheckRolled': {
       const label = event.skill !== undefined ? event.skill : `${event.ability} check`;
       const dcLine = event.dc !== undefined ? ` vs DC ${event.dc} -> ${event.success === true ? 'success' : 'failure'}` : '';
-      return `**${characterName(stateBefore, event.characterId)}** ${label}: d20(${event.d20[0]}) + ${event.bonus} = ${event.total}${dcLine}.`;
+      return `**${characterName(stateBefore, event.characterId)}** ${label}: d20(${event.d20[0]}) + ${event.bonus}${formatBreakdown(event.breakdown)} = ${event.total}${dcLine}.`;
     }
     case 'LevelUpResolved': {
       const hpLabel = event.hpRoll !== undefined ? `rolled d? = ${event.hpRoll}, total +${event.hpGained}` : `average, +${event.hpGained}`;

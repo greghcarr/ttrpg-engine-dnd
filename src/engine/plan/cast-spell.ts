@@ -290,6 +290,7 @@ const planSaveMechanic = (
       total,
       success,
       causedByEventId: declaredEventId as ULID,
+      breakdown: [...saveDerivation.breakdown],
     };
     events.push(saveEvent);
 

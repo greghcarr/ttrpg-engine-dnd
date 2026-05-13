@@ -82,7 +82,7 @@ Vex forages: d20(9)+1=10 vs DC 12 -> nothing found.
 
 **Alyx** enters Riverside (burned).
 
-**Brother Cassius** persuasion: d20(19) + 1 = 20 vs DC 10 -> success.
+**Brother Cassius** persuasion: d20(19) + 1 (+3 CHA-mod, -2 exhaustion) = 20 vs DC 10 -> success.
 
 Elder Ymra attitude -> helpful (social-check shift).
 
@@ -116,23 +116,19 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Goblin Scout A** [advantage]: d20(6/13) + 7 = 20 vs AC 12 -> hit.
+**Vex** attacks **Goblin Scout A** [advantage]: d20(6/13) + 7 = 20 vs AC 15 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
-**Goblin Scout A** takes 1 damage (1 piercing). (HP 14 -> 13)
+**Goblin Scout A** takes 10 damage (10 piercing). (HP 14 -> 4)
 
-Damage rolled: 1d4=[3]+4 piercing.
+Damage rolled: 1d4=[4]+4 piercing.
 
-**Goblin Scout A** takes 7 damage (7 piercing). (HP 13 -> 6)
+**Goblin Scout A** takes 8 damage (8 piercing). (HP 4 -> -4)
 
 _(Vex consumes bonusAction)_
 
-**Vex** attacks **Goblin Scout A**: d20(15) + 7 = 22 vs AC 12 -> hit.
-
-Damage rolled: 1d4=[4]+0 piercing.
-
-**Goblin Scout A** takes 4 damage (4 piercing). (HP 6 -> 2)
+**Vex** attacks **Goblin Scout A**: d20(1) + 7 = 8 vs AC 15 -> miss.
 
 End of Vex's turn.
 
@@ -142,7 +138,11 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Goblin Shaman**: d20(1) + 7 = 8 vs AC 12 -> miss.
+**Alyx** attacks **Goblin Shaman**: d20(11) + 7 = 18 vs AC 12 -> hit.
+
+Damage rolled: 1d8=[8]+4 slashing.
+
+**Goblin Shaman** takes 12 damage (12 slashing). (HP 22 -> 10)
 
 Mastery: Sap against **Goblin Shaman** (Alyx).
 
@@ -154,11 +154,11 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Goblin Shaman**: d20(11) + 7 = 18 vs AC 12 -> hit.
+**Alyx** attacks **Goblin Shaman**: d20(8) + 7 = 15 vs AC 12 -> hit.
 
-Damage rolled: 1d8=[8]+4 slashing.
+Damage rolled: 1d8=[2]+4 slashing.
 
-**Goblin Shaman** takes 12 damage (12 slashing). (HP 22 -> 10)
+**Goblin Shaman** takes 6 damage (6 slashing). (HP 10 -> 4)
 
 End of Alyx's turn.
 
@@ -186,27 +186,23 @@ _(Mira consumes reaction)_
 
 Slot consumed: 3rd-level.
 
-**Goblin Shaman** CON save: d20(8) + 2 = 10 vs DC 15 -> failure.
-
-**Mira** counterspells **Goblin Shaman**'s Hold Person: the spell fails.
+**Goblin Shaman** CON save: d20(19) + 2 = 21 vs DC 15 -> success.
 
 End of Goblin Shaman's turn.
 
 ### Round 1: Goblin Scout B's turn
 
-**Brother Cassius** takes 22 damage from **Goblin Scout B** (22 slashing). (HP 44 -> 22)
+**Brother Cassius** takes 6 damage from **Goblin Scout B** (6 slashing). (HP 44 -> 38)
 
-**Brother Cassius** CON save: d20(5) + 0 = 5 vs DC 11 -> failure.
-
-**Brother Cassius**'s concentration on Bless broke (failedSave).
+**Brother Cassius** CON save: d20(10) + 0 (+2 CON-mod, -2 exhaustion) = 10 vs DC 10 -> success.
 
 _(Brother Cassius consumes reaction)_
 
-**Brother Cassius** attacks **Goblin Scout B**: d20(19) + 6 = 25 vs AC 12 -> hit.
+**Brother Cassius** attacks **Goblin Scout B**: d20(10) + 6 = 16 vs AC 15 -> hit.
 
-Damage rolled: 1d8=[4]+3 slashing.
+Damage rolled: 1d8=[1]+3 slashing.
 
-**Goblin Scout B** takes 7 damage (7 slashing). (HP 12 -> 5)
+**Goblin Scout B** takes 4 damage (4 slashing). (HP 12 -> 8)
 
 End of Goblin Scout B's turn.
 
@@ -216,17 +212,17 @@ End of Goblin Scout B's turn.
 
 Slot consumed: 3rd-level.
 
-**Goblin Scout A** DEX save: d20(11) + 2 = 13 vs DC 15 -> failure.
+**Goblin Scout A** DEX save: d20(10) + 2 = 12 vs DC 15 -> failure.
 
-**Goblin Scout A** takes 22 damage from **Mira** (22 fire). (HP 2 -> -14)
+**Goblin Scout A** takes 27 damage from **Mira** (27 fire). (HP -4 -> -14)
 
-**Goblin Scout B** DEX save: d20(17) + 2 = 19 vs DC 15 -> success.
+**Goblin Scout B** DEX save: d20(15) + 2 = 17 vs DC 15 -> success.
 
-**Goblin Scout B** takes 11 damage from **Mira** (11 fire). (HP 5 -> -6)
+**Goblin Scout B** takes 13 damage from **Mira** (13 fire). (HP 8 -> -5)
 
-**Goblin Shaman** DEX save: d20(10) + 2 = 12 vs DC 15 -> failure.
+**Goblin Shaman** DEX save: d20(13) + 2 = 15 vs DC 15 -> success.
 
-**Goblin Shaman** takes 22 damage from **Mira** (22 fire). (HP 10 -> -12)
+**Goblin Shaman** takes 13 damage from **Mira** (13 fire). (HP 4 -> -9)
 
 End of Mira's turn.
 
@@ -324,15 +320,15 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Slag the Ogre** [advantage]: d20(15/13) + 7 = 22 vs AC 9 -> hit.
+**Vex** attacks **Slag the Ogre** [advantage]: d20(12/6) + 7 = 19 vs AC 11 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
-**Slag the Ogre** takes 4 damage (4 piercing). (HP 59 -> 55)
+**Slag the Ogre** takes 9 damage (9 piercing). (HP 59 -> 50)
 
-Damage rolled: 1d4=[2]+4 piercing.
+Damage rolled: 1d4=[3]+4 piercing.
 
-**Slag the Ogre** takes 6 damage (6 piercing). (HP 55 -> 49)
+**Slag the Ogre** takes 7 damage (7 piercing). (HP 50 -> 43)
 
 End of Vex's turn.
 
@@ -342,11 +338,11 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Slag the Ogre**: d20(4) + 7 = 11 vs AC 9 -> hit.
+**Alyx** attacks **Slag the Ogre**: d20(6) + 7 = 13 vs AC 11 -> hit.
 
-Damage rolled: 1d8=[2]+4 slashing.
+Damage rolled: 1d8=[3]+4 slashing.
 
-**Slag the Ogre** takes 6 damage (6 slashing). (HP 49 -> 43)
+**Slag the Ogre** takes 7 damage (7 slashing). (HP 43 -> 36)
 
 End of Alyx's turn.
 
@@ -366,13 +362,13 @@ End of Brother Cassius's turn.
 
 _(Slag the Ogre consumes action)_
 
-**Slag the Ogre** attacks **Alyx**: d20(18) + 6 = 24 vs AC 15 -> hit.
+**Slag the Ogre** attacks **Alyx**: d20(4) + 6 = 10 vs AC 12 -> miss.
 
-Damage rolled: 2d6=[4,2]+4 slashing.
+**Slag the Ogre** attacks **Alyx**: d20(16) + 6 = 22 vs AC 12 -> hit.
 
-**Alyx** takes 10 damage (10 slashing). (HP 157 -> 147)
+Damage rolled: 2d6=[5,4]+4 slashing.
 
-**Slag the Ogre** attacks **Alyx**: d20(6) + 6 = 12 vs AC 15 -> miss.
+**Alyx** takes 13 damage (13 slashing). (HP 157 -> 144)
 
 End of Slag the Ogre's turn.
 
@@ -386,13 +382,15 @@ End of Vex's turn.
 
 ### Round 2: Alyx's turn
 
+**Slag the Ogre** takes 25 damage from **Alyx** (25 bludgeoning). (HP 36 -> 11)
+
 End of Alyx's turn.
 
 ### Round 2: Mira's turn
 
 Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd level).
 
-**Slag the Ogre** takes 43 damage from **Mira** (43 force). (HP 43 -> 0)
+**Slag the Ogre** takes 11 damage from **Mira** (11 force). (HP 11 -> 0)
 
 ## Encounter ends: victory.
 
@@ -418,15 +416,15 @@ _(Vex consumes action)_
 
 _(Vex consumes attack)_
 
-**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(4/16) + 7 = 23 vs AC 10 -> hit.
+**Vex** attacks **Stoneheart, the Young Red** [advantage]: d20(2/17) + 7 = 24 vs AC 18 -> hit.
 
 _(sneak-attack triggers for Vex)_
 
-**Stoneheart, the Young Red** takes 5 damage (5 piercing). (HP 178 -> 173)
+**Stoneheart, the Young Red** takes 10 damage (10 piercing). (HP 178 -> 168)
 
-Damage rolled: 1d4=[3]+4 piercing.
+Damage rolled: 1d4=[2]+4 piercing.
 
-**Stoneheart, the Young Red** takes 7 damage (7 piercing). (HP 173 -> 166)
+**Stoneheart, the Young Red** takes 6 damage (6 piercing). (HP 168 -> 162)
 
 End of Vex's turn.
 
@@ -448,7 +446,11 @@ _(Alyx consumes action)_
 
 _(Alyx consumes attack)_
 
-**Alyx** attacks **Stoneheart, the Young Red**: d20(2) + 7 = 9 vs AC 10 -> miss.
+**Alyx** attacks **Stoneheart, the Young Red**: d20(18) + 7 = 25 vs AC 18 -> hit.
+
+Damage rolled: 1d8=[5]+4 slashing.
+
+**Stoneheart, the Young Red** takes 9 damage (9 slashing). (HP 162 -> 153)
 
 End of Alyx's turn.
 
@@ -464,19 +466,23 @@ End of Alyx's turn.
 
 _(Stoneheart, the Young Red consumes action)_
 
-**Stoneheart, the Young Red** attacks **Alyx**: d20(17) + 10 = 27 vs AC 15 -> hit.
+**Stoneheart, the Young Red** attacks **Alyx**: d20(12) + 10 = 22 vs AC 15 -> hit.
 
-Damage rolled: 1d8=[8]+6 slashing.
+Damage rolled: 1d8=[2]+6 slashing.
 
-**Alyx** takes 14 damage (14 slashing). (HP 19 -> 5)
+**Alyx** takes 8 damage (8 slashing). (HP 19 -> 11)
 
-**Stoneheart, the Young Red** attacks **Alyx**: d20(2) + 10 = 12 vs AC 15 -> miss.
+**Stoneheart, the Young Red** attacks **Alyx**: d20(10) + 10 = 20 vs AC 15 -> hit.
 
-**Stoneheart, the Young Red** attacks **Alyx**: d20(9) + 10 = 19 vs AC 15 -> hit.
+Damage rolled: 1d8=[1]+6 slashing.
 
-Damage rolled: 1d8=[4]+6 slashing.
+**Alyx** takes 7 damage (7 slashing). (HP 11 -> 4)
 
-**Alyx** takes 10 damage (10 slashing). (HP 5 -> -5)
+**Stoneheart, the Young Red** attacks **Alyx**: d20(18) + 10 = 28 vs AC 15 -> hit.
+
+Damage rolled: 1d8=[1]+6 slashing.
+
+**Alyx** takes 7 damage (7 slashing). (HP 4 -> -3)
 
 End of Stoneheart, the Young Red's turn.
 
@@ -486,17 +492,17 @@ End of Stoneheart, the Young Red's turn.
 
 Slot consumed: 1st-level.
 
-**Alyx** healed 5 from healing-word. (HP -5 -> 5)
+**Alyx** healed 2 from healing-word. (HP -3 -> 2)
 
 _(Brother Cassius consumes action)_
 
 _(Brother Cassius consumes attack)_
 
-**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(13) + 6 = 19 vs AC 10 -> hit.
+**Brother Cassius** attacks **Stoneheart, the Young Red**: d20(17) + 6 = 23 vs AC 18 -> hit.
 
-Damage rolled: 1d8=[5]+3 slashing.
+Damage rolled: 1d8=[3]+3 slashing.
 
-**Stoneheart, the Young Red** takes 8 damage (8 slashing). (HP 166 -> 158)
+**Stoneheart, the Young Red** takes 6 damage (6 slashing). (HP 153 -> 147)
 
 End of Brother Cassius's turn.
 
@@ -504,7 +510,31 @@ End of round 1.
 
 ### Round 2: Vex's turn
 
-**Stoneheart, the Young Red** takes 158 damage from **Vex** (158 slashing). (HP 158 -> 0)
+**Stoneheart, the Young Red** takes 24 damage from **Vex** (24 piercing). (HP 147 -> 123)
+
+End of Vex's turn.
+
+### Round 2: Mira's turn
+
+Wand of Magic Missiles loses 3 charge(s) by **Mira** for Magic Missile (3rd level).
+
+**Stoneheart, the Young Red** takes 22 damage from **Mira** (22 force). (HP 123 -> 101)
+
+End of Mira's turn.
+
+### Round 2: Alyx's turn
+
+**Stoneheart, the Young Red** takes 22 damage from **Alyx** (22 slashing). (HP 101 -> 79)
+
+End of Alyx's turn.
+
+### Round 2: Stoneheart, the Young Red's turn
+
+End of Stoneheart, the Young Red's turn.
+
+### Round 2: Brother Cassius's turn
+
+**Stoneheart, the Young Red** takes 35 damage from **Brother Cassius** (35 radiant). (HP 79 -> 44)
 
 ## Encounter ends: victory.
 
@@ -522,7 +552,7 @@ Quest reward claimed: "Slay the Stoneheart Dragon" (1500 XP each to Alyx, Mira, 
 
 Milestone (major): "Stoneheart the Young Red is slain".
 
-_Journal (Mira, Day 01 02:00)_: **In the dragon's wake**: The cavern still smells of sulfur. We were lucky to come back at all. Cassius was dead for a moment. I keep thinking about that.
+_Journal (Mira, Day 01 02:00)_: **In the dragon's wake**: The cavern still smells of sulfur. We were lucky to come back at all. Vex was dead for a moment in the ogre cave. I keep thinking about that.
 
 Time passes: Day 01 02:00 -> Day 01 10:00 (+480 min) (long rest in the cavern).
 

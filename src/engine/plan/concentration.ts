@@ -63,6 +63,7 @@ export const planCheckConcentration = (
     bonus: saveDerivation.total,
     total,
     success,
+    breakdown: [...saveDerivation.breakdown],
   };
   const events: Event[] = [save];
 

@@ -99,6 +99,24 @@ export interface ComputeACInput {
 
 export const computeAC = (input: ComputeACInput): ACResult => {
   const effects = buildEffectStack(input);
+
+  // A flat `armorClass` on the character takes precedence over equipment
+  // and effect-based overrides. It's used by creatures whose AC comes
+  // from natural armor (hide, scales, plate-skin) declared on a statblock
+  // or by polymorph forms (which copy the form's AC onto the character).
+  // Modifiers (+1 cloak, shield from effects, etc.) still stack on top.
+  if (input.character.armorClass !== undefined) {
+    const breakdown: ACBreakdownEntry[] = [
+      { source: 'natural-armor', value: input.character.armorClass },
+    ];
+    const modifierBonus = effects.modifierSum('ac');
+    if (modifierBonus !== 0) {
+      breakdown.push({ source: 'modifier', value: modifierBonus });
+    }
+    const total = breakdown.reduce((acc, entry) => acc + entry.value, 0);
+    return { total, breakdown };
+  }
+
   const armorInstanceId = input.character.equipped.armor;
 
   let breakdown: ACBreakdownEntry[];

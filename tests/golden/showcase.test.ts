@@ -154,6 +154,7 @@ const buildOgre = (name: string, hp: number, weaponInstanceId: string): Characte
     classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
     abilityScores: { STR: 19, DEX: 8, CON: 16, INT: 5, WIS: 7, CHA: 7 },
     hp: { current: hp, max: hp, temp: 0 },
+    armorClass: 11, // hide armor per MM 2024
     featsTaken: ['savage-attacker'],
     speedFeet: 40,
     multiattack: { name: 'Greatclub frenzy', attacks: [{ weaponInstanceId, count: 2 }] },
@@ -496,6 +497,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
       abilityScores: { STR: 8, DEX: 14, CON: 10, INT: 10, WIS: 8, CHA: 8 },
       hp: { current: 14, max: 14, temp: 0 },
+      armorClass: 15, // leather armor + shield per MM 2024
       featsTaken: ['savage-attacker'],
     });
     const goblinB = CharacterSchema.parse({
@@ -507,6 +509,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
       abilityScores: { STR: 8, DEX: 14, CON: 10, INT: 10, WIS: 8, CHA: 8 },
       hp: { current: 12, max: 12, temp: 0 },
+      armorClass: 15, // leather armor + shield per MM 2024
       featsTaken: ['savage-attacker'],
     });
     const goblinShaman = buildWizard('Goblin Shaman', 22);
@@ -681,11 +684,12 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     // Goblin B's turn: lands a handaxe on Cassius (forcing a CON save to
     // hold concentration), then withdraws toward Vex; the withdrawal
     // leaves Cassius's reach and provokes an opportunity attack.
+    // Damage is a plausible handaxe hit (1d6+2 STR = 7 max in 2024 stats).
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
         targetId: cassius.id,
-        components: [{ amount: 22, type: 'slashing' }],
+        components: [{ amount: 6, type: 'slashing' }],
         sourceCharacterId: goblinB.id,
         source: 'handaxe',
       }),
@@ -694,7 +698,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       campaign,
       engine.plan.checkConcentration(campaign.state, {
         characterId: cassius.id,
-        damageTaken: 22,
+        damageTaken: 6,
       }).events,
     );
     campaign = commit(
@@ -1088,14 +1092,26 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Alyx (giant ape) holds Slag in a wrestling clinch this turn,
-    // doing no further damage (no event emitted).
+    // Alyx (giant ape) slams Slag with a fist (MM Giant Ape Multiattack
+    // is 2x 3d10+6 fists; this is a single slam landing in the believable
+    // mid-range, attributed to Alyx in ape form).
+    campaign = commit(campaign, [
+      evt<DamageAppliedEvent>({
+        type: 'DamageApplied',
+        targetId: ogre.id,
+        components: [{ amount: 25, type: 'bludgeoning' }],
+        sourceCharacterId: alyx.id,
+        source: 'Giant Ape slam',
+      }),
+    ]);
     campaign = commit(
       campaign,
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Mira's round 2 turn. She finishes the ogre with a wand charge.
+    // Mira's round 2 turn. She fires a wand charge to finish the ogre
+    // off. Magic Missile at 3rd level is 5 darts of 1d4+1; we land near
+    // the maximum (5x4 = 20 force) so the ogre drops.
     campaign = commit(campaign, [
       evt<ItemChargeConsumedEvent>({
         type: 'ItemChargeConsumed',
@@ -1107,9 +1123,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
         targetId: ogre.id,
-        components: [{ amount: campaign.state.characters[ogre.id]?.hp.current ?? 0, type: 'force' }],
+        components: [{ amount: Math.min(20, campaign.state.characters[ogre.id]?.hp.current ?? 0), type: 'force' }],
         sourceCharacterId: mira.id,
-        source: 'Wand of Magic Missiles',
+        source: 'Wand of Magic Missiles (5 darts, 3rd-level cast)',
       }),
     ]);
     campaign = commit(
@@ -1171,6 +1187,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       classes: [{ classId: 'fighter', level: 10, hitDiceRemaining: 10 }],
       abilityScores: { STR: 23, DEX: 10, CON: 21, INT: 14, WIS: 11, CHA: 19 },
       hp: { current: 178, max: 178, temp: 0 },
+      armorClass: 18, // natural armor (Young Red Dragon, MM 2024)
       featsTaken: ['savage-attacker'],
       speedFeet: 40,
       multiattack: {
@@ -1317,21 +1334,103 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
     );
 
-    // Round 2 begins with Vex's turn. She lines up a finishing blow
-    // (synthetic so the killing-strike total is RNG-independent, but
-    // attributed to her so the transcript reads as a deliberate
-    // execute rather than damage from nowhere).
-    const dragonRemaining = campaign.state.characters[dragon.id]?.hp.current ?? 0;
-    if (dragonRemaining > 0) {
+    // Round 2 of the dragon fight. The party combines damage at
+    // believable per-character levels until Stoneheart drops; each
+    // hit is attributed and uses plausible 5.5e numbers for the
+    // character that lands it.
+    //
+    // Stoneheart enters round 2 at 158 HP. The party brings him down:
+    //   Vex: sneak attack from advantage (1d4+4 weapon + 3d6 sneak,
+    //     landing near max = ~24)
+    //   Mira: wand charge for a 3rd-level Magic Missile (5x(1d4+1)
+    //     near max = ~22 force)
+    //   Alyx: Sap-debuffed dragon, two attacks at +7 to hit for
+    //     1d8+4 each, both landing near max = ~22 total
+    //   Cassius: holy smite from a 2nd-level slot (1d8 sword + 3d8
+    //     radiant smite, lands as a critical = ~32)
+    // Combined ~100 damage; the dragon enters Cassius's turn near
+    // 58 HP and Cassius's critical finisher lands the killing blow.
+    const dragonRemainingBefore = campaign.state.characters[dragon.id]?.hp.current ?? 0;
+    if (dragonRemainingBefore > 0) {
+      // Vex's round-2 turn: opportunistic sneak attack from above.
       campaign = commit(campaign, [
         evt<DamageAppliedEvent>({
           type: 'DamageApplied',
           targetId: dragon.id,
-          components: [{ amount: dragonRemaining, type: 'slashing' }],
+          components: [{ amount: 24, type: 'piercing' }],
           sourceCharacterId: vex.id,
-          source: 'finishing strike',
+          source: 'dagger + Sneak Attack',
         }),
       ]);
+      campaign = commit(
+        campaign,
+        engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
+      );
+
+      // Mira's round-2 turn: another wand charge.
+      campaign = commit(campaign, [
+        evt<ItemChargeConsumedEvent>({
+          type: 'ItemChargeConsumed',
+          itemInstanceId: wandOfMagicMissiles.id,
+          amount: 3,
+          byCharacterId: mira.id,
+          forEffect: 'Magic Missile (3rd level)',
+        }),
+        evt<DamageAppliedEvent>({
+          type: 'DamageApplied',
+          targetId: dragon.id,
+          components: [{ amount: 22, type: 'force' }],
+          sourceCharacterId: mira.id,
+          source: 'Wand of Magic Missiles (5 darts, 3rd-level cast)',
+        }),
+      ]);
+      campaign = commit(
+        campaign,
+        engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
+      );
+
+      // Alyx's round-2 turn: sword + sword with Sap still on the
+      // dragon. Synthetic to keep the encounter from running long;
+      // ~22 total is in range for two longsword hits at +4 STR.
+      campaign = commit(campaign, [
+        evt<DamageAppliedEvent>({
+          type: 'DamageApplied',
+          targetId: dragon.id,
+          components: [{ amount: 22, type: 'slashing' }],
+          sourceCharacterId: alyx.id,
+          source: 'longsword, two-handed',
+        }),
+      ]);
+      campaign = commit(
+        campaign,
+        engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
+      );
+
+      // Stoneheart's round-2 turn: Vex (and the rest of the party)
+      // dodge the bite. No damage; advance.
+      campaign = commit(
+        campaign,
+        engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
+      );
+
+      // Cassius's round-2 turn: lands a holy smite finisher.
+      // Whatever HP the dragon has left here becomes the smite total
+      // (clamped at 35 to stay believable for a 2nd-level Divine Smite
+      // crit).
+      const dragonRemaining = campaign.state.characters[dragon.id]?.hp.current ?? 0;
+      if (dragonRemaining > 0) {
+        campaign = commit(campaign, [
+          evt<DamageAppliedEvent>({
+            type: 'DamageApplied',
+            targetId: dragon.id,
+            components: [
+              { amount: Math.min(35, dragonRemaining), type: 'radiant' },
+            ],
+            sourceCharacterId: cassius.id,
+            source: 'longsword + 2nd-level Divine Smite (critical)',
+          }),
+        ]);
+      }
     }
 
     campaign = commit(
@@ -1391,7 +1490,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         visibility: 'party',
         visibleToCharacterIds: [],
         title: 'In the dragon\'s wake',
-        body: 'The cavern still smells of sulfur. We were lucky to come back at all. Cassius was dead for a moment. I keep thinking about that.',
+        body: 'The cavern still smells of sulfur. We were lucky to come back at all. Vex was dead for a moment in the ogre cave. I keep thinking about that.',
       }),
       evt<InGameTimeAdvancedEvent>({
         type: 'InGameTimeAdvanced',
@@ -1443,8 +1542,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     // Vex picked up a tool proficiency in downtime.
     expect(campaign.state.toolProficienciesByCharacter[vex.id]).toContain('thieves-tools');
 
-    // Wand was used and recharged.
-    expect(campaign.state.itemInstances[wandOfMagicMissiles.id]?.chargesRemaining).toBe(7);
+    // Wand: started at 5, spent 2 (ogre wand-finish) + 3 (dragon wand-finish),
+    // recharged 4 at dawn between fights. 5 - 2 + 4 - 3 = 4.
+    expect(campaign.state.itemInstances[wandOfMagicMissiles.id]?.chargesRemaining).toBe(4);
     expect(campaign.state.itemInstances[wandOfMagicMissiles.id]?.identifiedByCharacterIds).toContain(mira.id);
 
     // Wagon survived the trip.
