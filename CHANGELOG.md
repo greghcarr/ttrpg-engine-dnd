@@ -2,6 +2,29 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+Engine-gap punch-list: closed 7 of 16 items from the README's Known-gaps section — all 4 🔴 entries plus 3 🟡. Test count grew from 563 to 585 (22 new tests across 7 new files); all replay-equivalence and RNG-capture invariants still hold.
+
+### Added
+
+- **`hp-pool-knockout` spell mechanic** — new `SpellMechanic` kind for Sleep-style spells. Rolls a dice pool (`poolDice`, optional `extraPoolDicePerSlotLevel`), walks targets in ascending current-HP order, and applies the configured condition until the pool runs out. Targets already carrying the condition are skipped. Sleep is now fully wired (5d8 base, +2d8 per slot above 1st, applies `unconscious`).
+- **`engine.plan.shield`** — reactive +5 AC planner. Takes the triggering attack's d20 total and the original AC; emits `ActionEconomyConsumed(reaction)`, `SpellSlotConsumed`, `ConditionApplied('shielded')`, and a new `ShieldCast` event with `preventedHit: boolean`. The new `shielded` condition grants +5 AC via `AddModifier`. Magic Missile damage immunity is not yet modeled (would need per-spell immunity primitive).
+- **`engine.plan.mistyStep`** — dedicated bonus-action teleport planner. Validates spell knowledge, slot, bonus-action availability, and 30-ft Chebyshev range; emits `SpellCastDeclared`, `SpellSlotConsumed(2+)`, `ActionEconomyConsumed(bonusAction)`, and `CombatantMoved(feetTraveled: 0)`.
+- **`engine.plan.expireSpellDurations`** — emits `ConcentrationBroken(reason='durationEnded')` events for every active effect whose listed duration has elapsed by the current in-game clock. New `parseSpellDurationMinutes` parses common 2024 duration phrasings. `EffectInstance` gains `durationMinutes` / `startedAtMinutes`; `ConcentrationStarted` carries `durationMinutes` which the reducer pairs with the in-game clock.
+- **`DerivedCharacter.hpMaxBonus` / `effectiveHpMax`** — character-view derivation now surfaces the sum of `AddModifier{target:'hpMax'}` effects. Aid adds a new `aid-buffed` condition that grants +5 hpMax. Reducer-side massive-damage threshold still compares against the stored `hp.max` (full enforcement is a larger refactor).
+- **`ShieldCastEvent`** and `ConcentrationBrokenReason` value `'unconscious'`.
+
+### Fixed
+
+- **Concentration ends on drop to 0 HP** (RAW 2024 PHB ch.7). All five damage-emitting planners (attack, falling, weapon-mastery, off-hand attack, cast-spell) now emit `ConcentrationBroken(reason='unconscious')` when damage drops a concentrating target to 0 HP. Magic Missile tracks per-target simulated HP so only the dart that actually drops the target emits the break.
+- **Death save auto-roll at start of turn** (RAW 2024 PHB ch.1). `planAdvanceTurn` and `planBeginFirstTurn` emit `DeathSaveRolled` for any combatant whose turn starts while they're at 0 HP and not stable / not already at 3 failures. The reducer invariant for `DeathSaveRolled` was relaxed from `=== 0` to `<= 0` (the engine tracks overflow internally; rules-side anything ≤ 0 is "at 0 HP").
+
+### Documentation
+
+- **README "Known gaps"** updated as each gap closed — engine count 16 → 10, spell-coverage row updated, partial-status bullets reworded, Slice 41 roadmap entry rewritten.
+- **docs/authoring-content-packs.md** SpellMechanic table updated from six kinds to seven (adds `hp-pool-knockout` row).
+
 ## 0.1.0-alpha.2 (2026-05-13)
 
 Alpha refinement. A multi-round D&D-correctness audit surfaced a long list of bugs across the engine, the starter pack content, and the showcase; this release closes them. The README's status and roadmap sections are also rewritten to mark partial slices honestly instead of claiming uniform completeness.

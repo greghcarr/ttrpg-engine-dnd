@@ -27,9 +27,9 @@ Every planner returns `{ events: Event[] }` with the resolution chain baked in (
 
 **Encounter lifecycle**: `createEncounter`, `rollInitiative`, `startEncounter`, `beginFirstTurn`, `advanceTurn`, `endEncounter`.
 
-**Movement**: `move`, `dash`, `disengage`.
+**Movement**: `move`, `dash`, `disengage`, `mistyStep`.
 
-**Spellcasting**: `castSpell`, `checkConcentration`, `counterspell`, `dispelMagic`, `identify`.
+**Spellcasting**: `castSpell`, `checkConcentration`, `expireSpellDurations`, `counterspell`, `dispelMagic`, `identify`, `shield`.
 
 **Checks & saves**: `save`, `abilityCheck`.
 
@@ -47,7 +47,7 @@ Every planner returns `{ events: Event[] }` with the resolution chain baked in (
 
 All read-only.
 
-- `character(state, id)` → `DerivedCharacter` (totalLevel, proficiency bonus, ability modifiers, HP, AC, saves, spell slots, pending choices).
+- `character(state, id)` → `DerivedCharacter` (totalLevel, proficiency bonus, ability modifiers, HP, `hpMaxBonus` / `effectiveHpMax` from effect stack, AC, saves, spell slots, pending choices).
 - `ac(state, id)`, `savingThrow(state, id, ability)`, `attackBonus(state, id, weaponInstanceId)`.
 - `spellSaveDC(state, id, classId)`, `spellAttackBonus(state, id, classId)`, `spellSlots(state, id)`.
 - `abilityModifier(score)`, `proficiencyBonus(level)`: pure helpers.
@@ -61,7 +61,7 @@ Every state transition is an event. The discriminated union `Event` lives at `Ev
 Categories:
 
 - **Combat**: `DamageApplied`, `Healed`, `TempHPGranted`, `ConditionApplied/Removed`, `DeathSaveRolled`, `Stabilized`, `ExhaustionChanged`, `AttackRolled`, `DamageRolled`, `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed`, `ConcentrationStarted/Broken`, `TriggerFired`, `ActionEconomyConsumed`, `CombatantMoved`, `Dashed`, `Disengaged`, `SaveRolled`, `AbilityCheckRolled`.
-- **Spellcasting (reactive)**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`.
+- **Spellcasting (reactive)**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`.
 - **Weapon mastery**: `WeaponMasteryActivated`.
 - **Encounter**: `EncounterCreated/Started/Ended`, `InitiativeRolled`, `TurnStarted/Ended`, `RoundEnded`.
 - **Resting**: `ShortRestStarted/Ended`, `LongRestStarted/Ended`, `HitDieSpent`, `ResourceSpent/Restored`.

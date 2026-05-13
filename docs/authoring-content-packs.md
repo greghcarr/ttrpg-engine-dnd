@@ -249,7 +249,7 @@ Subclass features dedupe by id the same way class features do.
 | `targeting` | `{ shape, size }` | no | AoE shape; `shape` is `cone`/`cube`/`line`/`sphere`/`cylinder` |
 | `mechanicalEffects` | `SpellMechanic[]` | no, default `[]` | See below |
 
-`SpellMechanic` is a discriminated union by `kind`. The starter pack uses six kinds:
+`SpellMechanic` is a discriminated union by `kind`. The starter pack uses seven kinds:
 
 | `kind` | Use | Fields |
 |---|---|---|
@@ -259,6 +259,7 @@ Subclass features dedupe by id the same way class features do.
 | `auto-hit` | N darts, no save / no roll (Magic Missile) | `damageDicePerDart`, `damageType`, `dartsAtBaseSlot`, `extraDartsPerSlotLevel` |
 | `buff` | Apply a condition with no save (Bless, Mage Armor) | `conditionId` |
 | `remove-condition` | Strip the first matching condition from each target (Lesser Restoration) | `eligibleConditionIds` (min 1) |
+| `hp-pool-knockout` | Roll a dice pool; walk targets in ascending-HP order and apply `conditionId` until the pool runs out (Sleep). Targets already carrying the condition are skipped. | `poolDice`, `extraPoolDicePerSlotLevel?`, `conditionId` |
 
 A spell can have multiple `mechanicalEffects` entries — for instance a spell that both damages and applies a condition would have two `save` entries (or one `save` with both `damageDice` and `conditionOnFail`).
 
