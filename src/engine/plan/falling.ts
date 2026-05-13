@@ -52,6 +52,7 @@ export const planFalling = (
     type: 'DamageApplied',
     targetId: intent.characterId,
     components: mitigated,
+    source: `falling ${intent.distanceFeet} ft`,
   };
   return [damageApplied];
 };

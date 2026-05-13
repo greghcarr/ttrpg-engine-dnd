@@ -124,7 +124,7 @@ export const planReactionRoll = (
       characterId: intent.npcId,
       ...(npc.attitude !== undefined ? { fromAttitude: npc.attitude } : {}),
       toAttitude: newAttitude,
-      cause: 'reaction roll',
+      cause: 'social-check shift',
     } satisfies AttitudeChangedEvent,
   ];
 };

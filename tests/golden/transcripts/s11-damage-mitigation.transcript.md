@@ -4,8 +4,8 @@
 **Goblin Mundane** joined (fighter 1, 60/60 HP).
 **Goblin Resistant** joined (fighter 1, 60/60 HP).
 **Goblin Immune** joined (fighter 1, 60/60 HP).
-**Mira the Enchanter** casts Fireball (slot 3) at Goblin Mundane, Goblin Resistant, Goblin Immune.
-Slot consumed: level 3.
+**Mira the Enchanter** casts Fireball (3rd-level slot) at Goblin Mundane, Goblin Resistant, Goblin Immune.
+Slot consumed: 3rd-level.
 **Goblin Mundane** DEX save: d20(15) + 2 = 17 vs DC 15 -> success.
 **Goblin Mundane** takes 17 damage (17 fire). (HP 60 -> 43)
 **Goblin Resistant** DEX save: d20(11) + 2 = 13 vs DC 15 -> failure.

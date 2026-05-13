@@ -19,6 +19,12 @@ interface FormatterContext {
 const characterName = (state: CampaignState, id: string): string =>
   state.characters[id]?.name ?? `<${id.slice(0, 8)}>`;
 
+const ordinal = (n: number): string => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] ?? s[v] ?? s[0]}`;
+};
+
 const itemName = (state: CampaignState, content: ResolvedContent, id: string): string => {
   const inst = state.itemInstances[id];
   if (!inst) return id;
@@ -63,6 +69,13 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
   switch (event.type) {
     case 'CharacterCreated': {
       const c = event.snapshot;
+      if (c.kind === 'creature') {
+        const label = c.statblockId !== undefined ? c.statblockId : 'creature';
+        return `**${c.name}** appears (${label}, ${c.hp.current}/${c.hp.max} HP).`;
+      }
+      if (c.kind === 'npc') {
+        return `**${c.name}** appears (NPC, ${c.hp.current}/${c.hp.max} HP).`;
+      }
       const cls = c.classes.map((e) => `${e.classId} ${e.level}`).join(' / ');
       return `**${c.name}** joined (${cls}, ${c.hp.current}/${c.hp.max} HP).`;
     }
@@ -73,7 +86,12 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const before = stateBefore.characters[event.targetId]?.hp.current;
       const after = stateAfter.characters[event.targetId]?.hp.current;
       const { total, summary } = sumDamage(event);
-      return `**${target}** takes ${total} damage (${summary}).${hpChange(before, after)}`;
+      const sourceLabel = event.sourceCharacterId !== undefined
+        ? ` from **${characterName(stateBefore, event.sourceCharacterId)}**`
+        : event.source !== undefined
+          ? ` from ${event.source}`
+          : '';
+      return `**${target}** takes ${total} damage${sourceLabel} (${summary}).${hpChange(before, after)}`;
     }
     case 'Healed': {
       const target = characterName(stateBefore, event.targetId);
@@ -166,11 +184,11 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const targets = event.targetIds.length === 0
         ? 'no targets'
         : event.targetIds.map((id) => characterName(stateBefore, id)).join(', ');
-      const slotLabel = event.slotLevel === 0 ? 'cantrip' : `slot ${event.slotLevel}${event.slotSource === 'pact' ? ' (pact)' : ''}`;
+      const slotLabel = event.slotLevel === 0 ? 'cantrip' : `${ordinal(event.slotLevel)}-level slot${event.slotSource === 'pact' ? ' (pact)' : ''}`;
       return `**${characterName(stateBefore, event.characterId)}** casts ${spellName(content, event.spellId)} (${slotLabel}) at ${targets}.`;
     }
     case 'SpellSlotConsumed':
-      return `Slot consumed: level ${event.slotLevel}.`;
+      return `Slot consumed: ${ordinal(event.slotLevel)}-level.`;
     case 'PactSlotConsumed':
       return `Pact slot consumed.`;
     case 'ConcentrationStarted': {
@@ -472,7 +490,12 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     }
     case 'PolymorphApplied': {
       const who = characterName(stateBefore, event.targetId);
-      return `**${who}** transforms via ${event.kind} into ${event.form.name} (${event.form.hp} HP).`;
+      const caster = event.casterId !== undefined
+        ? characterName(stateBefore, event.casterId)
+        : undefined;
+      const spellName_ = event.kind === 'wild-shape' ? 'Wild Shape' : event.kind === 'true-polymorph' ? 'True Polymorph' : 'Polymorph';
+      const casterLabel = caster !== undefined && caster !== who ? `**${caster}** casts ${spellName_} on **${who}**: ` : `**${who}** uses ${spellName_}: `;
+      return `${casterLabel}new form is ${event.form.name} (${event.form.hp} HP, AC ${event.form.ac}, speed ${event.form.speedFeet}).`;
     }
     case 'PolymorphReverted': {
       const who = characterName(stateAfter, event.targetId);

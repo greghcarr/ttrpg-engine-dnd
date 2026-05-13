@@ -37,12 +37,9 @@ import {
   newJournalEntryId,
   newPartyId,
   newSessionId,
-  newAppliedConditionId,
 } from '../../src/ids.js';
 import type { CharacterCreatedEvent } from '../../src/schemas/events/progression.js';
 import type {
-  ConditionAppliedEvent,
-  ConditionRemovedEvent,
   DamageAppliedEvent,
   DeathSaveRolledEvent,
 } from '../../src/schemas/events/combat.js';
@@ -623,19 +620,22 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     );
     advance();
 
-    // Goblin A retaliates; injects a heavy direct DamageApplied to set up
-    // the death-save beat later. Includes flat-reduction mitigation
-    // marker (rawAmount > amount).
+    // Goblin Scout A's turn: stabs Vex with a handaxe. Synthetic
+    // damage event attributed to the goblin, marked as resisted via
+    // Vex's leather armor (rawAmount 15 -> amount 12 after mitigation).
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
         targetId: vex.id,
         components: [{ amount: 12, type: 'piercing', rawAmount: 15, mitigation: 'resisted' }],
+        sourceCharacterId: goblinA.id,
+        source: 'handaxe (resisted by light armor)',
       }),
     ]);
     advance();
 
-    // Cassius enters reach of Goblin B; concentration on Bless starts.
+    // Cassius's turn: he casts Bless to support the front line. Starts
+    // concentrating on it (Bless is a concentration spell).
     campaign = commit(
       campaign,
       engine.plan.castSpell(campaign.state, {
@@ -646,9 +646,26 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         castingClassId: 'paladin',
       }).events,
     );
+    advance();
 
-    // Goblin Shaman attempts a hold-person on Cassius; Mira counterspells.
+    // Goblin Shaman's turn: tries to drop Cassius with Hold Person.
+    // Mira uses her reaction to Counterspell. The shaman's spell is
+    // declared first (so the chain reads as a real reactive interrupt),
+    // then Mira spends her 3rd-level slot to negate it.
     const shamanCastEventId = eventId();
+    campaign = commit(campaign, [
+      {
+        id: shamanCastEventId,
+        at: at(),
+        type: 'SpellCastDeclared',
+        characterId: goblinShaman.id,
+        spellId: 'hold-person',
+        slotLevel: 2,
+        slotSource: 'standard',
+        targetIds: [cassius.id],
+        castAsRitual: false,
+      } satisfies Event,
+    ]);
     campaign = commit(
       campaign,
       engine.plan.counterspell(campaign.state, {
@@ -662,8 +679,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     );
     advance();
 
-    // Goblin B charges Vex; provokes an opportunity attack from Cassius
-    // when it leaves Cassius's reach.
+    // Goblin B's turn: charges Vex, leaving Cassius's reach. Cassius
+    // uses his reaction to make an opportunity attack on the goblin as
+    // it disengages.
     campaign = commit(
       campaign,
       engine.plan.opportunityAttack(campaign.state, {
@@ -672,34 +690,15 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         weaponInstanceId: cassiusSword.id,
       }).events,
     );
-    // Goblin B applies the charmed condition on Vex (story-only beat).
-    campaign = commit(campaign, [
-      evt<ConditionAppliedEvent>({
-        type: 'ConditionApplied',
-        targetId: vex.id,
-        conditionId: 'charmed',
-        appliedConditionId: newAppliedConditionId(),
-      }),
-    ]);
-    advance();
-
-    // Mira closes round 1 with Fireball at the bunched goblins.
-    campaign = commit(
-      campaign,
-      engine.plan.castSpell(campaign.state, {
-        characterId: mira.id,
-        spellId: 'fireball',
-        slotLevel: 3,
-        targetIds: [goblinA.id, goblinB.id, goblinShaman.id],
-      }).events,
-    );
-
-    // Concentration check: Goblin B's strike on Cassius forces it.
+    // Goblin B reaches Cassius and lands a hit that breaks his
+    // concentration on Bless.
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
         targetId: cassius.id,
         components: [{ amount: 22, type: 'slashing' }],
+        sourceCharacterId: goblinB.id,
+        source: 'handaxe',
       }),
     ]);
     campaign = commit(
@@ -709,15 +708,21 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         damageTaken: 22,
       }).events,
     );
+    advance();
 
-    // Vex shakes off the charm at end of round.
-    campaign = commit(campaign, [
-      evt<ConditionRemovedEvent>({
-        type: 'ConditionRemoved',
-        targetId: vex.id,
-        conditionId: 'charmed',
-      }),
-    ]);
+    // Mira's turn: closes round 1 with Fireball at the bunched goblins.
+    // Note: the engine currently rolls damage per target instead of
+    // once per spell with save-or-half per target. This is RAW-adjacent
+    // but not strict 2024 Fireball semantics; see Slice 16 follow-up.
+    campaign = commit(
+      campaign,
+      engine.plan.castSpell(campaign.state, {
+        characterId: mira.id,
+        spellId: 'fireball',
+        slotLevel: 3,
+        targetIds: [goblinA.id, goblinB.id, goblinShaman.id],
+      }).events,
+    );
     advance(); // Round ends, encounter wraps.
 
     // Clean up the goblins: they're either dead or dispersed.
@@ -1038,16 +1043,20 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // Cassius drops to 0 from the ogre's previous beating; death save.
+    // Vex catches Slag's swing while flanking; drops to 0. Synthetic
+    // damage attributed to the ogre so the cause reads cleanly. Vex
+    // then succeeds a death save.
     campaign = commit(campaign, [
       evt<DamageAppliedEvent>({
         type: 'DamageApplied',
-        targetId: cassius.id,
-        components: [{ amount: campaign.state.characters[cassius.id]?.hp.current ?? 0, type: 'bludgeoning' }],
+        targetId: vex.id,
+        components: [{ amount: campaign.state.characters[vex.id]?.hp.current ?? 0, type: 'bludgeoning' }],
+        sourceCharacterId: ogre.id,
+        source: 'greatclub',
       }),
       evt<DeathSaveRolledEvent>({
         type: 'DeathSaveRolled',
-        targetId: cassius.id,
+        targetId: vex.id,
         d20: 11,
         success: true,
         critical: false,
@@ -1058,7 +1067,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: ogreEnc.encounterId }).events,
     );
 
-    // The ogre's multiattack. Cassius is already down so it pivots to
+    // The ogre's multiattack. Vex is already down so it pivots to
     // Alyx (in ape form). Polymorphed HP soaks it.
     campaign = commit(
       campaign,
@@ -1095,21 +1104,25 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       }).events,
     );
 
-    // Cassius is unconscious-at-0. Alyx revivifies him.
+    // Vex is unconscious-at-0. Brother Cassius (Paladin 5, prepares
+    // Revivify) casts it; per RAW he consumes a 300 gp diamond from
+    // his component pouch (the showcase doesn't model component
+    // consumption explicitly to avoid coupling to the party purse).
+    // Vex returns at 1 HP.
     campaign = commit(campaign, [
       evt<CharacterResurrectedEvent>({
         type: 'CharacterResurrected',
-        characterId: cassius.id,
+        characterId: vex.id,
         spell: 'revivify',
-        byCharacterId: alyx.id,
+        byCharacterId: cassius.id,
         hpAfter: 1,
       }),
     ]);
-    // Cassius drinks a Potion of Greater Healing to recover fully.
+    // Vex drinks a Potion of Greater Healing to recover further.
     campaign = commit(campaign, [
       evt({
         type: 'Healed',
-        targetId: cassius.id,
+        targetId: vex.id,
         amount: 30,
         source: 'Potion of Greater Healing',
       } as never),
@@ -1209,15 +1222,21 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       engine.plan.advanceTurn(campaign.state, { encounterId: dragonEnc.encounterId }).events,
     );
 
-    // Stoneheart breathes fire. Inject a manually-shaped fire damage event
-    // showing mitigation against the entire party (resisted; rawAmount
-    // 50 -> amount 25 each).
+    // Stoneheart breathes fire. Inject manually-shaped fire damage
+    // showing mitigation against the entire party. In strict RAW the
+    // dice would be rolled ONCE for the breath and each target would
+    // make a DEX save (success = half); the engine currently models
+    // AoE damage per target instead, so this is approximate.
+    // Each target ends up at 25 fire damage (resisted from 50 raw),
+    // attributed to the dragon.
     for (const id of [alyx.id, mira.id, cassius.id, vex.id]) {
       campaign = commit(campaign, [
         evt<DamageAppliedEvent>({
           type: 'DamageApplied',
           targetId: id,
           components: [{ amount: 25, type: 'fire', rawAmount: 50, mitigation: 'resisted' }],
+          sourceCharacterId: dragon.id,
+          source: 'Fire Breath (DEX save; resisted by warding)',
         }),
       ]);
     }
@@ -1398,9 +1417,10 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     expect(campaign.state.settings.heroPoints).toBe(true);
     expect(campaign.state.settings.customHouserules).toContain('inspiration-on-natural-1');
 
-    // Alyx reverted from polymorph; Cassius is alive (1 HP) post-revivify.
+    // Alyx reverted from polymorph; Vex is alive post-revivify (and
+    // healed past 1 HP from the potion).
     expect(campaign.state.characters[alyx.id]?.polymorphedSnapshot).toBeUndefined();
-    expect(campaign.state.characters[cassius.id]?.hp.current).toBeGreaterThanOrEqual(1);
+    expect(campaign.state.characters[vex.id]?.hp.current).toBeGreaterThanOrEqual(1);
 
     // Vex picked up a tool proficiency in downtime.
     expect(campaign.state.toolProficienciesByCharacter[vex.id]).toContain('thieves-tools');

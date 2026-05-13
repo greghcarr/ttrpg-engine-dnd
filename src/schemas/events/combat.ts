@@ -18,6 +18,8 @@ export const DamageAppliedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('DamageApplied'),
   targetId: ULIDSchema,
   components: z.array(DamageComponentSchema).min(1),
+  sourceCharacterId: ULIDSchema.optional(),
+  source: z.string().optional(),
 });
 export type DamageAppliedEvent = z.infer<typeof DamageAppliedEventSchema>;
 

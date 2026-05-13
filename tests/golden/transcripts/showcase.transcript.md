@@ -31,7 +31,7 @@ _Journal (DM, Day 00 07:00) [dm-only]_: **Pre-session notes**: Goblins burned th
 Location "Riverside (burned)" created.
 Location "Whispering Forest Road" created.
 Vehicle acquired: "Supply Wagon" (land, AC 14, 80 HP, 4 seats).
-**Stride** joined (fighter 1, 19/19 HP).
+**Stride** appears (creature, 19/19 HP).
 **Alyx** mounts **Stride**.
 **Brother Cassius** boards Supply Wagon.
 **Mira** boards Supply Wagon.
@@ -42,11 +42,11 @@ Travel: Riverside (burned) -> destination, 24 mi over 6h at fast pace (Forced ma
 **Brother Cassius** exhaustion 0 -> 1.
 Navigation check (Mira): d20(16)+1=17 vs DC 10 -> on course.
 Vex forages: d20(9)+1=10 vs DC 12 -> nothing found.
-**Elder Ymra** joined (fighter 1, 9/9 HP).
+**Elder Ymra** appears (NPC, 9/9 HP).
 **Elder Ymra** enters Riverside (burned).
 **Alyx** enters Riverside (burned).
 **Brother Cassius** persuasion: d20(19) + 1 = 20 vs DC 10 -> success.
-Elder Ymra attitude -> helpful (reaction roll).
+Elder Ymra attitude -> helpful (social-check shift).
 _Journal (Brother Cassius, Day 00 13:00)_: **The hermit**: Elder Ymra warmed to us after Cassius helped her dig her sister out of the rubble. The dragon nests in a basalt cave two days east.
 
 ## Quest started: "Slay the Stoneheart Dragon"
@@ -54,8 +54,8 @@ _Journal (Brother Cassius, Day 00 13:00)_: **The hermit**: Elder Ymra warmed to 
 Item acquired: Handaxe.
 Item acquired: Handaxe.
 Item acquired: Quarterstaff.
-**Goblin Scout A** joined (fighter 1, 14/14 HP).
-**Goblin Scout B** joined (fighter 1, 12/12 HP).
+**Goblin Scout A** appears (creature, 14/14 HP).
+**Goblin Scout B** appears (creature, 12/12 HP).
 **Goblin Shaman** joined (wizard 5, 22/22 HP).
 **Alyx** dismounts Stride.
 
@@ -99,44 +99,49 @@ End of Alyx's turn.
 
 ### Round 1: Goblin Scout A's turn
 
-**Vex** takes 12 damage (12 piercing [resisted from 15]). (HP 35 -> 23)
+**Vex** takes 12 damage from **Goblin Scout A** (12 piercing [resisted from 15]). (HP 35 -> 23)
 End of Goblin Scout A's turn.
 
 ### Round 1: Brother Cassius's turn
 
-**Brother Cassius** casts Bless (slot 1) at Alyx, Vex, Brother Cassius.
-Slot consumed: level 1.
+**Brother Cassius** casts Bless (1st-level slot) at Alyx, Vex, Brother Cassius.
+Slot consumed: 1st-level.
 **Brother Cassius** is now concentrating on Bless.
-_(Mira consumes reaction)_
-Slot consumed: level 3.
-**Goblin Shaman** CON save: d20(8) + 2 = 10 vs DC 15 -> failure.
-**Mira** counterspells **Goblin Shaman**'s Hold Person: the spell fails.
 End of Brother Cassius's turn.
 
 ### Round 1: Goblin Shaman's turn
 
-_(Brother Cassius consumes reaction)_
-**Brother Cassius** attacks **Goblin Scout B**: d20(5) + 6 = 11 vs AC 12 -> miss.
-**Vex** is now Charmed.
+**Goblin Shaman** casts Hold Person (2nd-level slot) at Brother Cassius.
+_(Mira consumes reaction)_
+Slot consumed: 3rd-level.
+**Goblin Shaman** CON save: d20(8) + 2 = 10 vs DC 15 -> failure.
+**Mira** counterspells **Goblin Shaman**'s Hold Person: the spell fails.
 End of Goblin Shaman's turn.
 
 ### Round 1: Goblin Scout B's turn
 
-**Mira** casts Fireball (slot 3) at Goblin Scout A, Goblin Scout B, Goblin Shaman.
-Slot consumed: level 3.
-**Goblin Scout A** DEX save: d20(19) + 2 = 21 vs DC 15 -> success.
-**Goblin Scout A** takes 11 damage (11 fire). (HP 2 -> -9)
-**Goblin Scout B** DEX save: d20(6) + 2 = 8 vs DC 15 -> failure.
-**Goblin Scout B** takes 29 damage (29 fire). (HP 12 -> -12)
-**Goblin Shaman** DEX save: d20(4) + 2 = 6 vs DC 15 -> failure.
-**Goblin Shaman** takes 30 damage (30 fire). (HP 10 -> -20)
-**Brother Cassius** takes 22 damage (22 slashing). (HP 44 -> 22)
-**Brother Cassius** CON save: d20(2) + 0 = 2 vs DC 11 -> failure.
-**Brother Cassius**'s concentration on Bless broke (failedSave).
-**Vex** is no longer Charmed.
+_(Brother Cassius consumes reaction)_
+**Brother Cassius** attacks **Goblin Scout B**: d20(5) + 6 = 11 vs AC 12 -> miss.
+**Brother Cassius** takes 22 damage from **Goblin Scout B** (22 slashing). (HP 44 -> 22)
+**Brother Cassius** CON save: d20(19) + 0 = 19 vs DC 11 -> success.
 End of Goblin Scout B's turn.
 
 ### Round 1: Mira's turn
+
+**Mira** casts Fireball (3rd-level slot) at Goblin Scout A, Goblin Scout B, Goblin Shaman.
+Slot consumed: 3rd-level.
+**Goblin Scout A** DEX save: d20(10) + 2 = 12 vs DC 15 -> failure.
+**Goblin Scout A** takes 22 damage (22 fire). (HP 2 -> -14)
+**Goblin Scout B** DEX save: d20(11) + 2 = 13 vs DC 15 -> failure.
+**Goblin Scout B** takes 26 damage (26 fire). (HP 12 -> -12)
+**Goblin Shaman** DEX save: d20(18) + 2 = 20 vs DC 15 -> success.
+**Goblin Shaman** takes 12 damage (12 fire). (HP 10 -> -2)
+End of Mira's turn.
+
+End of round 1.
+
+
+### Round 2: Vex's turn
 
 
 ## Encounter ends: victory.
@@ -184,9 +189,9 @@ Door "Iron portcullis" added at Stoneheart Caverns (5,2), locked.
 **Brother Cassius** enters Stoneheart Caverns.
 **Vex** enters Stoneheart Caverns.
 Door "Iron portcullis" is now open by **Vex**.
-**Vex** takes 7 damage (7 bludgeoning). (HP 35 -> 28)
+**Vex** takes 7 damage from falling 20 ft (7 bludgeoning). (HP 35 -> 28)
 Item acquired: Greatsword.
-**Slag the Ogre** joined (fighter 1, 59/59 HP).
+**Slag the Ogre** appears (ogre, 59/59 HP).
 
 ## Encounter created: Slag the Ogre (5 combatants)
 
@@ -217,13 +222,13 @@ End of Alyx's turn.
 
 ### Round 1: Mira's turn
 
-**Alyx** transforms via polymorph into Giant Ape (157 HP).
+**Mira** casts Polymorph on **Alyx**: new form is Giant Ape (157 HP, AC 12, speed 40).
 End of Mira's turn.
 
 ### Round 1: Brother Cassius's turn
 
-**Brother Cassius** takes 44 damage (44 bludgeoning). (HP 44 -> 0)
-**Brother Cassius** death save: d20(11) -> success.
+**Vex** takes 28 damage from **Slag the Ogre** (28 bludgeoning). (HP 28 -> 0)
+**Vex** death save: d20(11) -> success.
 End of Brother Cassius's turn.
 
 ### Round 1: Slag the Ogre's turn
@@ -246,11 +251,11 @@ Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd leve
 
 ## Encounter ends: victory.
 
-**Brother Cassius** is restored via revivify by **Alyx** (now 1 HP).
-**Brother Cassius** healed 30 from Potion of Greater Healing. (HP 1 -> 31)
+**Vex** is restored via revivify by **Brother Cassius** (now 1 HP).
+**Vex** healed 30 from Potion of Greater Healing. (HP 1 -> 31)
 **Alyx** reverts (voluntary).
 Item acquired: Longsword.
-**Stoneheart, the Young Red** joined (fighter 10, 178/178 HP).
+**Stoneheart, the Young Red** appears (young-red-dragon, 178/178 HP).
 
 ## Encounter created: Stoneheart the Young Red (5 combatants)
 
@@ -271,16 +276,16 @@ End of Vex's turn.
 
 ### Round 1: Mira's turn
 
-**Mira** casts Magic Missile (slot 3) at Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red.
-Slot consumed: level 3.
+**Mira** casts Magic Missile (3rd-level slot) at Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red.
+Slot consumed: 3rd-level.
 End of Mira's turn.
 
 ### Round 1: Alyx's turn
 
-**Alyx** takes 25 damage (25 fire [resisted from 50]). (HP 44 -> 19)
-**Mira** takes 25 damage (25 fire [resisted from 50]). (HP 32 -> 7)
-**Brother Cassius** takes 25 damage (25 fire [resisted from 50]). (HP 31 -> 6)
-**Vex** takes 25 damage (25 fire [resisted from 50]). (HP 28 -> 3)
+**Alyx** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
+**Mira** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 32 -> 7)
+**Brother Cassius** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 44 -> 19)
+**Vex** takes 25 damage from **Stoneheart, the Young Red** (25 fire [resisted from 50]). (HP 31 -> 6)
 **Stoneheart, the Young Red** attacks **Alyx**: d20(19) + 10 = 29 vs AC 15 -> hit.
 Damage rolled:
   1d8=[3]+6 slashing
@@ -307,8 +312,8 @@ End of Stoneheart, the Young Red's turn.
 
 ### Round 1: Brother Cassius's turn
 
-**Brother Cassius** casts Healing Word (slot 1) at Alyx.
-Slot consumed: level 1.
+**Brother Cassius** casts Healing Word (1st-level slot) at Alyx.
+Slot consumed: 1st-level.
 **Alyx** healed 2 from healing-word. (HP -20 -> 2)
 _(Brother Cassius consumes action)_
 _(Brother Cassius consumes attack)_

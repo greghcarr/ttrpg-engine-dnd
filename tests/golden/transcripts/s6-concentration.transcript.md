@@ -2,8 +2,8 @@
 
 **Mira** joined (wizard 5, 28/28 HP).
 **Ogre** joined (fighter 1, 30/30 HP).
-**Mira** casts Hold Person (slot 2) at Ogre.
-Slot consumed: level 2.
+**Mira** casts Hold Person (2nd-level slot) at Ogre.
+Slot consumed: 2nd-level.
 **Ogre** WIS save: d20(2) + -2 = 0 vs DC 15 -> failure.
 **Ogre** is now Paralyzed.
 **Mira** is now concentrating on Hold Person.

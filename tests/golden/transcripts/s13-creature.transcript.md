@@ -1,7 +1,7 @@
 # Ogre multiattack: two longsword swings in one action
 
 Item acquired: Longsword.
-**Grimtooth** joined (fighter 1, 59/59 HP).
+**Grimtooth** appears (ogre, 59/59 HP).
 **Cassius** joined (fighter 1, 40/40 HP).
 **Grimtooth** attacks **Cassius**: d20(19) + 6 = 25 vs AC 12 -> hit.
 Damage rolled:
