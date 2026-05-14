@@ -59,11 +59,13 @@ export {
   planMove,
   planDash,
   planDisengage,
+  planDodge,
   planMistyStep,
   chebyshevDistance,
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
+  type DodgeIntent,
   type MistyStepIntent,
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';

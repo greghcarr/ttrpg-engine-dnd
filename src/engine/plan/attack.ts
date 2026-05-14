@@ -124,8 +124,23 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     pendingChoices: state.pendingChoices,
   });
   const targetGrantsAdvantage = targetEffects.grantsAdvantageToAttackers();
+  const targetImposesDisadvantage = targetEffects.imposesDisadvantageOnAttackers();
   let advantage = input.advantage ?? 'none';
-  if (advantage === 'none' && targetGrantsAdvantage) advantage = 'advantage';
+  // 2024 advantage/disadvantage cancellation: if both apply, the
+  // attack is rolled with neither. Apply the target's contributions
+  // first, then resolve.
+  if (targetGrantsAdvantage && targetImposesDisadvantage) {
+    // Both cancel — no further auto-modification beyond what the
+    // caller passed in.
+  } else if (advantage === 'none' && targetGrantsAdvantage) {
+    advantage = 'advantage';
+  } else if (advantage === 'none' && targetImposesDisadvantage) {
+    advantage = 'disadvantage';
+  } else if (advantage === 'advantage' && targetImposesDisadvantage) {
+    advantage = 'none';
+  } else if (advantage === 'disadvantage' && targetGrantsAdvantage) {
+    advantage = 'none';
+  }
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
   if (advantage !== 'none') {
     rolls.push(rollDie(D20_SIDES, rng));

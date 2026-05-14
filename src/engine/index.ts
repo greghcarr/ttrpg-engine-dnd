@@ -42,6 +42,7 @@ import {
   planMove,
   planDash,
   planDisengage,
+  planDodge,
   planMistyStep,
   planActionSurge,
   planOffHandAttack,
@@ -102,6 +103,7 @@ import {
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
+  type DodgeIntent,
   type MistyStepIntent,
   type ActionSurgeIntent,
   type OffHandAttackIntent,
@@ -196,6 +198,7 @@ export interface Engine {
     move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
     dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
+    dodge(state: CampaignState, intent: Omit<DodgeIntent, 'type'>): PlanResult;
     mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
@@ -350,6 +353,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     disengage(state, intent) {
       return { events: planDisengage(state, content, { type: 'Disengage', ...intent }) };
+    },
+    dodge(state, intent) {
+      return { events: planDodge(state, content, { type: 'Dodge', ...intent }) };
     },
     mistyStep(state, intent) {
       return { events: planMistyStep(state, content, { type: 'MistyStep', ...intent }) };

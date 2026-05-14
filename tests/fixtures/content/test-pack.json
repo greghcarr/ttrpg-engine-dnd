@@ -561,6 +561,16 @@
       "effects": []
     },
     {
+      "id": "dodged",
+      "name": "Dodging",
+      "stackable": false,
+      "endsOn": [{ "kind": "turnEnd", "ownerId": "self" }],
+      "effects": [
+        { "kind": "ImposeDisadvantageOnAttackers" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }
+      ]
+    },
+    {
       "id": "prone",
       "name": "Prone",
       "stackable": false,

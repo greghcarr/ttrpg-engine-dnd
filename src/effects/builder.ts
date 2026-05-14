@@ -154,6 +154,19 @@ export class EffectAccumulator {
 
   private advantageToAttackersFlag = false;
 
+  // Mirror of `grantsAdvantageToAttackers`: true when this character
+  // has any effect that imposes disadvantage on incoming attacks
+  // (Dodge action's RAW effect, blur-style spells in future).
+  imposesDisadvantageOnAttackers(): boolean {
+    return this.disadvantageOnAttackersFlag;
+  }
+
+  markImposesDisadvantageOnAttackers(): void {
+    this.disadvantageOnAttackersFlag = true;
+  }
+
+  private disadvantageOnAttackersFlag = false;
+
   hasResistance(type: DamageType): boolean {
     return this.resistances.has(type) || this.resistances.has('all');
   }
@@ -258,6 +271,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();
+      return;
+    case 'ImposeDisadvantageOnAttackers':
+      acc.markImposesDisadvantageOnAttackers();
       return;
     case 'GrantSense':
     case 'ModifySpeed':

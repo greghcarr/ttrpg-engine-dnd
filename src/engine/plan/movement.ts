@@ -10,6 +10,8 @@ import type {
 } from '../../schemas/events/movement.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 import type { SpellCastDeclaredEvent, SpellSlotConsumedEvent } from '../../schemas/events/spellcasting.js';
+import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
+import { newAppliedConditionId } from '../../ids.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { invariant } from '../../internal/invariants.js';
@@ -220,6 +222,58 @@ export const planMistyStep = (
     feetTraveled: 0,
   };
   return [declared, slotConsumed, bonusConsumed, moved];
+};
+
+export interface DodgeIntent {
+  readonly type: 'Dodge';
+  readonly combatantId: string;
+  readonly at?: string;
+}
+
+/**
+ * RAW 2024 Dodge action: until the start of your next turn, attack
+ * rolls against you have disadvantage (if you can see the attacker)
+ * and you have advantage on Dexterity saving throws. Lost if you're
+ * incapacitated or your speed drops to 0.
+ *
+ * Wires through as: ActionEconomyConsumed('action') + ConditionApplied
+ * ('dodged'). The `dodged` condition carries
+ * `ImposeDisadvantageOnAttackers` and `SetAdvantage` (on DEX saves);
+ * `planAttack` consults the target's effect stack and lowers its own
+ * roll to disadvantage. The condition is cleared at the start of the
+ * dodger's next turn — the engine doesn't auto-clear, so the consumer
+ * emits `ConditionRemoved` at the appropriate turn boundary.
+ */
+export const planDodge = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  intent: DodgeIntent,
+): ReadonlyArray<Event> => {
+  const { encounterId, combatant, isActive } = findCombatant(state, intent.combatantId);
+  if (!isActive) {
+    throw new Error('Only the active combatant may Dodge on their turn');
+  }
+  if (combatant.turnUsage.actionUsed) {
+    throw new Error('Action already used this turn');
+  }
+  const at = intent.at ?? nowIso();
+  const actionConsumed: ActionEconomyConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ActionEconomyConsumed',
+    encounterId,
+    combatantId: intent.combatantId,
+    kind: 'action',
+  };
+  const conditionApplied: ConditionAppliedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ConditionApplied',
+    targetId: intent.combatantId,
+    conditionId: 'dodged',
+    appliedConditionId: newAppliedConditionId(),
+  };
+  return [actionConsumed, conditionApplied];
 };
 
 export const planDisengage = (

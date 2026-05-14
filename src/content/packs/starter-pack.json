@@ -1741,6 +1741,17 @@
       "effects": []
     },
     {
+      "id": "dodged",
+      "name": "Dodging",
+      "description": "Until the start of your next turn, attacks against you have disadvantage and you have advantage on Dexterity saving throws (Dodge action).",
+      "stackable": false,
+      "endsOn": [{ "kind": "turnEnd", "ownerId": "self" }],
+      "effects": [
+        { "kind": "ImposeDisadvantageOnAttackers" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }
+      ]
+    },
+    {
       "id": "blinded",
       "name": "Blinded",
       "stackable": false,

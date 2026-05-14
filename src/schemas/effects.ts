@@ -145,6 +145,7 @@ export type Effect =
   // the *target's* effect stack to pick this up; the attacker doesn't
   // need to know.
   | { kind: 'GrantAdvantageToAttackers'; condition?: Predicate }
+  | { kind: 'ImposeDisadvantageOnAttackers'; condition?: Predicate }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -300,6 +301,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       condition: PredicateSchema.optional(),
     }),
     z.object({
+      kind: z.literal('ImposeDisadvantageOnAttackers'),
+      condition: PredicateSchema.optional(),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -333,5 +338,6 @@ export const EFFECT_KINDS = [
   'OfferChoice',
   'FlatDamageReduction',
   'GrantAdvantageToAttackers',
+  'ImposeDisadvantageOnAttackers',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;
