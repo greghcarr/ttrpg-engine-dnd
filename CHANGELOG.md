@@ -4,7 +4,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
-Engine-gap punch-list cleanup: of the 16 items the punch-list opened with, only two ⚪ items remain (sanity and mass-combat variant rules, each its own slice). Closed 14 items across this development cycle — all 4 🔴, all 7 🟡, and 3 of the 5 ⚪. Test count grew from 563 to 626 (63 new tests across 16 new files); all replay-equivalence and RNG-capture invariants still hold.
+Engine-gap punch-list cleanup: of the 16 items the punch-list opened with, only two ⚪ items remain (sanity and mass-combat variant rules, each its own slice). Closed 14 items across this development cycle — all 4 🔴, all 7 🟡, and 3 of the 5 ⚪. Also closed the long-open `fast-check` property-test gap (Layer 7 of the testing standard). Test count grew from 563 to 642 (79 new tests across 19 new files); all replay-equivalence and RNG-capture invariants still hold.
 
 ### Added
 
@@ -25,6 +25,7 @@ Engine-gap punch-list cleanup: of the 16 items the punch-list opened with, only 
 - **`engine.plan.simulacrum`** — RAW 2024 7th-level illusion. Validates caster knowledge, slot, materials (1500 gp ruby dust via `materialsConsumed` flag), and the "one Simulacrum per source creature" constraint. Returns `{ events, simulacrumId }` so consumers can wire UI to the new creature pre-commit.
 - **`engine.plan.wish`** — RAW 2024 9th-level conjuration. Eight predefined effects bypass the stress cascade; anything else rolls a d100 and applies exhaustion on a result of 33 or lower. Returns `{ events, stressApplied }`.
 - **`hp.maxBonus`** field on Character + `Character.appliedConditions[].hpMaxBonusDelta` stamping. The damage reducer's massive-damage threshold now compares against `hp.max + hp.maxBonus`, so an Aid-buffed character (effective max 17 instead of 12) doesn't die instantly to a 12-damage hit when at -4 HP. The buff planner sets the delta on `ConditionAppliedEvent.hpMaxBonusDelta`; the reducer copies it into the applied-condition entry and bumps `hp.maxBonus`. Removal (ConditionRemoved, ConcentrationBroken, LongRestStarted concentration-clearing) reads the stored delta and reverses it.
+- **Property tests with `fast-check`** (Layer 7 of the testing standard in [CLAUDE.md](CLAUDE.md)). 16 properties across three files (`tests/property/derivations.test.ts`, `tests/property/reducers.test.ts`, `tests/property/plan.test.ts`), each run at 1000 iterations by default (override with `FAST_CHECK_NUM_RUNS=10000` for local fuzz). Properties: derivations never throw / AC ≥ 1 / `effectiveHpMax === hp.max + hp.maxBonus` for any character; reducer output is `CampaignStateSchema`-valid after any random event sequence; replay equivalence under fuzzing; `hp.current ≤ effective max` and `exhaustion ∈ [0, 6]` always; same seed → byte-equivalent dice payloads. Shared generators in `tests/property/generators.ts`.
 - **`grittyRest` flag wired**: rest events carry `expectedDurationMinutes` (60/480 standard, 480/10080 gritty). The planner reads `state.settings.grittyRest` and stamps the right value.
 - **`heroPoints` flag wired**: `Character.heroPoints` field, `HeroPointGranted` / `HeroPointSpent` events, `engine.plan.grantInitialHeroPoints` (5 + level − 1 per PC), `engine.plan.spendHeroPoint` (rolls a d6 the consumer adds to the augmented roll, decrements the pool).
 

@@ -144,11 +144,10 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-Test-suite expansions that the testing standard in [CLAUDE.md](CLAUDE.md) calls out but were never written. The engine ships 563 tests across 90 files with replay-equivalence and RNG-capture invariants; these would extend the safety net further.
+Test-suite expansions that the testing standard in [CLAUDE.md](CLAUDE.md) calls out but were never written. The engine ships 642 tests across 107 files with replay-equivalence, RNG-capture, and property-based invariants; these would extend the safety net further.
 
 | Gap | Severity | What's missing |
 |---|---|---|
-| Property tests with fast-check (Layer 7) | 🟡 | The testing standard requires property-based tests with `fast-check`. None are written. Generators for valid characters / valid event sequences with assertions on invariants (`replay(events).state === campaign.state`, `AC ≥ 1`, derivations never throw, no negative slot counts). Catches combinatorial bugs the targeted tests miss. |
 | Public API contract test | 🟡 | The testing standard's Layer 9. A `.d.ts` snapshot or `tsd` test that locks the exported type surface so accidental API breakage is caught at the type level. |
 | Feature-coverage matrix | 🟡 | The plan called for `tests/coverage/features.test.ts` enumerating real 5.5e features (class features, magic-item powers, condition interactions, etc.) and asserting each loads + computes. `tests/unit/engine/spell-coverage.test.ts` is the only piece written; the broader matrix is open. |
 
