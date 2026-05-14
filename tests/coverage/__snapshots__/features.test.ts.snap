@@ -2,17 +2,17 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 17,
-  "total": 46,
-  "wired": 29,
+  "stub": 14,
+  "total": 48,
+  "wired": 34,
 }
 `;
 
 exports[`feature-coverage matrix: class features > every named class feature parses (id + level + status snapshot) 1`] = `
 [
   "barbarian L1 rage [wired]",
-  "barbarian L1 unarmored-defense-barbarian-feature [stub]",
-  "barbarian L2 danger-sense [stub]",
+  "barbarian L1 unarmored-defense-barbarian-feature [wired]",
+  "barbarian L2 danger-sense [wired]",
   "barbarian L2 reckless-attack [stub]",
   "barbarian L5 extra-attack-barb [wired]",
   "barbarian L5 fast-movement [wired]",
@@ -37,6 +37,7 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "monk L5 extra-attack-monk [wired]",
   "monk L5 stunning-strike [stub]",
   "monk L7 evasion-monk [stub]",
+  "paladin L1 lay-on-hands [wired]",
   "ranger L1 favored-enemy [wired]",
   "ranger L1 weapon-mastery-ranger [wired]",
   "ranger L2 deft-explorer [stub]",
@@ -55,7 +56,8 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "sorcerer L1 innate-sorcery [wired]",
   "sorcerer L2 font-of-magic [wired]",
   "sorcerer L2 metamagic [stub]",
-  "sorcerer L5 sorcerous-restoration [stub]",
+  "sorcerer L5 sorcerous-restoration [wired]",
+  "wizard L1 arcane-recovery [wired]",
 ]
 `;
 

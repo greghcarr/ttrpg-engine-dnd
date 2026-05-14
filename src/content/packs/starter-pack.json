@@ -174,7 +174,7 @@
       "weaponProficiencies": [],
       "toolProficiencies": [],
       "levelTable": {
-        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "1": { "proficiencyBonus": 2, "features": [{ "id": "arcane-recovery", "name": "Arcane Recovery", "effects": [{ "kind": "GrantResource", "resourceId": "arcane-recovery-points", "max": { "kind": "ceil", "term": { "kind": "multiply", "terms": [{ "kind": "level", "classId": "wizard" }, { "kind": "const", "value": 0.5 }] } }, "recharge": "longRest" }] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
@@ -302,7 +302,7 @@
       "weaponProficiencies": ["simple", "martial"],
       "toolProficiencies": [],
       "levelTable": {
-        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "1": { "proficiencyBonus": 2, "features": [{ "id": "lay-on-hands", "name": "Lay on Hands", "effects": [{ "kind": "GrantResource", "resourceId": "lay-on-hands", "max": { "kind": "multiply", "terms": [{ "kind": "level", "classId": "paladin" }, { "kind": "const", "value": 5 }] }, "recharge": "longRest" }] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
@@ -344,11 +344,11 @@
           "proficiencyBonus": 2,
           "features": [
             { "id": "rage", "name": "Rage", "effects": [{ "kind": "GrantResource", "resourceId": "rage", "max": 2, "recharge": "longRest" }] },
-            { "id": "unarmored-defense-barbarian-feature", "name": "Unarmored Defense", "effects": [] }
+            { "id": "unarmored-defense-barbarian-feature", "name": "Unarmored Defense", "effects": [{ "kind": "OverrideACFormula", "base": 10, "abilityModifiers": ["DEX", "CON"], "priority": 50 }] }
           ],
           "columns": {}
         },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "reckless-attack", "name": "Reckless Attack", "effects": [] }, { "id": "danger-sense", "name": "Danger Sense", "effects": [] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "reckless-attack", "name": "Reckless Attack", "effects": [] }, { "id": "danger-sense", "name": "Danger Sense", "effects": [{ "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-barb", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "fast-movement", "name": "Fast Movement", "effects": [{ "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 10 }] }], "columns": {} },
@@ -559,7 +559,7 @@
         "2": { "proficiencyBonus": 2, "features": [{ "id": "font-of-magic", "name": "Font of Magic (Sorcery Points)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 2, "recharge": "longRest" }] }, { "id": "metamagic", "name": "Metamagic", "effects": [] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
-        "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [] }], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [{ "kind": "RecoverResource", "resourceId": "sorcery-points", "amount": 4, "when": "shortRest" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
