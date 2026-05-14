@@ -17,6 +17,7 @@
 import {
   CharacterSchema,
   createEngine,
+  newAppliedConditionId,
   newCharacterId,
   newEffectInstanceId,
   newEncounterId,
@@ -26,6 +27,7 @@ import {
   type Campaign,
   type CharacterCreatedEvent,
   type CombatantMovedEvent,
+  type ConditionAppliedEvent,
   type ContentPack,
   type EncounterCreatedEvent,
   type EncounterStartedEvent,
@@ -169,6 +171,20 @@ export const buildDownedWizard = (
       toPosition: { x: 10, y: 5 },
       feetTraveled: 0,
     } satisfies CombatantMovedEvent,
+    // Brindle is Prone (the goblin staggered her on a prior swing).
+    // Prone gives attackers within 5 ft Advantage on melee — the
+    // goblin's first hit on the visitor's click now lands in roughly
+    // 92% of seeded runs, instead of ~65% for a flat attack. The
+    // demonstration is the same; the rule firing is what visitors
+    // need to see, not the variance of the d20.
+    {
+      id: eventId(),
+      at: now(),
+      type: 'ConditionApplied',
+      targetId: wizard.id,
+      conditionId: 'prone',
+      appliedConditionId: newAppliedConditionId(),
+    } satisfies ConditionAppliedEvent,
   ]);
 
   return {
