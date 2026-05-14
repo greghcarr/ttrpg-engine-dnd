@@ -156,6 +156,21 @@ export const mountEventInspector = (opts: EventInspectorOptions): EventInspector
     lastRenderedCount = events.length;
   };
 
+  // Track whether the user is "following the tail" — i.e. is currently
+  // pinned within 64px of the bottom of the scroller. While following,
+  // every commit snaps to the new bottom. When the user scrolls up out
+  // of that band, following turns off and stays off until they scroll
+  // back down. This avoids the buggy alternative of measuring atBottom
+  // *after* appending new rows (which has just changed scrollHeight,
+  // so the measurement is against the wrong window).
+  let followTail = true;
+  const FOLLOW_TAIL_TOLERANCE = 64;
+  const refreshFollowState = (): void => {
+    followTail =
+      scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < FOLLOW_TAIL_TOLERANCE;
+  };
+  scroller.addEventListener('scroll', refreshFollowState, { passive: true });
+
   const render = (campaign: Campaign): void => {
     const total = campaign.events.length;
     const firstIndex = showAll ? 0 : Math.max(0, total - MAX_VISIBLE);
@@ -182,14 +197,20 @@ export const mountEventInspector = (opts: EventInspectorOptions): EventInspector
       renderFullRange(campaign.events.slice(firstIndex), firstIndex);
     }
 
-    // Auto-scroll to the latest row if the user is already at the
-    // bottom (within 64px). Don't yank them away if they've scrolled
-    // up to read older context.
-    const atBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 64;
-    if (atBottom) scroller.scrollTop = scroller.scrollHeight;
+    // Snap to the newest row whenever the user is following the tail.
+    // The `followTail` flag is maintained by the scroll listener; here
+    // we only need to honor it after the DOM has settled.
+    if (followTail) {
+      scroller.scrollTop = scroller.scrollHeight;
+    }
   };
 
   render(host.getCampaign());
+  // Initial mount: snap to the bottom so the user sees the most recent
+  // events without scrolling. `render` already does this, but the
+  // scroll-listener-driven `followTail` defaults to true so this is a
+  // no-op safety net for environments where the listener fires async.
+  scroller.scrollTop = scroller.scrollHeight;
   const unsubscribe = host.subscribe(render);
 
   return {
