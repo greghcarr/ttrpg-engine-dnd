@@ -82,6 +82,38 @@ const previewFor = (event: Event): string => {
     case 'InitiativeRolled':
       push('rolls', e.rolls);
       break;
+    case 'ItemAcquired': {
+      // `ItemAcquired` does NOT name an owner — it just registers an
+      // item instance in the campaign's item table. Ownership is set
+      // by the character snapshot's `inventory` / `equipped` fields in
+      // the subsequent `CharacterCreated` event, or moved at runtime
+      // by `ItemEquipped` / `ItemUnequipped`. Surface the definition
+      // and instance id so the row makes that clear.
+      const instance = e.instance as { id?: string; definitionId?: string } | undefined;
+      push('def', instance?.definitionId);
+      push('instance', instance?.id);
+      parts.push('(no owner; minted into world)');
+      break;
+    }
+    case 'ItemEquipped':
+      push('character', e.characterId);
+      push('slot', e.slot);
+      push('instance', e.instanceId);
+      break;
+    case 'ItemUnequipped':
+      push('character', e.characterId);
+      push('slot', e.slot);
+      break;
+    case 'CharacterCreated': {
+      const snapshot = e.snapshot as
+        | { name?: string; inventory?: ReadonlyArray<string>; equipped?: { mainHand?: string; armor?: string } }
+        | undefined;
+      push('name', snapshot?.name);
+      push('inventory', snapshot?.inventory?.length ?? 0);
+      push('mainHand', snapshot?.equipped?.mainHand);
+      push('armor', snapshot?.equipped?.armor);
+      break;
+    }
     default:
       break;
   }
