@@ -58,6 +58,7 @@ Pick the doc that matches what you want:
 | Try the web demo in your browser | [https://greghcarr.github.io/ttrpg-engine-dnd/](https://greghcarr.github.io/ttrpg-engine-dnd/) |
 | Hack on the web demo locally | [web/README.md](web/README.md) |
 | Read the demo's architecture decisions | [docs/web-demo-plan.md](docs/web-demo-plan.md) |
+| Understand what's missing before the engine is trustworthy for unsupervised play | [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) |
 | Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
 | Know what each version means (alpha / beta / rc / 1.0) | [VERSIONING.md](VERSIONING.md) |
 | Read the change history | [CHANGELOG.md](CHANGELOG.md) |
@@ -111,18 +112,70 @@ Severity column throughout: 🔴 immediately visible to a player at low levels, 
 
 ### Engine gaps
 
-Engine-level features that ship as partial or not at all. Two items, grouped by category. Each entry says what's missing and which slice (if any) it sits under.
+Engine-level features that ship as partial or not at all. Grouped by category. Each entry says what's missing and (if applicable) which slice it sits under.
 
-#### Variant-rule enforcement
+> **2026-05-14 audit note.** A web-demo session ([docs/web-demo-plan.md](docs/web-demo-plan.md)) surfaced multiple RAW violations that targeted-test coverage missed. The RAW-compliance audit in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) probes a curated set of first-page-of-the-PHB rules; **its failing rows are a floor, not a ceiling**. Replace each row with a "✓ fixed (commit ###)" line when the relevant planner gains its guard. **Until these are closed, do not trust the engine for an unsupervised tabletop session — a downed PC can swing a sword, a Wizard can chain three Shields in one round, and movement through threatened squares is free.**
+>
+> **Scope of audit.** Not exhaustive. The list below enumerates *probed* failures. Categories I've named but not yet built probes for: Frightened/Charmed source-tracking restrictions, two-weapon-fighting light-property enforcement, multiattack target legality at L5+, Heavy-weapon disadvantage for Small creatures, Loading-property one-shot-per-attack, ranged-attack disadvantage when an enemy is in melee reach, half/three-quarters cover AC bonuses, difficult-terrain 2× movement cost, and auto-crit on attacks within 5ft of Paralyzed/Unconscious targets. Some of these the engine likely gets right; some likely not. If you have time to write probes, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) is structured to take more `it()`s with a one-line setup each.
+
+#### Conditions don't block actions
+
+The applied-conditions list is metadata; no planner consults it before allowing an actor to act. RAW Appendix "Conditions" makes most of these prohibitive. Probed and failing in the audit:
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Unconscious actor (HP = 0) can still Attack / Move / Dodge / Dash | 🔴 | RAW: "An Unconscious creature can't take Actions, Bonus Actions, or Reactions". Engine: only `engine.commit`'s death-save automation runs at turn start; the dispatch planners accept the dispatch and emit damage events as normal. |
+| Incapacitated condition lets the actor still Attack and Dodge | 🔴 | RAW: "An Incapacitated creature can't take any Action, Bonus Action, or Reaction". Engine: the condition is applied to `appliedConditions` but no planner reads it. |
+| Stunned condition lets the actor Attack | 🔴 | RAW: includes Incapacitated + auto-fail STR/DEX saves. Engine: misses the action-block half entirely. |
+| Paralyzed condition lets the actor Attack | 🔴 | RAW: includes Incapacitated + auto-fail saves + auto-crit within 5ft. Engine: misses the action-block half. |
+| Petrified condition lets the actor Attack | 🔴 | RAW: includes Incapacitated. Engine: misses the action-block half. |
+| Restrained condition does not reduce speed to 0 | 🔴 | RAW: "speed becomes 0, and it can't benefit from any bonus to its speed". Engine: `planMove` reads `speedFeet` directly, ignoring active conditions. |
+| Grappled condition does not reduce speed to 0 | 🔴 | RAW: "speed becomes 0". Engine: same root cause as Restrained. |
+
+#### Action economy and reactions
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Reaction cap (1 per round) is not enforced by reactive spells | 🟡 | RAW PHB ch.1 "Reactions": "You can take only one Reaction per round". Engine: `planShield` (and other reactive-spell planners) do not consult `turnUsage.reactionUsedThisRound` and do not emit `ActionEconomyConsumed('reaction')`. A Wizard can cast Shield three times in the same round. |
+
+#### Positioning and movement
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Leaving a hostile's melee reach does not provoke an opportunity attack | 🔴 | RAW PHB ch.1 "Opportunity Attack": "You provoke an Opportunity Attack when you move out of a creature's Reach". Engine: `planOpportunityAttack` exists but `planMove` doesn't emit any `OpportunityAvailable` / reaction-prompt event, so consumers have no signal to invoke it. Effectively, OAs never fire. |
+| Standing up from Prone does not cost half your speed | 🟡 | RAW PHB ch.1 "Prone": "Standing up takes more effort; doing so costs an amount of movement equal to half your speed". Engine: clearing the Prone condition doesn't touch `turnUsage.feetMovedThisTurn`. |
+| Misty Step (and other teleport effects) doesn't check destination occupancy | 🟡 | RAW spell text: "teleport up to 30 feet to an unoccupied space". Engine: `planMistyStep` has an explicit `// occupancy checks are the consumer's responsibility` comment; should at minimum reject ending in another combatant's square (matching the [planMove fix](src/engine/plan/movement.ts) shipped 2026-05-14). |
+| Ranged attack within 5 ft of a hostile does not impose disadvantage | 🟡 | RAW PHB ch.1 "Ranged Attacks in Close Combat": "You have Disadvantage on the attack roll if you are within 5 feet of a hostile creature who can see you and who isn't Incapacitated". Engine: `planAttack` checks weapon range but ignores adjacent-hostile state when deciding advantage/disadvantage. |
+
+#### Concentration
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Concentration is not auto-cleared when the caster's HP drops to 0 | 🔴 | RAW PHB ch.7 "Concentration": "Becoming Incapacitated or dying immediately ends Concentration". Engine: `planCheckConcentration` documents this rule but is consumer-called; the `DamageApplied` reducer does not auto-clear `character.concentrationEffectId` when HP reaches 0. Wizards / Druids will hold concentration on Hex / Spirit Guardians from beyond the grave until the consumer remembers to call the planner. |
+
+#### Variant-rule enforcement (deferred, ⚪)
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
 | `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
 
+#### Verified clean (audit passes)
+
+The audit also confirms some rules the engine *does* get right, so this section isn't all bad news:
+
+- **Dodge → Dash and Dash → Dodge both reject.** The Dash and Dodge planners each guard `turnUsage.actionUsed`.
+- **Auto-crit on melee hits within 5ft of a Paralyzed target.** The advantage/auto-crit pipeline picks this up via the effect-stack contribution from the `paralyzed` condition.
+
 #### Engine triage
 
-All 🔴 and 🟡 items are now closed. The remaining ⚪ gaps are large variant-rule slices (`sanity` is a 7th-stat refactor, `massCombat` is a Squad system) deferred to their own future slices.
+**🔴 status — 10 open items.** Concentrated in three clusters: (1) conditions are inert against the actor (action-block rules in the Conditions appendix), (2) opportunity attacks are unobservable from `planMove`, (3) concentration is not auto-cleared on HP=0. The fix shape for cluster 1 is a single `assertActorCanAct(state, combatantId)` helper that every planner calls before doing any work. Cluster 2 wants either an extra event in `planMove`'s return (`OpportunityAvailable { reactorId, targetId }`) or a richer return shape (`{ events, opportunities }`). Cluster 3 wants the `DamageApplied` reducer to inline-call the concentration-break path when `hp.current` lands at 0.
+
+**🟡 status — 4 open items.** Reaction cap, prone speed cost, Misty Step occupancy, ranged-in-melee disadvantage. Lower-frequency but still rules-aware-player-catchable.
+
+**Prior "all 🔴/🟡 closed" claim was wrong.** Targeted-test coverage exercises each planner in isolation with well-formed setups; it didn't fuzz the cross-product of "actor has condition X" × "actor attempts action Y" or "ranged attacker in melee" × "attack". The web demo's hands-on play exposed this gap. The fix order, the audit file at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts), and these README rows are the lasting record.
+
+**Bigger picture: see [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md).** That doc lays out the four tiers of work between "alpha" and "trustworthy for unsupervised tabletop play" — Tier 1 closes the audit, Tier 2 extends the audit categorically, Tier 3 fills content stubs, Tier 4 ships a real SRD pack. The tables in this section cover Tier 1 only.
 
 ### Content gaps
 
