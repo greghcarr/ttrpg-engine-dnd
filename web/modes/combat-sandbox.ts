@@ -131,7 +131,59 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
     onStatus?.(`Passed on OA (${offer.reactorId})`);
   };
 
+  // An OA offer is only still valid right after the mover left reach,
+  // and only while every precondition still holds. Prune whenever:
+  //   - the mover moved again (their position no longer matches
+  //     offer.toPosition; the OA was tied to *that* leaving moment)
+  //   - the encounter has moved past the mover's turn (a new
+  //     combatant is now active — the window for reacting to the
+  //     prior turn's movement is closed)
+  //   - the reactor has already used their reaction this round
+  //   - the reactor can no longer act (Unconscious / Stunned /
+  //     Paralyzed / Petrified / Incapacitated / HP 0)
+  //   - the reactor is now the active combatant (RAW: can't OA on
+  //     own turn; engine rejects, but the UI should reflect that
+  //     before the user clicks Take)
+  const isOfferStillValid = (
+    campaign: Campaign,
+    offer: OpportunityAvailableEvent,
+  ): boolean => {
+    const enc = campaign.state.encounters[offer.encounterId];
+    if (!enc) return false;
+    const moverCb = enc.combatants.find((c) => c.combatantId === offer.moverId);
+    const reactorCb = enc.combatants.find((c) => c.combatantId === offer.reactorId);
+    if (!moverCb || !reactorCb) return false;
+    if (
+      moverCb.position === undefined ||
+      moverCb.position.x !== offer.toPosition.x ||
+      moverCb.position.y !== offer.toPosition.y
+    ) {
+      return false;
+    }
+    const activeCb = enc.combatants[enc.activeIndex];
+    if (!activeCb || activeCb.combatantId !== offer.moverId) return false;
+    if (reactorCb.turnUsage.reactionUsedThisRound) return false;
+    const reactorChar = campaign.state.characters[offer.reactorId];
+    if (!reactorChar || reactorChar.hp.current <= 0) return false;
+    const ACTION_BLOCK: ReadonlySet<string> = new Set([
+      'incapacitated',
+      'stunned',
+      'paralyzed',
+      'petrified',
+      'unconscious',
+    ]);
+    if (reactorChar.appliedConditions.some((c) => ACTION_BLOCK.has(c.conditionId))) {
+      return false;
+    }
+    return true;
+  };
+
   const renderOAQueue = (campaign: Campaign): void => {
+    const before = pendingOAs.length;
+    pendingOAs = pendingOAs.filter((offer) => isOfferStillValid(campaign, offer));
+    if (before > 0 && pendingOAs.length < before) {
+      console.log(`[demo] OA queue pruned: ${before} → ${pendingOAs.length}`);
+    }
     if (pendingOAs.length === 0) {
       oaQueueEl.hidden = true;
       oaQueueEl.replaceChildren();
