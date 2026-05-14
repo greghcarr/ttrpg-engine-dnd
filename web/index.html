@@ -18,12 +18,17 @@
         Combat math, replay equivalence, and the action economy are fully exercised at L3.
       </p>
       <p class="toolbar">
+        <label class="scenario-control">
+          scenario:
+          <select id="scenario-select" aria-label="Scenario"></select>
+        </label>
         <button id="btn-reset" type="button" disabled>Reset</button>
         <label class="seed-control">
           seed:
           <input id="seed-input" type="number" inputmode="numeric" min="0" step="1" />
         </label>
       </p>
+      <p id="scenario-hint" class="scenario-hint" hidden></p>
       <p id="status">Booting...</p>
       <section id="pending-choice-root" class="pending-choice-resolver" aria-label="Pending choices" hidden></section>
       <div class="panels">

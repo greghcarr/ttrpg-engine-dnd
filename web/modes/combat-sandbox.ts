@@ -9,11 +9,11 @@
 
 import type { Campaign, OpportunityAvailableEvent } from 'ttrpg-engine-dnd';
 import type { EngineHost, Intent } from '../engine-host.js';
-import type { GoblinSkirmish } from '../scenarios/goblin-skirmish.js';
+import type { DemoSession } from '../scenarios/index.js';
 
 export interface CombatSandboxOptions {
   readonly host: EngineHost;
-  readonly scenario: GoblinSkirmish;
+  readonly scenario: DemoSession;
   readonly root: HTMLElement;
   readonly onStatus?: (text: string) => void;
 }

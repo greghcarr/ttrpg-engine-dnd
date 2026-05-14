@@ -14,7 +14,7 @@ import { SCENARIOS } from '../../web/scenarios/index.js';
 
 describe('web demo: replay equivalence', () => {
   for (const scenario of SCENARIOS) {
-    describe(scenario.name, () => {
+    describe(scenario.id, () => {
       it('replay(events).state deep-equals campaign.state', () => {
         const { campaign } = scenario.build();
         const rebuilt = replay(campaign.events);

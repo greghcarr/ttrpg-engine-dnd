@@ -33,6 +33,7 @@ const ROW_BACK = 10;
 const DEFAULT_SEED = 42;
 
 export interface GoblinSkirmishCombatants {
+  readonly [name: string]: string;
   readonly alyx: string;
   readonly brindle: string;
   readonly goblinA: string;

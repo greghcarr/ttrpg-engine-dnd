@@ -3,12 +3,10 @@ import { mountCombatSandbox, type CombatSandbox } from './modes/combat-sandbox.j
 import { mountEventInspector, type EventInspector } from './modes/event-inspector.js';
 import { mountRulesLab, type RulesLab } from './modes/rules-lab.js';
 import { mountPendingChoiceResolver, type PendingChoiceResolver } from './ui/pending-choice.js';
-import { buildGoblinSkirmish, type GoblinSkirmish } from './scenarios/goblin-skirmish.js';
-
-type StarterModule = typeof import('ttrpg-engine-dnd/starter-pack');
-type StarterPack = ReturnType<StarterModule['loadStarterPack']>;
+import { SCENARIOS, type DemoScenario, type DemoSession } from './scenarios/index.js';
 
 const DEFAULT_SEED = 42;
+const DEFAULT_SCENARIO_ID = 'goblin-skirmish';
 
 const status = document.getElementById('status');
 const setStatus = (text: string): void => {
@@ -21,6 +19,8 @@ const sandboxRoot = document.getElementById('combat-sandbox-root');
 const inspectorRoot = document.getElementById('event-inspector-root');
 const choiceRoot = document.getElementById('pending-choice-root');
 const rulesLabRoot = document.getElementById('rules-lab-root');
+const scenarioSelect = document.getElementById('scenario-select') as HTMLSelectElement | null;
+const scenarioHint = document.getElementById('scenario-hint') as HTMLParagraphElement | null;
 
 // URL hash format: `#seed=42&mode=combat`. We only read/write `seed` for
 // now; `mode` lands when the second mode does. Keep this tolerant of
@@ -30,9 +30,10 @@ const readHashParams = (): URLSearchParams => {
   return new URLSearchParams(raw);
 };
 
-const writeHashSeed = (seed: number): void => {
+const writeHash = (seed: number, scenarioId: string): void => {
   const params = readHashParams();
   params.set('seed', String(seed));
+  params.set('scenario', scenarioId);
   const next = `#${params.toString()}`;
   if (location.hash !== next) {
     history.replaceState(null, '', next);
@@ -44,6 +45,17 @@ const readHashSeed = (): number => {
   if (raw === null) return DEFAULT_SEED;
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_SEED;
+};
+
+const readHashScenarioId = (): string => {
+  const raw = readHashParams().get('scenario');
+  if (raw === null) return DEFAULT_SCENARIO_ID;
+  return SCENARIOS.some((s) => s.id === raw) ? raw : DEFAULT_SCENARIO_ID;
+};
+
+const findScenario = (id: string): DemoScenario => {
+  const found = SCENARIOS.find((s) => s.id === id);
+  return found ?? SCENARIOS[0]!;
 };
 
 const activeCombatantId = (
@@ -64,14 +76,15 @@ const activeCombatantId = (
   return enc.combatants[enc.activeIndex]?.combatantId;
 };
 
-interface DemoSession {
+interface DemoState {
   readonly host: EngineHost;
-  readonly scenario: GoblinSkirmish;
+  readonly scenario: DemoSession;
+  readonly scenarioDef: DemoScenario;
   readonly idToName: ReadonlyMap<string, string>;
 }
 
-const startSession = (starter: StarterPack, seed: number): DemoSession => {
-  const scenario = buildGoblinSkirmish(starter, { seed });
+const startSession = (scenarioDef: DemoScenario, seed: number): DemoState => {
+  const scenario = scenarioDef.build({ seed });
   const host = createEngineHost(scenario.engine, scenario.campaign);
   const idToName = new Map<string, string>();
   for (const [name, id] of Object.entries(scenario.combatants)) idToName.set(id, name);
@@ -101,12 +114,13 @@ const startSession = (starter: StarterPack, seed: number): DemoSession => {
     });
   });
 
-  return { host, scenario, idToName };
+  return { host, scenario, scenarioDef, idToName };
 };
 
-const renderReady = (session: DemoSession): void => {
+const renderReady = (session: DemoState): void => {
   const initialActive = activeCombatantId(session.host.getCampaign());
   console.log('[demo] scenario ready', {
+    scenarioId: session.scenarioDef.id,
     schemaVersion: session.scenario.engine.schemaVersion,
     seed: session.scenario.seed,
     encounterId: session.scenario.encounterId,
@@ -115,10 +129,14 @@ const renderReady = (session: DemoSession): void => {
     activeCombatant: initialActive ? session.idToName.get(initialActive) : undefined,
   });
   setStatus(
-    `Scenario ready (seed ${session.scenario.seed}). ` +
+    `${session.scenarioDef.title} (seed ${session.scenario.seed}). ` +
       `${session.host.getCampaign().events.length} seed events committed. ` +
-      `${initialActive ? `${session.idToName.get(initialActive)}'s turn` : 'No active combatant'} — pick an action from their row in the sandbox.`,
+      `${initialActive ? `${session.idToName.get(initialActive)}'s turn` : 'No active combatant'}.`,
   );
+  if (scenarioHint) {
+    scenarioHint.textContent = session.scenarioDef.hint ?? '';
+    scenarioHint.hidden = !session.scenarioDef.hint;
+  }
 };
 
 async function boot(): Promise<void> {
@@ -129,10 +147,24 @@ async function boot(): Promise<void> {
   const starter = loadStarterPack();
 
   let seed = readHashSeed();
-  writeHashSeed(seed);
+  let scenarioId = readHashScenarioId();
+  writeHash(seed, scenarioId);
   if (seedInput) seedInput.value = String(seed);
 
-  let session = startSession(starter, seed);
+  // Populate the scenario picker.
+  if (scenarioSelect) {
+    scenarioSelect.innerHTML = '';
+    for (const def of SCENARIOS) {
+      const opt = document.createElement('option');
+      opt.value = def.id;
+      opt.textContent = def.title;
+      opt.title = def.description;
+      scenarioSelect.appendChild(opt);
+    }
+    scenarioSelect.value = scenarioId;
+  }
+
+  let session = startSession(findScenario(scenarioId), seed);
   let sandbox: CombatSandbox | undefined;
   let inspector: EventInspector | undefined;
   let resolver: PendingChoiceResolver | undefined;
@@ -163,14 +195,16 @@ async function boot(): Promise<void> {
   void rulesLab;
   renderReady(session);
 
-  const reset = (newSeed: number): void => {
+  const reset = (newSeed: number, newScenarioId: string): void => {
     seed = newSeed;
-    writeHashSeed(seed);
+    scenarioId = newScenarioId;
+    writeHash(seed, scenarioId);
     if (seedInput) seedInput.value = String(seed);
+    if (scenarioSelect) scenarioSelect.value = scenarioId;
     sandbox?.unmount();
     inspector?.unmount();
     resolver?.unmount();
-    session = startSession(starter, seed);
+    session = startSession(findScenario(scenarioId), seed);
     mountPanels();
     renderReady(session);
   };
@@ -180,15 +214,24 @@ async function boot(): Promise<void> {
     resetBtn.addEventListener('pointerdown', () => {
       const raw = seedInput?.value ?? String(seed);
       const parsed = Number.parseInt(raw, 10);
-      const next = Number.isFinite(parsed) && parsed >= 0 ? parsed : seed;
-      reset(next);
+      const nextSeed = Number.isFinite(parsed) && parsed >= 0 ? parsed : seed;
+      reset(nextSeed, scenarioId);
+    });
+  }
+
+  if (scenarioSelect) {
+    scenarioSelect.addEventListener('change', () => {
+      reset(seed, scenarioSelect.value);
     });
   }
 
   // React to manual edits of the URL hash (back/forward, paste).
   window.addEventListener('hashchange', () => {
-    const next = readHashSeed();
-    if (next !== seed) reset(next);
+    const nextSeed = readHashSeed();
+    const nextScenario = readHashScenarioId();
+    if (nextSeed !== seed || nextScenario !== scenarioId) {
+      reset(nextSeed, nextScenario);
+    }
   });
 }
 

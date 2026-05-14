@@ -53,9 +53,29 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.seed-control {
+.seed-control,
+.scenario-control {
   font-size: 0.9rem;
   margin-left: 0.5rem;
+}
+
+.scenario-control select {
+  font: inherit;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.375rem;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  max-width: 18rem;
+}
+
+.scenario-hint {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 0.375rem;
+  background: rgba(70, 130, 200, 0.08);
+  border: 1px solid rgba(70, 130, 200, 0.4);
 }
 
 .seed-control input {
