@@ -16,6 +16,7 @@ import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { invariant } from '../../internal/invariants.js';
 import type { ULID } from '../ids-utils.js';
+import { assertActorCanAct, getEffectiveSpeed } from './_actor-state.js';
 
 export interface MoveIntent {
   readonly type: 'Move';
@@ -61,7 +62,8 @@ const findCombatant = (
 
 const characterWalkSpeed = (state: CampaignState, characterId: string): number => {
   const character = state.characters[characterId];
-  return character?.speedFeet ?? 30;
+  if (!character) return 30;
+  return getEffectiveSpeed(character);
 };
 
 export const planMove = (
@@ -73,11 +75,18 @@ export const planMove = (
   if (!isActive) {
     throw new Error('Only the active combatant may move on their turn');
   }
+  const character = state.characters[intent.combatantId];
+  if (character) assertActorCanAct(character, 'Move');
   if (combatant.position === undefined) {
     throw new Error('Combatant has no position set');
   }
   const distance = chebyshevDistance(combatant.position, intent.to);
   const baseSpeed = characterWalkSpeed(state, intent.combatantId);
+  if (baseSpeed === 0) {
+    throw new Error(
+      `${character?.name ?? intent.combatantId} cannot move (speed reduced to 0 by Restrained / Grappled)`,
+    );
+  }
   const maxThisTurn = combatant.turnUsage.dashed ? baseSpeed * 2 : baseSpeed;
   const remaining = maxThisTurn - combatant.turnUsage.feetMovedThisTurn;
   if (distance > remaining) {
@@ -130,6 +139,8 @@ export const planDash = (
   if (!isActive) {
     throw new Error('Only the active combatant may Dash on their turn');
   }
+  const dasher = state.characters[intent.combatantId];
+  if (dasher) assertActorCanAct(dasher, 'Dash');
   if (combatant.turnUsage.actionUsed) {
     throw new Error('Action already used this turn');
   }
@@ -193,6 +204,7 @@ export const planMistyStep = (
   if (!isActive) {
     throw new Error('Only the active combatant may cast Misty Step on their turn');
   }
+  assertActorCanAct(caster, 'cast Misty Step');
   if (combatant.position === undefined) {
     throw new Error('Combatant has no position set');
   }
@@ -202,6 +214,22 @@ export const planMistyStep = (
   const distance = chebyshevDistance(combatant.position, intent.to);
   if (distance > MISTY_STEP_RANGE_FEET) {
     throw new Error(`Misty Step destination is ${distance}ft away (max 30ft)`);
+  }
+  // RAW spell text: "teleport up to 30 feet to an unoccupied space."
+  // Reject if any other combatant occupies the destination.
+  const blocker = state.encounters[encounterId]?.combatants.find(
+    (c) =>
+      c.combatantId !== intent.casterId &&
+      c.position !== undefined &&
+      c.position.x === intent.to.x &&
+      c.position.y === intent.to.y,
+  );
+  if (blocker !== undefined) {
+    const occupier = state.characters[blocker.combatantId];
+    const name = occupier?.name ?? blocker.combatantId;
+    throw new Error(
+      `Misty Step destination (${intent.to.x},${intent.to.y}) is occupied by ${name}; teleport requires an unoccupied space`,
+    );
   }
 
   const at = intent.at ?? nowIso();
@@ -274,6 +302,8 @@ export const planDodge = (
   if (!isActive) {
     throw new Error('Only the active combatant may Dodge on their turn');
   }
+  const dodger = state.characters[intent.combatantId];
+  if (dodger) assertActorCanAct(dodger, 'Dodge');
   if (combatant.turnUsage.actionUsed) {
     throw new Error('Action already used this turn');
   }
@@ -306,6 +336,8 @@ export const planDisengage = (
   if (!isActive) {
     throw new Error('Only the active combatant may Disengage on their turn');
   }
+  const disengager = state.characters[intent.combatantId];
+  if (disengager) assertActorCanAct(disengager, 'Disengage');
   if (combatant.turnUsage.actionUsed) {
     throw new Error('Action already used this turn');
   }

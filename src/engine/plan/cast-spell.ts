@@ -38,6 +38,7 @@ import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
+import { assertActorCanAct } from './_actor-state.js';
 import { parseSpellDurationMinutes } from '../../internal/spell-duration.js';
 import {
   CANTRIP_LEVEL,
@@ -618,6 +619,7 @@ export const planCastSpell = (
 ): ReadonlyArray<Event> => {
   const character = state.characters[intent.characterId];
   if (!character) throw new Error(`Unknown character ${intent.characterId}`);
+  assertActorCanAct(character, 'cast a spell');
   const spell = content.spells.get(intent.spellId);
   if (!spell) throw new Error(`Unknown spell ${intent.spellId}`);
   if (!characterKnowsSpell(character, intent.spellId)) {

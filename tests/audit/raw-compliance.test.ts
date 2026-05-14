@@ -484,16 +484,28 @@ describe('RAW audit — concentration breaks', () => {
 // carry `critical: true` whenever it hits, regardless of d20 roll.
 // ---------------------------------------------------------------------
 
+const applyConditionTo = (s: AuditSetup, combatantId: string, conditionId: string): AuditSetup => {
+  const event: ConditionAppliedEvent = {
+    id: eventId(),
+    at: isoTimestamp(),
+    type: 'ConditionApplied',
+    targetId: combatantId,
+    conditionId,
+    appliedConditionId: newAppliedConditionId(),
+  };
+  return { ...s, campaign: commit(s.campaign, [event]) };
+};
+
 describe('RAW audit — auto-crit within 5ft of incapacitated targets', () => {
   it('melee hit on a Paralyzed target within 5ft is a critical hit', () => {
-    let s = setup();
-    s = applyConditionToActor({ ...s, aId: s.bId } as AuditSetup, 'paralyzed'); // paralyze B
-    // Move A adjacent to B: (10, 5) is B's square, so step A to (5, 5)
-    // → distance 5ft (Chebyshev) already. A's longsword reaches.
-    const { events } = s.engine.plan.attack(s.campaign.state, {
-      attackerId: s.aId,
-      targetId: s.bId,
-      weaponInstanceId: s.aWeaponId,
+    // Paralyze the *target* (B) and have A attack B. A is at (5,5)
+    // and B is at (10,5), Chebyshev 5ft — within melee reach.
+    const s = setup();
+    const sParalyzed = applyConditionTo(s, s.bId, 'paralyzed');
+    const { events } = sParalyzed.engine.plan.attack(sParalyzed.campaign.state, {
+      attackerId: sParalyzed.aId,
+      targetId: sParalyzed.bId,
+      weaponInstanceId: sParalyzed.aWeaponId,
     });
     const attackRolled = events.find((e) => e.type === 'AttackRolled');
     if (attackRolled === undefined || attackRolled.type !== 'AttackRolled') {

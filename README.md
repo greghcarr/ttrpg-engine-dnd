@@ -120,17 +120,11 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 #### Conditions don't block actions
 
-The applied-conditions list is metadata; no planner consults it before allowing an actor to act. RAW Appendix "Conditions" makes most of these prohibitive. Probed and failing in the audit:
+✓ **Closed in 2026-05-14 sweep.** The `assertActorCanAct` helper at [src/engine/plan/_actor-state.ts](src/engine/plan/_actor-state.ts) is now called from every action planner; `getEffectiveSpeed` returns 0 for Restrained / Grappled. The audit's 11 condition-related rows all pass. Specifically:
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Unconscious actor (HP = 0) can still Attack / Move / Dodge / Dash | 🔴 | RAW: "An Unconscious creature can't take Actions, Bonus Actions, or Reactions". Engine: only `engine.commit`'s death-save automation runs at turn start; the dispatch planners accept the dispatch and emit damage events as normal. |
-| Incapacitated condition lets the actor still Attack and Dodge | 🔴 | RAW: "An Incapacitated creature can't take any Action, Bonus Action, or Reaction". Engine: the condition is applied to `appliedConditions` but no planner reads it. |
-| Stunned condition lets the actor Attack | 🔴 | RAW: includes Incapacitated + auto-fail STR/DEX saves. Engine: misses the action-block half entirely. |
-| Paralyzed condition lets the actor Attack | 🔴 | RAW: includes Incapacitated + auto-fail saves + auto-crit within 5ft. Engine: misses the action-block half. |
-| Petrified condition lets the actor Attack | 🔴 | RAW: includes Incapacitated. Engine: misses the action-block half. |
-| Restrained condition does not reduce speed to 0 | 🔴 | RAW: "speed becomes 0, and it can't benefit from any bonus to its speed". Engine: `planMove` reads `speedFeet` directly, ignoring active conditions. |
-| Grappled condition does not reduce speed to 0 | 🔴 | RAW: "speed becomes 0". Engine: same root cause as Restrained. |
+- Unconscious actor (HP = 0) rejects Attack / Move / Dodge / Dash. ✓
+- Incapacitated, Stunned, Paralyzed, Petrified all reject Attack and Dodge. ✓
+- Restrained and Grappled return effective speed 0 from `planMove`. ✓
 
 #### Action economy and reactions
 
@@ -144,7 +138,7 @@ The applied-conditions list is metadata; no planner consults it before allowing 
 |---|---|---|
 | Leaving a hostile's melee reach does not provoke an opportunity attack | 🔴 | RAW PHB ch.1 "Opportunity Attack": "You provoke an Opportunity Attack when you move out of a creature's Reach". Engine: `planOpportunityAttack` exists but `planMove` doesn't emit any `OpportunityAvailable` / reaction-prompt event, so consumers have no signal to invoke it. Effectively, OAs never fire. |
 | Standing up from Prone does not cost half your speed | 🟡 | RAW PHB ch.1 "Prone": "Standing up takes more effort; doing so costs an amount of movement equal to half your speed". Engine: clearing the Prone condition doesn't touch `turnUsage.feetMovedThisTurn`. |
-| Misty Step (and other teleport effects) doesn't check destination occupancy | 🟡 | RAW spell text: "teleport up to 30 feet to an unoccupied space". Engine: `planMistyStep` has an explicit `// occupancy checks are the consumer's responsibility` comment; should at minimum reject ending in another combatant's square (matching the [planMove fix](src/engine/plan/movement.ts) shipped 2026-05-14). |
+| ~~Misty Step (and other teleport effects) doesn't check destination occupancy~~ | ✓ | Closed in 2026-05-14 sweep alongside cluster A. `planMistyStep` now runs the same destination-occupancy scan as `planMove`. |
 | Ranged attack within 5 ft of a hostile does not impose disadvantage | 🟡 | RAW PHB ch.1 "Ranged Attacks in Close Combat": "You have Disadvantage on the attack roll if you are within 5 feet of a hostile creature who can see you and who isn't Incapacitated". Engine: `planAttack` checks weapon range but ignores adjacent-hostile state when deciding advantage/disadvantage. |
 
 #### Concentration
@@ -169,9 +163,9 @@ The audit also confirms some rules the engine *does* get right, so this section 
 
 #### Engine triage
 
-**🔴 status — 10 open items.** Concentrated in three clusters: (1) conditions are inert against the actor (action-block rules in the Conditions appendix), (2) opportunity attacks are unobservable from `planMove`, (3) concentration is not auto-cleared on HP=0. The fix shape for cluster 1 is a single `assertActorCanAct(state, combatantId)` helper that every planner calls before doing any work. Cluster 2 wants either an extra event in `planMove`'s return (`OpportunityAvailable { reactorId, targetId }`) or a richer return shape (`{ events, opportunities }`). Cluster 3 wants the `DamageApplied` reducer to inline-call the concentration-break path when `hp.current` lands at 0.
+**🔴 status — 2 open items.** Cluster 1 (conditions inert against actor) is fully closed in the 2026-05-14 sweep. Remaining: (2) opportunity attacks unobservable from `planMove`, (3) concentration not auto-cleared on HP=0. Cluster 2 wants either an extra event in `planMove`'s return (`OpportunityAvailable { reactorId, targetId }`) or a richer return shape (`{ events, opportunities }`). Cluster 3 wants the `DamageApplied` reducer to inline-call the concentration-break path when `hp.current` lands at 0.
 
-**🟡 status — 4 open items.** Reaction cap, prone speed cost, Misty Step occupancy, ranged-in-melee disadvantage. Lower-frequency but still rules-aware-player-catchable.
+**🟡 status — 3 open items.** Reaction cap, prone speed cost, ranged-in-melee disadvantage. Misty Step occupancy was closed as a bonus during the cluster-1 sweep. Lower-frequency but still rules-aware-player-catchable.
 
 **Prior "all 🔴/🟡 closed" claim was wrong.** Targeted-test coverage exercises each planner in isolation with well-formed setups; it didn't fuzz the cross-product of "actor has condition X" × "actor attempts action Y" or "ranged attacker in melee" × "attack". The web demo's hands-on play exposed this gap. The fix order, the audit file at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts), and these README rows are the lasting record.
 

@@ -19,6 +19,7 @@ import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import type { ULID } from '../ids-utils.js';
+import { assertActorCanAct } from './_actor-state.js';
 
 export interface OffHandAttackIntent {
   readonly type: 'OffHandAttack';
@@ -49,6 +50,7 @@ export const planOffHandAttack = (
 ): ReadonlyArray<Event> => {
   const attacker = state.characters[intent.attackerId];
   if (!attacker) throw new Error(`Unknown attacker ${intent.attackerId}`);
+  assertActorCanAct(attacker, 'Off-hand Attack');
   const target = state.characters[intent.targetId];
   if (!target) throw new Error(`Unknown target ${intent.targetId}`);
   const weaponInstance = state.itemInstances[intent.weaponInstanceId];

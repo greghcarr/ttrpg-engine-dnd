@@ -23,6 +23,7 @@ import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import { assertActorCanAct } from './_actor-state.js';
 import { chebyshevDistance } from './movement.js';
 
 const DEFAULT_MELEE_REACH_FEET = 5;
@@ -326,6 +327,8 @@ export const planAttack = (
   rng: RNG,
   intent: AttackIntent,
 ): ReadonlyArray<Event> => {
+  const attacker = state.characters[intent.attackerId];
+  if (attacker) assertActorCanAct(attacker, 'Attack');
   const economyPrelude = planActionEconomyForAttack(state, content, intent);
   assertWeaponInRange(state, content, intent);
   const at = intent.at ?? nowIso();
