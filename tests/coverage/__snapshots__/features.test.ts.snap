@@ -1,0 +1,414 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
+{
+  "stub": 17,
+  "total": 46,
+  "wired": 29,
+}
+`;
+
+exports[`feature-coverage matrix: class features > every named class feature parses (id + level + status snapshot) 1`] = `
+[
+  "barbarian L1 rage [wired]",
+  "barbarian L1 unarmored-defense-barbarian-feature [stub]",
+  "barbarian L2 danger-sense [stub]",
+  "barbarian L2 reckless-attack [stub]",
+  "barbarian L5 extra-attack-barb [wired]",
+  "barbarian L5 fast-movement [wired]",
+  "barbarian L7 feral-instinct [stub]",
+  "bard L1 bardic-inspiration [wired]",
+  "bard L2 jack-of-all-trades [stub]",
+  "bard L3 expertise-bard [stub]",
+  "bard L5 font-of-inspiration [stub]",
+  "cleric L1 channel-divinity [wired]",
+  "cleric L6 channel-divinity-cleric-2 [wired]",
+  "druid L1 druidic [stub]",
+  "druid L2 wild-companion [stub]",
+  "druid L2 wild-shape [wired]",
+  "fighter L1 second-wind [wired]",
+  "fighter L2 action-surge [wired]",
+  "fighter L5 extra-attack [wired]",
+  "monk L1 martial-arts [stub]",
+  "monk L1 unarmored-defense-monk [wired]",
+  "monk L2 monks-focus [wired]",
+  "monk L2 unarmored-movement-monk [wired]",
+  "monk L4 slow-fall [stub]",
+  "monk L5 extra-attack-monk [wired]",
+  "monk L5 stunning-strike [stub]",
+  "monk L7 evasion-monk [stub]",
+  "ranger L1 favored-enemy [wired]",
+  "ranger L1 weapon-mastery-ranger [wired]",
+  "ranger L2 deft-explorer [stub]",
+  "ranger L2 fighting-style-ranger [stub]",
+  "ranger L5 extra-attack-ranger [wired]",
+  "rogue L1 sneak-attack [wired]",
+  "rogue L3 sneak-attack [wired]",
+  "rogue L5 sneak-attack [wired]",
+  "rogue L7 sneak-attack [wired]",
+  "rogue L9 sneak-attack [wired]",
+  "rogue L11 sneak-attack [wired]",
+  "rogue L13 sneak-attack [wired]",
+  "rogue L15 sneak-attack [wired]",
+  "rogue L17 sneak-attack [wired]",
+  "rogue L19 sneak-attack [wired]",
+  "sorcerer L1 innate-sorcery [wired]",
+  "sorcerer L2 font-of-magic [wired]",
+  "sorcerer L2 metamagic [stub]",
+  "sorcerer L5 sorcerous-restoration [stub]",
+]
+`;
+
+exports[`feature-coverage matrix: conditions > every condition is shipped with status + effects count 1`] = `
+[
+  {
+    "effectsCount": 1,
+    "id": "aid-buffed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 7,
+    "id": "baned",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 7,
+    "id": "blessed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "blinded",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "charmed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "deafened",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "exhaustion",
+    "stackable": true,
+  },
+  {
+    "effectsCount": 1,
+    "id": "faerie-fired",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 2,
+    "id": "frightened",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "grappled",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "guided",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "incapacitated",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "invisible",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "mage-armored",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 3,
+    "id": "paralyzed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 3,
+    "id": "petrified",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 3,
+    "id": "poisoned",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "prone",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 4,
+    "id": "restrained",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "shielded",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 2,
+    "id": "stunned",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 3,
+    "id": "unconscious",
+    "stackable": false,
+  },
+]
+`;
+
+exports[`feature-coverage matrix: feats > feat catalog by category + wire status is stable 1`] = `
+[
+  {
+    "category": "epic-boon",
+    "id": "boon-of-combat-prowess",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-dimensional-travel",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-energy-resistance",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-fortitude",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-irresistible-offense",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-skill",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-spell-recall",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-the-night-spirit",
+    "status": "stub",
+  },
+  {
+    "category": "epic-boon",
+    "id": "boon-of-truesight",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-archery",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-defense",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-dueling",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-great-weapon",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-protection",
+    "status": "stub",
+  },
+  {
+    "category": "fighting-style",
+    "id": "fighting-style-two-weapon",
+    "status": "stub",
+  },
+  {
+    "category": "general",
+    "id": "great-weapon-master",
+    "status": "stub",
+  },
+  {
+    "category": "general",
+    "id": "polearm-master",
+    "status": "stub",
+  },
+  {
+    "category": "general",
+    "id": "resilient-con",
+    "status": "stub",
+  },
+  {
+    "category": "general",
+    "id": "sharpshooter",
+    "status": "stub",
+  },
+  {
+    "category": "general",
+    "id": "unarmored-defense-barbarian",
+    "status": "wired",
+  },
+  {
+    "category": "general",
+    "id": "war-caster",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "alert",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "crafter",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "lucky",
+    "status": "wired",
+  },
+  {
+    "category": "origin",
+    "id": "magic-initiate-cleric",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "magic-initiate-druid",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "magic-initiate-wizard",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "savage-attacker",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "skilled",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "tough",
+    "status": "stub",
+  },
+]
+`;
+
+exports[`feature-coverage matrix: magic items > charges + effect-bearing magic items are stable 1`] = `
+[
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "amulet-of-health",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "bag-of-holding",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "boots-of-elvenkind",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "cloak-of-protection",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "deck-of-many-things",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "flametongue-longsword",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "gauntlets-of-ogre-power",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "ring-of-protection",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": true,
+    "id": "wand-of-magic-missiles",
+  },
+]
+`;
+
+exports[`feature-coverage matrix: weapon masteries > mastery → weapon mapping is stable 1`] = `
+{
+  "Cleave": [
+    "greataxe",
+  ],
+  "Graze": [
+    "greatsword",
+  ],
+  "Nick": [
+    "dagger",
+  ],
+  "Push": [
+    "warhammer",
+  ],
+  "Sap": [
+    "longsword",
+    "mace",
+    "spear",
+  ],
+  "Slow": [
+    "crossbow-light",
+    "longbow",
+  ],
+  "Topple": [
+    "quarterstaff",
+  ],
+  "Vex": [
+    "handaxe",
+    "rapier",
+    "shortsword",
+  ],
+}
+`;

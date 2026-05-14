@@ -2,6 +2,10 @@ node_modules
 dist/
 release/
 coverage/
+# `coverage/` above matches anywhere — un-ignore the feature-coverage
+# matrix test directory which shares the name (Layer 8 of the testing
+# standard, per CLAUDE.md).
+!tests/coverage/
 .DS_Store
 *.log
 .env*
