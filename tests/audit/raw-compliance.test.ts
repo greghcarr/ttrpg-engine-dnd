@@ -482,7 +482,12 @@ describe('RAW audit — concentration breaks', () => {
 // carry `critical: true` whenever it hits, regardless of d20 roll.
 // ---------------------------------------------------------------------
 
-const applyConditionTo = (s: AuditSetup, combatantId: string, conditionId: string): AuditSetup => {
+const applyConditionTo = (
+  s: AuditSetup,
+  combatantId: string,
+  conditionId: string,
+  sourceCharacterId?: string,
+): AuditSetup => {
   const event: ConditionAppliedEvent = {
     id: eventId(),
     at: isoTimestamp(),
@@ -490,6 +495,7 @@ const applyConditionTo = (s: AuditSetup, combatantId: string, conditionId: strin
     targetId: combatantId,
     conditionId,
     appliedConditionId: newAppliedConditionId(),
+    ...(sourceCharacterId !== undefined ? { sourceCharacterId } : {}),
   };
   return { ...s, campaign: commit(s.campaign, [event]) };
 };
@@ -844,19 +850,10 @@ describe('Tier 2 — spell slot level enforcement', () => {
 
 describe('Tier 2 — sourced-condition restrictions', () => {
   it('Frightened: cannot willingly move closer to the source', () => {
-    // Without `sourceCharacterId` on AppliedCondition, we can't
-    // declare *who* scared A. Probe asserts the rule would be
-    // enforced; expected to fail until source tracking lands.
-    const s = applyConditionTo(setup(), s_aId(setup()), 'frightened');
-    void s;
-    // The simplest expressible probe: A is frightened, B is at (10,5),
-    // A is at (5,5). Moving to (6,5) is closer to B. Without source
-    // tracking the engine permits this. We mark the rule unenforced.
+    // A is at (5,5), B is at (10,5). Apply Frightened to A with B as
+    // the source. Moving from (5,5) to (6,5) is closer to B → reject.
     const fresh = setup();
-    const frightened = applyConditionTo(fresh, fresh.aId, 'frightened');
-    // Expectation: move toward B (10,5) from (5,5) should reject for
-    // a creature frightened by B. The engine has no source data, so
-    // it permits — probe fails.
+    const frightened = applyConditionTo(fresh, fresh.aId, 'frightened', fresh.bId);
     expect(() =>
       frightened.engine.plan.move(frightened.campaign.state, {
         combatantId: frightened.aId,
@@ -865,11 +862,21 @@ describe('Tier 2 — sourced-condition restrictions', () => {
     ).toThrow(/frightened|source|closer/i);
   });
 
+  it('Frightened: moving AWAY from the source is allowed', () => {
+    const fresh = setup();
+    const frightened = applyConditionTo(fresh, fresh.aId, 'frightened', fresh.bId);
+    // Moving from (5,5) to (0,5) is farther from B(10,5) — should
+    // succeed even though A is Frightened.
+    const { events } = frightened.engine.plan.move(frightened.campaign.state, {
+      combatantId: frightened.aId,
+      to: { x: 0, y: 5 },
+    });
+    expect(events.some((e) => e.type === 'CombatantMoved')).toBe(true);
+  });
+
   it('Charmed: cannot attack the charmer', () => {
     const fresh = setup();
-    const charmed = applyConditionTo(fresh, fresh.aId, 'charmed');
-    // Without source tracking the engine permits the attack — probe
-    // fails, documenting the gap.
+    const charmed = applyConditionTo(fresh, fresh.aId, 'charmed', fresh.bId);
     expect(() =>
       charmed.engine.plan.attack(charmed.campaign.state, {
         attackerId: charmed.aId,
@@ -879,8 +886,6 @@ describe('Tier 2 — sourced-condition restrictions', () => {
     ).toThrow(/charmed|charmer|cannot.*attack/i);
   });
 });
-
-const s_aId = (s: AuditSetup) => s.aId;
 
 // ---------------------------------------------------------------------
 // Two-weapon fighting eligibility: RAW 2024 PHB ch.1 requires both
@@ -912,27 +917,38 @@ describe('Tier 2 — two-weapon fighting eligibility', () => {
 describe('Tier 2 — attunement cap (3 items)', () => {
   it('attempting to attune a 4th item rejects', () => {
     const s = setup();
-    // Patch A to already have 3 attuned items.
-    const aChar = s.campaign.state.characters[s.aId]!;
-    const fakeIds = ['fake-1', 'fake-2', 'fake-3'];
-    const patched = {
-      ...aChar,
-      equipped: { ...aChar.equipped, attuned: fakeIds as string[] },
-    };
-    const campaign = {
-      ...s.campaign,
-      state: { ...s.campaign.state, characters: { ...s.campaign.state.characters, [s.aId]: patched } },
-    };
-    // Attempt to attune a 4th item via direct event commit.
+    // Register 4 magic-item instances and seed A with 3 of them
+    // already attuned. The 4th attunement attempt should trip the
+    // cap invariant in applyItemAttuned.
+    const items = [1, 2, 3, 4].map(() => makeItemInstance('longsword'));
+    const acquired = commit(
+      s.campaign,
+      items.map((inst) => ({
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ItemAcquired' as const,
+        instance: inst,
+      })),
+    );
+    const attuneFirst3 = commit(
+      acquired,
+      items.slice(0, 3).map((inst) => ({
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ItemAttuned' as const,
+        characterId: s.aId,
+        instanceId: inst.id,
+      })),
+    );
     expect(() =>
-      commit(campaign, [
+      commit(attuneFirst3, [
         {
           id: eventId(),
           at: isoTimestamp(),
           type: 'ItemAttuned',
           characterId: s.aId,
-          instanceId: 'fake-4',
-        } as never,
+          instanceId: items[3]!.id,
+        },
       ]),
     ).toThrow(/attune|3|max/i);
   });

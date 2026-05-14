@@ -143,6 +143,9 @@ export const applyConditionApplied = (
     id: event.appliedConditionId ?? event.id,
     conditionId: event.conditionId,
     sourceEventId: event.id,
+    ...(event.sourceCharacterId !== undefined
+      ? { sourceCharacterId: event.sourceCharacterId }
+      : {}),
     ...(event.level !== undefined ? { level: event.level } : {}),
     ...(event.expiresOnRound !== undefined ? { expiresOnRound: event.expiresOnRound } : {}),
     ...(event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0

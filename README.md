@@ -145,14 +145,12 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 #### Tier 2 — newly probed gaps (2026-05-14)
 
-Extending the audit toward categorical coverage surfaced four more confirmed bugs. The Tier 1 sweep cleared 21 probes; the Tier 2 batch added ~15 more probes and found these:
+✓ **All four closed in the same-day sweep.** Tier 2's first audit batch surfaced four new bugs; each got a paired fix.
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Frightened condition doesn't restrict movement toward the source | 🟡 | RAW PHB Appendix "Frightened": "while frightened by a source, you can't willingly move closer to the source of your fear". Engine: `AppliedCondition` schema has `sourceEventId` but no `sourceCharacterId`. Without that field, the engine can't know who scared you and can't enforce the restriction. Fix shape: add `sourceCharacterId` to the condition schema and the planner that emits Frightened, then a `planMove` guard. |
-| Charmed condition doesn't restrict attacks against the charmer | 🟡 | RAW Appendix "Charmed": "the charmer has Advantage on any ability check it makes to interact socially with the creature; the charmed creature can't attack the charmer or target the charmer with harmful Abilities or magical Effects." Engine: same root cause as Frightened — no source-character tracking on the AppliedCondition. |
-| Attunement cap (3 items) isn't enforced at the reducer | 🟡 | RAW DMG ch.7 "Attunement": "A creature can attune to a maximum of three magic items at a time." Engine: `CharacterSchema.equipped.attuned` declares `.max(3)` but the `ItemAttuned` reducer doesn't check current count before appending. Fix shape: invariant + throw at the reducer head. |
-| Cast Spell (action) doesn't consume the actor's action | 🔴 | RAW: most spell casting takes an action; that action should be unavailable for an Attack on the same turn. Engine: `planCastSpell` does not consult `turnUsage.actionUsed` for action-cost spells and does not emit `ActionEconomyConsumed('action')`. A Wizard can Magic Missile + longsword in the same turn. (`assertActorCanAct` blocks Cast → Attack only when the caster has an action-blocking condition; the action-economy half is separate.) |
+- **Cast Spell action consumption** (🔴): `planCastSpell` now parses `spell.castingTime`, throws if the caster's matching action slot is already used (Action / Bonus Action / Reaction), and emits `ActionEconomyConsumed(<kind>)` so subsequent planners on the same turn see the consumed slot. Long-cast spells (rituals, 1 Minute+) and out-of-encounter casts are unchanged. The showcase golden transcript got a snapshot refresh to include the new `consumes bonusAction` lines for Healing Word and similar.
+- **Frightened source tracking** (🟡): `AppliedCondition` schema and `ConditionApplied` event both carry an optional `sourceCharacterId`. `planMove` reads it from the mover's condition list; if Frightened by a positioned source and the destination is closer to that source than the current position, the move rejects.
+- **Charmed source tracking** (🟡): same field; `planAttack` reads it from the attacker's condition list and rejects if the target is the charmer.
+- **Attunement cap** (🟡): the invariant was already in `applyItemAttuned` ([src/engine/reducers/inventory.ts:60-63](src/engine/reducers/inventory.ts#L60-L63)); the audit probe was wrong (didn't register item-instance entries so a different invariant fired first). The probe was fixed; the rule itself is enforced.
 
 Probes I named but couldn't build out yet (need richer fixtures or content): Sneak Attack eligibility (needs Rogue setup), Heavy weapon Small disadvantage (needs Small species character), Loading property (needs crossbow), Two-handed + shield conflict, Difficult terrain 2× cost (needs Location map cells). Each is a `.skip()` in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) with a one-line note on what's missing.
 
@@ -165,13 +163,11 @@ Probes I named but couldn't build out yet (need richer fixtures or content): Sne
 
 #### Engine triage
 
-**🔴 / 🟡 status — 1 🔴 + 3 🟡 open** (all from the Tier 2 batch above). Tier 1 (the original 21 probes) is fully closed. Tier 2's first batch surfaced four new bugs; the table just above documents them. The audit file now stands at **35 passing + 5 skipped (need richer fixtures) + 4 failing**.
+**🔴 / 🟡 status — 0 open items as of 2026-05-14 (post-Tier-2-first-pass).** Audit: **40 passing + 5 skipped (need richer fixtures) + 0 failing**. Tier 1 closed first; Tier 2's first batch added ~15 probes, surfaced 4 new bugs, all fixed same day.
 
-The 🔴 in the new batch: `planCastSpell` doesn't consume the action. Wizards can Magic Missile then Attack on the same turn. The other three are 🟡 (sourced-condition restrictions and attunement cap).
+**The audit is still a floor, not a ceiling.** The 5 skipped probes need fixture work (Rogue Sneak Attack setup, Small species character, crossbow setup, etc.). The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names another ~10-15 RAW rules I haven't even written probes for yet. Tier 1 + Tier 2 first pass clean means "the rules I probed are enforced," not "every RAW rule is enforced."
 
-**Prior "all 🔴/🟡 closed" claim was wrong.** Tier 1 fixed the cluster the demo's hands-on play exposed; Tier 2 (categorical extension) is showing that more rules look-RAW-but-aren't. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) is explicit that **the audit is a floor, not a ceiling**: more Tier 2 probes (Sneak Attack eligibility, Heavy/Loading weapons, difficult terrain, etc.) need richer fixtures before we can probe them.
-
-**Next:** Fix the four Tier 2 gaps (or batch-fix alongside more probe building). See [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) "Tier 2" for the named-but-unprobed list.
+**Next:** Either un-skip the 5 fixture-blocked probes (needs new fixtures: Small species character, Rogue, crossbow item) or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
 
 ### Content gaps
 

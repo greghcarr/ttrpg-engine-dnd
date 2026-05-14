@@ -170,6 +170,8 @@ End of Goblin Scout A's turn.
 
 **Brother Cassius** casts Bless (1st-level slot) at Alyx, Vex, Brother Cassius.
 
+_(Brother Cassius consumes action)_
+
 Slot consumed: 1st-level.
 
 **Alyx** is now Blessed.
@@ -213,6 +215,8 @@ End of Goblin Scout B's turn.
 ### Round 1: Mira's turn
 
 **Mira** casts Fireball (3rd-level slot) at Goblin Scout A, Goblin Scout B, Goblin Shaman.
+
+_(Mira consumes action)_
 
 Slot consumed: 3rd-level.
 
@@ -450,6 +454,8 @@ End of Vex's turn.
 
 **Mira** casts Magic Missile (3rd-level slot) at Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red, Stoneheart, the Young Red.
 
+_(Mira consumes action)_
+
 Slot consumed: 3rd-level.
 
 **Stoneheart, the Young Red** takes 2 damage from **Mira** (2 force). (HP 150 -> 148)
@@ -513,6 +519,8 @@ End of Stoneheart, the Young Red's turn.
 ### Round 1: Brother Cassius's turn
 
 **Brother Cassius** casts Healing Word (1st-level slot) at Alyx.
+
+_(Brother Cassius consumes bonusAction)_
 
 Slot consumed: 1st-level.
 

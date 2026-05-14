@@ -658,6 +658,44 @@ export const planCastSpell = (
     }
   }
 
+  // RAW PHB ch.7 "Casting Time": a spell's castingTime determines
+  // which action-economy slot it consumes. Most leveled spells take
+  // an Action; some take a Bonus Action or Reaction. Long-cast spells
+  // (Ritual, 1 Minute, 10 Minutes, etc.) don't fit the per-turn slot
+  // model — the engine doesn't gate them on combat action economy.
+  //
+  // The action-economy events are only emitted (and only enforced)
+  // when the caster is the active combatant in an active encounter.
+  // Out-of-encounter casts skip both the check and the event, matching
+  // how planShield / planCounterspell already do this.
+  const castingTimeKind = ((): 'action' | 'bonusAction' | 'reaction' | 'long' => {
+    const ct = spell.castingTime.trim().toLowerCase();
+    if (ct === 'action') return 'action';
+    if (ct === 'bonus action') return 'bonusAction';
+    if (ct === 'reaction') return 'reaction';
+    return 'long';
+  })();
+  const encounter = state.activeEncounterId ? state.encounters[state.activeEncounterId] : undefined;
+  const casterCombatant =
+    encounter?.combatants.find((c) => c.combatantId === intent.characterId) ?? undefined;
+  if (casterCombatant !== undefined && !castAsRitual) {
+    if (castingTimeKind === 'action' && casterCombatant.turnUsage.actionUsed) {
+      throw new Error(
+        `${character.name} cannot cast ${spell.name}: action already used this turn`,
+      );
+    }
+    if (castingTimeKind === 'bonusAction' && casterCombatant.turnUsage.bonusActionUsed) {
+      throw new Error(
+        `${character.name} cannot cast ${spell.name}: bonus action already used this turn`,
+      );
+    }
+    if (castingTimeKind === 'reaction' && casterCombatant.turnUsage.reactionUsedThisRound) {
+      throw new Error(
+        `${character.name} cannot cast ${spell.name}: reaction already used this round`,
+      );
+    }
+  }
+
   const at = intent.at ?? nowIso();
   const declared: SpellCastDeclaredEvent = {
     id: newEventId() as ULID,
@@ -671,6 +709,31 @@ export const planCastSpell = (
     castAsRitual,
   };
   const events: Event[] = [declared];
+
+  // Emit the action-economy consumption right after the declaration
+  // so the apply() reducer marks turnUsage before any subsequent
+  // events run. Skip for rituals and for long-cast spells outside
+  // initiative.
+  if (encounter !== undefined && casterCombatant !== undefined && !castAsRitual) {
+    const economyKind =
+      castingTimeKind === 'action'
+        ? 'action'
+        : castingTimeKind === 'bonusAction'
+          ? 'bonusAction'
+          : castingTimeKind === 'reaction'
+            ? 'reaction'
+            : undefined;
+    if (economyKind !== undefined) {
+      events.push({
+        id: newEventId() as ULID,
+        at,
+        type: 'ActionEconomyConsumed',
+        encounterId: encounter.id,
+        combatantId: intent.characterId,
+        kind: economyKind,
+      });
+    }
+  }
 
   if (spell.level > CANTRIP_LEVEL && !castAsRitual) {
     if (slotSource === 'pact') {

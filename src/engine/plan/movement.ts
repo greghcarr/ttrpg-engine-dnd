@@ -81,6 +81,33 @@ export const planMove = (
   if (combatant.position === undefined) {
     throw new Error('Combatant has no position set');
   }
+  // RAW Appendix "Frightened": "while frightened by a source, you
+  // can't willingly move closer to the source of your fear." If the
+  // mover carries a Frightened condition with a sourceCharacterId set,
+  // and the destination is closer (Chebyshev) to that source than the
+  // current position, reject the move.
+  if (character !== undefined) {
+    const frightenedBy = character.appliedConditions.find(
+      (c) => c.conditionId === 'frightened' && c.sourceCharacterId !== undefined,
+    );
+    if (frightenedBy?.sourceCharacterId !== undefined) {
+      const sourceCb = state.encounters[encounterId]?.combatants.find(
+        (c) => c.combatantId === frightenedBy.sourceCharacterId,
+      );
+      if (sourceCb?.position !== undefined) {
+        const before = chebyshevDistance(combatant.position, sourceCb.position);
+        const after = chebyshevDistance(intent.to, sourceCb.position);
+        if (after < before) {
+          const sourceName =
+            state.characters[frightenedBy.sourceCharacterId]?.name ??
+            frightenedBy.sourceCharacterId;
+          throw new Error(
+            `${character.name} is Frightened by ${sourceName} and cannot move closer to them`,
+          );
+        }
+      }
+    }
+  }
   const distance = chebyshevDistance(combatant.position, intent.to);
   const baseSpeed = characterWalkSpeed(state, intent.combatantId);
   if (baseSpeed === 0) {

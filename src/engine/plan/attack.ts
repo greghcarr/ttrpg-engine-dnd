@@ -355,6 +355,21 @@ export const planAttack = (
 ): ReadonlyArray<Event> => {
   const attacker = state.characters[intent.attackerId];
   if (attacker) assertActorCanAct(attacker, 'Attack');
+  // RAW Appendix "Charmed": "the charmed creature can't attack the
+  // charmer or target the charmer with harmful Abilities or magical
+  // Effects." If the attacker carries a Charmed condition sourced by
+  // the intended target, reject.
+  if (attacker !== undefined) {
+    const charmedBy = attacker.appliedConditions.find(
+      (c) => c.conditionId === 'charmed' && c.sourceCharacterId === intent.targetId,
+    );
+    if (charmedBy !== undefined) {
+      const targetName = state.characters[intent.targetId]?.name ?? intent.targetId;
+      throw new Error(
+        `${attacker.name} is Charmed by ${targetName} and cannot attack them`,
+      );
+    }
+  }
   const economyPrelude = planActionEconomyForAttack(state, content, intent);
   assertWeaponInRange(state, content, intent);
   const at = intent.at ?? nowIso();

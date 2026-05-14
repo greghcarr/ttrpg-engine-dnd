@@ -46,6 +46,11 @@ export const ConditionAppliedEventSchema = EventEnvelopeSchema.extend({
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
   appliedConditionId: ULIDSchema.optional(),
+  // For sourced conditions (Frightened, Charmed, etc.), the creature
+  // that is the source. Stored on the applied-condition entry so
+  // planners can enforce "can't move toward source" / "can't attack
+  // charmer" rules. Leave undefined for unsourced conditions.
+  sourceCharacterId: ULIDSchema.optional(),
   // Pre-computed sum of this condition's `AddModifier { target: 'hpMax' }`
   // effects (Aid's `aid-buffed` carries +5). The planner sets it at cast
   // time using the content pack; the reducer stamps it on the applied-

@@ -17,6 +17,14 @@ export const AppliedConditionSchema = z.object({
   id: ULIDSchema,
   conditionId: z.string(),
   sourceEventId: ULIDSchema.optional(),
+  // RAW PHB Appendix "Conditions" — several conditions (Frightened,
+  // Charmed) are sourced by a specific creature, and constrain the
+  // affected creature's actions w.r.t. that source ("can't willingly
+  // move closer to the source", "can't attack the charmer"). When the
+  // condition has such a source, store it here so planners can enforce
+  // the restriction. Unsourced conditions (Prone, Poisoned, etc.)
+  // leave this undefined.
+  sourceCharacterId: ULIDSchema.optional(),
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
   // The hpMax-modifier delta this applied condition contributed to
