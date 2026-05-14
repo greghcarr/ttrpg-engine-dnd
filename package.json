@@ -41,11 +41,11 @@
     "dev:web": "vite --config vite.web.config.ts",
     "build:web": "vite build --config vite.web.config.ts",
     "preview:web": "vite preview --config vite.web.config.ts",
-    "prepublishOnly": "npm run prepublish:check"
+    "prepublishOnly": "npm run prepublish:check",
+    "release": "npm publish && npm dist-tag add ttrpg-engine-dnd@$npm_package_version alpha"
   },
   "publishConfig": {
-    "access": "public",
-    "tag": "alpha"
+    "access": "public"
   },
   "dependencies": {
     "immer": "^10.1.1",

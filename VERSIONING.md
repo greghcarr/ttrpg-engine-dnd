@@ -149,3 +149,11 @@ This is not a calendar commitment. The gate is external-consumer validation; the
 - Don't bump the version on every PR. The version is a user-facing signal, not a build counter.
 - When in doubt about whether a change is breaking, treat it as breaking. The cost of an over-cautious minor bump is small; the cost of a silently-breaking patch bump is consumer trust.
 - The `prepublishOnly` script runs the full CI gate. A failed gate blocks publish.
+
+### Publish workflow
+
+The canonical publish command is `npm run release`. It runs `npm publish` (which triggers `prepublishOnly` and publishes to the `latest` dist-tag) and then moves the `alpha` dist-tag to the same version. Both `alpha` and `latest` always point at the most recent published version.
+
+When promoting from alpha to beta (or beta to rc), edit the trailing tag in the `release` script to match the new stage (`alpha` → `beta` → `rc`). Don't keep stale stage tags pointing at older versions; the dist-tags should always reflect the current line.
+
+After `npm run release`, tag the release commit in git: `git tag vX.Y.Z-stage.N && git push --tags`.
