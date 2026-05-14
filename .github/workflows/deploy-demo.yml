@@ -44,6 +44,10 @@ jobs:
         env:
           NODE_ENV: production
       - uses: actions/configure-pages@v5
+        with:
+          # Auto-enable Pages on first run so the repo doesn't need a
+          # one-time Settings → Pages click. No-op on subsequent runs.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist-web

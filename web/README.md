@@ -19,7 +19,7 @@ The dev alias maps `ttrpg-engine-dnd` and `ttrpg-engine-dnd/starter-pack` to loc
 
 Pushes to `main` trigger [.github/workflows/deploy-demo.yml](../.github/workflows/deploy-demo.yml), which builds `dist-web/` and uploads it as a GitHub Pages artifact. No build output is committed to the repo.
 
-**One-time repo setup** (only needed once per fork): Settings → Pages → **Source = "GitHub Actions"**.
+The workflow self-enables Pages on first run via `actions/configure-pages@v5`'s `enablement: true`, so no manual Settings click is needed. If you'd rather configure it by hand: Settings → Pages → **Source = "GitHub Actions"**.
 
 ## URL hash
 

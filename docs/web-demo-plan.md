@@ -191,7 +191,7 @@ The engine already exposes `serializeCampaign(c): string` and `loadCampaign(s): 
 
 ### GitHub Pages
 
-- Settings → Pages → **Source = "GitHub Actions"** (not "Deploy from a branch"). One-time configuration.
+- The workflow self-enables Pages on first run via `actions/configure-pages@v5`'s `enablement: true`, so no manual Settings click is required. To configure by hand instead: Settings → Pages → **Source = "GitHub Actions"** (not "Deploy from a branch").
 - Build output goes to `dist-web/` (gitignored) and is uploaded as a Pages artifact by `.github/workflows/deploy-demo.yml`. No build output lives in git.
 - This deviates from the original plan's "build into `docs/`, commit back to main" flow. Reason: this repo's `docs/` directory already holds hand-authored markdown guides (`api-overview.md`, `getting-started.md`, etc.). Mixing those with build output would be brittle. The modern artifact-upload flow avoids the collision and keeps the diff history clean.
 
