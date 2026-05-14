@@ -71,6 +71,7 @@ export class EffectAccumulator {
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
   private readonly flatDamageReductions = new Map<DamageType, number>();
+  private critThresholdValue: number = 20;
 
   addModifier(target: ModifierTarget, value: number, source: string): void {
     const key = modifierKey(target);
@@ -216,6 +217,12 @@ export class EffectAccumulator {
   flatDamageReductionFor(damageType: DamageType): number {
     return this.flatDamageReductions.get(damageType) ?? 0;
   }
+  expandCritRange(threshold: number): void {
+    if (threshold < this.critThresholdValue) this.critThresholdValue = threshold;
+  }
+  critThreshold(): number {
+    return this.critThresholdValue;
+  }
 }
 
 export interface BuilderContext {
@@ -278,6 +285,9 @@ export const applyEffectToBuilder = (
       for (const damageType of effect.damageTypes) {
         acc.addFlatDamageReduction(damageType, effect.amount);
       }
+      return;
+    case 'ExpandCritRange':
+      acc.expandCritRange(effect.threshold);
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();

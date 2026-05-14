@@ -196,7 +196,17 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const naturalHit = usedRoll === NAT_20;
   const naturalMiss = usedRoll === NAT_1;
   const hit = !naturalMiss && (naturalHit || total >= acResult.total);
-  const critical = naturalHit;
+  // Improved Critical / Superior Critical (and similar) lower the
+  // crit threshold via ExpandCritRange. Default 20. A crit only
+  // counts on a hit (a 19 that misses AC is just a miss).
+  const attackerEffects = buildEffectStack({
+    character: attacker,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const critThreshold = attackerEffects.critThreshold();
+  const critical = hit && usedRoll >= critThreshold;
 
   // RAW Rogue Sneak Attack (and equivalent content triggers): the
   // ally-adjacent path requires *another* positioned, non-incapacitated

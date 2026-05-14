@@ -139,6 +139,11 @@ export type Effect =
   | { kind: 'SetHPMaxFormula'; formula: Formula }
   | { kind: 'OfferChoice'; choiceId: string; prompt: string; options: ChoiceOptionShape[]; oneOf: number; when: 'onAcquire' | 'onLevelUp' | 'onLongRest' }
   | { kind: 'FlatDamageReduction'; damageTypes: DamageType[]; amount: number }
+  // Lowers the natural-d20 threshold at which the attacker's weapon
+  // attacks crit. Default threshold is 20; Improved Critical sets 19,
+  // Superior Critical sets 18. Multiple sources stack to the lowest.
+  // Does not change auto-hit semantics: only a natural 20 auto-hits.
+  | { kind: 'ExpandCritRange'; threshold: number }
   // Cross-character effect: while this is active on a character, attacks
   // against that character are made with advantage. Used by Faerie Fire,
   // Hex (kind of), Hunter's Mark variants. The attack planner consults
@@ -297,6 +302,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       amount: z.number().int().min(1),
     }),
     z.object({
+      kind: z.literal('ExpandCritRange'),
+      threshold: z.number().int().min(2).max(20),
+    }),
+    z.object({
       kind: z.literal('GrantAdvantageToAttackers'),
       condition: PredicateSchema.optional(),
     }),
@@ -337,6 +346,7 @@ export const EFFECT_KINDS = [
   'SetHPMaxFormula',
   'OfferChoice',
   'FlatDamageReduction',
+  'ExpandCritRange',
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
   'Custom',

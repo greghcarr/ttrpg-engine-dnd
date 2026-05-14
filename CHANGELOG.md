@@ -8,6 +8,7 @@ Banked work since alpha.4, awaiting an alpha.5 release. The headline is a 48-pro
 
 ### Tier 3 content stubs
 
+- **Improved Critical wired (Champion L3).** Champion Fighter L3 Improved Critical now emits a new `ExpandCritRange { threshold: 19 }` effect primitive instead of an empty `effects: []`. The accumulator tracks the lowest threshold (default 20; multiple sources stack down), and `resolveAttack` uses it for crit detection. RAW behavior preserved: a nat 20 still auto-hits, and a crit only counts on a hit (a 19 that misses AC is just a miss). Tests: [tests/unit/engine/plan-attack-improved-critical.test.ts](tests/unit/engine/plan-attack-improved-critical.test.ts) covers nat 19 (Champion crits, plain Fighter doesn't), nat 20 (still auto-hits + crits), nat 18 (still no crit).
 - **Druidic language wired.** Druid L1 Druidic now emits `GrantProficiency { target: 'language', id: 'druidic' }` instead of an empty `effects: []`. New `computeKnownLanguages` derivation combines species + background `languages[]` with any `GrantProficiency target: 'language'` effects from the active effect stack, returning a sorted deduplicated list. Surfaced on `DerivedCharacter.knownLanguages` and exported from the public barrel. Tests: [tests/unit/derive/languages.test.ts](tests/unit/derive/languages.test.ts) covers species-only PCs, Druid PCs (Druidic appears), and combined species + class language stacking. Feature-coverage matrix shifts to 37 wired / 11 stub.
 
 ### Fixed (RAW closures)

@@ -388,7 +388,7 @@ exports[`feature-coverage matrix: magic items > charges + effect-bearing magic i
 
 exports[`feature-coverage matrix: subclasses > subclass catalog with feature wire-status is stable 1`] = `
 [
-  "champion L3 improved-critical [stub]",
+  "champion L3 improved-critical [wired]",
   "champion L3 remarkable-athlete [wired]",
   "circle-of-the-land L3 circle-of-the-land-cantrip [stub]",
   "circle-of-the-land L3 lands-aid [stub]",

@@ -666,7 +666,7 @@
           {
             "id": "improved-critical",
             "name": "Improved Critical",
-            "effects": []
+            "effects": [{ "kind": "ExpandCritRange", "threshold": 19 }]
           },
           {
             "id": "remarkable-athlete",
