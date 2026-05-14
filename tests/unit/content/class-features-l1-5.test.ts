@@ -108,4 +108,34 @@ describe('class features L1-5: wired features actually apply', () => {
     expect(derived.totalLevel).toBe(1);
     expect(derived.spellSlots.slotsByLevel[0]).toBe(2); // 2 first-level slots at L1
   });
+
+  it('Bard Expertise (L3): doubles PB on Insight and Persuasion', () => {
+    const pc = buildPC('bard', 3, { CHA: 16 });
+    const stack = buildEffectStack({
+      character: pc,
+      itemInstances: {},
+      content: CONTENT,
+    });
+    expect(stack.proficiencyLevel('skill', 'insight')).toBe('expertise');
+    expect(stack.proficiencyLevel('skill', 'persuasion')).toBe('expertise');
+    // Other skills shouldn't have been bumped.
+    expect(stack.proficiencyLevel('skill', 'athletics')).not.toBe('expertise');
+  });
+
+  it('Bard Font of Inspiration (L5): adds a shortRest recover for bardic-inspiration', () => {
+    // Smoke check that the derivation completes for an L5 Bard. The
+    // RecoverResource effect fires on the rest event, not derivation,
+    // so a state-side check would need a campaign + a short rest;
+    // the feature-coverage matrix asserts the effect array is
+    // non-empty, and this test confirms the L5 Bard's character view
+    // computes without error.
+    const pc = buildPC('bard', 5, { CHA: 16 });
+    const derived = computeDerivedCharacter({
+      character: pc,
+      itemInstances: {},
+      content: CONTENT,
+    });
+    expect(derived.totalLevel).toBe(5);
+    expect(derived.proficiencyBonus).toBe(3);
+  });
 });

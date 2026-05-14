@@ -383,9 +383,9 @@
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "bardic-inspiration", "name": "Bardic Inspiration", "effects": [{ "kind": "GrantResource", "resourceId": "bardic-inspiration", "max": 3, "recharge": "longRest" }] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [{ "id": "jack-of-all-trades", "name": "Jack of All Trades", "effects": [] }], "columns": {} },
-        "3": { "proficiencyBonus": 2, "features": [{ "id": "expertise-bard", "name": "Expertise", "effects": [] }], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [{ "id": "expertise-bard", "name": "Expertise", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "insight", "level": "expertise" }, { "kind": "GrantProficiency", "target": "skill", "id": "persuasion", "level": "expertise" }] }], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
-        "5": { "proficiencyBonus": 3, "features": [{ "id": "font-of-inspiration", "name": "Font of Inspiration", "effects": [] }], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [{ "id": "font-of-inspiration", "name": "Font of Inspiration", "effects": [{ "kind": "RecoverResource", "resourceId": "bardic-inspiration", "amount": "all", "when": "shortRest" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
