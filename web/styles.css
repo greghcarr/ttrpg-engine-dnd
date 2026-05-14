@@ -346,15 +346,70 @@ button:disabled {
 
 .panels {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem) minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .panels {
     grid-template-columns: 1fr;
   }
+}
+
+.grid-view {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(127, 127, 127, 0.4);
+  border-radius: 0.5rem;
+}
+
+.grid-view-header h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.grid-view-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 6), 1fr);
+  grid-template-rows: repeat(var(--grid-rows, 4), 1fr);
+  aspect-ratio: var(--grid-cols, 6) / var(--grid-rows, 4);
+  gap: 1px;
+  background: rgba(127, 127, 127, 0.4);
+  border: 1px solid rgba(127, 127, 127, 0.4);
+  border-radius: 0.25rem;
+  max-width: 16rem;
+  margin-inline: auto;
+}
+
+.grid-cell {
+  background: rgba(127, 127, 127, 0.05);
+}
+
+.grid-token {
+  grid-column: var(--token-col, 1);
+  grid-row: var(--token-row, 1);
+  margin: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--token-color, #888);
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.grid-token-active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--token-color, #888);
+}
+
+.grid-token-downed {
+  opacity: 0.4;
+  text-decoration: line-through;
 }
 
 .event-inspector {

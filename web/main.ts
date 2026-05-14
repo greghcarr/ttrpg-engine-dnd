@@ -1,6 +1,7 @@
 import { createEngineHost, type EngineHost } from './engine-host.js';
 import { mountCombatSandbox, type CombatSandbox } from './modes/combat-sandbox.js';
 import { mountEventInspector, type EventInspector } from './modes/event-inspector.js';
+import { mountGridView, type GridView } from './modes/grid-view.js';
 import { mountRulesLab, type RulesLab } from './modes/rules-lab.js';
 import { mountPendingChoiceResolver, type PendingChoiceResolver } from './ui/pending-choice.js';
 import { SCENARIOS, type DemoScenario, type DemoSession } from './scenarios/index.js';
@@ -16,6 +17,7 @@ const setStatus = (text: string): void => {
 const resetBtn = document.getElementById('btn-reset') as HTMLButtonElement | null;
 const seedInput = document.getElementById('seed-input') as HTMLInputElement | null;
 const sandboxRoot = document.getElementById('combat-sandbox-root');
+const gridRoot = document.getElementById('grid-view-root');
 const inspectorRoot = document.getElementById('event-inspector-root');
 const choiceRoot = document.getElementById('pending-choice-root');
 const rulesLabRoot = document.getElementById('rules-lab-root');
@@ -166,6 +168,7 @@ async function boot(): Promise<void> {
 
   let session = startSession(findScenario(scenarioId), seed);
   let sandbox: CombatSandbox | undefined;
+  let gridView: GridView | undefined;
   let inspector: EventInspector | undefined;
   let resolver: PendingChoiceResolver | undefined;
   const mountPanels = (): void => {
@@ -175,6 +178,13 @@ async function boot(): Promise<void> {
         scenario: session.scenario,
         root: sandboxRoot,
         onStatus: setStatus,
+      });
+    }
+    if (gridRoot) {
+      gridView = mountGridView({
+        host: session.host,
+        scenario: session.scenario,
+        root: gridRoot,
       });
     }
     if (inspectorRoot) {
@@ -202,6 +212,7 @@ async function boot(): Promise<void> {
     if (seedInput) seedInput.value = String(seed);
     if (scenarioSelect) scenarioSelect.value = scenarioId;
     sandbox?.unmount();
+    gridView?.unmount();
     inspector?.unmount();
     resolver?.unmount();
     session = startSession(findScenario(scenarioId), seed);
