@@ -162,13 +162,13 @@ const applyConditionToActor = (
 };
 
 const dropActorToZero = (s: AuditSetup): AuditSetup => {
+  const hp = s.campaign.state.characters[s.aId]!.hp.current;
   const event: DamageAppliedEvent = {
     id: eventId(),
     at: isoTimestamp(),
     type: 'DamageApplied',
     targetId: s.aId,
-    amount: s.campaign.state.characters[s.aId]!.hp.current,
-    components: [{ type: 'slashing', amount: s.campaign.state.characters[s.aId]!.hp.current }],
+    components: [{ type: 'slashing', amount: hp }],
   };
   return { ...s, campaign: commit(s.campaign, [event]) };
 };
@@ -302,14 +302,13 @@ describe('RAW audit — conditions block actions', () => {
 describe('RAW audit — opportunity attacks', () => {
   it('moving out of a hostile\'s 5ft reach surfaces an OA opportunity', () => {
     const s = setup();
-    // A is at (5,5), B is at (10,5) — they are within 5ft melee reach.
-    // A moves to (5,10): one square diagonally away, leaving B's reach.
+    // A is at (5,5), B is at (10,5). Chebyshev distance is 5 — A is
+    // in B's reach. A moves to (0, 5): Chebyshev to B is now 10ft,
+    // clearly out of reach. RAW: B gets an opportunity attack.
     const { events } = s.engine.plan.move(s.campaign.state, {
       combatantId: s.aId,
-      to: { x: 5, y: 10 },
+      to: { x: 0, y: 5 },
     });
-    // Expect either an explicit OA event, an OpportunityAvailable
-    // notification, or a planResult field with `opportunityAttacks`.
     const types = events.map((e) => e.type);
     const hasOASignal =
       types.some((t) => /Opportunit/i.test(t)) || types.some((t) => /Reaction/i.test(t));
@@ -355,7 +354,7 @@ describe('RAW audit — reaction cap (1 per round)', () => {
     const first = s.engine.plan.shield(s.campaign.state, {
       casterId: s.aId,
       triggeringAttackEventId: eventId(),
-      attackD20Total: 18,
+      triggeringAttackTotal: 18,
       originalAC: 15,
     });
     const afterFirst = commit(s.campaign, first.events);
@@ -363,7 +362,7 @@ describe('RAW audit — reaction cap (1 per round)', () => {
       s.engine.plan.shield(afterFirst.state, {
         casterId: s.aId,
         triggeringAttackEventId: eventId(),
-        attackD20Total: 19,
+        triggeringAttackTotal: 19,
         originalAC: 15,
       }),
     ).toThrow(/reaction.*used|already.*reaction|one reaction/i);
@@ -464,7 +463,6 @@ describe('RAW audit — concentration breaks', () => {
         at: isoTimestamp(),
         type: 'DamageApplied',
         targetId: s.aId,
-        amount: aChar.hp.current,
         components: [{ type: 'slashing', amount: aChar.hp.current }],
       } satisfies DamageAppliedEvent,
     ]);
@@ -574,10 +572,10 @@ describe('RAW audit — ranged-in-melee disadvantage', () => {
     if (ar === undefined || ar.type !== 'AttackRolled') {
       throw new Error('no AttackRolled event emitted');
     }
-    const advField = (ar as unknown as { advantage?: string }).advantage;
+    const usedField = (ar as unknown as { used?: string }).used;
     expect(
-      advField,
-      `ranged attack from within 5ft of a hostile must have disadvantage; got advantage=${advField}`,
+      usedField,
+      `ranged attack from within 5ft of a hostile must roll with disadvantage; got used=${usedField}`,
     ).toBe('disadvantage');
   });
 });

@@ -15,6 +15,7 @@ import type { Character, DeathSaves } from '../../schemas/runtime/character.js';
 import { invariant } from '../../internal/invariants.js';
 import { newAppliedConditionId } from '../../ids.js';
 import { EXHAUSTION_MAX } from '../../schemas/primitives.js';
+import { clearConcentrationEffect } from './concentration.js';
 
 const DEATH_SAVE_SUCCESSES_TO_STABILIZE = 3;
 const DEATH_SAVE_FAILURES_TO_DIE = 3;
@@ -90,6 +91,16 @@ export const applyDamageApplied = (
   const newlyDowned = startedConscious && character.hp.current <= 0;
   if (newlyDowned) {
     resetDeathSaves(character.deathSaves);
+    // RAW 2024 PHB ch.7: "Becoming Incapacitated or dying immediately
+    // ends Concentration." Defensive — planAttack / planCastSpell /
+    // planFalling / planWeaponMastery already pair DamageApplied with
+    // an explicit ConcentrationBroken event via planConcentrationBreakOnDrop,
+    // but consumers issuing raw DamageApplied events (environmental
+    // hazards, custom planners) would otherwise leave the caster
+    // holding concentration from beyond unconsciousness.
+    if (character.concentrationEffectId !== undefined) {
+      clearConcentrationEffect(state, character.concentrationEffectId);
+    }
   }
 };
 

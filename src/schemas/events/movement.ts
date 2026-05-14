@@ -26,3 +26,25 @@ export const DisengagedEventSchema = EventEnvelopeSchema.extend({
   combatantId: ULIDSchema,
 });
 export type DisengagedEvent = z.infer<typeof DisengagedEventSchema>;
+
+// Record-only notification. RAW 2024 PHB ch.1 "Opportunity Attack":
+// when a creature moves out of an enemy's reach, that enemy can take
+// a Reaction to make a melee attack against them. The engine surfaces
+// the moment of opportunity here so consumers can decide (per
+// reactor) whether to dispatch `engine.plan.opportunityAttack`. No
+// state effect — the apply() reducer for this event is intentionally
+// a no-op.
+export const OpportunityAvailableEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('OpportunityAvailable'),
+  encounterId: ULIDSchema,
+  // The combatant who moved out of reach (would-be target of the OA).
+  moverId: ULIDSchema,
+  // The combatant who is eligible to take the reaction.
+  reactorId: ULIDSchema,
+  // Positions captured at the moment of opportunity. fromPosition is
+  // where the mover started; toPosition is where they ended up.
+  reactorPosition: PositionSchema,
+  fromPosition: PositionSchema,
+  toPosition: PositionSchema,
+});
+export type OpportunityAvailableEvent = z.infer<typeof OpportunityAvailableEventSchema>;

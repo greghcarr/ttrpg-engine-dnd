@@ -128,24 +128,20 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 #### Action economy and reactions
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Reaction cap (1 per round) is not enforced by reactive spells | 🟡 | RAW PHB ch.1 "Reactions": "You can take only one Reaction per round". Engine: `planShield` (and other reactive-spell planners) do not consult `turnUsage.reactionUsedThisRound` and do not emit `ActionEconomyConsumed('reaction')`. A Wizard can cast Shield three times in the same round. |
+✓ **Closed in 2026-05-14 sweep.** `planShield` and `planCounterspell` now call `assertReactionAvailable(state, casterId, label)` before doing any work; the reaction-cap RAW is enforced.
 
 #### Positioning and movement
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Leaving a hostile's melee reach does not provoke an opportunity attack | 🔴 | RAW PHB ch.1 "Opportunity Attack": "You provoke an Opportunity Attack when you move out of a creature's Reach". Engine: `planOpportunityAttack` exists but `planMove` doesn't emit any `OpportunityAvailable` / reaction-prompt event, so consumers have no signal to invoke it. Effectively, OAs never fire. |
-| Standing up from Prone does not cost half your speed | 🟡 | RAW PHB ch.1 "Prone": "Standing up takes more effort; doing so costs an amount of movement equal to half your speed". Engine: clearing the Prone condition doesn't touch `turnUsage.feetMovedThisTurn`. |
-| ~~Misty Step (and other teleport effects) doesn't check destination occupancy~~ | ✓ | Closed in 2026-05-14 sweep alongside cluster A. `planMistyStep` now runs the same destination-occupancy scan as `planMove`. |
-| Ranged attack within 5 ft of a hostile does not impose disadvantage | 🟡 | RAW PHB ch.1 "Ranged Attacks in Close Combat": "You have Disadvantage on the attack roll if you are within 5 feet of a hostile creature who can see you and who isn't Incapacitated". Engine: `planAttack` checks weapon range but ignores adjacent-hostile state when deciding advantage/disadvantage. |
+✓ **Closed in 2026-05-14 sweep.** Four positioning rules are now wired:
+
+- Leaving a hostile's 5ft reach emits one `OpportunityAvailable` event per eligible reactor. The event is record-only (its reducer is a no-op); consumers read it to decide whether to dispatch `engine.plan.opportunityAttack`. Disengage suppresses these for the rest of the turn. Unconscious / Incapacitated reactors don't get an opportunity.
+- Standing up from Prone charges half-speed (`floor(speed/2)`) against `feetMovedThisTurn` and emits `ConditionRemoved('prone')` ahead of the `CombatantMoved`. A 30-speed mover at Prone now has 15ft of move left, not 30.
+- Misty Step (and `planMove`) reject destinations occupied by another combatant.
+- Ranged attacks made within 5ft of a non-incapacitated hostile roll with disadvantage. Cancels with target-side advantage per the 2024 RAW matrix.
 
 #### Concentration
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Concentration is not auto-cleared when the caster's HP drops to 0 | 🔴 | RAW PHB ch.7 "Concentration": "Becoming Incapacitated or dying immediately ends Concentration". Engine: `planCheckConcentration` documents this rule but is consumer-called; the `DamageApplied` reducer does not auto-clear `character.concentrationEffectId` when HP reaches 0. Wizards / Druids will hold concentration on Hex / Spirit Guardians from beyond the grave until the consumer remembers to call the planner. |
+✓ **Closed in 2026-05-14 sweep.** `applyDamageApplied` now calls `clearConcentrationEffect` when `hp.current` lands at 0, cascading through the effect's applied conditions on other characters (extracted from the prior `applyConcentrationBroken` body). Wizards / Druids drop their concentration spell the moment they go down, even if the damage came in via a raw `DamageApplied` event rather than through one of the attack planners that already paired it with `planConcentrationBreakOnDrop`.
 
 #### Variant-rule enforcement (deferred, ⚪)
 
@@ -154,22 +150,16 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 | `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
 | `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
 
-#### Verified clean (audit passes)
-
-The audit also confirms some rules the engine *does* get right, so this section isn't all bad news:
-
-- **Dodge → Dash and Dash → Dodge both reject.** The Dash and Dodge planners each guard `turnUsage.actionUsed`.
-- **Auto-crit on melee hits within 5ft of a Paralyzed target.** The advantage/auto-crit pipeline picks this up via the effect-stack contribution from the `paralyzed` condition.
-
 #### Engine triage
 
-**🔴 status — 2 open items.** Cluster 1 (conditions inert against actor) is fully closed in the 2026-05-14 sweep. Remaining: (2) opportunity attacks unobservable from `planMove`, (3) concentration not auto-cleared on HP=0. Cluster 2 wants either an extra event in `planMove`'s return (`OpportunityAvailable { reactorId, targetId }`) or a richer return shape (`{ events, opportunities }`). Cluster 3 wants the `DamageApplied` reducer to inline-call the concentration-break path when `hp.current` lands at 0.
+**🔴 / 🟡 status — 0 open items as of 2026-05-14.** The full Tier 1 sweep is complete: all 21 probes in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) pass against the current working tree. The closed items split across two commits:
 
-**🟡 status — 3 open items.** Reaction cap, prone speed cost, ranged-in-melee disadvantage. Misty Step occupancy was closed as a bonus during the cluster-1 sweep. Lower-frequency but still rules-aware-player-catchable.
+- Cluster A (conditions inert against actor + Restrained/Grappled speed-0 + Misty Step occupancy): committed as `Reject actions by Incapacitated / Stunned / Paralyzed / Petrified / Unconscious / HP=0 actors`. Helper: [src/engine/plan/_actor-state.ts](src/engine/plan/_actor-state.ts) threaded through every action planner.
+- Cluster B (OAs, prone stand-up, reaction cap, ranged-in-melee, concentration on HP=0): the rest of Tier 1.
 
-**Prior "all 🔴/🟡 closed" claim was wrong.** Targeted-test coverage exercises each planner in isolation with well-formed setups; it didn't fuzz the cross-product of "actor has condition X" × "actor attempts action Y" or "ranged attacker in melee" × "attack". The web demo's hands-on play exposed this gap. The fix order, the audit file at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts), and these README rows are the lasting record.
+**Prior "all 🔴/🟡 closed" claim was wrong.** It is now correct for the curated audit, but the [trustworthiness roadmap](docs/trustworthiness-roadmap.md) is explicit that **the audit is a floor, not a ceiling** — Tier 2 names ~25 more RAW rules I haven't probed yet (Frightened/Charmed source restrictions, two-weapon fighting eligibility, multiattack target legality, Heavy/Loading weapon properties, half/three-quarters cover, difficult terrain, etc.). Tier 1 being clean means the rules I probed are enforced; not that every RAW rule is enforced.
 
-**Bigger picture: see [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md).** That doc lays out the four tiers of work between "alpha" and "trustworthy for unsupervised tabletop play" — Tier 1 closes the audit, Tier 2 extends the audit categorically, Tier 3 fills content stubs, Tier 4 ships a real SRD pack. The tables in this section cover Tier 1 only.
+**Next:** Tier 2 — extend the audit's probe set toward categorical coverage. See [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) "Tier 2" for the named-but-unprobed list.
 
 ### Content gaps
 

@@ -277,6 +277,11 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
       case 'Disengaged':
         applyDisengaged(draft, event);
         break;
+      case 'OpportunityAvailable':
+        // Notification-only event: no state effect. Surfaced by
+        // planMove so consumers can decide whether to dispatch an
+        // opportunity attack. Replay is a no-op for the reducer.
+        break;
       case 'ItemEquipped':
         applyItemEquipped(draft, event);
         break;

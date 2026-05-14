@@ -55,6 +55,24 @@ const economyConsumedIfEncountered = (
   };
 };
 
+/**
+ * RAW 2024 PHB ch.1: "You can take only one Reaction per round." This
+ * helper throws if the combatant has already used their reaction since
+ * the last round boundary. Out-of-encounter (no active encounter) is a
+ * no-op — reactions only exist inside initiative.
+ */
+const assertReactionAvailable = (state: CampaignState, combatantId: string, label: string): void => {
+  if (state.activeEncounterId === undefined) return;
+  const encounter = state.encounters[state.activeEncounterId];
+  if (!encounter) return;
+  const combatant = encounter.combatants.find((c) => c.combatantId === combatantId);
+  if (!combatant) return;
+  if (combatant.turnUsage.reactionUsedThisRound) {
+    const name = state.characters[combatantId]?.name ?? combatantId;
+    throw new Error(`${name} cannot ${label}: reaction already used this round`);
+  }
+};
+
 export interface CounterspellIntent {
   readonly type: 'Counterspell';
   readonly counterCasterId: string;
@@ -82,6 +100,7 @@ export const planCounterspell = (
   invariant(caster !== undefined, `Counter caster ${intent.counterCasterId} not found`);
   const target = state.characters[intent.targetCasterId];
   invariant(target !== undefined, `Target caster ${intent.targetCasterId} not found`);
+  assertReactionAvailable(state, intent.counterCasterId, 'cast Counterspell');
   const at = intent.at ?? nowIso();
   const dcResult = computeSpellSaveDC({
     character: caster,
@@ -310,6 +329,7 @@ export const planShield = (
   invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
   const slotLevel = intent.slotLevel ?? SHIELD_MIN_SLOT_LEVEL;
   invariant(slotLevel >= SHIELD_MIN_SLOT_LEVEL, 'Shield is a 1st-level spell');
+  assertReactionAvailable(state, intent.casterId, 'cast Shield');
   const at = intent.at ?? nowIso();
 
   const events: Event[] = [];

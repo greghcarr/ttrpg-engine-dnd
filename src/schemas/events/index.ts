@@ -60,6 +60,7 @@ import {
   CombatantMovedEventSchema,
   DashedEventSchema,
   DisengagedEventSchema,
+  OpportunityAvailableEventSchema,
 } from './movement.js';
 import {
   ItemEquippedEventSchema,
@@ -196,6 +197,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   CombatantMovedEventSchema,
   DashedEventSchema,
   DisengagedEventSchema,
+  OpportunityAvailableEventSchema,
   ItemEquippedEventSchema,
   ItemUnequippedEventSchema,
   ItemAttunedEventSchema,
@@ -308,6 +310,7 @@ export const EVENT_TYPES = [
   'CombatantMoved',
   'Dashed',
   'Disengaged',
+  'OpportunityAvailable',
   'ItemEquipped',
   'ItemUnequipped',
   'ItemAttuned',
@@ -529,11 +532,13 @@ export {
   CombatantMovedEventSchema,
   DashedEventSchema,
   DisengagedEventSchema,
+  OpportunityAvailableEventSchema,
 } from './movement.js';
 export type {
   CombatantMovedEvent,
   DashedEvent,
   DisengagedEvent,
+  OpportunityAvailableEvent,
 } from './movement.js';
 export {
   PartyCreatedEventSchema,

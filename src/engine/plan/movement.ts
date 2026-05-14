@@ -7,6 +7,7 @@ import type {
   CombatantMovedEvent,
   DashedEvent,
   DisengagedEvent,
+  OpportunityAvailableEvent,
 } from '../../schemas/events/movement.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 import type { SpellCastDeclaredEvent, SpellSlotConsumedEvent } from '../../schemas/events/spellcasting.js';
@@ -16,7 +17,7 @@ import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { invariant } from '../../internal/invariants.js';
 import type { ULID } from '../ids-utils.js';
-import { assertActorCanAct, getEffectiveSpeed } from './_actor-state.js';
+import { assertActorCanAct, getEffectiveSpeed, findActorBlockingCondition } from './_actor-state.js';
 
 export interface MoveIntent {
   readonly type: 'Move';
@@ -89,9 +90,21 @@ export const planMove = (
   }
   const maxThisTurn = combatant.turnUsage.dashed ? baseSpeed * 2 : baseSpeed;
   const remaining = maxThisTurn - combatant.turnUsage.feetMovedThisTurn;
-  if (distance > remaining) {
+  // RAW PHB ch.1 "Prone → Standing Up": "Standing up takes more
+  // effort; doing so costs an amount of movement equal to half your
+  // speed." The engine treats a Move while Prone as an implicit
+  // stand-up-then-walk: half-speed surcharge added to the move's cost,
+  // ConditionRemoved(prone) emitted before CombatantMoved so the
+  // condition is gone for any downstream geometry checks.
+  const isProne = character?.appliedConditions.some((c) => c.conditionId === 'prone') ?? false;
+  const standUpCost = isProne ? Math.floor(baseSpeed / 2) : 0;
+  const totalCost = distance + standUpCost;
+  if (totalCost > remaining) {
+    const detail = isProne
+      ? `${distance}ft move + ${standUpCost}ft stand-up`
+      : `${distance}ft`;
     throw new Error(
-      `Move of ${distance}ft exceeds remaining movement (${remaining}ft of ${maxThisTurn}ft)`,
+      `Move (${detail}) exceeds remaining movement (${remaining}ft of ${maxThisTurn}ft)`,
     );
   }
   // RAW 2024 PHB "Moving Around Other Creatures": you can pass through
@@ -117,6 +130,16 @@ export const planMove = (
   }
 
   const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  if (isProne) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionRemoved',
+      targetId: intent.combatantId,
+      conditionId: 'prone',
+    });
+  }
   const moved: CombatantMovedEvent = {
     id: newEventId() as ULID,
     at,
@@ -125,9 +148,57 @@ export const planMove = (
     combatantId: intent.combatantId,
     fromPosition: { ...combatant.position },
     toPosition: { ...intent.to },
-    feetTraveled: distance,
+    // Charge the stand-up overhead against the move's feetTraveled so
+    // the CombatantMoved reducer drains feetMovedThisTurn by the full
+    // RAW cost. The actual travel distance is `distance`; the prone
+    // stand-up surcharge bumps it up to the total movement spent.
+    feetTraveled: totalCost,
   };
-  return [moved];
+  events.push(moved);
+  // RAW 2024 PHB ch.1 "Opportunity Attack": moving out of a creature's
+  // Reach provokes an opportunity attack from that creature. The
+  // engine emits one OpportunityAvailable per eligible reactor so the
+  // consumer can decide (per reactor) whether to dispatch
+  // engine.plan.opportunityAttack. Disengage suppresses these for the
+  // rest of the turn.
+  if (!combatant.turnUsage.disengaged) {
+    const fromPos = combatant.position;
+    const toPos = intent.to;
+    const MELEE_REACH = 5;
+    const enc = state.encounters[encounterId];
+    if (enc) {
+      for (const other of enc.combatants) {
+        if (other.combatantId === intent.combatantId) continue;
+        if (!other.position) continue;
+        const wasInReach =
+          Math.max(Math.abs(other.position.x - fromPos.x), Math.abs(other.position.y - fromPos.y)) <=
+          MELEE_REACH;
+        const stillInReach =
+          Math.max(Math.abs(other.position.x - toPos.x), Math.abs(other.position.y - toPos.y)) <=
+          MELEE_REACH;
+        if (!wasInReach || stillInReach) continue;
+        const reactorChar = state.characters[other.combatantId];
+        // Unconscious / Incapacitated / Stunned / Paralyzed / Petrified
+        // creatures can't take reactions.
+        if (!reactorChar || findActorBlockingCondition(reactorChar) !== undefined) continue;
+        // Reaction already spent this round → no opportunity.
+        if (other.turnUsage.reactionUsedThisRound) continue;
+        const oa: OpportunityAvailableEvent = {
+          id: newEventId() as ULID,
+          at,
+          type: 'OpportunityAvailable',
+          encounterId,
+          moverId: intent.combatantId,
+          reactorId: other.combatantId,
+          reactorPosition: { ...other.position },
+          fromPosition: { ...fromPos },
+          toPosition: { ...toPos },
+        };
+        events.push(oa);
+      }
+    }
+  }
+  return events;
 };
 
 export const planDash = (

@@ -236,6 +236,8 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `**${characterName(stateBefore, event.combatantId)}** Dashes.`;
     case 'Disengaged':
       return `**${characterName(stateBefore, event.combatantId)}** Disengages.`;
+    case 'OpportunityAvailable':
+      return `_(${characterName(stateBefore, event.reactorId)} has an opportunity attack on ${characterName(stateBefore, event.moverId)})_`;
     case 'ItemEquipped':
       return `**${characterName(stateBefore, event.characterId)}** equips ${itemName(stateBefore, content, event.instanceId)} (${event.slot}).`;
     case 'ItemUnequipped':

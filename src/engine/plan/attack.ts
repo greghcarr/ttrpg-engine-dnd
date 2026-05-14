@@ -23,7 +23,7 @@ import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
-import { assertActorCanAct } from './_actor-state.js';
+import { assertActorCanAct, findActorBlockingCondition } from './_actor-state.js';
 import { chebyshevDistance } from './movement.js';
 
 const DEFAULT_MELEE_REACH_FEET = 5;
@@ -129,7 +129,33 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     pendingChoices: state.pendingChoices,
   });
   const targetGrantsAdvantage = targetEffects.grantsAdvantageToAttackers();
-  const targetImposesDisadvantage = targetEffects.imposesDisadvantageOnAttackers();
+  // RAW PHB ch.1 "Ranged Attacks in Close Combat": ranged attacks have
+  // disadvantage if a hostile creature who isn't Incapacitated is
+  // within 5 ft of the attacker. The engine has no hostility model, so
+  // treat any other living, non-incapacitated combatant within reach
+  // as a threat. Out-of-encounter / unpositioned: no disadvantage
+  // imposed (matches the rest of the planner's geometry-aware checks).
+  const rangedInMelee = ((): boolean => {
+    if (weaponDef.attackKind !== 'ranged') return false;
+    if (!state.activeEncounterId) return false;
+    const enc = state.encounters[state.activeEncounterId];
+    if (!enc) return false;
+    const attackerCb = enc.combatants.find((c) => c.combatantId === input.attackerId);
+    const attackerPos = attackerCb?.position;
+    if (!attackerPos) return false;
+    return enc.combatants.some((other) => {
+      if (other.combatantId === input.attackerId) return false;
+      const otherPos = other.position;
+      if (!otherPos) return false;
+      const ch = state.characters[other.combatantId];
+      if (!ch) return false;
+      // Unconscious / Incapacitated / Stunned / Paralyzed / Petrified
+      // creatures do not threaten ranged attackers (they cannot react).
+      if (findActorBlockingCondition(ch) !== undefined) return false;
+      return chebyshevDistance(attackerPos, otherPos) <= 5;
+    });
+  })();
+  const targetImposesDisadvantage = targetEffects.imposesDisadvantageOnAttackers() || rangedInMelee;
   let advantage = input.advantage ?? 'none';
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions

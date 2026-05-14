@@ -36,12 +36,32 @@ export const applyConcentrationStarted = (
   caster.concentrationEffectId = event.effectInstanceId;
 };
 
-export const applyConcentrationBroken = (
+/**
+ * Cascading cleanup for an effect that the caster is concentrating on:
+ * remove any conditions the effect applied to other characters, reverse
+ * hpMax bonuses contributed by those conditions, clear the caster's
+ * concentration pointer, and delete the effect instance.
+ *
+ * Tolerates a dangling `concentrationEffectId` pointing at a missing
+ * effect instance (e.g. when the damage reducer needs to defensively
+ * clear concentration on a character whose effect record never got
+ * registered). In that case it just clears the caster's pointer.
+ */
+export const clearConcentrationEffect = (
   state: Draft<CampaignState>,
-  event: ConcentrationBrokenEvent,
+  effectInstanceId: string,
 ): void => {
-  const effect = state.effectInstances[event.effectInstanceId];
-  invariant(effect !== undefined, `EffectInstance ${event.effectInstanceId} not found`);
+  const effect = state.effectInstances[effectInstanceId];
+  if (effect === undefined) {
+    // Dangling pointer: walk characters and unset any matching
+    // concentrationEffectId. Cheap; the character table is small.
+    for (const ch of Object.values(state.characters)) {
+      if (ch.concentrationEffectId === effectInstanceId) {
+        ch.concentrationEffectId = undefined;
+      }
+    }
+    return;
+  }
   const caster = state.characters[effect.casterId];
   for (const applied of effect.conditionsApplied) {
     const target = state.characters[applied.targetId];
@@ -56,8 +76,19 @@ export const applyConcentrationBroken = (
       (c) => c.id !== applied.appliedConditionId,
     );
   }
-  if (caster?.concentrationEffectId === event.effectInstanceId) {
+  if (caster?.concentrationEffectId === effectInstanceId) {
     caster.concentrationEffectId = undefined;
   }
-  delete state.effectInstances[event.effectInstanceId];
+  delete state.effectInstances[effectInstanceId];
+};
+
+export const applyConcentrationBroken = (
+  state: Draft<CampaignState>,
+  event: ConcentrationBrokenEvent,
+): void => {
+  invariant(
+    state.effectInstances[event.effectInstanceId] !== undefined,
+    `EffectInstance ${event.effectInstanceId} not found`,
+  );
+  clearConcentrationEffect(state, event.effectInstanceId);
 };
