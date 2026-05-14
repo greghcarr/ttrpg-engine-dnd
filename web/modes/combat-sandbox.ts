@@ -7,7 +7,7 @@
 // Dodge · End Turn. No generalization yet — the toolbar is rebuilt on
 // each commit because the active combatant moves around.
 
-import type { Campaign } from 'ttrpg-engine-dnd';
+import type { Campaign, OpportunityAvailableEvent } from 'ttrpg-engine-dnd';
 import type { EngineHost, Intent } from '../engine-host.js';
 import type { GoblinSkirmish } from '../scenarios/goblin-skirmish.js';
 
@@ -63,22 +63,109 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
       <h2>Combat Sandbox</h2>
       <p class="combat-meta"></p>
     </header>
+    <div class="oa-queue" aria-label="Pending opportunity attacks" hidden></div>
     <ol class="combatant-list" aria-label="Initiative order"></ol>
   `;
 
   const meta = root.querySelector<HTMLParagraphElement>('.combat-meta');
   const list = root.querySelector<HTMLOListElement>('.combatant-list');
-  if (!meta || !list) throw new Error('combat-sandbox: failed to mount root template');
+  const oaQueueEl = root.querySelector<HTMLDivElement>('.oa-queue');
+  if (!meta || !list || !oaQueueEl)
+    throw new Error('combat-sandbox: failed to mount root template');
+
+  // Opportunity-attack queue. Each move dispatch may emit one or more
+  // OpportunityAvailable events; we append them here so the consumer
+  // can decide per reactor whether to take it. Re-rendered on every
+  // commit (the list shrinks as the user clicks Take / Pass and the
+  // host's subscriber re-renders).
+  let pendingOAs: OpportunityAvailableEvent[] = [];
 
   const fire = (intent: Intent, label: string): void => {
     try {
       const { events } = host.dispatch(intent);
       console.log(`[demo] ${label} dispatched`, intent, events.map((e) => e.type), events);
       onStatus?.(`${label} → ${events.length} events committed.`);
+      // Capture any opportunity-attack offers surfaced by this dispatch
+      // (planMove emits one OpportunityAvailable per eligible reactor).
+      // Filter out reactors who can't currently take an OA — saves the
+      // user from clicking Pass on offers that would just reject.
+      for (const ev of events) {
+        if (ev.type === 'OpportunityAvailable') {
+          pendingOAs.push(ev as OpportunityAvailableEvent);
+        }
+      }
     } catch (err) {
       console.error(`[demo] ${label} rejected`, intent, err);
       onStatus?.(`${label} rejected: ${(err as Error).message}`);
     }
+  };
+
+  const takeOA = (offer: OpportunityAvailableEvent): void => {
+    const reactor = host.getState().characters[offer.reactorId];
+    const weaponId = reactor?.equipped.mainHand;
+    if (!weaponId) {
+      onStatus?.(`OA passed: ${reactor?.name ?? offer.reactorId} has no main-hand weapon`);
+      pendingOAs = pendingOAs.filter((o) => o.id !== offer.id);
+      return;
+    }
+    try {
+      const { events } = host.dispatch({
+        kind: 'opportunityAttack',
+        reactorId: offer.reactorId,
+        targetId: offer.moverId,
+        weaponInstanceId: weaponId,
+      });
+      console.log('[demo] OpportunityAttack dispatched', offer, events);
+      onStatus?.(
+        `${reactor?.name ?? offer.reactorId} took an OA → ${events.length} events committed.`,
+      );
+    } catch (err) {
+      console.error('[demo] OpportunityAttack rejected', offer, err);
+      onStatus?.(`OA rejected: ${(err as Error).message}`);
+    }
+    pendingOAs = pendingOAs.filter((o) => o.id !== offer.id);
+  };
+
+  const passOA = (offer: OpportunityAvailableEvent): void => {
+    pendingOAs = pendingOAs.filter((o) => o.id !== offer.id);
+    onStatus?.(`Passed on OA (${offer.reactorId})`);
+  };
+
+  const renderOAQueue = (campaign: Campaign): void => {
+    if (pendingOAs.length === 0) {
+      oaQueueEl.hidden = true;
+      oaQueueEl.replaceChildren();
+      return;
+    }
+    oaQueueEl.hidden = false;
+    const frag = document.createDocumentFragment();
+    const header = document.createElement('p');
+    header.className = 'oa-queue-header';
+    header.textContent = `Pending opportunity attacks (${pendingOAs.length})`;
+    frag.appendChild(header);
+    for (const offer of pendingOAs) {
+      const reactor = campaign.state.characters[offer.reactorId];
+      const mover = campaign.state.characters[offer.moverId];
+      const row = document.createElement('div');
+      row.className = 'oa-offer';
+      const text = document.createElement('span');
+      text.className = 'oa-text';
+      text.textContent =
+        `${reactor?.name ?? offer.reactorId} → OA against ${mover?.name ?? offer.moverId}`;
+      row.appendChild(text);
+      const takeBtn = document.createElement('button');
+      takeBtn.type = 'button';
+      takeBtn.textContent = 'Take';
+      takeBtn.addEventListener('pointerdown', () => takeOA(offer));
+      const passBtn = document.createElement('button');
+      passBtn.type = 'button';
+      passBtn.textContent = 'Pass';
+      passBtn.addEventListener('pointerdown', () => passOA(offer));
+      row.appendChild(takeBtn);
+      row.appendChild(passBtn);
+      frag.appendChild(row);
+    }
+    oaQueueEl.replaceChildren(frag);
   };
 
   const buildActionToolbar = (
@@ -210,6 +297,7 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
       return li;
     });
     list.replaceChildren(...items);
+    renderOAQueue(campaign);
   };
 
   render(host.getCampaign());

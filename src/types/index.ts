@@ -92,6 +92,7 @@ export type {
   TurnEndedEvent,
   RoundEndedEvent,
   CombatantMovedEvent,
+  OpportunityAvailableEvent,
   ItemAcquiredEvent,
   ItemEquippedEvent,
   ItemUnequippedEvent,

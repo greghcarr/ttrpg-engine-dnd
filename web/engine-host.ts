@@ -9,6 +9,7 @@ export type Intent =
   | { kind: 'dash'; combatantId: string }
   | { kind: 'move'; combatantId: string; to: { x: number; y: number } }
   | { kind: 'attack'; attackerId: string; targetId: string; weaponInstanceId: string }
+  | { kind: 'opportunityAttack'; reactorId: string; targetId: string; weaponInstanceId: string }
   | { kind: 'advanceTurn'; encounterId: string }
   | { kind: 'resolveChoice'; choiceId: string; characterId: string; selectedOptionIds: ReadonlyArray<string> }
   | { kind: 'commit'; events: ReadonlyArray<Event> };
@@ -51,6 +52,12 @@ export const createEngineHost = (engine: Engine, initial: Campaign): EngineHost 
       case 'attack':
         return engine.plan.attack(campaign.state, {
           attackerId: intent.attackerId,
+          targetId: intent.targetId,
+          weaponInstanceId: intent.weaponInstanceId,
+        }).events;
+      case 'opportunityAttack':
+        return engine.plan.opportunityAttack(campaign.state, {
+          reactorId: intent.reactorId,
           targetId: intent.targetId,
           weaponInstanceId: intent.weaponInstanceId,
         }).events;
