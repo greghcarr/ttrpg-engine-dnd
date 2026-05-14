@@ -48,3 +48,31 @@ describe('web demo: replay equivalence', () => {
     });
   }
 });
+
+// Scenario-specific regression: attacking Brindle in the
+// Concentrating-Wizard scenario must not crash on the synthetic
+// concentrationEffectId. Earlier the dual-cleanup path (DamageApplied
+// auto-clear + planConcentrationBreakOnDrop ConcentrationBroken event)
+// hit a redundant invariant in applyConcentrationBroken.
+describe('web demo: concentrating-wizard scenario survives an attack', () => {
+  it('attacking Brindle drops her to 0 without throwing on the synthetic concentrationEffectId', async () => {
+    const scenario = SCENARIOS.find((s) => s.id === 'downed-wizard');
+    if (!scenario) throw new Error('downed-wizard scenario missing from registry');
+    for (const seed of [38, 42, 7, 99]) {
+      const session = scenario.build({ seed });
+      // Find Brindle (wizard) and the goblin from the combatants map.
+      const wizardId = session.combatants['wizard']!;
+      const goblinId = session.combatants['goblin']!;
+      const goblin = session.campaign.state.characters[goblinId]!;
+      const weaponId = goblin.equipped.mainHand!;
+      // Goblin is the active combatant. Their attack must not throw.
+      expect(() =>
+        session.engine.plan.attack(session.campaign.state, {
+          attackerId: goblinId,
+          targetId: wizardId,
+          weaponInstanceId: weaponId,
+        }),
+      ).not.toThrow();
+    }
+  });
+});

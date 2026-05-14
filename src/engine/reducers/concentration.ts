@@ -86,9 +86,11 @@ export const applyConcentrationBroken = (
   state: Draft<CampaignState>,
   event: ConcentrationBrokenEvent,
 ): void => {
-  invariant(
-    state.effectInstances[event.effectInstanceId] !== undefined,
-    `EffectInstance ${event.effectInstanceId} not found`,
-  );
+  // No invariant on the effectInstance — clearConcentrationEffect
+  // tolerates a dangling pointer (defensive helper extracted from
+  // this reducer). The same event can fire harmlessly if a prior
+  // commit already cleared the concentration (e.g. the
+  // DamageApplied auto-clear inside the same event chain, followed
+  // by an explicit ConcentrationBroken from planConcentrationBreakOnDrop).
   clearConcentrationEffect(state, event.effectInstanceId);
 };
