@@ -50,8 +50,8 @@ export const SCENARIOS: ReadonlyArray<DemoScenario> = [
   {
     id: 'misty-step-occupied',
     title: 'Misty Step into Occupied Space',
-    description: 'A wizard who knows Misty Step, with the only adjacent destination already occupied. Tests spell-level destination occupancy.',
-    hint: 'The Combat Sandbox doesn\'t yet have a Misty Step button — check the Rules Lab below or trigger the rule from the browser console: `host.dispatch({ kind: \'commit\', events: [/* ... */] })`. Engine still enforces the rule when called.',
+    description: 'A wizard who knows Misty Step, flanked by two goblins. Tests spell-level destination occupancy.',
+    hint: 'On the wizard\'s turn, the action toolbar has `Misty Step → Goblin Left` and `Misty Step → Goblin Right` buttons. Each one tries to teleport into that goblin\'s square. The engine rejects: "Misty Step destination is occupied by Goblin Left." Watch the status line.',
     build: (opts) => buildMistyStepOccupied(loadStarter(), opts),
   },
   {

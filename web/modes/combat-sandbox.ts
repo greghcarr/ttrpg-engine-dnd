@@ -296,6 +296,44 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
 
     bar.appendChild(mkBtn('Dash', () => fire({ kind: 'dash', combatantId: activeId }, 'Dash')));
     bar.appendChild(mkBtn('Dodge', () => fire({ kind: 'dodge', combatantId: activeId }, 'Dodge')));
+
+    // Misty Step: if the active combatant knows the spell and their
+    // bonus action is free, surface a button per other combatant
+    // whose position the caster could try to teleport into. Each
+    // click attempts a teleport to the chosen combatant's exact
+    // square — the engine's occupancy check rejects, demonstrating
+    // the rule. (If the chosen square turns out to be empty in some
+    // scenario variant, the spell would succeed; the engine is the
+    // source of truth either way.)
+    const activeChar = campaign.state.characters[activeId];
+    const activeCb = campaign.state.encounters[encId]?.combatants.find(
+      (c) => c.combatantId === activeId,
+    );
+    if (
+      activeChar?.knownSpells.includes('misty-step') &&
+      activeChar.preparedSpells.includes('misty-step') &&
+      activeCb !== undefined &&
+      !activeCb.turnUsage.bonusActionUsed
+    ) {
+      const enc = campaign.state.encounters[encId];
+      if (enc) {
+        for (const other of enc.combatants) {
+          if (other.combatantId === activeId) continue;
+          if (!other.position) continue;
+          const otherChar = campaign.state.characters[other.combatantId];
+          const targetPos = other.position;
+          bar.appendChild(
+            mkBtn(`Misty Step → ${otherChar?.name ?? other.combatantId}`, () =>
+              fire(
+                { kind: 'mistyStep', casterId: activeId, to: { x: targetPos.x, y: targetPos.y } },
+                `Misty Step → ${otherChar?.name ?? other.combatantId}`,
+              ),
+            ),
+          );
+        }
+      }
+    }
+
     bar.appendChild(endTurnBtn);
     return bar;
   };

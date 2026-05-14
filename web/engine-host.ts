@@ -8,6 +8,7 @@ export type Intent =
   | { kind: 'dodge'; combatantId: string }
   | { kind: 'dash'; combatantId: string }
   | { kind: 'move'; combatantId: string; to: { x: number; y: number } }
+  | { kind: 'mistyStep'; casterId: string; to: { x: number; y: number } }
   | { kind: 'attack'; attackerId: string; targetId: string; weaponInstanceId: string }
   | { kind: 'opportunityAttack'; reactorId: string; targetId: string; weaponInstanceId: string }
   | { kind: 'advanceTurn'; encounterId: string }
@@ -49,6 +50,8 @@ export const createEngineHost = (engine: Engine, initial: Campaign): EngineHost 
         return engine.plan.dash(campaign.state, { combatantId: intent.combatantId }).events;
       case 'move':
         return engine.plan.move(campaign.state, { combatantId: intent.combatantId, to: intent.to }).events;
+      case 'mistyStep':
+        return engine.plan.mistyStep(campaign.state, { casterId: intent.casterId, to: intent.to }).events;
       case 'attack':
         return engine.plan.attack(campaign.state, {
           attackerId: intent.attackerId,
