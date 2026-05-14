@@ -84,14 +84,10 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
   const buildActionToolbar = (
     activeId: string,
     campaign: Campaign,
+    downed: boolean,
   ): HTMLDivElement => {
     const bar = document.createElement('div');
     bar.className = 'action-toolbar';
-
-    const attackerWeapon = equippedWeaponId(campaign, activeId);
-    const targets = Object.values(campaign.state.characters).filter(
-      (c) => c.id !== activeId && c.hp.current > 0,
-    );
 
     const mkBtn = (label: string, onClick: () => void, disabled = false): HTMLButtonElement => {
       const b = document.createElement('button');
@@ -101,6 +97,28 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
       b.addEventListener('pointerdown', onClick);
       return b;
     };
+
+    const endTurnBtn = mkBtn('End Turn', () =>
+      fire({ kind: 'advanceTurn', encounterId: scenario.encounterId }, 'Advance turn'),
+    );
+
+    if (downed) {
+      // A combatant at 0 HP is unconscious and can take no actions
+      // other than death saves (which the engine rolls automatically
+      // at turn-start). The only legal click is End Turn so the round
+      // can continue.
+      const note = document.createElement('span');
+      note.className = 'toolbar-note';
+      note.textContent = 'Unconscious — only End Turn is available.';
+      bar.appendChild(note);
+      bar.appendChild(endTurnBtn);
+      return bar;
+    }
+
+    const attackerWeapon = equippedWeaponId(campaign, activeId);
+    const targets = Object.values(campaign.state.characters).filter(
+      (c) => c.id !== activeId && c.hp.current > 0,
+    );
 
     if (attackerWeapon) {
       for (const t of targets) {
@@ -139,11 +157,7 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
 
     bar.appendChild(mkBtn('Dash', () => fire({ kind: 'dash', combatantId: activeId }, 'Dash')));
     bar.appendChild(mkBtn('Dodge', () => fire({ kind: 'dodge', combatantId: activeId }, 'Dodge')));
-    bar.appendChild(
-      mkBtn('End Turn', () =>
-        fire({ kind: 'advanceTurn', encounterId: scenario.encounterId }, 'Advance turn'),
-      ),
-    );
+    bar.appendChild(endTurnBtn);
     return bar;
   };
 
@@ -190,8 +204,8 @@ export const mountCombatSandbox = (opts: CombatSandboxOptions): CombatSandbox =>
       li.querySelector('.combatant-conditions')!.textContent =
         conds.length === 0 ? '' : conds.join(', ');
 
-      if (entry.combatantId === active && enc.status === 'active' && ch && ch.hp.current > 0) {
-        li.appendChild(buildActionToolbar(active, campaign));
+      if (entry.combatantId === active && enc.status === 'active' && ch) {
+        li.appendChild(buildActionToolbar(active, campaign, ch.hp.current <= 0));
       }
       return li;
     });

@@ -158,6 +158,13 @@ button:disabled {
   padding: 0.25rem 0.55rem;
 }
 
+.toolbar-note {
+  font-size: 0.8rem;
+  color: #c44;
+  align-self: center;
+  margin-right: 0.5rem;
+}
+
 .toolbar {
   display: flex;
   gap: 0.5rem;
