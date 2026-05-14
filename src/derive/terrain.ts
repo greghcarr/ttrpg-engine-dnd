@@ -55,7 +55,7 @@ interface RayCell {
   readonly y: number;
 }
 
-const bresenhamCells = (from: Position, to: Position): RayCell[] => {
+export const bresenhamCells = (from: Position, to: Position): RayCell[] => {
   const cells: RayCell[] = [];
   let x0 = from.x;
   let y0 = from.y;

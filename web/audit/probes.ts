@@ -23,6 +23,7 @@ import {
   newEncounterId,
   newEventId,
   newItemInstanceId,
+  newLocationId,
   seededRNG,
   type Campaign,
   type CharacterCreatedEvent,
@@ -847,6 +848,228 @@ export const ALL_PROBES: ReadonlyArray<Probe> = [
         /two-handed|shield|both hands/i,
         'equip(two-handed) with shield equipped must reject',
       );
+    },
+  },
+  {
+    id: 'loading-once-per-turn',
+    category: 'Equipment',
+    name: 'Loading weapon: only one shot per turn',
+    raw: 'PHB Equipment: "Loading" — fire only one piece of ammunition per attack action, regardless of Extra Attack.',
+    run: (starter) => {
+      const lc = starter.items.find((it) => it.id === 'crossbow-light');
+      if (!lc) {
+        return { passed: true, detail: 'no light-crossbow in starter pack — probe skipped' };
+      }
+      const engine = createEngine({ contentPacks: [starter], rng: seededRNG(7) });
+      const crossbow = makeItem('crossbow-light');
+      const archer = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'pc',
+        name: 'Archer',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 5, hitDiceRemaining: 5 }],
+        abilityScores: { STR: 12, DEX: 18, CON: 14, INT: 10, WIS: 12, CHA: 10 },
+        hp: { current: 40, max: 40, temp: 0 },
+        inventory: [crossbow.id],
+        equipped: { mainHand: crossbow.id, attuned: [] },
+        featsTaken: [],
+      });
+      const target = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'creature',
+        name: 'Sandbag',
+        statblockId: 'goblin',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+        abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+        hp: { current: 100, max: 100, temp: 0 },
+        armorClass: 5,
+        featsTaken: [],
+      });
+      let campaign = engine.createCampaign({ name: 'loading-probe' });
+      campaign = engine.commit(campaign, [
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: crossbow } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: archer } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+      ]);
+      const encId = newEncounterId();
+      campaign = engine.commit(campaign, [
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterCreated',
+          encounterId: encId,
+          combatantIds: [archer.id, target.id],
+        } satisfies EncounterCreatedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'InitiativeRolled',
+          encounterId: encId,
+          rolls: [
+            { combatantId: archer.id, d20: 20, modifier: 4, total: 24 },
+            { combatantId: target.id, d20: 5, modifier: 0, total: 5 },
+          ],
+        } satisfies InitiativeRolledEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterStarted',
+          encounterId: encId,
+        } satisfies EncounterStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'TurnStarted',
+          encounterId: encId,
+          combatantId: archer.id,
+          round: 1,
+        } satisfies TurnStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: archer.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 5, y: 5 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: target.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 25, y: 5 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+      ]);
+      const afterFirst = engine.commit(
+        campaign,
+        engine.plan.attack(campaign.state, {
+          attackerId: archer.id,
+          targetId: target.id,
+          weaponInstanceId: crossbow.id,
+        }).events,
+      );
+      return expectThrow(
+        () =>
+          engine.plan.attack(afterFirst.state, {
+            attackerId: archer.id,
+            targetId: target.id,
+            weaponInstanceId: crossbow.id,
+          }),
+        /loading|again this turn/i,
+        'second crossbow attack same turn must reject',
+      );
+    },
+  },
+  {
+    id: 'difficult-terrain-doubles-cost',
+    category: 'Movement',
+    name: 'Difficult terrain doubles movement cost',
+    raw: 'PHB ch.1 "Difficult Terrain": each foot of movement through difficult terrain costs 1 extra foot.',
+    run: (starter) => {
+      // 5x1 map: [normal, difficult, normal, normal, normal]
+      const engine = createEngine({ contentPacks: [starter], rng: seededRNG(7) });
+      const sword = makeItem('longsword');
+      const armor = makeItem('chain-mail');
+      const a = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'pc',
+        name: 'Alyx',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 3, hitDiceRemaining: 3 }],
+        abilityScores: { STR: 16, DEX: 14, CON: 14, INT: 10, WIS: 12, CHA: 8 },
+        hp: { current: 28, max: 28, temp: 0 },
+        inventory: [sword.id, armor.id],
+        equipped: { mainHand: sword.id, armor: armor.id, attuned: [] },
+        featsTaken: [],
+      });
+      let campaign = engine.createCampaign({ name: 'terrain-probe' });
+      campaign = engine.commit(campaign, [
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: sword } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: armor } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: a } satisfies CharacterCreatedEvent,
+      ]);
+      const encId = newEncounterId();
+      const locId = newLocationId();
+      campaign = engine.commit(campaign, [
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterCreated',
+          encounterId: encId,
+          combatantIds: [a.id],
+        } satisfies EncounterCreatedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'InitiativeRolled',
+          encounterId: encId,
+          rolls: [{ combatantId: a.id, d20: 20, modifier: 2, total: 22 }],
+        } satisfies InitiativeRolledEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterStarted',
+          encounterId: encId,
+        } satisfies EncounterStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'TurnStarted',
+          encounterId: encId,
+          combatantId: a.id,
+          round: 1,
+        } satisfies TurnStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'LocationCreated',
+          locationId: locId,
+          name: 'Bog',
+          map: {
+            widthCells: 5,
+            heightCells: 1,
+            cellSizeFeet: 5,
+            terrain: [['normal', 'difficult', 'normal', 'normal', 'normal']],
+          },
+        },
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CharacterLocationChanged',
+          characterId: a.id,
+          toLocationId: locId,
+        },
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: a.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 0, y: 0 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+      ]);
+      // Move from (0,0) → (20,0). 4 cells entered: difficult(2) + 3*normal(1) = 5 cost × 5ft = 25ft.
+      const after = engine.commit(
+        campaign,
+        engine.plan.move(campaign.state, { combatantId: a.id, to: { x: 20, y: 0 } }).events,
+      );
+      const cb = after.state.encounters[encId]!.combatants.find((c) => c.combatantId === a.id);
+      const feet = cb?.turnUsage.feetMovedThisTurn ?? -1;
+      if (feet !== 25) {
+        return { passed: false, error: `expected feetMovedThisTurn=25 (difficult cell doubled); got ${feet}` };
+      }
+      return { passed: true, detail: `feetMovedThisTurn = ${feet} (1 difficult cell = 2× cost)` };
     },
   },
   {

@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest';
 import { createEngine } from '../../src/engine/index.js';
 import { seededRNG } from '../../src/rng/seeded.js';
 import { commit } from '../../src/engine/commit.js';
-import { newCharacterId, newEncounterId, newItemInstanceId } from '../../src/ids.js';
+import { newCharacterId, newEncounterId, newItemInstanceId, newLocationId } from '../../src/ids.js';
 import { CharacterSchema } from '../../src/schemas/runtime/character.js';
 import {
   TEST_PACK,
@@ -1029,8 +1029,62 @@ describe('Tier 2 — cover AC bonus', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — difficult terrain', () => {
-  it.skip('difficult-terrain cells double movement cost (probe needs Location wiring)', () => {
-    expect(true).toBe(true);
+  it('moving through a difficult-terrain cell costs double the per-foot move', () => {
+    // Build a 5x1 map: [normal, difficult, normal, normal, normal].
+    // Move A from cell 0 to cell 4. Without difficult terrain the
+    // cost would be 4 cells × 5ft = 20ft. With cell 1 being difficult,
+    // it costs 1 (enter cell 1) × 2 + 3 × 1 = 5 cells of cost × 5ft
+    // = 25ft. A's speed is 30ft, so the move fits — verify the move
+    // succeeds AND that feetMovedThisTurn now reflects the inflated
+    // cost.
+    const s = setup();
+    const locationId = newLocationId();
+    const seeded = commit(s.campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'LocationCreated',
+        locationId,
+        name: 'Bog',
+        map: {
+          widthCells: 5,
+          heightCells: 1,
+          cellSizeFeet: 5,
+          terrain: [['normal', 'difficult', 'normal', 'normal', 'normal']],
+        },
+      },
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CharacterLocationChanged',
+        characterId: s.aId,
+        toLocationId: locationId,
+      },
+      // Move A to cell 0 (x=0). Engine cost when no map = 5ft (chebyshev),
+      // but the move's already-positioned (5,5) → (0,0) crosses (0,1)? No,
+      // (0,1) is out of the 5x1 map. Use a 1D path: stay at y=0.
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId: s.encounterId,
+        combatantId: s.aId,
+        fromPosition: { x: 5, y: 5 },
+        toPosition: { x: 0, y: 0 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+    ]);
+    // Move A from (0,0) cell-0 to (20,0) cell-4. Cells entered: 1, 2, 3, 4.
+    // Costs: difficult(1)=2, normal(2)=1, normal(3)=1, normal(4)=1. Sum=5.
+    // Total feet = 5 cells × 5ft = 25ft.
+    const moved = commit(
+      seeded,
+      s.engine.plan.move(seeded.state, { combatantId: s.aId, to: { x: 20, y: 0 } }).events,
+    );
+    const aCb = moved.state.encounters[s.encounterId]!.combatants.find(
+      (c) => c.combatantId === s.aId,
+    );
+    expect(aCb?.turnUsage.feetMovedThisTurn, 'feetMoved should reflect difficult-terrain surcharge').toBe(25);
   });
 });
 

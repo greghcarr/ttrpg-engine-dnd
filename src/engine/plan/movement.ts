@@ -18,6 +18,8 @@ import { nowIso } from '../../internal/clock.js';
 import { invariant } from '../../internal/invariants.js';
 import type { ULID } from '../ids-utils.js';
 import { assertActorCanAct, getEffectiveSpeed, findActorBlockingCondition } from './_actor-state.js';
+import { bresenhamCells, movementCostAt } from '../../derive/terrain.js';
+import { DEFAULT_CELL_SIZE_FEET } from '../../schemas/runtime/location.js';
 
 export interface MoveIntent {
   readonly type: 'Move';
@@ -108,7 +110,42 @@ export const planMove = (
       }
     }
   }
-  const distance = chebyshevDistance(combatant.position, intent.to);
+  // RAW PHB ch.1 "Difficult Terrain": each foot of movement through
+  // difficult terrain costs 1 extra foot. If the moving character is
+  // associated with a Location that has a map, walk Bresenham cells
+  // from the start to the destination and sum per-cell costs (skipping
+  // the starting cell, since RAW counts ENTRY into a difficult cell).
+  // Without a location-map context, falls back to plain Chebyshev.
+  const locationId = state.characterLocations[intent.combatantId];
+  const map =
+    locationId !== undefined ? state.locations[locationId]?.map : undefined;
+  let distance: number;
+  if (map !== undefined) {
+    const cellSize = map.cellSizeFeet ?? DEFAULT_CELL_SIZE_FEET;
+    const fromCell = {
+      x: Math.floor(combatant.position.x / cellSize),
+      y: Math.floor(combatant.position.y / cellSize),
+    };
+    const toCell = {
+      x: Math.floor(intent.to.x / cellSize),
+      y: Math.floor(intent.to.y / cellSize),
+    };
+    const cells = bresenhamCells(fromCell, toCell);
+    // Sum cost for each cell ENTERED (everything past the starting cell).
+    let costInCells = 0;
+    for (let i = 1; i < cells.length; i++) {
+      const cell = cells[i]!;
+      costInCells += movementCostAt(map, cell.x, cell.y);
+    }
+    if (!Number.isFinite(costInCells)) {
+      throw new Error(
+        `Path crosses impassable terrain between (${combatant.position.x},${combatant.position.y}) and (${intent.to.x},${intent.to.y})`,
+      );
+    }
+    distance = costInCells * cellSize;
+  } else {
+    distance = chebyshevDistance(combatant.position, intent.to);
+  }
   const baseSpeed = characterWalkSpeed(state, intent.combatantId);
   if (baseSpeed === 0) {
     throw new Error(

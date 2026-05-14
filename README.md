@@ -164,7 +164,9 @@ Probes I named but couldn't build out yet (need richer fixtures or content): Sne
 - **Sneak Attack "ally within 5ft of target"**: `planAttack` now computes `attackerHasAllyAdjacentToTarget` (any other positioned, non-incapacitated combatant within Chebyshev 5 of the target) and emits it on `AttackRolled`. The trigger-dispatcher exposes the new field as a fact. The Sneak Attack predicates in starter-pack and test-pack (all 10 odd levels each) now use an `any`-branch: trigger fires when `used === advantage` OR when `used !== disadvantage AND attackerHasAllyAdjacentToTarget === true`.
 - **Two-handed weapon + shield conflict**: new `engine.plan.equip(state, content, intent)` planner wraps `ItemEquipped` with content-aware validation. Rejects equipping a two-handed weapon in `mainHand` while `shield` slot is occupied, and rejects equipping a shield while `mainHand` holds a two-handed weapon. Versatile weapons + shield is still permitted (the consumer is choosing one-handed mode).
 
-Still skipped pending fixture machinery: Loading property (needs a multiattack-capable character with a crossbow), Difficult terrain 2× cost (needs Location map cells in encounter setup).
+✓ **Loading property** closed in 2026-05-14 sweep. New `TurnUsage.loadedWeaponsFiredThisTurn` array tracks weapon instances fired with the Loading property this turn; `planAttack` rejects a second attempt with the same Loading weapon, and emits a record-only `WeaponLoaded` event that the reducer reads. `applyTurnStarted` was also tightened to reset all 7 `turnUsage` flags (previously only 3 were reset on turn boundary).
+
+✓ **Difficult terrain 2× cost** closed in 2026-05-14 sweep. `planMove` now walks Bresenham cells between the move's start and end positions in cell-space (converted via `cellSizeFeet`) when the character is associated with a Location that has a map, and sums per-cell movement costs. Difficult cells double; impassable cells reject the move. Falls back to plain Chebyshev when no location/map is set.
 
 #### Variant-rule enforcement (deferred, ⚪)
 
@@ -175,11 +177,11 @@ Still skipped pending fixture machinery: Loading property (needs a multiattack-c
 
 #### Engine triage
 
-**🔴 / 🟡 status — 0 🔴 + 0 🟡 open as of 2026-05-14 PM.** Audit: **46 passing + 2 skipped (Loading, difficult terrain) + 0 failing**. Every probed RAW rule is enforced. The two architectural gaps that took longer to close (Sneak Attack ally-adjacent, two-handed + shield conflict) both landed via small structured changes — a new event field plus content-predicate OR-branch for the first; a new `engine.plan.equip` planner for the second.
+**🔴 / 🟡 status — 0 🔴 + 0 🟡 open as of 2026-05-14 PM.** Audit: **48 passing + 0 skipped + 0 failing**. Every probed RAW rule is enforced. The full Tier 1 + Tier 2 punch list is closed — including the two architectural 🟡s (Sneak Attack ally-adjacent, two-handed + shield) and the two fixture-blocked items (Loading, difficult terrain).
 
-**The audit is still a floor, not a ceiling.** Skipped probes need fixture work. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names more rules without probes. The Tier 1 + Tier 2 audit being clean means "the rules I probed are enforced," not "every RAW rule is enforced."
+**The audit is still a floor, not a ceiling.** It probes 48 specific rules; the [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names other RAW areas that haven't been probed yet (Frightened/Charmed nuances, multiattack target legality past Extra Attack, exhaustion progression effects, etc.). "Clean audit" means "every rule I probed is enforced," not "every RAW rule is enforced."
 
-**Next:** Either close the 2 skipped probes (build fixture machinery for Loading + difficult terrain), or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
+**Next:** Tier 3 — fill the 14 named class-feature content stubs (Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix). Each is a focused mini-slice. After Tier 3 the class-features matrix flips from 36 wired / 12 stub to 48 wired / 0 stub at L1–5.
 
 ### Content gaps
 
