@@ -34,6 +34,7 @@ import {
 import {
   AttackRolledEventSchema,
   DamageRolledEventSchema,
+  WeaponLoadedEventSchema,
 } from './attack.js';
 import { ItemAcquiredEventSchema } from './inventory.js';
 import {
@@ -181,6 +182,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   EncounterEndedEventSchema,
   AttackRolledEventSchema,
   DamageRolledEventSchema,
+  WeaponLoadedEventSchema,
   ItemAcquiredEventSchema,
   LevelUpResolvedEventSchema,
   ChoiceRequiredEventSchema,
@@ -294,6 +296,7 @@ export const EVENT_TYPES = [
   'EncounterEnded',
   'AttackRolled',
   'DamageRolled',
+  'WeaponLoaded',
   'ItemAcquired',
   'LevelUpResolved',
   'ChoiceRequired',
@@ -456,9 +459,11 @@ export {
 export {
   AttackRolledEventSchema,
   DamageRolledEventSchema,
+  WeaponLoadedEventSchema,
   DamageRollSchema,
   AttackAdvantageSchema,
 } from './attack.js';
+export type { WeaponLoadedEvent } from './attack.js';
 export {
   ItemAcquiredEventSchema,
   ItemEquippedEventSchema,

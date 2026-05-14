@@ -1327,8 +1327,102 @@ describe('Tier 2 — Heavy weapon Small disadvantage', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — Loading property (one shot per attack)', () => {
-  it.skip('a second attack in the same Attack action with a loading weapon rejects (needs crossbow setup)', () => {
-    expect(true).toBe(true);
+  it('a second attack with a loading weapon in the same turn rejects', () => {
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
+    const crossbow = makeItemInstance('light-crossbow');
+    // Fighter L5 has Extra Attack — RAW allows 2 attacks per Attack
+    // action, which is exactly what the Loading rule constrains.
+    const archer = buildFighter({
+      name: 'Archer',
+      level: 5,
+      hpMax: 40,
+      hpCurrent: 40,
+      DEX: 18,
+    });
+    const archerEquipped = {
+      ...archer,
+      inventory: [crossbow.id],
+      equipped: { mainHand: crossbow.id, attuned: [] },
+    };
+    const target = buildFighter({ name: 'Dummy', hpMax: 100, hpCurrent: 100 });
+    let campaign = engine.createCampaign({ name: 'loading-probe' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: crossbow },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: archerEquipped } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    const encId = newEncounterId();
+    campaign = commit(campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterCreated',
+        encounterId: encId,
+        combatantIds: [archerEquipped.id, target.id],
+      } satisfies EncounterCreatedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'InitiativeRolled',
+        encounterId: encId,
+        rolls: [
+          { combatantId: archerEquipped.id, d20: 20, modifier: 4, total: 24 },
+          { combatantId: target.id, d20: 5, modifier: 2, total: 7 },
+        ],
+      } satisfies InitiativeRolledEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterStarted',
+        encounterId: encId,
+      } satisfies EncounterStartedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'TurnStarted',
+        encounterId: encId,
+        combatantId: archerEquipped.id,
+        round: 1,
+      } satisfies TurnStartedEvent,
+      // Position 20 ft apart — well within crossbow's 80 ft normal range.
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId: encId,
+        combatantId: archerEquipped.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 5, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId: encId,
+        combatantId: target.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 25, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+    ]);
+    // First attack — should succeed.
+    const afterFirst = commit(
+      campaign,
+      engine.plan.attack(campaign.state, {
+        attackerId: archerEquipped.id,
+        targetId: target.id,
+        weaponInstanceId: crossbow.id,
+      }).events,
+    );
+    // Second attack same turn with the same Loading weapon — should reject.
+    expect(() =>
+      engine.plan.attack(afterFirst.state, {
+        attackerId: archerEquipped.id,
+        targetId: target.id,
+        weaponInstanceId: crossbow.id,
+      }),
+    ).toThrow(/loading|again this turn/i);
   });
 });
 

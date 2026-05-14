@@ -29,6 +29,19 @@ export const AttackRolledEventSchema = EventEnvelopeSchema.extend({
 });
 export type AttackRolledEvent = z.infer<typeof AttackRolledEventSchema>;
 
+// Record-only event surfaced by planAttack when a weapon with the
+// `loading` property fires. The reducer adds the weapon instance id to
+// the attacker's turnUsage.loadedWeaponsFiredThisTurn array so a
+// subsequent attempt to fire the same weapon in the same turn rejects.
+// Reset alongside the other per-turn flags at TurnStarted.
+export const WeaponLoadedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('WeaponLoaded'),
+  encounterId: ULIDSchema,
+  combatantId: ULIDSchema,
+  weaponInstanceId: ULIDSchema,
+});
+export type WeaponLoadedEvent = z.infer<typeof WeaponLoadedEventSchema>;
+
 export const DamageRollSchema = z.object({
   expression: DiceExpressionSchema,
   rolls: z.array(z.number().int().min(1)),

@@ -18,6 +18,11 @@ export const TurnUsageSchema = z.object({
   feetMovedThisTurn: z.number().min(0).default(0),
   dashed: z.boolean().default(false),
   disengaged: z.boolean().default(false),
+  // Item-instance ids of any weapons with the `loading` property that
+  // were fired this turn. RAW Loading: a Loading weapon can fire only
+  // one piece of ammunition per attack action / bonus action / reaction.
+  // Reset alongside the other per-turn flags at TurnStarted.
+  loadedWeaponsFiredThisTurn: ULIDSchema.array().default([]),
 });
 export type TurnUsage = z.infer<typeof TurnUsageSchema>;
 
@@ -29,6 +34,7 @@ export const EMPTY_TURN_USAGE: TurnUsage = {
   feetMovedThisTurn: 0,
   dashed: false,
   disengaged: false,
+  loadedWeaponsFiredThisTurn: [],
 };
 
 export const CombatantSchema = z.object({

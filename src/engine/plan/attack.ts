@@ -408,6 +408,30 @@ export const planAttack = (
       );
     }
   }
+  // RAW Equipment "Loading": a weapon with the Loading property can
+  // fire only one piece of ammunition per attack action / bonus action
+  // / reaction (regardless of Extra Attack / multiattack). Block the
+  // second attempt with the same Loading weapon in the same turn.
+  // Tracked on Combatant.turnUsage.loadedWeaponsFiredThisTurn; reset
+  // on TurnStarted alongside the other per-turn flags.
+  const encounter = state.activeEncounterId
+    ? state.encounters[state.activeEncounterId]
+    : undefined;
+  const attackerCb = encounter?.combatants.find((c) => c.combatantId === intent.attackerId);
+  const weaponInstance = state.itemInstances[intent.weaponInstanceId];
+  const weaponDef = weaponInstance
+    ? content.items.get(weaponInstance.definitionId)
+    : undefined;
+  const weaponIsLoading =
+    weaponDef?.itemKind === 'weapon' && weaponDef.properties.includes('loading');
+  if (
+    weaponIsLoading &&
+    attackerCb?.turnUsage.loadedWeaponsFiredThisTurn.includes(intent.weaponInstanceId)
+  ) {
+    throw new Error(
+      `${attacker?.name ?? intent.attackerId} cannot fire ${weaponDef?.name ?? 'this Loading weapon'} again this turn (Loading property)`,
+    );
+  }
   const economyPrelude = planActionEconomyForAttack(state, content, intent);
   assertWeaponInRange(state, content, intent);
   const at = intent.at ?? nowIso();
@@ -422,7 +446,21 @@ export const planAttack = (
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
     at,
   });
-  return [...economyPrelude, ...resolution];
+  // If we fired a Loading weapon, append a WeaponLoaded event so the
+  // reducer records it in turnUsage. Second attempt this turn will
+  // hit the guard above.
+  const tail: Event[] = [];
+  if (weaponIsLoading && encounter !== undefined) {
+    tail.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'WeaponLoaded',
+      encounterId: encounter.id,
+      combatantId: intent.attackerId,
+      weaponInstanceId: intent.weaponInstanceId,
+    });
+  }
+  return [...economyPrelude, ...resolution, ...tail];
 };
 
 const CLEAVE_TRIGGER_ID = 'mastery:cleave';

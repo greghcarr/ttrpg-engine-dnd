@@ -40,6 +40,7 @@ export const applyEncounterCreated = (
         feetMovedThisTurn: 0,
         dashed: false,
         disengaged: false,
+        loadedWeaponsFiredThisTurn: [],
       },
     })),
     round: 0,
@@ -103,6 +104,10 @@ export const applyTurnStarted = (
   active.turnUsage.actionUsed = false;
   active.turnUsage.bonusActionUsed = false;
   active.turnUsage.attacksMadeThisTurn = 0;
+  active.turnUsage.feetMovedThisTurn = 0;
+  active.turnUsage.dashed = false;
+  active.turnUsage.disengaged = false;
+  active.turnUsage.loadedWeaponsFiredThisTurn = [];
 };
 
 export const applyTurnEnded = (
