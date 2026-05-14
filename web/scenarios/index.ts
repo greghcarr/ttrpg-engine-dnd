@@ -56,9 +56,9 @@ export const SCENARIOS: ReadonlyArray<DemoScenario> = [
   },
   {
     id: 'downed-wizard',
-    title: 'Downed Wizard (HP 0)',
-    description: 'A wizard concentrating on Bless drops to 0 HP. Tests concentration auto-clear, action-block, death-save rotation.',
-    hint: 'On the wizard\'s turn, only End Turn is available (the sandbox auto-detects HP=0). Watch the Event Inspector — concentration cleared on the damage event, and a DeathSaveRolled fires at turn start.',
+    title: 'Concentrating Wizard at 1 HP',
+    description: 'A wizard concentrating on Bless is at 1 HP; the goblin acts first. Tests concentration auto-clear, action-block on 0 HP, and death-save rotation — all in real time after the first attack lands.',
+    hint: 'The goblin goes first. Click "Attack Brindle" — one dagger hit drops her to 0. Watch the Event Inspector: the same commit clears her concentration. When her turn comes up, only End Turn is available (sandbox detects HP=0), and a DeathSaveRolled fires at turn start.',
     build: (opts) => buildDownedWizard(loadStarter(), opts),
   },
 ];

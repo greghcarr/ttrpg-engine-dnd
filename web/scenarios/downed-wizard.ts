@@ -1,4 +1,4 @@
-// Downed Wizard scenario.
+// Concentrating Wizard at 1 HP scenario.
 //
 // Demonstrates three RAW rules in one scene:
 //   1. Concentration auto-clears when the caster drops to 0 HP.
@@ -8,9 +8,11 @@
 //
 // We seed the wizard mid-combat: concentrating on a synthetic effect
 // (the engine doesn't care about the spell identity for the clear-on-
-// drop check), at full HP. The visitor then attacks the wizard via the
-// goblin's turn to drop them to 0 — and watches concentration vanish
-// in the same commit.
+// drop check), at 1 HP. The goblin acts first, so a single dagger
+// swing from the visitor drops her to 0 — and concentration vanishes
+// in the same commit. Starting at 1 (rather than 0) is deliberate:
+// it puts the auto-clear inside an interactively-triggered event
+// rather than buried in the scenario's setup history.
 
 import {
   CharacterSchema,
