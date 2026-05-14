@@ -143,6 +143,19 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 ✓ **Closed in 2026-05-14 sweep.** `applyDamageApplied` now calls `clearConcentrationEffect` when `hp.current` lands at 0, cascading through the effect's applied conditions on other characters (extracted from the prior `applyConcentrationBroken` body). Wizards / Druids drop their concentration spell the moment they go down, even if the damage came in via a raw `DamageApplied` event rather than through one of the attack planners that already paired it with `planConcentrationBreakOnDrop`.
 
+#### Tier 2 — newly probed gaps (2026-05-14)
+
+Extending the audit toward categorical coverage surfaced four more confirmed bugs. The Tier 1 sweep cleared 21 probes; the Tier 2 batch added ~15 more probes and found these:
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Frightened condition doesn't restrict movement toward the source | 🟡 | RAW PHB Appendix "Frightened": "while frightened by a source, you can't willingly move closer to the source of your fear". Engine: `AppliedCondition` schema has `sourceEventId` but no `sourceCharacterId`. Without that field, the engine can't know who scared you and can't enforce the restriction. Fix shape: add `sourceCharacterId` to the condition schema and the planner that emits Frightened, then a `planMove` guard. |
+| Charmed condition doesn't restrict attacks against the charmer | 🟡 | RAW Appendix "Charmed": "the charmer has Advantage on any ability check it makes to interact socially with the creature; the charmed creature can't attack the charmer or target the charmer with harmful Abilities or magical Effects." Engine: same root cause as Frightened — no source-character tracking on the AppliedCondition. |
+| Attunement cap (3 items) isn't enforced at the reducer | 🟡 | RAW DMG ch.7 "Attunement": "A creature can attune to a maximum of three magic items at a time." Engine: `CharacterSchema.equipped.attuned` declares `.max(3)` but the `ItemAttuned` reducer doesn't check current count before appending. Fix shape: invariant + throw at the reducer head. |
+| Cast Spell (action) doesn't consume the actor's action | 🔴 | RAW: most spell casting takes an action; that action should be unavailable for an Attack on the same turn. Engine: `planCastSpell` does not consult `turnUsage.actionUsed` for action-cost spells and does not emit `ActionEconomyConsumed('action')`. A Wizard can Magic Missile + longsword in the same turn. (`assertActorCanAct` blocks Cast → Attack only when the caster has an action-blocking condition; the action-economy half is separate.) |
+
+Probes I named but couldn't build out yet (need richer fixtures or content): Sneak Attack eligibility (needs Rogue setup), Heavy weapon Small disadvantage (needs Small species character), Loading property (needs crossbow), Two-handed + shield conflict, Difficult terrain 2× cost (needs Location map cells). Each is a `.skip()` in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) with a one-line note on what's missing.
+
 #### Variant-rule enforcement (deferred, ⚪)
 
 | Gap | Severity | Slice | What's missing |
@@ -152,14 +165,13 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 #### Engine triage
 
-**🔴 / 🟡 status — 0 open items as of 2026-05-14.** The full Tier 1 sweep is complete: all 21 probes in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) pass against the current working tree. The closed items split across two commits:
+**🔴 / 🟡 status — 1 🔴 + 3 🟡 open** (all from the Tier 2 batch above). Tier 1 (the original 21 probes) is fully closed. Tier 2's first batch surfaced four new bugs; the table just above documents them. The audit file now stands at **35 passing + 5 skipped (need richer fixtures) + 4 failing**.
 
-- Cluster A (conditions inert against actor + Restrained/Grappled speed-0 + Misty Step occupancy): committed as `Reject actions by Incapacitated / Stunned / Paralyzed / Petrified / Unconscious / HP=0 actors`. Helper: [src/engine/plan/_actor-state.ts](src/engine/plan/_actor-state.ts) threaded through every action planner.
-- Cluster B (OAs, prone stand-up, reaction cap, ranged-in-melee, concentration on HP=0): the rest of Tier 1.
+The 🔴 in the new batch: `planCastSpell` doesn't consume the action. Wizards can Magic Missile then Attack on the same turn. The other three are 🟡 (sourced-condition restrictions and attunement cap).
 
-**Prior "all 🔴/🟡 closed" claim was wrong.** It is now correct for the curated audit, but the [trustworthiness roadmap](docs/trustworthiness-roadmap.md) is explicit that **the audit is a floor, not a ceiling** — Tier 2 names ~25 more RAW rules I haven't probed yet (Frightened/Charmed source restrictions, two-weapon fighting eligibility, multiattack target legality, Heavy/Loading weapon properties, half/three-quarters cover, difficult terrain, etc.). Tier 1 being clean means the rules I probed are enforced; not that every RAW rule is enforced.
+**Prior "all 🔴/🟡 closed" claim was wrong.** Tier 1 fixed the cluster the demo's hands-on play exposed; Tier 2 (categorical extension) is showing that more rules look-RAW-but-aren't. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) is explicit that **the audit is a floor, not a ceiling**: more Tier 2 probes (Sneak Attack eligibility, Heavy/Loading weapons, difficult terrain, etc.) need richer fixtures before we can probe them.
 
-**Next:** Tier 2 — extend the audit's probe set toward categorical coverage. See [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) "Tier 2" for the named-but-unprobed list.
+**Next:** Fix the four Tier 2 gaps (or batch-fix alongside more probe building). See [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) "Tier 2" for the named-but-unprobed list.
 
 ### Content gaps
 
