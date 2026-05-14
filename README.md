@@ -86,7 +86,7 @@ Pick the doc that matches what you want:
 
 ## Status
 
-**Alpha.** Architecturally complete; mechanically partial. 698 tests across 116 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven.
+**Alpha.** Architecturally complete; mechanically partial. 763 tests across 118 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
 
 Beyond the architecture, here's the honest split:
 
@@ -98,7 +98,7 @@ Beyond the architecture, here's the honest split:
   - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
   - Spells (Slice 41): ~33 spells in the pack; ~26 of those have full mechanical effects wired. Guidance and Spirit Guardians remain schema-only TODOs; the utility cantrips (Mage Hand, Prestidigitation, Light, Detect Magic) are intentionally narrative-only.
   - Variant rules (Slice 46): `grittyRest` (rest events stamp the right durations) and `heroPoints` (`engine.plan.grantInitialHeroPoints` / `engine.plan.spendHeroPoint`) both ship. `sanity` and `massCombat` still toggle but the engine doesn't yet enforce their mechanics (own slices, see Known gaps).
-- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (2 items), content (inventory), and test infrastructure (3 items) — all in one place.
+- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (2 ⚪ variant-rule items, no 🔴/🟡), content (inventory), and test infrastructure (3 items) — all in one place.
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
 
@@ -112,76 +112,18 @@ Severity column throughout: 🔴 immediately visible to a player at low levels, 
 
 ### Engine gaps
 
-Engine-level features that ship as partial or not at all. Grouped by category. Each entry says what's missing and (if applicable) which slice it sits under.
+**🔴 / 🟡 status: 0 open.** The RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) probes 48 first-page-of-the-PHB rules across action economy, conditions, positioning, concentration, combat math, equipment, and death/dying — **all 48 pass, 0 skipped, 0 failing**. The audit's commit history is the canonical record of which rules were closed when; the [trustworthiness roadmap](docs/trustworthiness-roadmap.md) frames the four-tier path from "alpha" to "trustworthy for unsupervised tabletop play."
 
-> **2026-05-14 audit note.** A web-demo session ([docs/web-demo-plan.md](docs/web-demo-plan.md)) surfaced multiple RAW violations that targeted-test coverage missed. The RAW-compliance audit in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) probes a curated set of first-page-of-the-PHB rules; **its failing rows are a floor, not a ceiling**. Replace each row with a "✓ fixed (commit ###)" line when the relevant planner gains its guard. **Until these are closed, do not trust the engine for an unsupervised tabletop session — a downed PC can swing a sword, a Wizard can chain three Shields in one round, and movement through threatened squares is free.**
->
-> **Scope of audit.** Not exhaustive. The list below enumerates *probed* failures. Categories I've named but not yet built probes for: Frightened/Charmed source-tracking restrictions, two-weapon-fighting light-property enforcement, multiattack target legality at L5+, Heavy-weapon disadvantage for Small creatures, Loading-property one-shot-per-attack, ranged-attack disadvantage when an enemy is in melee reach, half/three-quarters cover AC bonuses, difficult-terrain 2× movement cost, and auto-crit on attacks within 5ft of Paralyzed/Unconscious targets. Some of these the engine likely gets right; some likely not. If you have time to write probes, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) is structured to take more `it()`s with a one-line setup each.
-
-#### Conditions don't block actions
-
-✓ **Closed in 2026-05-14 sweep.** The `assertActorCanAct` helper at [src/engine/plan/_actor-state.ts](src/engine/plan/_actor-state.ts) is now called from every action planner; `getEffectiveSpeed` returns 0 for Restrained / Grappled. The audit's 11 condition-related rows all pass. Specifically:
-
-- Unconscious actor (HP = 0) rejects Attack / Move / Dodge / Dash. ✓
-- Incapacitated, Stunned, Paralyzed, Petrified all reject Attack and Dodge. ✓
-- Restrained and Grappled return effective speed 0 from `planMove`. ✓
-
-#### Action economy and reactions
-
-✓ **Closed in 2026-05-14 sweep.** `planShield` and `planCounterspell` now call `assertReactionAvailable(state, casterId, label)` before doing any work; the reaction-cap RAW is enforced.
-
-#### Positioning and movement
-
-✓ **Closed in 2026-05-14 sweep.** Four positioning rules are now wired:
-
-- Leaving a hostile's 5ft reach emits one `OpportunityAvailable` event per eligible reactor. The event is record-only (its reducer is a no-op); consumers read it to decide whether to dispatch `engine.plan.opportunityAttack`. Disengage suppresses these for the rest of the turn. Unconscious / Incapacitated reactors don't get an opportunity.
-- Standing up from Prone charges half-speed (`floor(speed/2)`) against `feetMovedThisTurn` and emits `ConditionRemoved('prone')` ahead of the `CombatantMoved`. A 30-speed mover at Prone now has 15ft of move left, not 30.
-- Misty Step (and `planMove`) reject destinations occupied by another combatant.
-- Ranged attacks made within 5ft of a non-incapacitated hostile roll with disadvantage. Cancels with target-side advantage per the 2024 RAW matrix.
-
-#### Concentration
-
-✓ **Closed in 2026-05-14 sweep.** `applyDamageApplied` now calls `clearConcentrationEffect` when `hp.current` lands at 0, cascading through the effect's applied conditions on other characters (extracted from the prior `applyConcentrationBroken` body). Wizards / Druids drop their concentration spell the moment they go down, even if the damage came in via a raw `DamageApplied` event rather than through one of the attack planners that already paired it with `planConcentrationBreakOnDrop`.
-
-#### Tier 2 — newly probed gaps (2026-05-14)
-
-✓ **All four closed in the same-day sweep.** Tier 2's first audit batch surfaced four new bugs; each got a paired fix.
-
-- **Cast Spell action consumption** (🔴): `planCastSpell` now parses `spell.castingTime`, throws if the caster's matching action slot is already used (Action / Bonus Action / Reaction), and emits `ActionEconomyConsumed(<kind>)` so subsequent planners on the same turn see the consumed slot. Long-cast spells (rituals, 1 Minute+) and out-of-encounter casts are unchanged. The showcase golden transcript got a snapshot refresh to include the new `consumes bonusAction` lines for Healing Word and similar.
-- **Frightened source tracking** (🟡): `AppliedCondition` schema and `ConditionApplied` event both carry an optional `sourceCharacterId`. `planMove` reads it from the mover's condition list; if Frightened by a positioned source and the destination is closer to that source than the current position, the move rejects.
-- **Charmed source tracking** (🟡): same field; `planAttack` reads it from the attacker's condition list and rejects if the target is the charmer.
-- **Attunement cap** (🟡): the invariant was already in `applyItemAttuned` ([src/engine/reducers/inventory.ts:60-63](src/engine/reducers/inventory.ts#L60-L63)); the audit probe was wrong (didn't register item-instance entries so a different invariant fired first). The probe was fixed; the rule itself is enforced.
-
-Probes I named but couldn't build out yet (need richer fixtures or content): Sneak Attack eligibility (needs Rogue setup), Heavy weapon Small disadvantage (needs Small species character), Loading property (needs crossbow), Two-handed + shield conflict, Difficult terrain 2× cost (needs Location map cells). Each is a `.skip()` in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) with a one-line note on what's missing.
-
-#### Tier 2 — second pass (2026-05-14 PM)
-
-✓ **Sneak Attack triggers on advantage; does NOT trigger on flat attacks.** Two clean confirmations.
-✓ **Heavy weapon Small disadvantage now enforced.** `planAttack` reads the attacker's species size from the content pack; Small + heavy property contributes disadvantage into the 2024 cancellation matrix alongside ranged-in-melee and target-side flags.
-
-✓ **Both architectural 🟡s closed in 2026-05-14 PM sweep.**
-
-- **Sneak Attack "ally within 5ft of target"**: `planAttack` now computes `attackerHasAllyAdjacentToTarget` (any other positioned, non-incapacitated combatant within Chebyshev 5 of the target) and emits it on `AttackRolled`. The trigger-dispatcher exposes the new field as a fact. The Sneak Attack predicates in starter-pack and test-pack (all 10 odd levels each) now use an `any`-branch: trigger fires when `used === advantage` OR when `used !== disadvantage AND attackerHasAllyAdjacentToTarget === true`.
-- **Two-handed weapon + shield conflict**: new `engine.plan.equip(state, content, intent)` planner wraps `ItemEquipped` with content-aware validation. Rejects equipping a two-handed weapon in `mainHand` while `shield` slot is occupied, and rejects equipping a shield while `mainHand` holds a two-handed weapon. Versatile weapons + shield is still permitted (the consumer is choosing one-handed mode).
-
-✓ **Loading property** closed in 2026-05-14 sweep. New `TurnUsage.loadedWeaponsFiredThisTurn` array tracks weapon instances fired with the Loading property this turn; `planAttack` rejects a second attempt with the same Loading weapon, and emits a record-only `WeaponLoaded` event that the reducer reads. `applyTurnStarted` was also tightened to reset all 7 `turnUsage` flags (previously only 3 were reset on turn boundary).
-
-✓ **Difficult terrain 2× cost** closed in 2026-05-14 sweep. `planMove` now walks Bresenham cells between the move's start and end positions in cell-space (converted via `cellSizeFeet`) when the character is associated with a Location that has a map, and sums per-cell movement costs. Difficult cells double; impassable cells reject the move. Falls back to plain Chebyshev when no location/map is set.
+The audit is a floor, not a ceiling — it probes 48 specific rules. RAW areas the audit doesn't yet probe (exhaustion progression effects, multiclass spell-slot math, death-save nat-1/nat-20 edge cases, Frightened-on-attack-roll disadvantage, etc.) could surface new gaps. Adding a probe is ~10-15 lines; the file is structured for incremental growth.
 
 #### Variant-rule enforcement (deferred, ⚪)
+
+The only remaining engine-side gaps are two opt-in variant-rule toggles. Both have campaign-state plumbing (the boolean flips); neither has rule-interpretation logic.
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
 | `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
-
-#### Engine triage
-
-**🔴 / 🟡 status — 0 🔴 + 0 🟡 open as of 2026-05-14 PM.** Audit: **48 passing + 0 skipped + 0 failing**. Every probed RAW rule is enforced. The full Tier 1 + Tier 2 punch list is closed — including the two architectural 🟡s (Sneak Attack ally-adjacent, two-handed + shield) and the two fixture-blocked items (Loading, difficult terrain).
-
-**The audit is still a floor, not a ceiling.** It probes 48 specific rules; the [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names other RAW areas that haven't been probed yet (Frightened/Charmed nuances, multiattack target legality past Extra Attack, exhaustion progression effects, etc.). "Clean audit" means "every rule I probed is enforced," not "every RAW rule is enforced."
-
-**Next:** Tier 3 — fill the 14 named class-feature content stubs (Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix). Each is a focused mini-slice. After Tier 3 the class-features matrix flips from 36 wired / 12 stub to 48 wired / 0 stub at L1–5.
 
 ### Content gaps
 
@@ -210,7 +152,7 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 22 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **698 tests across 116 files**.
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 22 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **763 tests across 118 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)).
 
 #### Property-test generator coverage
 
