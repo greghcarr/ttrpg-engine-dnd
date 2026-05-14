@@ -85,6 +85,27 @@ export const planMove = (
       `Move of ${distance}ft exceeds remaining movement (${remaining}ft of ${maxThisTurn}ft)`,
     );
   }
+  // RAW 2024 PHB "Moving Around Other Creatures": you can pass through
+  // a nonhostile creature's space (treated as difficult terrain for
+  // same-size creatures), but you cannot willingly end a move in
+  // another creature's space, friend or foe. The engine only models
+  // the destination of a move, not the path, so this check rejects
+  // moves that *end* on an occupied square. Pass-through is permitted
+  // implicitly since intermediate squares aren't simulated.
+  const blocker = state.encounters[encounterId]?.combatants.find(
+    (c) =>
+      c.combatantId !== intent.combatantId &&
+      c.position !== undefined &&
+      c.position.x === intent.to.x &&
+      c.position.y === intent.to.y,
+  );
+  if (blocker !== undefined) {
+    const occupier = state.characters[blocker.combatantId];
+    const name = occupier?.name ?? blocker.combatantId;
+    throw new Error(
+      `Destination (${intent.to.x},${intent.to.y}) is occupied by ${name}; you can't end a move in another creature's space`,
+    );
+  }
 
   const at = intent.at ?? nowIso();
   const moved: CombatantMovedEvent = {
