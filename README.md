@@ -86,7 +86,7 @@ Pick the doc that matches what you want:
 
 ## Status
 
-**Alpha.** Architecturally complete; mechanically partial. 844 tests across 135 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
+**Alpha.** Architecturally complete; mechanically partial. 1009 tests across 139 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
 
 Beyond the architecture, here's the honest split:
 
@@ -166,16 +166,14 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 22 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **844 tests across 135 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)).
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1009 tests across 139 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)) and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
 
 #### Property-test generator coverage
 
-The Layer 7 property tests in [tests/property/](tests/property/) fuzz the engine across 16 invariants × 1000 iterations each, plus a stateful combat-sequence test (6 more invariants × 60-turn random fights). Property tests find bugs in proportion to what the generators *reach* — the existing ones cover a meaningful but narrow slice. New generators worth building (none of these are blocking; each is its own future slice):
+The Layer 7 property tests in [tests/property/](tests/property/) fuzz the engine across 28 invariants × 1000 iterations each (with the content-pack validator fuzz at 200 iterations to keep runs snappy), plus a stateful combat-sequence test (6 more invariants × 60-turn random fights). Coverage of the previously-missing generators landed in alpha.5: random spell-cast sequences (slot accounting, concentration consistency, replay equivalence across 5-20 random casts) and multi-class characters (10 invariants over 2-3-class mixes with PHB 2024 prerequisites). The remaining gaps are non-blocking expansion targets (each its own future slice):
 
 | Generator | Severity | What it would exercise |
 |---|---|---|
-| Random spell-cast sequences | 🟡 | `planCastSpell` with random spell/slot/target combinations, concentration switches across multiple casts, slot accounting, condition stacking. The targeted spell tests cover each spell in isolation; a random-sequence generator would catch interactions (e.g. casting Bless on top of an existing Bless via a different caster, or Hold Person → Spirit Guardians on the same caster). |
-| Multi-class characters | 🟡 | The current generator builds single-class characters only. Multiclass interactions (combined spell slots, half-caster slot table, multiclass prerequisites, feat eligibility) are tested only via targeted fixtures. A random-multiclass-character generator would fuzz `computeAvailableSpellSlots`, the level-up planner, and the spell-prep math. |
 | Encounters with terrain | ⚪ | The combat-sequence test uses a bare grid; the engine also supports difficult / impassable / water cells, doors (open / closed / locked), and line-of-sight via Bresenham. A terrain generator would fuzz `terrainAt`, `movementCostFor`, `hasLineOfSight`, `hasLineOfEffect` against random maps. |
 | Mounted combat | ⚪ | `Mounted` / `Dismounted` / vehicle entities and the planners around them (mounted attack rules, controlled vs independent mounts, vehicle damage). Untouched by current property tests. |
 | Level-up flows | ⚪ | Random `LevelUp` intents producing valid `PendingChoice` chains, then random `ChoiceResolved` to clear them. Would fuzz the level-up planner + `applyLevelUpResolved` + the choice-resolution interactions. |

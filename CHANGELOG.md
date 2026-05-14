@@ -2,9 +2,9 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
-## Unreleased
+## 0.1.0-alpha.5 - 2026-05-14
 
-Banked work since alpha.4, awaiting an alpha.5 release. The headline is a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped), plus a Tier 3 content-stub sweep that took the class-features matrix from 36 wired / 12 stub to **48 wired / 0 stub** at L1–7. Test count grew from 698 to 844 (146 new tests across 28 new files), all on top of the unchanged architectural invariants. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`, `RecklessAttackActivated`, `StunningStrikeAttempted`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` + `recklessAttackActive` + `stunningStrikeUsedThisTurn` on combatant turn usage) are all additive; `DerivedCharacter.knownLanguages` and the new `ExpandCritRange` / `GrantHalfProficiencyBonusFloor` / `BoostHealing` / `GrantEvasion` effect primitives are additive.
+The fifth pre-alpha. Headlined by a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped), plus a Tier 3 content-stub sweep that took the class-features matrix from 36 wired / 12 stub to **48 wired / 0 stub** at L1–7. The pre-release closes with a Claude-optimization documentation pass + a bug-hunting test sweep (boundary sweeps, multi-class property generator, random spell-cast sequences, content-pack validator fuzzing). Test count grew from 698 to 1009 (311 new tests across 32 new files), all on top of the unchanged architectural invariants. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`, `RecklessAttackActivated`, `StunningStrikeAttempted`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` + `recklessAttackActive` + `stunningStrikeUsedThisTurn` on combatant turn usage) are all additive; `DerivedCharacter.knownLanguages` and the new `ExpandCritRange` / `GrantHalfProficiencyBonusFloor` / `BoostHealing` / `GrantEvasion` effect primitives are additive.
 
 ### Tier 3 content stubs
 
@@ -54,6 +54,21 @@ Class-features matrix: 36 wired / 12 stub → **48 wired / 0 stub** at L1–7. S
 ### Changed
 
 - **README cleanup** (1cd20dc): collapsed 70+ lines of in-line "✓ Closed in 2026-05-14 sweep" retrospective in the Engine gaps section into a one-line summary referencing the audit file. Test counts refreshed to 763 / 118.
+
+### Documentation
+
+- **CLAUDE.md source map.** New section that lists where each kind of file lives (events, reducers, planners, derivations, content packs, handlers, test categories). Predicts the answer to "where do new things go" without an `ls`.
+- **CLAUDE.md planner shape.** New subsection codifying the skeleton extracted from [src/engine/plan/attack.ts](src/engine/plan/attack.ts) (large, RNG + triggers) and [src/engine/plan/sacred-weapon.ts](src/engine/plan/sacred-weapon.ts) (small, no RNG) so new planners pattern-match.
+- **[docs/slice-template.md](docs/slice-template.md).** Breaks the slice workflow into three shape-specific checklists: new planner, new content, new derivation. Each carries a file checklist + order of operations + gotchas.
+
+### Tests
+
+The bug-hunting sweep added 165 tests across 4 files. The headline finding: zero engine bugs surfaced — every invariant the new tests check holds across random samples and exhaustive table walks. The tests are now permanent safety nets.
+
+- **Boundary sweep over canonical PHB 2024 tables** ([tests/boundaries/tabulated-math.test.ts](tests/boundaries/tabulated-math.test.ts)). 153 exhaustive assertions: ability modifier for every score 1-30, proficiency bonus for every level 1-20, full-caster + half-caster + pact spell-slot tables, carrying capacity for every STR 1-30, exhaustion d20 penalty for every level 0-6, plus out-of-range rejection paths. Targets off-by-one bugs that random property-test sampling hits only in expectation.
+- **Multi-class character property generator** ([tests/property/generators.ts](tests/property/generators.ts), [tests/property/multiclass.test.ts](tests/property/multiclass.test.ts)). New `multiclassCharacterArb` produces 2-3-class characters meeting 2024 PHB multiclass prerequisites; 10 invariants run at 1000 iterations each cover total-level bounds, distinct classes, proficiency-bonus from total level, slot-count non-negativity + max-vs-available, fighter-leakage protection, pact-warlock isolation, warlock-non-caster mix, and the wizard+paladin ceil-half rule.
+- **Random spell-cast sequence invariants** ([tests/property/spell-cast-sequence.test.ts](tests/property/spell-cast-sequence.test.ts)). Single property running 1000 random sequences (5-20 casts each) against a fixed wizard + cleric + two dummies, drawing from a curated pool of 16 fully-wired starter-pack spells. Asserts slot accounting (`SpellSlotConsumed` events match final `spellSlotsUsed`), concentration field consistency, and replay equivalence at sequence end.
+- **Content-pack validator path-reporting fuzz** ([tests/property/content-pack-validator.test.ts](tests/property/content-pack-validator.test.ts)). 200 random mutations against the starter-pack JSON (replace-with-wrong-type / replace-with-array / delete-key); asserts that when Zod rejects, the reported issue path overlaps the mutated location so content-pack authors can navigate to the problem.
 
 ## 0.1.0-alpha.4
 
