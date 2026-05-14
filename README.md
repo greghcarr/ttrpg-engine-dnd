@@ -144,11 +144,7 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-Test-suite expansions that the testing standard in [CLAUDE.md](CLAUDE.md) calls out but were never written. The engine ships 660 tests across 111 files with replay-equivalence, RNG-capture, property-based, and public-API contract invariants; this would extend the safety net further.
-
-| Gap | Severity | What's missing |
-|---|---|---|
-| Feature-coverage matrix | 🟡 | The plan called for `tests/coverage/features.test.ts` enumerating real 5.5e features (class features, magic-item powers, condition interactions, etc.) and asserting each loads + computes. `tests/unit/engine/spell-coverage.test.ts` is the only piece written; the broader matrix is open. |
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 22 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **671 tests across 112 files**.
 
 #### Property-test generator coverage
 
