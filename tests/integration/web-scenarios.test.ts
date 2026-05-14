@@ -49,23 +49,77 @@ describe('web demo: replay equivalence', () => {
   }
 });
 
+// Headline-action probes — one per scenario, exercising the rule
+// each scenario's picker hint promises. The replay-equivalence tests
+// above cover construction; these cover *demonstration*. A scenario
+// whose hint says "click → to see the engine reject" but where the
+// engine doesn't actually reject is a broken scenario, even if it
+// replays cleanly.
+
+const requireScenario = (id: string) => {
+  const s = SCENARIOS.find((sc) => sc.id === id);
+  if (!s) throw new Error(`scenario "${id}" missing from registry`);
+  return s;
+};
+
+describe('web demo: frightened-halfling headline action', () => {
+  it('Pip moving east (toward Goblin Scout) rejects', () => {
+    const session = requireScenario('frightened-halfling').build();
+    const pipId = session.combatants['halfling']!;
+    const pip = session.campaign.state.characters[pipId]!;
+    void pip;
+    // The toolbar move-east button steps +5 in x. Pip starts at (5,5)
+    // facing the goblin at (25,5); east goes closer.
+    expect(() =>
+      session.engine.plan.move(session.campaign.state, {
+        combatantId: pipId,
+        to: { x: 10, y: 5 },
+      }),
+    ).toThrow(/frightened|closer|source/i);
+  });
+  it('Pip moving west (away from the goblin) succeeds', () => {
+    const session = requireScenario('frightened-halfling').build();
+    const pipId = session.combatants['halfling']!;
+    const { events } = session.engine.plan.move(session.campaign.state, {
+      combatantId: pipId,
+      to: { x: 0, y: 5 },
+    });
+    expect(events.some((e) => e.type === 'CombatantMoved')).toBe(true);
+  });
+});
+
+describe('web demo: misty-step-occupied headline action', () => {
+  it('Misty Step into Goblin Left (occupied square) rejects', () => {
+    const session = requireScenario('misty-step-occupied').build();
+    const wizardId = session.combatants['wizard']!;
+    const goblinAId = session.combatants['goblinA']!;
+    const goblinPos =
+      session.campaign.state.encounters[session.encounterId]!.combatants.find(
+        (c) => c.combatantId === goblinAId,
+      )?.position;
+    if (!goblinPos) throw new Error('goblin A missing position');
+    expect(() =>
+      session.engine.plan.mistyStep(session.campaign.state, {
+        casterId: wizardId,
+        to: { x: goblinPos.x, y: goblinPos.y },
+      }),
+    ).toThrow(/occupied|unoccupied|space/i);
+  });
+});
+
 // Scenario-specific regression: attacking Brindle in the
 // Concentrating-Wizard scenario must not crash on the synthetic
 // concentrationEffectId. Earlier the dual-cleanup path (DamageApplied
 // auto-clear + planConcentrationBreakOnDrop ConcentrationBroken event)
 // hit a redundant invariant in applyConcentrationBroken.
-describe('web demo: concentrating-wizard scenario survives an attack', () => {
-  it('attacking Brindle drops her to 0 without throwing on the synthetic concentrationEffectId', async () => {
-    const scenario = SCENARIOS.find((s) => s.id === 'downed-wizard');
-    if (!scenario) throw new Error('downed-wizard scenario missing from registry');
+describe('web demo: concentrating-wizard headline action', () => {
+  it('attacking Brindle drops her to 0 without throwing on the synthetic concentrationEffectId', () => {
     for (const seed of [38, 42, 7, 99]) {
-      const session = scenario.build({ seed });
-      // Find Brindle (wizard) and the goblin from the combatants map.
+      const session = requireScenario('downed-wizard').build({ seed });
       const wizardId = session.combatants['wizard']!;
       const goblinId = session.combatants['goblin']!;
       const goblin = session.campaign.state.characters[goblinId]!;
       const weaponId = goblin.equipped.mainHand!;
-      // Goblin is the active combatant. Their attack must not throw.
       expect(() =>
         session.engine.plan.attack(session.campaign.state, {
           attackerId: goblinId,
@@ -74,5 +128,16 @@ describe('web demo: concentrating-wizard scenario survives an attack', () => {
         }),
       ).not.toThrow();
     }
+  });
+});
+
+describe('web demo: goblin-skirmish sanity', () => {
+  it('seeds four combatants, an active encounter, and the first turn started', () => {
+    const session = requireScenario('goblin-skirmish').build();
+    expect(Object.keys(session.combatants).length).toBe(4);
+    expect(session.campaign.state.activeEncounterId).toBeDefined();
+    const enc = session.campaign.state.encounters[session.encounterId]!;
+    expect(enc.status).toBe('active');
+    expect(enc.round).toBe(1);
   });
 });
