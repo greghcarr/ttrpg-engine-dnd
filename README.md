@@ -118,12 +118,26 @@ The audit is a floor, not a ceiling — it probes 48 specific rules. RAW areas t
 
 #### Variant-rule enforcement (deferred, ⚪)
 
-The only remaining engine-side gaps are two opt-in variant-rule toggles. Both have campaign-state plumbing (the boolean flips); neither has rule-interpretation logic.
+Two opt-in variant-rule toggles. Both have campaign-state plumbing (the boolean flips); neither has rule-interpretation logic.
 
 | Gap | Severity | Slice | What's missing |
 |---|---|---|---|
 | `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
 | `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
+
+#### Partial wires from Tier 3 closures (⚪)
+
+The Tier 3 content-stub sweep closed all 14 named class-feature stubs + the 3 remaining class-feature placeholders, taking the class-features matrix to **48 wired / 0 stub** at L1–7. Several of those closures shipped intentionally narrow wires; each is a candidate for its own follow-up slice.
+
+| Gap | Severity | What's wired | What's missing |
+|---|---|---|---|
+| `AddModifier { value: Formula }` is unused | ⚪ | Effect schema accepts `number \| Formula`; the builder reads only numeric values. | Sacred Weapon ships a static `+3` attack bonus (representing a typical Paladin CHA mod). Closing this gap lets buffs read the actor's CHA mod at apply time — and unlocks dynamic-value buffs more generally. |
+| Predicate DSL coverage | ⚪ | `eq` / `hasProperty` / `hasCondition` / `damageType` / `all` / `any` / `not` / `always` / `never`. | No predicates for "ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand". Fighting Style effects (Archery +2 attack, Defense +1 AC, Dueling +2 damage) apply unconditionally as a result. |
+| Rage planner | ⚪ | Barbarian L1 grants the `rage` resource; Frenzy spends one charge + applies a `frenzied` condition (+2 damage). | No `planRage` to install Rage's actual effects (damage resistance to physical, attack-bonus on STR melee, exhaustion-at-end, advantage on STR checks while raging, duration tracking). Frenzy's bonus-action attack grant is consumer-driven. |
+| Per-Metamagic-option spell modification | ⚪ | `engine.plan.metamagic({ option })` spends the right sorcery-point cost (1/2/3 SP per RAW). | Spell modification (Twinned target doubling, Distant range doubling, Quickened bonus-action timing, Empowered damage reroll, etc.) is consumer-driven. Each option's effect on `planCastSpell` is a future slice. |
+| Familiar as a first-class entity | ⚪ | Druid Wild Companion spends a Wild Shape charge. | No Familiar entity / Find Familiar spell mechanic. Summoning a familiar is consumer-driven (`CharacterCreated` for the creature). |
+| `OfferChoice` at L1 doesn't auto-fire | ⚪ | `planLevelUp` emits `ChoiceRequired` on level advancement. | Fresh L1 characters (built via `CharacterCreated` rather than leveled up to L1) don't receive their L1 `OfferChoice` grants. Fighter L1 Fighting Style is affected; Paladin/Ranger Fighting Style work because they're gained on L1→L2. |
+| 3 of 6 Fighting Styles are placeholders | ⚪ | Archery, Defense, Dueling have effects (unconditional approximations). | Great Weapon Fighting (reroll 1s/2s on damage dice), Protection (reactive impose-disadvantage on attacks against allies), Two-Weapon Fighting (add ability mod to off-hand damage) ship as `effects: []`. Each is its own mechanic. |
 
 ### Content gaps
 
@@ -131,7 +145,7 @@ The starter pack is intentionally a slice, not the full 2024 catalogs. This tabl
 
 | Category | Shipped | RAW total (approx) | Severity | Notes |
 |---|---|---|---|---|
-| Classes (table scaffolding) | 12 of 12 | 12 | 🟡 | Tables ship 1-20. Class-feature wire status (per the coverage matrix): **48 wired / 0 stub** at L1-7. The 14 named Tier 3 content stubs (Druidic, Improved Critical, Slow Fall, Martial Arts die scaling, Jack of All Trades, Sacred Weapon, Disciple of Life, Reckless Attack, Stunning Strike, Frenzy, Evasion, Cutting Words, Metamagic, Fighting Style choice) plus the three remaining class-feature placeholders (Feral Instinct, Deft Explorer, Wild Companion) are all closed. Class-feature matrix fully wired through L7. The next remaining stubs live at the subclass-feature L3 layer (13 entries across 9 subclasses). |
+| Classes (table scaffolding) | 12 of 12 | 12 | 🟡 | Tables ship 1-20. Class-feature wire status (per the coverage matrix): **48 wired / 0 stub** at L1-7. Wired highlights: Sneak Attack scaling all 10 odd levels, Second Wind / Action Surge / Extra Attack, Rage resource, Bardic Inspiration + Expertise (Insight/Persuasion) + Font of Inspiration + Jack of All Trades, Channel Divinity, Wild Shape, Druidic, Monk's Martial Arts die scaling / Focus / Unarmored Defense / Extra Attack / Slow Fall, Hunter's Mark + Weapon Mastery grant, Innate Sorcery / Font of Magic / Sorcerous Restoration, Lay on Hands, Arcane Recovery, Barbarian Unarmored Defense + Danger Sense. All 14 named Tier 3 content stubs (per [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md)) plus the three remaining class-feature entries (Feral Instinct, Deft Explorer, Wild Companion) now have effects and engine support. The class-feature matrix is fully wired through L7. The next remaining stubs live at the subclass-feature L3 layer (11 entries across 9 subclasses). |
 | Subclasses | 12 (1 per class, L3 only) | ~50+ | 🟡 | One canonical PHB-2024 subclass per class lands at L3 — the gating level. The L3 features are a mix of wired (Draconic Resilience AC, Thief Second-Story climb speed, College of Lore proficiencies + Cutting Words, Champion Remarkable Athlete + Improved Critical, Oath of Devotion Sacred Weapon, Life Domain Disciple of Life, Path of the Berserker Frenzy) and **13 remaining content-stubs** (Circle of the Land's cantrip + Land's Aid, Draconic Resilience HP + Draconic Spells, Evoker's Evocation Savant + Sculpt Spells, Fiend Patron's Dark One's Blessing + Fiend Spells, Hunter's Lore + Hunter's Prey, Oath of Devotion Spells, Thief Fast Hands, Warrior of the Open Hand Technique). L7 / L10 / L14 feature grants and the other 3-4 subclasses per class are still consumer territory. |
 | Spells | ~33 (~26 fully wired) | ~370 | 🔴 | The starter slice. Two of the remaining schema-only spells (Guidance, Spirit Guardians) need engine work first; the other ~330 missing spells are pure content authoring. The four utility cantrips (Mage Hand, Prestidigitation, Light, Detect Magic) are intentionally narrative-only. |
 | Magic items | 9 | hundreds (DMG) | 🟡 | Bag of Holding, Wand of Magic Missiles, Cloak of Protection, etc. through legendary Deck of Many Things. Most DMG items missing. |

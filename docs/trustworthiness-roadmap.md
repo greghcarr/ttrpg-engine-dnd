@@ -108,22 +108,22 @@ Each fix lands with a regression test that lifts the corresponding `it()` in [te
 
 **Goal:** every "stub" row in [README.md](../README.md) "Content gaps" → Classes table → "Stubs (engine work not yet done)" gets engine support, and the content entries get full effect lists.
 
-**The named stubs (all closed):**
+**The named stubs** (from the README itself):
 
-- ~~Druidic~~ ✓ wired — `GrantProficiency target:'language' id:'druidic'` + `computeKnownLanguages` derivation
-- ~~Improved Critical~~ ✓ wired — new `ExpandCritRange { threshold }` primitive; `resolveAttack` consults attacker's effect stack
-- ~~Slow Fall~~ ✓ wired — `FallingIntent.useSlowFall` flag; `planFalling` reduces by 5×monk-level, consumes reaction in encounters
 - ~~Martial Arts die scaling~~ ✓ wired — `applyMartialArtsDieScaling` helper; new `unarmed-strike` weapon; main + off-hand attack paths swap to MA die when larger
-- ~~Jack of All Trades~~ ✓ wired — new `GrantHalfProficiencyBonusFloor` primitive; `computeAbilityCheck` applies floor(profBonus/2) when no explicit prof contribution lands
-- ~~Sacred Weapon~~ ✓ wired — new `engine.plan.sacredWeapon` planner; spends Channel Divinity charge + applies `sacred-weapon-active` condition (+3 attack bonus, static)
-- ~~Disciple of Life~~ ✓ wired — new `BoostHealing` primitive; `planHealMechanic` adds `flat + perSpellLevel * slotLevel` to heals at slot 1+
-- ~~Reckless Attack timing~~ ✓ wired — `engine.plan.recklessAttack` planner + `RecklessAttackActivated` event; turnUsage flag persists until next TurnStarted
 - ~~Stunning Strike~~ ✓ wired — `engine.plan.stunningStrike` + new `StunningStrikeAttempted` event; CON save vs DC 8+WIS+prof, stunned-on-fail, once per turn
-- ~~Frenzy~~ ✓ wired (minimal) — `engine.plan.frenzy` spends Rage charge + applies `frenzied` condition; bonus-action attack grant + end-of-rage exhaustion are consumer-driven until Rage gets a planner slice
-- ~~Evasion~~ ✓ wired — new `GrantEvasion` primitive; `planCastSpell` save-mechanic path flips to (success → 0, fail → half) on DEX saves vs halves-on-success spells
-- ~~Cutting Words~~ ✓ wired — `engine.plan.cuttingWords` returns `{events, dieRoll, preventedHit}`; consumer adjudicates trailing chain (same pattern as Shield)
+- ~~Reckless Attack timing~~ ✓ wired — `engine.plan.recklessAttack` planner + `RecklessAttackActivated` event; turnUsage flag persists until next TurnStarted
 - ~~Metamagic~~ ✓ wired (resource economy) — `engine.plan.metamagic` spends the right sorcery-point cost per option; per-option spell modifications are deferred
+- ~~Evasion~~ ✓ wired — new `GrantEvasion` primitive; `planCastSpell` save-mechanic path flips to (success → 0, fail → half) on DEX saves vs halves-on-success spells
+- ~~Druidic~~ ✓ wired — `GrantProficiency target:'language' id:'druidic'` + `computeKnownLanguages` derivation
+- ~~Slow Fall~~ ✓ wired — `FallingIntent.useSlowFall` flag; `planFalling` reduces by 5×monk-level, consumes reaction in encounters
+- ~~Cutting Words~~ ✓ wired — `engine.plan.cuttingWords` returns `{events, dieRoll, preventedHit}`; consumer adjudicates trailing chain (same pattern as Shield)
+- ~~Jack of All Trades~~ ✓ wired — new `GrantHalfProficiencyBonusFloor` primitive; `computeAbilityCheck` applies floor(profBonus/2) when no explicit prof contribution lands
 - ~~Fighting Style choice~~ ✓ wired — Fighter L1 / Paladin L2 / Ranger L2 ship `OfferChoice` with style options; Archery/Defense/Dueling have effects, GWF/Protection/Two-Weapon remain placeholders
+- ~~Improved Critical~~ ✓ wired — new `ExpandCritRange { threshold }` primitive; `resolveAttack` consults attacker's effect stack
+- ~~Frenzy~~ ✓ wired (minimal) — `engine.plan.frenzy` spends Rage charge + applies `frenzied` condition; bonus-action attack grant + end-of-rage exhaustion are consumer-driven until Rage gets a planner slice
+- ~~Disciple of Life~~ ✓ wired — new `BoostHealing` primitive; `planHealMechanic` adds `flat + perSpellLevel * slotLevel` to heals at slot 1+
+- ~~Sacred Weapon~~ ✓ wired — new `engine.plan.sacredWeapon` planner; spends Channel Divinity charge + applies `sacred-weapon-active` condition (+3 attack bonus, static)
 
 Some of these need new effect primitives (Cutting Words needs reactive-debuff, Stunning Strike needs save-DC-on-hit, Reckless Attack needs symmetric-advantage flag). Others need only the `OfferChoice` plumbing finished. The README has more detail per item.
 
@@ -135,6 +135,22 @@ Some of these need new effect primitives (Cutting Words needs reactive-debuff, S
 - All 14 named class-feature stubs wired with effects + tests.
 - Class-features matrix is **48 wired / 0 stub** at L1–7. The 14 named Tier 3 stubs PLUS the three remaining class-feature placeholders (Feral Instinct, Deft Explorer, Wild Companion) are all closed.
 - The feature-coverage matrix in [tests/coverage/features.test.ts](../tests/coverage/features.test.ts) asserts no stubs remain.
+
+### Partial wires (Tier 3.5 follow-ups)
+
+The Tier 3 sweep shipped several wires intentionally narrow. Each is a candidate for its own follow-up slice once the rest of the engine catches up. The canonical list is in [README.md](../README.md) under "Known gaps → Partial wires from Tier 3 closures" — repeated here so the roadmap has a punch-list:
+
+- `AddModifier { value: Formula }` evaluation in the builder — unlocks dynamic stat-baked-at-activation buffs (Sacred Weapon currently uses static +3).
+- Predicate DSL extensions: "ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand" — unlocks proper conditional fighting-style effects.
+- `planRage` — full Rage mechanic (resistance, attack bonus, exhaustion-at-end). Unblocks Frenzy's bonus-action attack + end-of-rage exhaustion.
+- Per-Metamagic-option spell modification in `planCastSpell` (Twinned, Distant, Quickened, Empowered, ...).
+- Familiar as a first-class entity (Find Familiar mechanic). Unblocks the real Wild Companion semantics.
+- `OfferChoice` at character-creation L1 (currently only fires on level advancement). Unblocks Fighter L1 Fighting Style for fresh L1 characters.
+- The 3 unwired Fighting Styles (GWF, Protection, Two-Weapon) — each needs its own mechanic.
+
+### Subclass-feature stubs (13 open)
+
+The 14-named Tier 3 list focused on class-feature stubs. The subclass-feature matrix still has 13 stubs at L3 across 9 subclasses (Circle of the Land, Draconic Sorcery, Evoker, Fiend Patron, Hunter, Oath of Devotion, Thief, Warrior of the Open Hand). See the feature-coverage matrix snapshot for the per-feature listing. These weren't part of the original 14-named scope; closing them is a natural Tier 3.5 extension before Tier 4 content fill-out.
 
 ---
 
