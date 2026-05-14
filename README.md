@@ -159,12 +159,10 @@ Probes I named but couldn't build out yet (need richer fixtures or content): Sne
 ✓ **Sneak Attack triggers on advantage; does NOT trigger on flat attacks.** Two clean confirmations.
 ✓ **Heavy weapon Small disadvantage now enforced.** `planAttack` reads the attacker's species size from the content pack; Small + heavy property contributes disadvantage into the 2024 cancellation matrix alongside ranged-in-melee and target-side flags.
 
-Two new gaps that don't fit a quick-fix shape and stay open:
+✓ **Both architectural 🟡s closed in 2026-05-14 PM sweep.**
 
-| Gap | Severity | What RAW says vs. what the engine does |
-|---|---|---|
-| Sneak Attack "ally within 5ft of target" trigger isn't modeled | 🟡 | RAW: SA also fires when an ally is within 5 ft of the target and the rogue doesn't have disadvantage. The starter pack wires SA with an OnEvent filter that only matches `event.used === 'advantage'`. The ally-adjacency branch needs either a content-level predicate extension (OR of an "ally adjacent" check) or a planAttack-level computation that promotes `used` for the trigger. Open. |
-| Two-handed weapon + shield conflict isn't enforced | 🟡 | RAW Equipment: wielding a two-handed weapon requires both hands; a shield occupies the other hand. Engine: `applyItemEquipped` doesn't have content access (no `content` argument), so it can't read weapon properties at the reducer level. Proper fix needs a `planEquip(state, content, intent)` planner that wraps ItemEquipped with content-aware validation. Open. |
+- **Sneak Attack "ally within 5ft of target"**: `planAttack` now computes `attackerHasAllyAdjacentToTarget` (any other positioned, non-incapacitated combatant within Chebyshev 5 of the target) and emits it on `AttackRolled`. The trigger-dispatcher exposes the new field as a fact. The Sneak Attack predicates in starter-pack and test-pack (all 10 odd levels each) now use an `any`-branch: trigger fires when `used === advantage` OR when `used !== disadvantage AND attackerHasAllyAdjacentToTarget === true`.
+- **Two-handed weapon + shield conflict**: new `engine.plan.equip(state, content, intent)` planner wraps `ItemEquipped` with content-aware validation. Rejects equipping a two-handed weapon in `mainHand` while `shield` slot is occupied, and rejects equipping a shield while `mainHand` holds a two-handed weapon. Versatile weapons + shield is still permitted (the consumer is choosing one-handed mode).
 
 Still skipped pending fixture machinery: Loading property (needs a multiattack-capable character with a crossbow), Difficult terrain 2× cost (needs Location map cells in encounter setup).
 
@@ -177,11 +175,11 @@ Still skipped pending fixture machinery: Loading property (needs a multiattack-c
 
 #### Engine triage
 
-**🔴 / 🟡 status — 0 🔴 + 2 🟡 open as of 2026-05-14 PM.** Audit: **43 passing + 2 skipped (Loading, difficult terrain) + 2 failing (Sneak Attack ally-adjacent, two-handed+shield)**. Tier 1 fully closed; Tier 2 first pass closed 4 gaps; Tier 2 second pass closed Heavy+Small and added regression coverage for SA-on-advantage. The two remaining 🟡s need architectural changes (content-predicate extension; planEquip planner) and are tracked in the table just above.
+**🔴 / 🟡 status — 0 🔴 + 0 🟡 open as of 2026-05-14 PM.** Audit: **46 passing + 2 skipped (Loading, difficult terrain) + 0 failing**. Every probed RAW rule is enforced. The two architectural gaps that took longer to close (Sneak Attack ally-adjacent, two-handed + shield conflict) both landed via small structured changes — a new event field plus content-predicate OR-branch for the first; a new `engine.plan.equip` planner for the second.
 
-**The audit is still a floor, not a ceiling.** Skipped probes need fixture work. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names more rules without probes. Tier 1 + most of Tier 2 clean means "the rules I probed are enforced," not "every RAW rule is enforced."
+**The audit is still a floor, not a ceiling.** Skipped probes need fixture work. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names more rules without probes. The Tier 1 + Tier 2 audit being clean means "the rules I probed are enforced," not "every RAW rule is enforced."
 
-**Next:** Close the 2 remaining 🟡s (architectural changes), or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
+**Next:** Either close the 2 skipped probes (build fixture machinery for Loading + difficult terrain), or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
 
 ### Content gaps
 

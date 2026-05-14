@@ -209,7 +209,7 @@
                       "terms": [
                         { "kind": "eq", "path": "event.attackerIsSelf", "value": true },
                         { "kind": "eq", "path": "event.hit", "value": true },
-                        { "kind": "eq", "path": "event.used", "value": "advantage" }
+                        { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] }
                       ]
                     }
                   },

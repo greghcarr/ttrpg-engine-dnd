@@ -198,6 +198,31 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const hit = !naturalMiss && (naturalHit || total >= acResult.total);
   const critical = naturalHit;
 
+  // RAW Rogue Sneak Attack (and equivalent content triggers): the
+  // ally-adjacent path requires *another* positioned, non-incapacitated
+  // combatant within 5 ft of the target. The engine has no team
+  // model, so any third party counts (content can layer hostility on
+  // top via additional predicates). Excludes the attacker, the
+  // target, and any combatant whose action-blocking conditions would
+  // prevent them from "threatening" the target.
+  const attackerHasAllyAdjacentToTarget = ((): boolean | undefined => {
+    if (!state.activeEncounterId) return undefined;
+    const enc = state.encounters[state.activeEncounterId];
+    if (!enc) return undefined;
+    const targetCb = enc.combatants.find((c) => c.combatantId === input.targetId);
+    if (!targetCb?.position) return undefined;
+    const targetPos = targetCb.position;
+    return enc.combatants.some((other) => {
+      if (other.combatantId === input.attackerId) return false;
+      if (other.combatantId === input.targetId) return false;
+      if (!other.position) return false;
+      const ch = state.characters[other.combatantId];
+      if (!ch) return false;
+      if (findActorBlockingCondition(ch) !== undefined) return false;
+      return chebyshevDistance(other.position, targetPos) <= 5;
+    });
+  })();
+
   const attackRolled: AttackRolledEvent = {
     id: newEventId() as ULID,
     at,
@@ -212,6 +237,9 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     targetAC: acResult.total,
     hit,
     critical,
+    ...(attackerHasAllyAdjacentToTarget !== undefined
+      ? { attackerHasAllyAdjacentToTarget }
+      : {}),
   };
 
   const stateAfterAttack = applyAll(state, [attackRolled]);

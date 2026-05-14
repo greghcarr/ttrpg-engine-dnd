@@ -1064,7 +1064,22 @@ describe('Tier 2 — Sneak Attack eligibility', () => {
       equipped: { mainHand: rapier.id, attuned: [] },
       featsTaken: [],
     });
-    const target = buildFighter({ name: 'Target', hpMax: 30, hpCurrent: 30 });
+    // Low AC so the rogue's +6-to-hit reliably lands across seeds —
+    // we want to test the trigger filter, not the dice. The target's
+    // armorClass override goes straight through computeAC.
+    const target = CharacterSchema.parse({
+      id: newCharacterId(),
+      kind: 'creature',
+      name: 'Sandbag',
+      statblockId: 'goblin',
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+      abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+      hp: { current: 30, max: 30, temp: 0 },
+      armorClass: 5,
+      featsTaken: [],
+    });
     const ally = buildFighter({ name: 'Ally' });
     let campaign = engine.createCampaign({ name: 'rogue' });
     campaign = commit(campaign, [
@@ -1164,9 +1179,23 @@ describe('Tier 2 — Sneak Attack eligibility', () => {
     void pierceRolls;
   });
 
-  it('Sneak Attack does NOT trigger on a flat attack (no advantage, no ally adjacent flag)', () => {
+  it('Sneak Attack does NOT trigger on a flat attack with no ally adjacent', () => {
+    // Move the ally far away so neither SA path holds: no advantage,
+    // no ally within 5 ft of the target.
     const s = setupRogueScenario();
-    const { events } = s.engine.plan.attack(s.campaign.state, {
+    const moved = commit(s.campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId: s.campaign.state.activeEncounterId!,
+        combatantId: s.allyId,
+        fromPosition: { x: 15, y: 5 },
+        toPosition: { x: 50, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+    ]);
+    const { events } = s.engine.plan.attack(moved.state, {
       attackerId: s.rogueId,
       targetId: s.targetId,
       weaponInstanceId: s.weaponId,
@@ -1178,10 +1207,6 @@ describe('Tier 2 — Sneak Attack eligibility', () => {
   it('Sneak Attack SHOULD trigger when an ally is within 5ft of the target (RAW; engine likely misses this)', () => {
     // Per RAW: SA also triggers when an ally of the rogue is within
     // 5 ft of the target and the rogue doesn't have disadvantage.
-    // Current content filter only checks `event.used === 'advantage'`;
-    // the ally-adjacent path isn't modeled. Probe will fail until
-    // either the content adds an OR-branch or the engine adds an
-    // ally-adjacency check to the trigger.
     const s = setupRogueScenario();
     const { events } = s.engine.plan.attack(s.campaign.state, {
       attackerId: s.rogueId,
@@ -1354,19 +1379,16 @@ describe('Tier 2 — death-save chain stops on heal', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — two-handed weapon + shield conflict', () => {
-  it('equipping a two-handed weapon while a shield is equipped rejects', () => {
+  it('engine.plan.equip rejects a two-handed weapon when a shield is equipped', () => {
     const s = setup();
-    // Acquire a shield + greataxe; equip shield first, then attempt
-    // to equip the greataxe two-handed. RAW: two-handed wielding
-    // requires both hands → shield disqualifies.
     const shield = { id: newItemInstanceId(), definitionId: 'shield', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
     const greataxe = { id: newItemInstanceId(), definitionId: 'greataxe', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
     const acquired = commit(s.campaign, [
       { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: shield },
       { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: greataxe },
     ]);
-    // First, unequip A's current longsword and equip the shield.
-    const reequipped = commit(acquired, [
+    // Unequip A's longsword, equip the shield via the planner.
+    const unequipped = commit(acquired, [
       {
         id: eventId(),
         at: isoTimestamp(),
@@ -1374,28 +1396,56 @@ describe('Tier 2 — two-handed weapon + shield conflict', () => {
         characterId: s.aId,
         slot: 'mainHand',
       },
-      {
-        id: eventId(),
-        at: isoTimestamp(),
-        type: 'ItemEquipped',
+    ]);
+    const withShield = commit(
+      unequipped,
+      s.engine.plan.equip(unequipped.state, {
         characterId: s.aId,
         slot: 'shield',
         instanceId: shield.id,
+      }).events,
+    );
+    // Now try to equip greataxe in main hand — should reject.
+    expect(() =>
+      s.engine.plan.equip(withShield.state, {
+        characterId: s.aId,
+        slot: 'mainHand',
+        instanceId: greataxe.id,
+      }),
+    ).toThrow(/two-handed|shield|both hands/i);
+  });
+
+  it('engine.plan.equip rejects a shield when a two-handed weapon is in main hand', () => {
+    const s = setup();
+    const shield = { id: newItemInstanceId(), definitionId: 'shield', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const greataxe = { id: newItemInstanceId(), definitionId: 'greataxe', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const acquired = commit(s.campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: shield },
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: greataxe },
+    ]);
+    const unequipped = commit(acquired, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ItemUnequipped',
+        characterId: s.aId,
+        slot: 'mainHand',
       },
     ]);
-    // Now try to equip a two-handed weapon in main hand — should
-    // reject per RAW because shield occupies the other hand.
+    const withGreataxe = commit(
+      unequipped,
+      s.engine.plan.equip(unequipped.state, {
+        characterId: s.aId,
+        slot: 'mainHand',
+        instanceId: greataxe.id,
+      }).events,
+    );
     expect(() =>
-      commit(reequipped, [
-        {
-          id: eventId(),
-          at: isoTimestamp(),
-          type: 'ItemEquipped',
-          characterId: s.aId,
-          slot: 'mainHand',
-          instanceId: greataxe.id,
-        },
-      ]),
+      s.engine.plan.equip(withGreataxe.state, {
+        characterId: s.aId,
+        slot: 'shield',
+        instanceId: shield.id,
+      }),
     ).toThrow(/two-handed|shield|both hands/i);
   });
 });

@@ -45,6 +45,7 @@ import {
   planDodge,
   planMistyStep,
   planActionSurge,
+  planEquip,
   planOffHandAttack,
   planMultiattack,
   planFalling,
@@ -106,6 +107,7 @@ import {
   type DodgeIntent,
   type MistyStepIntent,
   type ActionSurgeIntent,
+  type EquipIntent,
   type OffHandAttackIntent,
   type MultiattackIntent,
   type FallingIntent,
@@ -201,6 +203,7 @@ export interface Engine {
     dodge(state: CampaignState, intent: Omit<DodgeIntent, 'type'>): PlanResult;
     mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
+    equip(state: CampaignState, intent: Omit<EquipIntent, 'type'>): PlanResult;
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
     multiattack(state: CampaignState, intent: Omit<MultiattackIntent, 'type'>): PlanResult;
     falling(state: CampaignState, intent: Omit<FallingIntent, 'type'>): PlanResult;
@@ -362,6 +365,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     actionSurge(state, intent) {
       return { events: planActionSurge(state, content, { type: 'ActionSurge', ...intent }) };
+    },
+    equip(state, intent) {
+      return { events: planEquip(state, content, { type: 'Equip', ...intent }) };
     },
     offHandAttack(state, intent) {
       return { events: planOffHandAttack(state, content, rng, { type: 'OffHandAttack', ...intent }) };

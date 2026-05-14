@@ -17,6 +17,15 @@ export const AttackRolledEventSchema = EventEnvelopeSchema.extend({
   targetAC: z.number().int(),
   hit: z.boolean(),
   critical: z.boolean(),
+  // True when any other positioned, non-incapacitated combatant was
+  // within 5 ft of the target at attack time. Surfaced so content
+  // predicates (e.g. Rogue Sneak Attack's "ally adjacent" trigger
+  // branch) can fire without baking class-specific logic into the
+  // engine. The engine doesn't model team/hostility, so this flag
+  // treats any third party as an "ally" — content with stricter
+  // hostility models can layer additional predicates. Undefined when
+  // attacker/target positions are unknown.
+  attackerHasAllyAdjacentToTarget: z.boolean().optional(),
 });
 export type AttackRolledEvent = z.infer<typeof AttackRolledEventSchema>;
 

@@ -25,6 +25,10 @@ const buildEventFacts = (event: Event, characterId: string): Map<string, unknown
     facts.set('event.critical', event.critical);
     facts.set('event.used', event.used);
     facts.set('event.weaponInstanceId', event.weaponInstanceId);
+    facts.set(
+      'event.attackerHasAllyAdjacentToTarget',
+      event.attackerHasAllyAdjacentToTarget ?? false,
+    );
   } else if (event.type === 'DamageApplied') {
     facts.set('event.targetIsSelf', event.targetId === characterId);
   }

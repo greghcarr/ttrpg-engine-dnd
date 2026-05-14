@@ -651,6 +651,205 @@ export const ALL_PROBES: ReadonlyArray<Probe> = [
   },
   // Critical hits / death
   {
+    id: 'sneak-attack-ally-adjacent',
+    category: 'Combat math',
+    name: 'Sneak Attack fires when an ally is within 5ft of the target',
+    raw: 'PHB Rogue: Sneak Attack triggers on advantage OR with an ally in 5ft of the target (and no disadvantage).',
+    run: (starter) => {
+      // Build a fresh rogue + a low-AC target + an ally adjacent to
+      // the target. The rogue attacks without explicit advantage; SA
+      // should still fire because the ally-adjacent flag is set.
+      const engine = createEngine({ contentPacks: [starter], rng: seededRNG(7) });
+      const rapier = makeItem('rapier');
+      const rogue = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'pc',
+        name: 'Sly',
+        speciesId: 'human',
+        backgroundId: 'criminal',
+        classes: [{ classId: 'rogue', level: 3, hitDiceRemaining: 3 }],
+        abilityScores: { STR: 10, DEX: 18, CON: 12, INT: 12, WIS: 12, CHA: 10 },
+        hp: { current: 22, max: 22, temp: 0 },
+        featsTaken: [],
+        inventory: [rapier.id],
+        equipped: { mainHand: rapier.id, attuned: [] },
+      });
+      const target = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'creature',
+        name: 'Sandbag',
+        statblockId: 'goblin',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+        abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+        hp: { current: 30, max: 30, temp: 0 },
+        armorClass: 5,
+        featsTaken: [],
+      });
+      const allyArmor = makeItem('chain-mail');
+      const allyWeapon = makeItem('longsword');
+      const ally = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'pc',
+        name: 'Mate',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+        abilityScores: { STR: 14, DEX: 12, CON: 12, INT: 10, WIS: 10, CHA: 10 },
+        hp: { current: 12, max: 12, temp: 0 },
+        inventory: [allyWeapon.id, allyArmor.id],
+        equipped: { mainHand: allyWeapon.id, armor: allyArmor.id, attuned: [] },
+        featsTaken: [],
+      });
+      let campaign = engine.createCampaign({ name: 'sa-probe' });
+      campaign = engine.commit(campaign, [
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: rapier } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: allyWeapon } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: allyArmor } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: rogue } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: ally } satisfies CharacterCreatedEvent,
+      ]);
+      const encId = newEncounterId();
+      campaign = engine.commit(campaign, [
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterCreated',
+          encounterId: encId,
+          combatantIds: [rogue.id, target.id, ally.id],
+        } satisfies EncounterCreatedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'InitiativeRolled',
+          encounterId: encId,
+          rolls: [
+            { combatantId: rogue.id, d20: 20, modifier: 4, total: 24 },
+            { combatantId: target.id, d20: 10, modifier: 0, total: 10 },
+            { combatantId: ally.id, d20: 5, modifier: 1, total: 6 },
+          ],
+        } satisfies InitiativeRolledEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'EncounterStarted',
+          encounterId: encId,
+        } satisfies EncounterStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'TurnStarted',
+          encounterId: encId,
+          combatantId: rogue.id,
+          round: 1,
+        } satisfies TurnStartedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: rogue.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 5, y: 5 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: target.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 10, y: 5 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+        {
+          id: eventId(),
+          at: now(),
+          type: 'CombatantMoved',
+          encounterId: encId,
+          combatantId: ally.id,
+          fromPosition: { x: 0, y: 0 },
+          toPosition: { x: 15, y: 5 },
+          feetTraveled: 0,
+        } satisfies CombatantMovedEvent,
+      ]);
+      const { events } = engine.plan.attack(campaign.state, {
+        attackerId: rogue.id,
+        targetId: target.id,
+        weaponInstanceId: rapier.id,
+      });
+      const ar = events.find((e) => e.type === 'AttackRolled');
+      if (!ar || ar.type !== 'AttackRolled') {
+        return { passed: false, error: 'no AttackRolled event' };
+      }
+      if (!ar.hit) {
+        return { passed: false, error: `attack missed (d20=${JSON.stringify(ar.d20)}); SA cannot be checked` };
+      }
+      const triggers = events.filter((e) => e.type === 'TriggerFired');
+      const sa = triggers.find((t) => /sneak/i.test((t as { triggerId?: string }).triggerId ?? ''));
+      if (!sa) {
+        return { passed: false, error: 'expected TriggerFired with sneak in triggerId; not found' };
+      }
+      return { passed: true, detail: 'Sneak Attack trigger fired via ally-adjacent path' };
+    },
+  },
+  {
+    id: 'two-handed-shield-conflict',
+    category: 'Equipment',
+    name: 'Two-handed weapon and shield cannot be wielded together',
+    raw: 'PHB Equipment: wielding a two-handed weapon requires both hands; a shield occupies the other hand.',
+    run: (starter) => {
+      const engine = createEngine({ contentPacks: [starter], rng: seededRNG(7) });
+      // Find a two-handed weapon in the starter pack. Greatsword,
+      // greataxe, maul, etc.
+      const heavyId = ['greatsword', 'greataxe', 'maul', 'halberd', 'pike'].find((id) => {
+        const d = starter.items.find((it) => it.id === id);
+        return d?.itemKind === 'weapon' && d.properties?.includes('two-handed');
+      });
+      if (!heavyId) {
+        return { passed: true, detail: 'no two-handed weapon in starter pack — probe skipped' };
+      }
+      const shieldId = starter.items.find((it) => it.id === 'shield')?.id;
+      if (!shieldId) {
+        return { passed: true, detail: 'no shield in starter pack — probe skipped' };
+      }
+      const heavy = makeItem(heavyId);
+      const shield = makeItem(shieldId);
+      const fighter = CharacterSchema.parse({
+        id: newCharacterId(),
+        kind: 'pc',
+        name: 'Greg',
+        speciesId: 'human',
+        backgroundId: 'soldier',
+        classes: [{ classId: 'fighter', level: 3, hitDiceRemaining: 3 }],
+        abilityScores: { STR: 18, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 10 },
+        hp: { current: 28, max: 28, temp: 0 },
+        inventory: [heavy.id, shield.id],
+        equipped: { shield: shield.id, attuned: [] },
+        featsTaken: [],
+      });
+      let campaign = engine.createCampaign({ name: 'equip-probe' });
+      campaign = engine.commit(campaign, [
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: heavy } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'ItemAcquired', instance: shield } satisfies ItemAcquiredEvent,
+        { id: eventId(), at: now(), type: 'CharacterCreated', snapshot: fighter } satisfies CharacterCreatedEvent,
+      ]);
+      return expectThrow(
+        () =>
+          engine.plan.equip(campaign.state, {
+            characterId: fighter.id,
+            slot: 'mainHand',
+            instanceId: heavy.id,
+          }),
+        /two-handed|shield|both hands/i,
+        'equip(two-handed) with shield equipped must reject',
+      );
+    },
+  },
+  {
     id: 'massive-damage-instant-death',
     category: 'Death & dying',
     name: 'Damage exceeding 0 by more than max HP = instant death',
