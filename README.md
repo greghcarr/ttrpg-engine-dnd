@@ -11,6 +11,10 @@ The package is named `ttrpg-engine-dnd` because the long-term plan extracts the 
 
 If you are building a D&D character sheet, encounter tracker, virtual tabletop, automation tool, or AI dungeon master and you do not want to reimplement the rules engine from scratch, this is for you.
 
+## Try it in your browser
+
+A live demo of the engine — combat sandbox + event inspector + import/export with replay verification — runs on GitHub Pages: **https://greghcarr.github.io/ttrpg-engine-dnd/** (deployed via `.github/workflows/deploy-demo.yml`; one-time setup is Settings → Pages → Source = "GitHub Actions"). Source lives under [web/](web/). See [web/README.md](web/README.md) for local development.
+
 ## Quick start
 
 ```sh
@@ -51,7 +55,9 @@ Pick the doc that matches what you want:
 | Look up a specific public symbol | [docs/api-overview.md](docs/api-overview.md) |
 | See common patterns (save, undo, houserules, multiplayer sync) | [docs/recipes.md](docs/recipes.md) |
 | Author content packs (spells, classes, feats, items, monsters) | [docs/authoring-content-packs.md](docs/authoring-content-packs.md) |
-| Plan / build the web demo (`/web` + GitHub Pages) | [docs/web-demo-plan.md](docs/web-demo-plan.md) |
+| Try the web demo in your browser | [https://greghcarr.github.io/ttrpg-engine-dnd/](https://greghcarr.github.io/ttrpg-engine-dnd/) |
+| Hack on the web demo locally | [web/README.md](web/README.md) |
+| Read the demo's architecture decisions | [docs/web-demo-plan.md](docs/web-demo-plan.md) |
 | Watch a full multi-act campaign run | [the showcase transcript](tests/golden/transcripts/showcase.transcript.md) |
 | Know what each version means (alpha / beta / rc / 1.0) | [VERSIONING.md](VERSIONING.md) |
 | Read the change history | [CHANGELOG.md](CHANGELOG.md) |

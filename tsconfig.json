@@ -21,9 +21,11 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "ttrpg-engine-dnd": ["src/index.ts"],
+      "ttrpg-engine-dnd/starter-pack": ["src/starter-pack.ts"]
     }
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "tests/**/*", "web/scenarios/**/*.ts"],
+  "exclude": ["node_modules", "dist", "dist-web"]
 }
