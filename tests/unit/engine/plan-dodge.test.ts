@@ -79,4 +79,24 @@ describe('planDodge', () => {
     const after = commit(campaign, engine.plan.dodge(campaign.state, { combatantId: activeId }).events);
     expect(() => engine.plan.dodge(after.state, { combatantId: activeId })).toThrow(/Action already used/);
   });
+
+  it('after Dodge, the dodger cannot start an Attack on the same turn', () => {
+    // Regression: planAttack used to skip emitting the 'action' consumed
+    // event if actionUsed was already true (correct for Multiattack
+    // continuation) but did not *reject* starting a fresh Attack with
+    // the action already spent by Dodge/Dash/cast spell. Caught via the
+    // web demo combat sandbox on 2026-05-14.
+    const { engine, campaign, encounterId, aId, bId, weaponId } = seedEncounter();
+    const enc = campaign.state.encounters[encounterId]!;
+    const activeId = enc.combatants[enc.activeIndex]!.combatantId;
+    const otherId = activeId === aId ? bId : aId;
+    const afterDodge = commit(campaign, engine.plan.dodge(campaign.state, { combatantId: activeId }).events);
+    expect(() =>
+      engine.plan.attack(afterDodge.state, {
+        attackerId: activeId,
+        targetId: otherId,
+        weaponInstanceId: weaponId,
+      }),
+    ).toThrow(/already used their action/);
+  });
 });

@@ -426,6 +426,11 @@ const planActionEconomyForAttack = (
     content,
   });
 
+  if (active.actionUsed && active.attacksMadeThisTurn === 0) {
+    throw new Error(
+      `${attacker.name} has already used their action this turn (Dodge/Dash/Disengage/Cast Spell); cannot also Attack`,
+    );
+  }
   if (active.attacksMadeThisTurn >= budget.maxAttacksPerAction) {
     throw new Error(
       `Attack budget exhausted: ${attacker.name} has already made ${active.attacksMadeThisTurn} attacks this turn (max ${budget.maxAttacksPerAction})`,

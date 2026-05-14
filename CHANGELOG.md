@@ -2,6 +2,16 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+### Fixed
+
+- **`engine.plan.attack` now rejects when the action has already been spent on Dodge / Dash / Disengage / Cast Spell.** Previously the attack planner only checked the per-attack swing budget (`attacksMadeThisTurn < maxAttacksPerAction`); it did not check `turnUsage.actionUsed`. As a result a combatant could Dodge (consuming their action) and then Attack on the same turn. The fix adds an "action already used by a non-attack ability" guard, detected via `actionUsed && attacksMadeThisTurn === 0` so Extra Attack's second swing (which legitimately runs with `actionUsed: true, attacksMadeThisTurn: 1`) continues to work. Regression test in [tests/unit/engine/plan-attack.test.ts](tests/unit/engine/plan-attack.test.ts).
+
+### Added
+
+- Type re-exports for the encounter / inventory / combat event types that were previously only available as schemas: `EncounterCreatedEvent`, `EncounterStartedEvent`, `EncounterEndedEvent`, `InitiativeRolledEvent`, `TurnStartedEvent`, `TurnEndedEvent`, `RoundEndedEvent`, `CombatantMovedEvent`, `ItemAcquiredEvent`, `ItemEquippedEvent`, `ItemUnequippedEvent`, `AttackRolledEvent`, `DamageRolledEvent`, `SaveRolledEvent`, `AbilityCheckRolledEvent`. Source: [src/types/index.ts](src/types/index.ts). Schema exports were already in place; this just closes the type-only gap so consumers can `satisfies XEvent` without reaching into deep paths.
+
 ## 0.1.0-alpha.3
 
 The third pre-alpha. Closes the engine-gap punch-list down to two ⚪ items (sanity and mass-combat variant rules, each its own slice), ships all three remaining layers of the testing standard (Layer 7 property tests with `fast-check`, Layer 8 feature-coverage matrix, Layer 9 public-API contract test), authors the first subclass content (12 of ~50, one per class at L3), wires five more class features at L1-5 (Barbarian Unarmored Defense + Danger Sense, Sorcerer Sorcerous Restoration, Paladin Lay on Hands, Wizard Arcane Recovery), wires the Bard's L3 Expertise + L5 Font of Inspiration, and lands a new `planDodge` plus an `ImposeDisadvantageOnAttackers` effect primitive so the Dodge action actually defends.

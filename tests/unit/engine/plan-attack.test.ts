@@ -60,6 +60,43 @@ describe('engine.plan.attack', () => {
     }
   });
 
+  it('rejects when the action was already used by Dodge/Dash/etc. (no swings yet)', () => {
+    // Regression: previously planAttack only checked the per-attack
+    // budget, so Dodge → Attack on the same turn slipped through.
+    // After Dodge, turnUsage.actionUsed=true and
+    // attacksMadeThisTurn=0 — that combination is the marker for
+    // "action consumed by a non-attack ability".
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
+    const longsword: ItemInstance = makeItemInstance('longsword');
+    const armor: ItemInstance = makeItemInstance('chain-mail');
+    const a = buildFighter({ name: 'A', STR: 16 });
+    const b = buildFighter({ name: 'B', hpMax: 30, hpCurrent: 30, armorInstanceId: armor.id });
+    let campaign: Campaign = engine.createCampaign({ name: 'dodge-then-attack' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: armor },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: a } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: b } satisfies CharacterCreatedEvent,
+    ]);
+    const enc = engine.plan.createEncounter(campaign.state, { combatantIds: [a.id, b.id] });
+    campaign = commit(campaign, enc.events);
+    campaign = commit(campaign, engine.plan.rollInitiative(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.startEncounter(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.beginFirstTurn(campaign.state, { encounterId: enc.encounterId }).events);
+    const encNow = campaign.state.encounters[enc.encounterId]!;
+    const activeId = encNow.combatants[encNow.activeIndex]!.combatantId;
+    const otherId = encNow.combatants.find((c) => c.combatantId !== activeId)!.combatantId;
+    campaign = commit(campaign, engine.plan.dodge(campaign.state, { combatantId: activeId }).events);
+
+    expect(() =>
+      engine.plan.attack(campaign.state, {
+        attackerId: activeId,
+        targetId: otherId,
+        weaponInstanceId: longsword.id,
+      }),
+    ).toThrow(/already used their action/);
+  });
+
   it('plan is deterministic given a seeded RNG', () => {
     const a = seedFightWithLongsword(seededRNG(123));
     const b = seedFightWithLongsword(seededRNG(123));
