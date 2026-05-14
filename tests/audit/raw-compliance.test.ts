@@ -16,7 +16,8 @@ import { describe, expect, it } from 'vitest';
 import { createEngine } from '../../src/engine/index.js';
 import { seededRNG } from '../../src/rng/seeded.js';
 import { commit } from '../../src/engine/commit.js';
-import { newEncounterId } from '../../src/ids.js';
+import { newCharacterId, newEncounterId, newItemInstanceId } from '../../src/ids.js';
+import { CharacterSchema } from '../../src/schemas/runtime/character.js';
 import {
   TEST_PACK,
   buildFighter,
@@ -1043,8 +1044,152 @@ describe('Tier 2 — difficult terrain', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — Sneak Attack eligibility', () => {
-  it.skip('Sneak Attack damage applies only when advantage OR ally adjacent (probe needs Rogue setup)', () => {
-    expect(true).toBe(true);
+  // Build a Rogue + a target + a Rogue ally adjacent to the target.
+  // Three sub-cases. The starter pack wires Sneak Attack with a
+  // filter that fires only on `event.used === 'advantage'`; the
+  // ally-adjacent path isn't modeled in content. We probe each.
+  const setupRogueScenario = () => {
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
+    const rapier = { id: newItemInstanceId(), definitionId: 'rapier', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const rogue = CharacterSchema.parse({
+      id: newCharacterId(),
+      kind: 'pc',
+      name: 'Sly',
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'rogue', level: 3, hitDiceRemaining: 3 }],
+      abilityScores: { STR: 10, DEX: 18, CON: 12, INT: 12, WIS: 12, CHA: 10 },
+      hp: { current: 22, max: 22, temp: 0 },
+      inventory: [rapier.id],
+      equipped: { mainHand: rapier.id, attuned: [] },
+      featsTaken: [],
+    });
+    const target = buildFighter({ name: 'Target', hpMax: 30, hpCurrent: 30 });
+    const ally = buildFighter({ name: 'Ally' });
+    let campaign = engine.createCampaign({ name: 'rogue' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: rapier },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: rogue } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: ally } satisfies CharacterCreatedEvent,
+    ]);
+    const encounterId = newEncounterId();
+    campaign = commit(campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterCreated',
+        encounterId,
+        combatantIds: [rogue.id, target.id, ally.id],
+      } satisfies EncounterCreatedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'InitiativeRolled',
+        encounterId,
+        rolls: [
+          { combatantId: rogue.id, d20: 20, modifier: 4, total: 24 },
+          { combatantId: target.id, d20: 10, modifier: 2, total: 12 },
+          { combatantId: ally.id, d20: 5, modifier: 2, total: 7 },
+        ],
+      } satisfies InitiativeRolledEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterStarted',
+        encounterId,
+      } satisfies EncounterStartedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'TurnStarted',
+        encounterId,
+        combatantId: rogue.id,
+        round: 1,
+      } satisfies TurnStartedEvent,
+    ]);
+    // Position: rogue at (5,5), target at (10,5), ally at (15,5).
+    // Rogue attacks target. Ally is at Chebyshev 5 from target → adjacent.
+    campaign = commit(campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId,
+        combatantId: rogue.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 5, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId,
+        combatantId: target.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 10, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId,
+        combatantId: ally.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 15, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+    ]);
+    return { engine, campaign, rogueId: rogue.id, targetId: target.id, allyId: ally.id, weaponId: rapier.id };
+  };
+
+  it('Sneak Attack triggers when the rogue attacks with advantage', () => {
+    const s = setupRogueScenario();
+    const { events } = s.engine.plan.attack(s.campaign.state, {
+      attackerId: s.rogueId,
+      targetId: s.targetId,
+      weaponInstanceId: s.weaponId,
+      advantage: 'advantage',
+    });
+    const ar = events.find((e) => e.type === 'AttackRolled');
+    if (!ar || ar.type !== 'AttackRolled' || !ar.hit) return;
+    // On hit, Sneak Attack rider should add a piercing damage roll.
+    const pierceRolls = events.filter(
+      (e) => e.type === 'DamageRolled',
+    );
+    const triggers = events.filter((e) => e.type === 'TriggerFired');
+    expect(triggers.some((t) => /sneak/i.test((t as { triggerId?: string }).triggerId ?? ''))).toBe(true);
+    void pierceRolls;
+  });
+
+  it('Sneak Attack does NOT trigger on a flat attack (no advantage, no ally adjacent flag)', () => {
+    const s = setupRogueScenario();
+    const { events } = s.engine.plan.attack(s.campaign.state, {
+      attackerId: s.rogueId,
+      targetId: s.targetId,
+      weaponInstanceId: s.weaponId,
+    });
+    const triggers = events.filter((e) => e.type === 'TriggerFired');
+    expect(triggers.some((t) => /sneak/i.test((t as { triggerId?: string }).triggerId ?? ''))).toBe(false);
+  });
+
+  it('Sneak Attack SHOULD trigger when an ally is within 5ft of the target (RAW; engine likely misses this)', () => {
+    // Per RAW: SA also triggers when an ally of the rogue is within
+    // 5 ft of the target and the rogue doesn't have disadvantage.
+    // Current content filter only checks `event.used === 'advantage'`;
+    // the ally-adjacent path isn't modeled. Probe will fail until
+    // either the content adds an OR-branch or the engine adds an
+    // ally-adjacency check to the trigger.
+    const s = setupRogueScenario();
+    const { events } = s.engine.plan.attack(s.campaign.state, {
+      attackerId: s.rogueId,
+      targetId: s.targetId,
+      weaponInstanceId: s.weaponId,
+    });
+    const triggers = events.filter((e) => e.type === 'TriggerFired');
+    expect(triggers.some((t) => /sneak/i.test((t as { triggerId?: string }).triggerId ?? ''))).toBe(true);
   });
 });
 
@@ -1055,11 +1200,96 @@ describe('Tier 2 — Sneak Attack eligibility', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — Heavy weapon Small disadvantage', () => {
-  it.skip('A Small character attacking with a Heavy weapon rolls with disadvantage (needs Small species setup)', () => {
-    // The starter pack has Halfling and Gnome (both Small per RAW),
-    // but buildFighter hard-codes species `human`. Adding a Small-PC
-    // helper to the fixtures is in scope for Tier 2 follow-up.
-    expect(true).toBe(true);
+  it('A Small character attacking with a Heavy weapon rolls with disadvantage', () => {
+    // Build a halfling fighter with a greataxe (heavy, two-handed).
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(7) });
+    const greataxe = { id: newItemInstanceId(), definitionId: 'greataxe', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const small = CharacterSchema.parse({
+      id: newCharacterId(),
+      kind: 'pc',
+      name: 'Squirt',
+      speciesId: 'halfling',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'fighter', level: 3, hitDiceRemaining: 3 }],
+      abilityScores: { STR: 16, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 10 },
+      hp: { current: 28, max: 28, temp: 0 },
+      inventory: [greataxe.id],
+      equipped: { mainHand: greataxe.id, attuned: [] },
+      featsTaken: [],
+    });
+    const target = buildFighter({ name: 'Dummy', hpMax: 30, hpCurrent: 30 });
+    let campaign = engine.createCampaign({ name: 'small' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: greataxe },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: small } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    const encounterId = newEncounterId();
+    campaign = commit(campaign, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterCreated',
+        encounterId,
+        combatantIds: [small.id, target.id],
+      } satisfies EncounterCreatedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'InitiativeRolled',
+        encounterId,
+        rolls: [
+          { combatantId: small.id, d20: 20, modifier: 1, total: 21 },
+          { combatantId: target.id, d20: 5, modifier: 2, total: 7 },
+        ],
+      } satisfies InitiativeRolledEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'EncounterStarted',
+        encounterId,
+      } satisfies EncounterStartedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'TurnStarted',
+        encounterId,
+        combatantId: small.id,
+        round: 1,
+      } satisfies TurnStartedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId,
+        combatantId: small.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 5, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'CombatantMoved',
+        encounterId,
+        combatantId: target.id,
+        fromPosition: { x: 0, y: 0 },
+        toPosition: { x: 10, y: 5 },
+        feetTraveled: 0,
+      } satisfies CombatantMovedEvent,
+    ]);
+    const { events } = engine.plan.attack(campaign.state, {
+      attackerId: small.id,
+      targetId: target.id,
+      weaponInstanceId: greataxe.id,
+    });
+    const ar = events.find((e) => e.type === 'AttackRolled');
+    if (!ar || ar.type !== 'AttackRolled') throw new Error('no AttackRolled');
+    const used = (ar as unknown as { used: string }).used;
+    expect(
+      used,
+      `Small attacker + Heavy weapon must roll with disadvantage; got used=${used}`,
+    ).toBe('disadvantage');
   });
 });
 
@@ -1124,8 +1354,49 @@ describe('Tier 2 — death-save chain stops on heal', () => {
 // ---------------------------------------------------------------------
 
 describe('Tier 2 — two-handed weapon + shield conflict', () => {
-  it.skip('equipping a two-handed weapon while a shield is equipped rejects (needs ItemEquipped probe)', () => {
-    expect(true).toBe(true);
+  it('equipping a two-handed weapon while a shield is equipped rejects', () => {
+    const s = setup();
+    // Acquire a shield + greataxe; equip shield first, then attempt
+    // to equip the greataxe two-handed. RAW: two-handed wielding
+    // requires both hands → shield disqualifies.
+    const shield = { id: newItemInstanceId(), definitionId: 'shield', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const greataxe = { id: newItemInstanceId(), definitionId: 'greataxe', quantity: 1, attuned: false, identifiedByCharacterIds: [] };
+    const acquired = commit(s.campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: shield },
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: greataxe },
+    ]);
+    // First, unequip A's current longsword and equip the shield.
+    const reequipped = commit(acquired, [
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ItemUnequipped',
+        characterId: s.aId,
+        slot: 'mainHand',
+      },
+      {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ItemEquipped',
+        characterId: s.aId,
+        slot: 'shield',
+        instanceId: shield.id,
+      },
+    ]);
+    // Now try to equip a two-handed weapon in main hand — should
+    // reject per RAW because shield occupies the other hand.
+    expect(() =>
+      commit(reequipped, [
+        {
+          id: eventId(),
+          at: isoTimestamp(),
+          type: 'ItemEquipped',
+          characterId: s.aId,
+          slot: 'mainHand',
+          instanceId: greataxe.id,
+        },
+      ]),
+    ).toThrow(/two-handed|shield|both hands/i);
   });
 });
 

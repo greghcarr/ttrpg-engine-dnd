@@ -129,6 +129,15 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     pendingChoices: state.pendingChoices,
   });
   const targetGrantsAdvantage = targetEffects.grantsAdvantageToAttackers();
+  // RAW PHB Equipment: "Small creatures have Disadvantage with Heavy
+  // weapons." Look up the attacker's species → size; if Small AND
+  // weapon has the `heavy` property, contribute disadvantage.
+  const heavyForSmall = ((): boolean => {
+    if (!weaponDef.properties.includes('heavy')) return false;
+    const species = content.species.get(attacker.speciesId);
+    if (!species) return false;
+    return species.size === 'Small';
+  })();
   // RAW PHB ch.1 "Ranged Attacks in Close Combat": ranged attacks have
   // disadvantage if a hostile creature who isn't Incapacitated is
   // within 5 ft of the attacker. The engine has no hostility model, so
@@ -155,7 +164,8 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
       return chebyshevDistance(attackerPos, otherPos) <= 5;
     });
   })();
-  const targetImposesDisadvantage = targetEffects.imposesDisadvantageOnAttackers() || rangedInMelee;
+  const targetImposesDisadvantage =
+    targetEffects.imposesDisadvantageOnAttackers() || rangedInMelee || heavyForSmall;
   let advantage = input.advantage ?? 'none';
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions

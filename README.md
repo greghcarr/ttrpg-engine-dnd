@@ -154,6 +154,20 @@ Engine-level features that ship as partial or not at all. Grouped by category. E
 
 Probes I named but couldn't build out yet (need richer fixtures or content): Sneak Attack eligibility (needs Rogue setup), Heavy weapon Small disadvantage (needs Small species character), Loading property (needs crossbow), Two-handed + shield conflict, Difficult terrain 2× cost (needs Location map cells). Each is a `.skip()` in [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) with a one-line note on what's missing.
 
+#### Tier 2 — second pass (2026-05-14 PM)
+
+✓ **Sneak Attack triggers on advantage; does NOT trigger on flat attacks.** Two clean confirmations.
+✓ **Heavy weapon Small disadvantage now enforced.** `planAttack` reads the attacker's species size from the content pack; Small + heavy property contributes disadvantage into the 2024 cancellation matrix alongside ranged-in-melee and target-side flags.
+
+Two new gaps that don't fit a quick-fix shape and stay open:
+
+| Gap | Severity | What RAW says vs. what the engine does |
+|---|---|---|
+| Sneak Attack "ally within 5ft of target" trigger isn't modeled | 🟡 | RAW: SA also fires when an ally is within 5 ft of the target and the rogue doesn't have disadvantage. The starter pack wires SA with an OnEvent filter that only matches `event.used === 'advantage'`. The ally-adjacency branch needs either a content-level predicate extension (OR of an "ally adjacent" check) or a planAttack-level computation that promotes `used` for the trigger. Open. |
+| Two-handed weapon + shield conflict isn't enforced | 🟡 | RAW Equipment: wielding a two-handed weapon requires both hands; a shield occupies the other hand. Engine: `applyItemEquipped` doesn't have content access (no `content` argument), so it can't read weapon properties at the reducer level. Proper fix needs a `planEquip(state, content, intent)` planner that wraps ItemEquipped with content-aware validation. Open. |
+
+Still skipped pending fixture machinery: Loading property (needs a multiattack-capable character with a crossbow), Difficult terrain 2× cost (needs Location map cells in encounter setup).
+
 #### Variant-rule enforcement (deferred, ⚪)
 
 | Gap | Severity | Slice | What's missing |
@@ -163,11 +177,11 @@ Probes I named but couldn't build out yet (need richer fixtures or content): Sne
 
 #### Engine triage
 
-**🔴 / 🟡 status — 0 open items as of 2026-05-14 (post-Tier-2-first-pass).** Audit: **40 passing + 5 skipped (need richer fixtures) + 0 failing**. Tier 1 closed first; Tier 2's first batch added ~15 probes, surfaced 4 new bugs, all fixed same day.
+**🔴 / 🟡 status — 0 🔴 + 2 🟡 open as of 2026-05-14 PM.** Audit: **43 passing + 2 skipped (Loading, difficult terrain) + 2 failing (Sneak Attack ally-adjacent, two-handed+shield)**. Tier 1 fully closed; Tier 2 first pass closed 4 gaps; Tier 2 second pass closed Heavy+Small and added regression coverage for SA-on-advantage. The two remaining 🟡s need architectural changes (content-predicate extension; planEquip planner) and are tracked in the table just above.
 
-**The audit is still a floor, not a ceiling.** The 5 skipped probes need fixture work (Rogue Sneak Attack setup, Small species character, crossbow setup, etc.). The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names another ~10-15 RAW rules I haven't even written probes for yet. Tier 1 + Tier 2 first pass clean means "the rules I probed are enforced," not "every RAW rule is enforced."
+**The audit is still a floor, not a ceiling.** Skipped probes need fixture work. The [trustworthiness roadmap](docs/trustworthiness-roadmap.md) names more rules without probes. Tier 1 + most of Tier 2 clean means "the rules I probed are enforced," not "every RAW rule is enforced."
 
-**Next:** Either un-skip the 5 fixture-blocked probes (needs new fixtures: Small species character, Rogue, crossbow item) or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
+**Next:** Close the 2 remaining 🟡s (architectural changes), or move to Tier 3 (content stubs — Stunning Strike, Metamagic, Evasion, etc. flagged in the class-features matrix).
 
 ### Content gaps
 

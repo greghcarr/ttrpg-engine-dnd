@@ -11,6 +11,15 @@
       "speed": { "walk": 30 },
       "languages": ["common"],
       "traits": []
+    },
+    {
+      "id": "halfling",
+      "name": "Halfling",
+      "size": "Small",
+      "creatureType": "Humanoid",
+      "speed": { "walk": 30 },
+      "languages": ["common", "halfling"],
+      "traits": []
     }
   ],
   "backgrounds": [
@@ -499,6 +508,27 @@
       "mastery": "Slow",
       "rangeNormal": 150,
       "rangeLong": 600
+    },
+    {
+      "id": "light-crossbow",
+      "itemKind": "weapon",
+      "name": "Light Crossbow",
+      "category": "simple",
+      "attackKind": "ranged",
+      "damageType": "piercing",
+      "damageDice": "1d8",
+      "properties": ["ammunition", "loading", "two-handed"],
+      "mastery": "Slow",
+      "rangeNormal": 80,
+      "rangeLong": 320
+    },
+    {
+      "id": "shield",
+      "itemKind": "armor",
+      "name": "Shield",
+      "category": "shield",
+      "baseAC": 2,
+      "stealthDisadvantage": false
     },
     {
       "id": "leather-armor",
