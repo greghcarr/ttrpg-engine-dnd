@@ -67,6 +67,26 @@ The seam doesn't need to be perfect today, just clean enough that Slice 47 is a 
 - **Schema versioning.** Every persisted doc carries `schemaVersion`. Migration machinery lives in `src/migrations/` from day one.
 - **PendingChoice protocol.** Deferred player decisions (ASI vs feat, subclass selection, spell selection, target selection) are first-class. `ChoiceRequired` events install a `PendingChoice` in state; `ChoiceResolved` records the selection; the effect-stack reads resolved choices and applies the selected option's effects to derivations.
 
+## Source map (where things live)
+
+- [src/schemas/events/](src/schemas/events/), event payload schemas (one file per category: attack, combat, action-economy, rest, etc.); aggregated in [src/schemas/events/index.ts](src/schemas/events/index.ts).
+- [src/schemas/runtime/](src/schemas/runtime/), persisted-state shapes (campaign, character, encounter, item-instance, etc.).
+- [src/schemas/content/](src/schemas/content/), content-pack shapes (classes, species, spells, items, etc.).
+- [src/schemas/effects.ts](src/schemas/effects.ts), [predicate.ts](src/schemas/predicate.ts), [formula.ts](src/schemas/formula.ts), effect primitives + DSLs.
+- [src/engine/apply.ts](src/engine/apply.ts), the master switch over event types; pure, RNG-free.
+- [src/engine/reducers/](src/engine/reducers/), one file per event category; each exports `applyFoo(draft, event)`.
+- [src/engine/plan/](src/engine/plan/), planners; the only place RNG is consumed. One file per intent.
+- [src/engine/triggers/](src/engine/triggers/), trigger dispatch (Sneak Attack, opportunity attacks, etc.) called from planners post-event.
+- [src/engine/replay.ts](src/engine/replay.ts), [commit.ts](src/engine/commit.ts), [undo-redo.ts](src/engine/undo-redo.ts), event-sourced infrastructure.
+- [src/derive/](src/derive/), computed-over-state functions (AC, attack bonus, spell slots, ability checks, etc.).
+- [src/effects/](src/effects/), `EffectAccumulator` builder and effect-stack composition.
+- [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json), the wired SRD content pack.
+- [src/handlers/](src/handlers/), `CustomEffect` code handlers (escape hatch for Wild Shape, Wish, etc.).
+- [src/index.ts](src/index.ts), the single public barrel.
+- [tests/unit/](tests/unit/), reducer + derivation tests.
+- [tests/golden/](tests/golden/), end-to-end scenarios + replay-equivalence + transcripts.
+- [tests/audit/](tests/audit/), the 48-probe RAW compliance audit (intentionally monolithic).
+
 ## Export discipline
 
 `src/index.ts` is the only public barrel. Nothing under `src/internal/` is exported. Anything not re-exported from `src/index.ts` is internal and may change without notice.
@@ -133,3 +153,58 @@ Each slice typically touches the same set of layers. When working on a new slice
 5. **Tests**: reducer unit tests, planner tests with RNG-capture proof, at least one golden scenario per slice exercising replay-equivalence.
 
 Common gotchas: forgetting to wire a new case into the apply.ts switch produces an "Unhandled event" runtime error. Forgetting the import causes a `ReferenceError` at apply time, not at typecheck time. The architectural invariant tests catch both but only if a golden scenario actually emits the new event.
+
+For task-shape checklists (new planner vs new content type vs new derivation), see [docs/slice-template.md](docs/slice-template.md).
+
+### Planner shape
+
+Every planner in [src/engine/plan/](src/engine/plan/) follows the same skeleton. New planners should match it unless there's a documented reason not to.
+
+```ts
+export interface FooIntent {
+  readonly type: 'Foo';
+  readonly actorId: string;
+  // …other intent fields…
+  readonly at?: string; // optional timestamp override
+}
+
+export const planFoo = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG, // omit if the planner consumes no randomness
+  intent: FooIntent,
+): ReadonlyArray<Event> => {
+  // 1. Resolve referenced entities; throw on unknown IDs.
+  const actor = state.characters[intent.actorId];
+  if (!actor) throw new Error(`Unknown actor ${intent.actorId}`);
+
+  // 2. Validate preconditions (action economy, resource availability,
+  //    blocking conditions, RAW restrictions). Throw with a
+  //    user-readable message on violation.
+  assertActorCanAct(actor, 'Foo');
+
+  // 3. Resolve `at` once.
+  const at = intent.at ?? nowIso();
+
+  // 4. Consume RNG (rollDie, rollAdvantage, etc.). All RNG calls live
+  //    in the planner; never in reducers or derivations.
+
+  // 5. Build the event sequence. Emit intent / resolution / notification
+  //    events in causal order. Set `causedByEventId` on dependent events.
+
+  // 6. Dispatch triggers via `dispatchTriggers({state, content, rng, event, at})`
+  //    after committing intermediate events with `applyAll` if downstream
+  //    events depend on post-event state.
+
+  return [/* events in order */];
+};
+```
+
+Conventions:
+- Intent type uses `readonly` fields and a literal `type` discriminator.
+- Throw `Error` with a sentence the consumer could surface; never return error tuples.
+- ID-form fields use plain `string` on the intent (consumer-facing); cast to branded IDs only when constructing events.
+- `at` defaults to `nowIso()`; pass-through to every emitted event so a single planner call gets one timestamp.
+- Wire the planner into [src/engine/plan/index.ts](src/engine/plan/index.ts) and (if part of the public API) into [src/engine/index.ts](src/engine/index.ts) and the convenience surface in [src/engine/conveniences.ts](src/engine/conveniences.ts).
+
+Reference examples: [plan/sacred-weapon.ts](src/engine/plan/sacred-weapon.ts) (small, no RNG), [plan/attack.ts](src/engine/plan/attack.ts) (large, RNG + triggers + multi-event resolution chain).
