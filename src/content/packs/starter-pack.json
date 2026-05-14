@@ -579,7 +579,243 @@
       "spellcasting": { "ability": "CHA", "type": "full" }
     }
   ],
-  "subclasses": [],
+  "subclasses": [
+    {
+      "id": "path-of-the-berserker",
+      "parentClassId": "barbarian",
+      "name": "Path of the Berserker",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "frenzy",
+            "name": "Frenzy",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "college-of-lore",
+      "parentClassId": "bard",
+      "name": "College of Lore",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "lore-bonus-proficiencies",
+            "name": "Bonus Proficiencies (College of Lore)",
+            "effects": [
+              { "kind": "GrantProficiency", "target": "skill", "id": "arcana", "level": "proficient" },
+              { "kind": "GrantProficiency", "target": "skill", "id": "history", "level": "proficient" },
+              { "kind": "GrantProficiency", "target": "skill", "id": "investigation", "level": "proficient" }
+            ]
+          },
+          {
+            "id": "cutting-words",
+            "name": "Cutting Words",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "life-domain",
+      "parentClassId": "cleric",
+      "name": "Life Domain",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "life-domain-armor-training",
+            "name": "Life Domain Armor Training",
+            "effects": [
+              { "kind": "GrantProficiency", "target": "armor", "id": "heavy", "level": "proficient" }
+            ]
+          },
+          {
+            "id": "disciple-of-life",
+            "name": "Disciple of Life",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "circle-of-the-land",
+      "parentClassId": "druid",
+      "name": "Circle of the Land",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "circle-of-the-land-cantrip",
+            "name": "Circle of the Land: Bonus Cantrip",
+            "effects": []
+          },
+          {
+            "id": "lands-aid",
+            "name": "Land's Aid",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "champion",
+      "parentClassId": "fighter",
+      "name": "Champion",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "improved-critical",
+            "name": "Improved Critical",
+            "effects": []
+          },
+          {
+            "id": "remarkable-athlete",
+            "name": "Remarkable Athlete",
+            "effects": [
+              { "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 5 }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "warrior-of-the-open-hand",
+      "parentClassId": "monk",
+      "name": "Warrior of the Open Hand",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "open-hand-technique",
+            "name": "Open Hand Technique",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "oath-of-devotion",
+      "parentClassId": "paladin",
+      "name": "Oath of Devotion",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "devotion-spells",
+            "name": "Oath of Devotion Spells",
+            "effects": []
+          },
+          {
+            "id": "sacred-weapon",
+            "name": "Channel Divinity: Sacred Weapon",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "hunter",
+      "parentClassId": "ranger",
+      "name": "Hunter",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "hunters-lore",
+            "name": "Hunter's Lore",
+            "effects": []
+          },
+          {
+            "id": "hunters-prey",
+            "name": "Hunter's Prey",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "thief",
+      "parentClassId": "rogue",
+      "name": "Thief",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "fast-hands",
+            "name": "Fast Hands",
+            "effects": []
+          },
+          {
+            "id": "second-story-work",
+            "name": "Second-Story Work",
+            "effects": [
+              { "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "draconic-sorcery",
+      "parentClassId": "sorcerer",
+      "name": "Draconic Sorcery",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "draconic-resilience-ac",
+            "name": "Draconic Resilience (Unarmored AC)",
+            "effects": [
+              { "kind": "OverrideACFormula", "base": 13, "abilityModifiers": ["DEX"], "priority": 50 }
+            ]
+          },
+          {
+            "id": "draconic-resilience-hp",
+            "name": "Draconic Resilience (HP)",
+            "effects": []
+          },
+          {
+            "id": "draconic-spells",
+            "name": "Draconic Sorcery Spells",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fiend-patron",
+      "parentClassId": "warlock",
+      "name": "Fiend Patron",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "dark-ones-blessing",
+            "name": "Dark One's Blessing",
+            "effects": []
+          },
+          {
+            "id": "fiend-spells",
+            "name": "Fiend Patron Spells",
+            "effects": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "evoker",
+      "parentClassId": "wizard",
+      "name": "Evoker",
+      "levelGrants": {
+        "3": [
+          {
+            "id": "evocation-savant",
+            "name": "Evocation Savant",
+            "effects": []
+          },
+          {
+            "id": "sculpt-spells",
+            "name": "Sculpt Spells",
+            "effects": []
+          }
+        ]
+      }
+    }
+  ],
   "spells": [
     {
       "id": "fire-bolt",

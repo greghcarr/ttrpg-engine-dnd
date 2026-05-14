@@ -93,6 +93,50 @@ describe('feature-coverage matrix: class features', () => {
   });
 });
 
+describe('feature-coverage matrix: subclasses', () => {
+  it('one subclass per class ships (12 of 12 classes covered)', () => {
+    const parentClassIds = new Set(PACK.subclasses.map((s) => s.parentClassId));
+    const classIds = PACK.classes.map((c) => c.id).sort();
+    for (const cid of classIds) {
+      expect(parentClassIds.has(cid), `No subclass ships for class ${cid}`).toBe(true);
+    }
+    expect(PACK.subclasses.length).toBeGreaterThanOrEqual(12);
+  });
+
+  it('every subclass has an L3 grant (the 2024 subclass-choice level)', () => {
+    for (const sub of PACK.subclasses) {
+      const l3 = (sub.levelGrants as Record<string, unknown[]>)['3'];
+      expect(l3, `Subclass ${sub.id} missing L3 grants`).toBeDefined();
+      expect(Array.isArray(l3) && l3.length > 0, `Subclass ${sub.id} L3 is empty`).toBe(true);
+    }
+  });
+
+  it('subclass catalog with feature wire-status is stable', () => {
+    const rows: Array<{ subclass: string; level: number; featureId: string; status: WireStatus }> = [];
+    for (const sub of PACK.subclasses) {
+      const tbl = sub.levelGrants as Record<string, Array<{ id: string; effects?: unknown[] }>>;
+      for (const [lvlStr, features] of Object.entries(tbl)) {
+        const level = Number.parseInt(lvlStr, 10);
+        for (const f of features) {
+          rows.push({
+            subclass: sub.id,
+            level,
+            featureId: f.id,
+            status: categorize((f.effects ?? []).length),
+          });
+        }
+      }
+    }
+    rows.sort(
+      (a, b) =>
+        a.subclass.localeCompare(b.subclass) ||
+        a.level - b.level ||
+        a.featureId.localeCompare(b.featureId),
+    );
+    expect(rows.map((r) => `${r.subclass} L${r.level} ${r.featureId} [${r.status}]`)).toMatchSnapshot();
+  });
+});
+
 describe('feature-coverage matrix: weapon masteries', () => {
   it('every PHB-2024 mastery has at least one weapon in the starter pack', () => {
     const weapons = [...CONTENT.items.values()].filter((i) => i.itemKind === 'weapon');
