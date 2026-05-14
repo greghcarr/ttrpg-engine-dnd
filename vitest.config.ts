@@ -3,9 +3,14 @@ import { resolve } from 'node:path';
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@': resolve(__dirname, 'src'),
-    },
+    alias: [
+      // Web demo scenarios import via the package name. Alias them
+      // back to local source so the CI replay test (and any future
+      // web-scenario tests) can run without a `dist/` build first.
+      { find: /^ttrpg-engine-dnd\/starter-pack$/, replacement: resolve(__dirname, 'src/starter-pack.ts') },
+      { find: /^ttrpg-engine-dnd$/, replacement: resolve(__dirname, 'src/index.ts') },
+      { find: '@', replacement: resolve(__dirname, 'src') },
+    ],
   },
   test: {
     globals: false,
