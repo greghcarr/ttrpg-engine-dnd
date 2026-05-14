@@ -37,10 +37,11 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "ci": "npm run typecheck && npm run test:coverage && npm run build",
+    "prepublish:check": "npm run typecheck && npm run test && npm run build",
     "dev:web": "vite --config vite.web.config.ts",
     "build:web": "vite build --config vite.web.config.ts",
     "preview:web": "vite preview --config vite.web.config.ts",
-    "prepublishOnly": "npm run ci"
+    "prepublishOnly": "npm run prepublish:check"
   },
   "publishConfig": {
     "access": "public",
