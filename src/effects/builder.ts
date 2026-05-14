@@ -72,6 +72,10 @@ export class EffectAccumulator {
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
   private readonly flatDamageReductions = new Map<DamageType, number>();
   private critThresholdValue: number = 20;
+  private halfProficiencyBonusFloorFlag: boolean = false;
+  private healingBoostFlat: number = 0;
+  private healingBoostPerSpellLevel: number = 0;
+  private evasionFlag: boolean = false;
 
   addModifier(target: ModifierTarget, value: number, source: string): void {
     const key = modifierKey(target);
@@ -223,6 +227,26 @@ export class EffectAccumulator {
   critThreshold(): number {
     return this.critThresholdValue;
   }
+  markHalfProficiencyBonusFloor(): void {
+    this.halfProficiencyBonusFloorFlag = true;
+  }
+  hasHalfProficiencyBonusFloor(): boolean {
+    return this.halfProficiencyBonusFloorFlag;
+  }
+  addHealingBoost(flat: number, perSpellLevel: number): void {
+    this.healingBoostFlat += flat;
+    this.healingBoostPerSpellLevel += perSpellLevel;
+  }
+  healingBoostFor(slotLevel: number): number {
+    if (slotLevel <= 0) return 0;
+    return this.healingBoostFlat + this.healingBoostPerSpellLevel * slotLevel;
+  }
+  markEvasion(): void {
+    this.evasionFlag = true;
+  }
+  hasEvasion(): boolean {
+    return this.evasionFlag;
+  }
 }
 
 export interface BuilderContext {
@@ -288,6 +312,15 @@ export const applyEffectToBuilder = (
       return;
     case 'ExpandCritRange':
       acc.expandCritRange(effect.threshold);
+      return;
+    case 'GrantHalfProficiencyBonusFloor':
+      acc.markHalfProficiencyBonusFloor();
+      return;
+    case 'BoostHealing':
+      acc.addHealingBoost(effect.flat, effect.perSpellLevel);
+      return;
+    case 'GrantEvasion':
+      acc.markEvasion();
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();

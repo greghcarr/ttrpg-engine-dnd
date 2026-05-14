@@ -23,6 +23,15 @@ export const TurnUsageSchema = z.object({
   // one piece of ammunition per attack action / bonus action / reaction.
   // Reset alongside the other per-turn flags at TurnStarted.
   loadedWeaponsFiredThisTurn: ULIDSchema.array().default([]),
+  // Barbarian Reckless Attack toggle. Set when the combatant activates
+  // Reckless Attack on their turn; resolved attacks made by this
+  // combatant gain advantage on melee STR attack rolls, and attack
+  // rolls against this combatant have advantage. Cleared on the next
+  // TurnStarted (which matches RAW: "until the start of your next turn").
+  recklessAttackActive: z.boolean().default(false),
+  // Monk Stunning Strike "once per turn" gate. Set when the Monk
+  // attempts a Stunning Strike, cleared at TurnStarted.
+  stunningStrikeUsedThisTurn: z.boolean().default(false),
 });
 export type TurnUsage = z.infer<typeof TurnUsageSchema>;
 
@@ -35,6 +44,8 @@ export const EMPTY_TURN_USAGE: TurnUsage = {
   dashed: false,
   disengaged: false,
   loadedWeaponsFiredThisTurn: [],
+  recklessAttackActive: false,
+  stunningStrikeUsedThisTurn: false,
 };
 
 export const CombatantSchema = z.object({

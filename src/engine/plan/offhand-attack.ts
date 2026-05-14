@@ -10,6 +10,7 @@ import type {
 import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
+import { applyMartialArtsDieScaling } from './attack.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { computeAttackBonus } from '../../derive/attack.js';
@@ -145,14 +146,15 @@ export const planOffHandAttack = (
   const isFinesse = weaponDef.properties.includes('finesse');
   const abilityMod = isFinesse ? Math.max(strMod, dexMod) : strMod;
   const offHandModifier = abilityMod < 0 ? abilityMod : 0;
-  const parsed = parseDiceExpression(weaponDef.damageDice);
+  const damageExpression = applyMartialArtsDieScaling(attacker, weaponDef.id, weaponDef.damageDice);
+  const parsed = parseDiceExpression(damageExpression);
   const totalRolls = critical ? parsed.count * 2 : parsed.count;
   const damageRolls: number[] = [];
   for (let i = 0; i < totalRolls; i++) {
     damageRolls.push(rollDie(parsed.die, rng));
   }
   const damageRollPayload: DamageRoll = {
-    expression: weaponDef.damageDice,
+    expression: damageExpression,
     rolls: damageRolls,
     modifier: offHandModifier + parsed.modifier,
     type: weaponDef.damageType,

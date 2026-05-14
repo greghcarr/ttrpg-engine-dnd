@@ -45,6 +45,13 @@ import {
   planDodge,
   planMistyStep,
   planActionSurge,
+  planSacredWeapon,
+  planRecklessAttack,
+  planStunningStrike,
+  planFrenzy,
+  planCuttingWords,
+  planMetamagic,
+  planWildCompanion,
   planEquip,
   planOffHandAttack,
   planMultiattack,
@@ -107,6 +114,14 @@ import {
   type DodgeIntent,
   type MistyStepIntent,
   type ActionSurgeIntent,
+  type SacredWeaponIntent,
+  type RecklessAttackIntent,
+  type StunningStrikeIntent,
+  type FrenzyIntent,
+  type CuttingWordsIntent,
+  type CuttingWordsOutcome,
+  type MetamagicIntent,
+  type WildCompanionIntent,
   type EquipIntent,
   type OffHandAttackIntent,
   type MultiattackIntent,
@@ -203,6 +218,13 @@ export interface Engine {
     dodge(state: CampaignState, intent: Omit<DodgeIntent, 'type'>): PlanResult;
     mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
+    sacredWeapon(state: CampaignState, intent: Omit<SacredWeaponIntent, 'type'>): PlanResult;
+    recklessAttack(state: CampaignState, intent: Omit<RecklessAttackIntent, 'type'>): PlanResult;
+    stunningStrike(state: CampaignState, intent: Omit<StunningStrikeIntent, 'type'>): PlanResult;
+    frenzy(state: CampaignState, intent: Omit<FrenzyIntent, 'type'>): PlanResult;
+    cuttingWords(state: CampaignState, intent: Omit<CuttingWordsIntent, 'type'>): CuttingWordsOutcome;
+    metamagic(state: CampaignState, intent: Omit<MetamagicIntent, 'type'>): PlanResult;
+    wildCompanion(state: CampaignState, intent: Omit<WildCompanionIntent, 'type'>): PlanResult;
     equip(state: CampaignState, intent: Omit<EquipIntent, 'type'>): PlanResult;
     offHandAttack(state: CampaignState, intent: Omit<OffHandAttackIntent, 'type'>): PlanResult;
     multiattack(state: CampaignState, intent: Omit<MultiattackIntent, 'type'>): PlanResult;
@@ -365,6 +387,27 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     actionSurge(state, intent) {
       return { events: planActionSurge(state, content, { type: 'ActionSurge', ...intent }) };
+    },
+    sacredWeapon(state, intent) {
+      return { events: planSacredWeapon(state, content, { type: 'SacredWeapon', ...intent }) };
+    },
+    recklessAttack(state, intent) {
+      return { events: planRecklessAttack(state, content, { type: 'RecklessAttack', ...intent }) };
+    },
+    stunningStrike(state, intent) {
+      return { events: planStunningStrike(state, content, rng, { type: 'StunningStrike', ...intent }) };
+    },
+    frenzy(state, intent) {
+      return { events: planFrenzy(state, content, { type: 'Frenzy', ...intent }) };
+    },
+    cuttingWords(state, intent) {
+      return planCuttingWords(state, content, rng, { type: 'CuttingWords', ...intent });
+    },
+    metamagic(state, intent) {
+      return { events: planMetamagic(state, content, { type: 'Metamagic', ...intent }) };
+    },
+    wildCompanion(state, intent) {
+      return { events: planWildCompanion(state, content, { type: 'WildCompanion', ...intent }) };
     },
     equip(state, intent) {
       return { events: planEquip(state, content, { type: 'Equip', ...intent }) };

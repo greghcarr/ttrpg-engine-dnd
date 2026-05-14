@@ -1,6 +1,10 @@
 import type { Draft } from 'immer';
 import type { CampaignState } from '../../schemas/runtime/campaign.js';
-import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import type {
+  ActionEconomyConsumedEvent,
+  RecklessAttackActivatedEvent,
+  StunningStrikeAttemptedEvent,
+} from '../../schemas/events/action-economy.js';
 import type { ResourceSpentEvent } from '../../schemas/events/resources.js';
 import { invariant } from '../../internal/invariants.js';
 
@@ -59,4 +63,26 @@ export const resetActionForActionSurge = (
   combatant: { turnUsage: { actionUsed: boolean } },
 ): void => {
   combatant.turnUsage.actionUsed = false;
+};
+
+export const applyRecklessAttackActivated = (
+  state: Draft<CampaignState>,
+  event: RecklessAttackActivatedEvent,
+): void => {
+  const encounter = state.encounters[event.encounterId];
+  invariant(encounter !== undefined, `Encounter ${event.encounterId} not found`);
+  const combatant = encounter.combatants.find((c) => c.combatantId === event.combatantId);
+  invariant(combatant !== undefined, `Combatant ${event.combatantId} not in encounter`);
+  combatant.turnUsage.recklessAttackActive = true;
+};
+
+export const applyStunningStrikeAttempted = (
+  state: Draft<CampaignState>,
+  event: StunningStrikeAttemptedEvent,
+): void => {
+  const encounter = state.encounters[event.encounterId];
+  invariant(encounter !== undefined, `Encounter ${event.encounterId} not found`);
+  const combatant = encounter.combatants.find((c) => c.combatantId === event.combatantId);
+  invariant(combatant !== undefined, `Combatant ${event.combatantId} not in encounter`);
+  combatant.turnUsage.stunningStrikeUsedThisTurn = true;
 };

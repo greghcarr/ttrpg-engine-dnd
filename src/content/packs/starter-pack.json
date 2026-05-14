@@ -60,9 +60,9 @@
     { "id": "polearm-master", "name": "Polearm Master", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
     { "id": "war-caster", "name": "War Caster", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
     { "id": "resilient-con", "name": "Resilient (Constitution)", "category": "general", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "fighting-style-archery", "name": "Fighting Style: Archery", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "fighting-style-defense", "name": "Fighting Style: Defense", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "fighting-style-dueling", "name": "Fighting Style: Dueling", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "fighting-style-archery", "name": "Fighting Style: Archery", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "AddModifier", "target": "attack", "value": 2 }] },
+    { "id": "fighting-style-defense", "name": "Fighting Style: Defense", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1 }] },
+    { "id": "fighting-style-dueling", "name": "Fighting Style: Dueling", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2 }] },
     { "id": "fighting-style-great-weapon", "name": "Fighting Style: Great Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
     { "id": "fighting-style-protection", "name": "Fighting Style: Protection", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
     { "id": "fighting-style-two-weapon", "name": "Fighting Style: Two-Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [] },
@@ -103,6 +103,27 @@
                   "resourceId": "second-wind",
                   "max": 2,
                   "recharge": "shortRest"
+                }
+              ]
+            },
+            {
+              "id": "fighting-style-fighter",
+              "name": "Fighting Style",
+              "effects": [
+                {
+                  "kind": "OfferChoice",
+                  "choiceId": "fighting-style-fighter",
+                  "prompt": "Choose a Fighting Style.",
+                  "oneOf": 1,
+                  "when": "onAcquire",
+                  "options": [
+                    { "id": "archery", "label": "Archery", "effects": [{ "kind": "AddModifier", "target": "attack", "value": 2 }] },
+                    { "id": "defense", "label": "Defense", "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1 }] },
+                    { "id": "dueling", "label": "Dueling", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2 }] },
+                    { "id": "great-weapon", "label": "Great Weapon Fighting", "effects": [] },
+                    { "id": "protection", "label": "Protection", "effects": [] },
+                    { "id": "two-weapon", "label": "Two-Weapon Fighting", "effects": [] }
+                  ]
                 }
               ]
             }
@@ -243,7 +264,7 @@
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (3d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "3d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (4d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "4d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (4d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "4d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "evasion-rogue", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (5d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "5d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
@@ -303,8 +324,8 @@
       "toolProficiencies": [],
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "lay-on-hands", "name": "Lay on Hands", "effects": [{ "kind": "GrantResource", "resourceId": "lay-on-hands", "max": { "kind": "multiply", "terms": [{ "kind": "level", "classId": "paladin" }, { "kind": "const", "value": 5 }] }, "recharge": "longRest" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [], "columns": {} },
-        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "fighting-style-paladin", "name": "Fighting Style", "effects": [{ "kind": "OfferChoice", "choiceId": "fighting-style-paladin", "prompt": "Choose a Fighting Style.", "oneOf": 1, "when": "onAcquire", "options": [ { "id": "defense", "label": "Defense", "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1 }] }, { "id": "dueling", "label": "Dueling", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2 }] }, { "id": "great-weapon", "label": "Great Weapon Fighting", "effects": [] }, { "id": "protection", "label": "Protection", "effects": [] } ] }] }], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [{ "id": "channel-divinity-paladin", "name": "Channel Divinity", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 2, "recharge": "shortRest" }] }], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
@@ -348,12 +369,12 @@
           ],
           "columns": {}
         },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "reckless-attack", "name": "Reckless Attack", "effects": [] }, { "id": "danger-sense", "name": "Danger Sense", "effects": [{ "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "reckless-attack", "name": "Reckless Attack", "effects": [{ "kind": "Custom", "handlerId": "reckless-attack" }] }, { "id": "danger-sense", "name": "Danger Sense", "effects": [{ "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-barb", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "fast-movement", "name": "Fast Movement", "effects": [{ "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 10 }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [{ "id": "feral-instinct", "name": "Feral Instinct", "effects": [] }], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "feral-instinct", "name": "Feral Instinct", "effects": [{ "kind": "SetAdvantage", "on": "initiative", "mode": "advantage" }] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
@@ -382,7 +403,7 @@
       "subclassLevel": 3,
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "bardic-inspiration", "name": "Bardic Inspiration", "effects": [{ "kind": "GrantResource", "resourceId": "bardic-inspiration", "max": 3, "recharge": "longRest" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "jack-of-all-trades", "name": "Jack of All Trades", "effects": [] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "jack-of-all-trades", "name": "Jack of All Trades", "effects": [{ "kind": "GrantHalfProficiencyBonusFloor" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [{ "id": "expertise-bard", "name": "Expertise", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "insight", "level": "expertise" }, { "kind": "GrantProficiency", "target": "skill", "id": "persuasion", "level": "expertise" }] }], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "font-of-inspiration", "name": "Font of Inspiration", "effects": [{ "kind": "RecoverResource", "resourceId": "bardic-inspiration", "amount": "all", "when": "shortRest" }] }], "columns": {} },
@@ -452,7 +473,7 @@
       "subclassLevel": 3,
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "druidic", "name": "Druidic", "effects": [{ "kind": "GrantProficiency", "target": "language", "id": "druidic", "level": "proficient" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "wild-shape", "name": "Wild Shape", "effects": [{ "kind": "GrantResource", "resourceId": "wild-shape", "max": 2, "recharge": "shortRest" }] }, { "id": "wild-companion", "name": "Wild Companion", "effects": [] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "wild-shape", "name": "Wild Shape", "effects": [{ "kind": "GrantResource", "resourceId": "wild-shape", "max": 2, "recharge": "shortRest" }] }, { "id": "wild-companion", "name": "Wild Companion", "effects": [{ "kind": "Custom", "handlerId": "wild-companion" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [], "columns": {} },
@@ -486,13 +507,13 @@
       "skillChoices": { "choices": 2, "from": ["acrobatics", "athletics", "history", "insight", "religion", "stealth"] },
       "subclassLevel": 3,
       "levelTable": {
-        "1": { "proficiencyBonus": 2, "features": [{ "id": "martial-arts", "name": "Martial Arts", "effects": [] }, { "id": "unarmored-defense-monk", "name": "Unarmored Defense (Monk)", "effects": [{ "kind": "OverrideACFormula", "base": 10, "abilityModifiers": ["DEX", "WIS"] }] }], "columns": {} },
+        "1": { "proficiencyBonus": 2, "features": [{ "id": "martial-arts", "name": "Martial Arts", "effects": [{ "kind": "Custom", "handlerId": "martial-arts" }] }, { "id": "unarmored-defense-monk", "name": "Unarmored Defense (Monk)", "effects": [{ "kind": "OverrideACFormula", "base": 10, "abilityModifiers": ["DEX", "WIS"] }] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [{ "id": "monks-focus", "name": "Monk's Focus (Ki)", "effects": [{ "kind": "GrantResource", "resourceId": "ki", "max": 2, "recharge": "shortRest" }] }, { "id": "unarmored-movement-monk", "name": "Unarmored Movement", "effects": [{ "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 10 }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
-        "4": { "proficiencyBonus": 2, "features": [{ "id": "slow-fall", "name": "Slow Fall", "effects": [] }], "columns": {} },
-        "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-monk", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "stunning-strike", "name": "Stunning Strike", "effects": [] }], "columns": {} },
+        "4": { "proficiencyBonus": 2, "features": [{ "id": "slow-fall", "name": "Slow Fall", "effects": [{ "kind": "Custom", "handlerId": "slow-fall" }] }], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-monk", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "stunning-strike", "name": "Stunning Strike", "effects": [{ "kind": "Custom", "handlerId": "stunning-strike" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [{ "id": "evasion-monk", "name": "Evasion", "effects": [] }], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "evasion-monk", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
@@ -521,7 +542,7 @@
       "subclassLevel": 3,
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "favored-enemy", "name": "Favored Enemy", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 2, "recharge": "longRest" }] }, { "id": "weapon-mastery-ranger", "name": "Weapon Mastery", "effects": [{ "kind": "GrantWeaponMastery", "masteries": ["Sap", "Vex", "Topple", "Push", "Slow", "Cleave", "Nick", "Graze", "Flex"], "slots": 2 }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "deft-explorer", "name": "Deft Explorer (Expertise)", "effects": [] }, { "id": "fighting-style-ranger", "name": "Fighting Style", "effects": [] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "deft-explorer", "name": "Deft Explorer (Expertise)", "effects": [{ "kind": "OfferChoice", "choiceId": "deft-explorer-expertise", "prompt": "Choose one skill to gain Expertise in.", "oneOf": 1, "when": "onAcquire", "options": [ { "id": "perception", "label": "Perception", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "perception", "level": "expertise" }] }, { "id": "stealth", "label": "Stealth", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "stealth", "level": "expertise" }] }, { "id": "survival", "label": "Survival", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "survival", "level": "expertise" }] }, { "id": "nature", "label": "Nature", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "nature", "level": "expertise" }] }, { "id": "animal-handling", "label": "Animal Handling", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "animal-handling", "level": "expertise" }] } ] }] }, { "id": "fighting-style-ranger", "name": "Fighting Style", "effects": [{ "kind": "OfferChoice", "choiceId": "fighting-style-ranger", "prompt": "Choose a Fighting Style.", "oneOf": 1, "when": "onAcquire", "options": [ { "id": "archery", "label": "Archery", "effects": [{ "kind": "AddModifier", "target": "attack", "value": 2 }] }, { "id": "defense", "label": "Defense", "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1 }] }, { "id": "dueling", "label": "Dueling", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2 }] }, { "id": "two-weapon", "label": "Two-Weapon Fighting", "effects": [] } ] }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-ranger", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }], "columns": {} },
@@ -556,7 +577,7 @@
       "subclassLevel": 3,
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "innate-sorcery", "name": "Innate Sorcery", "effects": [{ "kind": "GrantResource", "resourceId": "innate-sorcery", "max": 2, "recharge": "longRest" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "font-of-magic", "name": "Font of Magic (Sorcery Points)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 2, "recharge": "longRest" }] }, { "id": "metamagic", "name": "Metamagic", "effects": [] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "font-of-magic", "name": "Font of Magic (Sorcery Points)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 2, "recharge": "longRest" }] }, { "id": "metamagic", "name": "Metamagic", "effects": [{ "kind": "Custom", "handlerId": "metamagic" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [{ "kind": "RecoverResource", "resourceId": "sorcery-points", "amount": 4, "when": "shortRest" }] }], "columns": {} },
@@ -589,7 +610,7 @@
           {
             "id": "frenzy",
             "name": "Frenzy",
-            "effects": []
+            "effects": [{ "kind": "Custom", "handlerId": "frenzy" }]
           }
         ]
       }
@@ -612,7 +633,7 @@
           {
             "id": "cutting-words",
             "name": "Cutting Words",
-            "effects": []
+            "effects": [{ "kind": "Custom", "handlerId": "cutting-words" }]
           }
         ]
       }
@@ -633,7 +654,7 @@
           {
             "id": "disciple-of-life",
             "name": "Disciple of Life",
-            "effects": []
+            "effects": [{ "kind": "BoostHealing", "flat": 2, "perSpellLevel": 1 }]
           }
         ]
       }
@@ -706,7 +727,7 @@
           {
             "id": "sacred-weapon",
             "name": "Channel Divinity: Sacred Weapon",
-            "effects": []
+            "effects": [{ "kind": "Custom", "handlerId": "sacred-weapon" }]
           }
         ]
       }
@@ -1420,6 +1441,16 @@
       "mastery": "Vex"
     },
     {
+      "id": "unarmed-strike",
+      "itemKind": "weapon",
+      "name": "Unarmed Strike",
+      "category": "simple",
+      "attackKind": "melee",
+      "damageType": "bludgeoning",
+      "damageDice": "1d4",
+      "properties": ["light"]
+    },
+    {
       "id": "dagger",
       "itemKind": "weapon",
       "name": "Dagger",
@@ -1662,6 +1693,24 @@
           "on": "attack",
           "mode": "disadvantage"
         }
+      ]
+    },
+    {
+      "id": "sacred-weapon-active",
+      "name": "Sacred Weapon Active",
+      "stackable": false,
+      "endsOn": [{ "kind": "longRest" }],
+      "effects": [
+        { "kind": "AddModifier", "target": "attack", "value": 3 }
+      ]
+    },
+    {
+      "id": "frenzied",
+      "name": "Frenzied",
+      "stackable": false,
+      "endsOn": [{ "kind": "longRest" }],
+      "effects": [
+        { "kind": "AddModifier", "target": "damage", "value": 2 }
       ]
     },
     {

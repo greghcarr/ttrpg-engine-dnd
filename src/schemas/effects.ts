@@ -144,6 +144,21 @@ export type Effect =
   // Superior Critical sets 18. Multiple sources stack to the lowest.
   // Does not change auto-hit semantics: only a natural 20 auto-hits.
   | { kind: 'ExpandCritRange'; threshold: number }
+  // Bard's Jack of All Trades and similar: any ability check the actor
+  // is NOT already proficient in (skill prof level === 'none', or a raw
+  // ability check with no skill) gains `floor(profBonus / 2)`. Existing
+  // prof / expertise / half-prof are not stacked with.
+  | { kind: 'GrantHalfProficiencyBonusFloor' }
+  // Cleric's Disciple of Life and similar: boost the HP restored by
+  // any healing spell of 1st level or higher cast by this character.
+  // Total bonus per heal target is `flat + perSpellLevel * slotLevel`.
+  // Cantrips (slotLevel 0) are excluded by the planner that reads this.
+  | { kind: 'BoostHealing'; flat: number; perSpellLevel: number }
+  // Rogue / Monk Evasion: when this character is forced to make a DEX
+  // save against an area-effect spell that ordinarily halves on
+  // success, they instead take no damage on success and half damage on
+  // failure. Read by `planCastSpell` from the target's effect stack.
+  | { kind: 'GrantEvasion' }
   // Cross-character effect: while this is active on a character, attacks
   // against that character are made with advantage. Used by Faerie Fire,
   // Hex (kind of), Hunter's Mark variants. The attack planner consults
@@ -306,6 +321,17 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       threshold: z.number().int().min(2).max(20),
     }),
     z.object({
+      kind: z.literal('GrantHalfProficiencyBonusFloor'),
+    }),
+    z.object({
+      kind: z.literal('BoostHealing'),
+      flat: z.number().int(),
+      perSpellLevel: z.number().int(),
+    }),
+    z.object({
+      kind: z.literal('GrantEvasion'),
+    }),
+    z.object({
       kind: z.literal('GrantAdvantageToAttackers'),
       condition: PredicateSchema.optional(),
     }),
@@ -347,6 +373,9 @@ export const EFFECT_KINDS = [
   'OfferChoice',
   'FlatDamageReduction',
   'ExpandCritRange',
+  'GrantHalfProficiencyBonusFloor',
+  'BoostHealing',
+  'GrantEvasion',
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
   'Custom',

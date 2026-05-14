@@ -40,15 +40,29 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
 
   const effects = buildEffectStack(input);
 
+  const fullProfBonus = proficiencyBonus(computeTotalLevel(input.character));
+  // Track whether any explicit proficiency contribution is applied to
+  // this check. If not, and the actor has Jack of All Trades (or any
+  // GrantHalfProficiencyBonusFloor effect), apply floor(profBonus / 2)
+  // as a fallback.
+  let proficiencyApplied = false;
   if (input.skill !== undefined) {
     const expectedAbility = SKILL_ABILITY[input.skill];
     if (expectedAbility === input.ability) {
       const profLevel = effects.proficiencyLevel('skill', input.skill);
       const multiplier = PROFICIENCY_MULTIPLIER[profLevel];
       if (multiplier > 0) {
-        const bonus = Math.floor(proficiencyBonus(computeTotalLevel(input.character)) * multiplier);
+        const bonus = Math.floor(fullProfBonus * multiplier);
         breakdown.push({ source: `skill-prof(${profLevel})`, value: bonus });
+        proficiencyApplied = true;
       }
+    }
+  }
+
+  if (!proficiencyApplied && effects.hasHalfProficiencyBonusFloor()) {
+    const halfProf = Math.floor(fullProfBonus / 2);
+    if (halfProf > 0) {
+      breakdown.push({ source: 'jack-of-all-trades', value: halfProf });
     }
   }
 

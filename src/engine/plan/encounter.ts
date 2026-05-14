@@ -16,6 +16,7 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newEventId, newEncounterId } from '../../ids.js';
 import { abilityModifier } from '../../derive/ability.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 import { D20_SIDES, NAT_20 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
@@ -91,7 +92,7 @@ export interface RollInitiativeIntent {
 
 export const planRollInitiative = (
   state: CampaignState,
-  _content: ResolvedContent,
+  content: ResolvedContent,
   rng: RNG,
   intent: RollInitiativeIntent,
 ): ReadonlyArray<Event> => {
@@ -101,7 +102,27 @@ export const planRollInitiative = (
   const rolls: InitiativeRoll[] = encounter.combatants.map((c) => {
     const character = state.characters[c.combatantId];
     const dexMod = character ? abilityModifier(character.abilityScores.DEX) : 0;
-    const d20 = rollDie(D20_SIDES, rng);
+    // Barbarian Feral Instinct (and similar): advantage on initiative.
+    // Read from the character's effect stack.
+    let d20: number;
+    if (character !== undefined) {
+      const effects = buildEffectStack({
+        character,
+        content,
+        itemInstances: state.itemInstances,
+        pendingChoices: state.pendingChoices,
+      });
+      const adv = effects.advantageFor('initiative');
+      if (adv.advantage && !adv.disadvantage) {
+        d20 = Math.max(rollDie(D20_SIDES, rng), rollDie(D20_SIDES, rng));
+      } else if (adv.disadvantage && !adv.advantage) {
+        d20 = Math.min(rollDie(D20_SIDES, rng), rollDie(D20_SIDES, rng));
+      } else {
+        d20 = rollDie(D20_SIDES, rng);
+      }
+    } else {
+      d20 = rollDie(D20_SIDES, rng);
+    }
     return {
       combatantId: c.combatantId,
       d20,

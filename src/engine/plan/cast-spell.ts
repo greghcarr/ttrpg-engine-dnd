@@ -37,6 +37,7 @@ import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { assertActorCanAct } from './_actor-state.js';
 import { parseSpellDurationMinutes } from '../../internal/spell-duration.js';
@@ -302,7 +303,28 @@ const planSaveMechanic = (
     events.push(saveEvent);
 
     if (mechanic.damageDice !== undefined && mechanic.damageType !== undefined) {
-      const finalAmount = success && mechanic.halfOnSuccess === true ? halveDamage(rawDamage) : success ? 0 : rawDamage;
+      // Rogue / Monk Evasion: when the target has Evasion and this is
+      // a DEX save against a halves-on-success damage spell, swap the
+      // formula to (success → 0, fail → half).
+      const targetEffects = buildEffectStack({
+        character: target,
+        content,
+        itemInstances: state.itemInstances,
+        pendingChoices: state.pendingChoices,
+      });
+      const evasionApplies =
+        targetEffects.hasEvasion() &&
+        mechanic.ability === 'DEX' &&
+        mechanic.halfOnSuccess === true;
+      const finalAmount = evasionApplies
+        ? success
+          ? 0
+          : halveDamage(rawDamage)
+        : success && mechanic.halfOnSuccess === true
+          ? halveDamage(rawDamage)
+          : success
+            ? 0
+            : rawDamage;
       if (finalAmount > 0) {
         const mitigated = mitigateDamage({
           character: target,
@@ -350,6 +372,7 @@ const planSaveMechanic = (
 
 const planHealMechanic = (
   state: CampaignState,
+  content: ResolvedContent,
   rng: RNG,
   intent: CastSpellIntent,
   spell: Spell,
@@ -362,6 +385,16 @@ const planHealMechanic = (
   const castingAbilityMod = abilityModifier(character.abilityScores.WIS);
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const flatAmount = mechanic.flatAmount ?? 0;
+  // Cleric's Disciple of Life and similar: spells of 1st level or
+  // higher add `flat + perSpellLevel * slotLevel` to each heal target.
+  // Cantrips (slotLevel 0) are excluded by `healingBoostFor`.
+  const casterEffects = buildEffectStack({
+    character,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const healingBoost = casterEffects.healingBoostFor(intent.slotLevel);
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
     let rolledAmount = 0;
@@ -369,7 +402,7 @@ const planHealMechanic = (
       const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
       rolledAmount = rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod;
     }
-    const amount = Math.max(0, rolledAmount + flatAmount);
+    const amount = Math.max(0, rolledAmount + flatAmount + healingBoost);
     const heal: HealedEvent = {
       id: newEventId() as ULID,
       at,
@@ -790,7 +823,7 @@ export const planCastSpell = (
       // time; concentration tracking is enough to know which aura is
       // active.
     } else {
-      events.push(...planHealMechanic(state, rng, intent, spell, mechanic, declared.id, at));
+      events.push(...planHealMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     }
   }
 

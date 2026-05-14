@@ -41,6 +41,8 @@ export const applyEncounterCreated = (
         dashed: false,
         disengaged: false,
         loadedWeaponsFiredThisTurn: [],
+        recklessAttackActive: false,
+        stunningStrikeUsedThisTurn: false,
       },
     })),
     round: 0,
@@ -108,6 +110,8 @@ export const applyTurnStarted = (
   active.turnUsage.dashed = false;
   active.turnUsage.disengaged = false;
   active.turnUsage.loadedWeaponsFiredThisTurn = [];
+  active.turnUsage.recklessAttackActive = false;
+  active.turnUsage.stunningStrikeUsedThisTurn = false;
 };
 
 export const applyTurnEnded = (

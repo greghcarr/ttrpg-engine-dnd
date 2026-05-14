@@ -57,7 +57,11 @@ import {
   applyConcentrationStarted,
 } from './reducers/concentration.js';
 import { applyTriggerFired } from './reducers/triggers.js';
-import { applyActionEconomyConsumed } from './reducers/action-economy.js';
+import {
+  applyActionEconomyConsumed,
+  applyRecklessAttackActivated,
+  applyStunningStrikeAttempted,
+} from './reducers/action-economy.js';
 import {
   applyCombatantMoved,
   applyDashed,
@@ -270,6 +274,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ActionEconomyConsumed':
         applyActionEconomyConsumed(draft, event);
+        break;
+      case 'RecklessAttackActivated':
+        applyRecklessAttackActivated(draft, event);
+        break;
+      case 'StunningStrikeAttempted':
+        applyStunningStrikeAttempted(draft, event);
         break;
       case 'CombatantMoved':
         applyCombatantMoved(draft, event);

@@ -56,7 +56,11 @@ import {
   ConcentrationBrokenEventSchema,
 } from './concentration.js';
 import { TriggerFiredEventSchema } from './triggers.js';
-import { ActionEconomyConsumedEventSchema } from './action-economy.js';
+import {
+  ActionEconomyConsumedEventSchema,
+  RecklessAttackActivatedEventSchema,
+  StunningStrikeAttemptedEventSchema,
+} from './action-economy.js';
 import {
   CombatantMovedEventSchema,
   DashedEventSchema,
@@ -196,6 +200,8 @@ export const EventSchema = z.discriminatedUnion('type', [
   ConcentrationBrokenEventSchema,
   TriggerFiredEventSchema,
   ActionEconomyConsumedEventSchema,
+  RecklessAttackActivatedEventSchema,
+  StunningStrikeAttemptedEventSchema,
   CombatantMovedEventSchema,
   DashedEventSchema,
   DisengagedEventSchema,
@@ -310,6 +316,8 @@ export const EVENT_TYPES = [
   'ConcentrationBroken',
   'TriggerFired',
   'ActionEconomyConsumed',
+  'RecklessAttackActivated',
+  'StunningStrikeAttempted',
   'CombatantMoved',
   'Dashed',
   'Disengaged',
@@ -529,10 +537,17 @@ export { TriggerFiredEventSchema } from './triggers.js';
 export type { TriggerFiredEvent } from './triggers.js';
 export {
   ActionEconomyConsumedEventSchema,
+  RecklessAttackActivatedEventSchema,
+  StunningStrikeAttemptedEventSchema,
   ActionEconomyKindSchema,
   ACTION_ECONOMY_KINDS,
 } from './action-economy.js';
-export type { ActionEconomyConsumedEvent, ActionEconomyKind } from './action-economy.js';
+export type {
+  ActionEconomyConsumedEvent,
+  RecklessAttackActivatedEvent,
+  StunningStrikeAttemptedEvent,
+  ActionEconomyKind,
+} from './action-economy.js';
 export {
   CombatantMovedEventSchema,
   DashedEventSchema,

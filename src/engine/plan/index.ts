@@ -69,6 +69,22 @@ export {
   type MistyStepIntent,
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
+export { planSacredWeapon, type SacredWeaponIntent } from './sacred-weapon.js';
+export { planRecklessAttack, type RecklessAttackIntent } from './reckless-attack.js';
+export { planStunningStrike, type StunningStrikeIntent } from './stunning-strike.js';
+export { planFrenzy, type FrenzyIntent } from './frenzy.js';
+export {
+  planCuttingWords,
+  type CuttingWordsIntent,
+  type CuttingWordsOutcome,
+} from './cutting-words.js';
+export {
+  planMetamagic,
+  METAMAGIC_OPTIONS,
+  type MetamagicIntent,
+  type MetamagicOption,
+} from './metamagic.js';
+export { planWildCompanion, type WildCompanionIntent } from './wild-companion.js';
 export { planEquip, type EquipIntent } from './inventory.js';
 export { planOffHandAttack, type OffHandAttackIntent } from './offhand-attack.js';
 export { planMultiattack, type MultiattackIntent } from './multiattack.js';

@@ -73,6 +73,35 @@ const chooseDamageAbility = (
   return 'STR';
 };
 
+// Monk class feature: Martial Arts die scaling (PHB 2024 Monk table).
+// L1: 1d6, L5: 1d8, L11: 1d10, L17: 1d12. Pre-L1 (non-Monk or
+// multiclass with 0 Monk levels) returns undefined.
+const martialArtsDie = (monkLevel: number): string | undefined => {
+  if (monkLevel >= 17) return '1d12';
+  if (monkLevel >= 11) return '1d10';
+  if (monkLevel >= 5) return '1d8';
+  if (monkLevel >= 1) return '1d6';
+  return undefined;
+};
+
+// When a Monk uses an Unarmed Strike whose natural die is smaller than
+// their Martial Arts die, the Martial Arts die replaces it. Other
+// weapons (and non-Monks) keep their natural die.
+export const applyMartialArtsDieScaling = (
+  attacker: { classes: ReadonlyArray<{ classId: string; level: number }> },
+  weaponDefId: string,
+  naturalDamageDice: string,
+): string => {
+  if (weaponDefId !== 'unarmed-strike') return naturalDamageDice;
+  const monk = attacker.classes.find((c) => c.classId === 'monk');
+  const lvl = monk?.level ?? 0;
+  const maDie = martialArtsDie(lvl);
+  if (maDie === undefined) return naturalDamageDice;
+  const naturalDie = parseDiceExpression(naturalDamageDice).die;
+  const martialArtsSize = parseDiceExpression(maDie).die;
+  return martialArtsSize > naturalDie ? maDie : naturalDamageDice;
+};
+
 export interface ResolveAttackInput {
   readonly state: CampaignState;
   readonly content: ResolvedContent;
@@ -128,7 +157,30 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     itemInstances: state.itemInstances,
     pendingChoices: state.pendingChoices,
   });
-  const targetGrantsAdvantage = targetEffects.grantsAdvantageToAttackers();
+  // Barbarian Reckless Attack: target's recklessAttackActive flag
+  // grants advantage to every incoming attack. Read from the encounter
+  // combatant entry (per-turn state).
+  const targetRecklessGrantsAdvantage = ((): boolean => {
+    if (!state.activeEncounterId) return false;
+    const enc = state.encounters[state.activeEncounterId];
+    if (!enc) return false;
+    const cb = enc.combatants.find((c) => c.combatantId === input.targetId);
+    return cb?.turnUsage.recklessAttackActive === true;
+  })();
+  const targetGrantsAdvantage =
+    targetEffects.grantsAdvantageToAttackers() || targetRecklessGrantsAdvantage;
+  // Attacker's own Reckless Attack: melee STR-based attack rolls gain
+  // advantage when the attacker has recklessAttackActive set on their
+  // turnUsage.
+  const attackerRecklessAdvantage = ((): boolean => {
+    if (!state.activeEncounterId) return false;
+    const enc = state.encounters[state.activeEncounterId];
+    if (!enc) return false;
+    const cb = enc.combatants.find((c) => c.combatantId === input.attackerId);
+    if (cb?.turnUsage.recklessAttackActive !== true) return false;
+    if (weaponDef.attackKind !== 'melee') return false;
+    return chooseDamageAbility(attacker, weaponDef) === 'STR';
+  })();
   // RAW PHB Equipment: "Small creatures have Disadvantage with Heavy
   // weapons." Look up the attacker's species → size; if Small AND
   // weapon has the `heavy` property, contribute disadvantage.
@@ -167,19 +219,23 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers() || rangedInMelee || heavyForSmall;
   let advantage = input.advantage ?? 'none';
+  // Reckless Attack: if the attacker activated it this turn (and the
+  // attack qualifies), it contributes advantage just like the target's
+  // grants-advantage path.
+  const effectivelyGrantsAdvantage = targetGrantsAdvantage || attackerRecklessAdvantage;
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions
   // first, then resolve.
-  if (targetGrantsAdvantage && targetImposesDisadvantage) {
+  if (effectivelyGrantsAdvantage && targetImposesDisadvantage) {
     // Both cancel — no further auto-modification beyond what the
     // caller passed in.
-  } else if (advantage === 'none' && targetGrantsAdvantage) {
+  } else if (advantage === 'none' && effectivelyGrantsAdvantage) {
     advantage = 'advantage';
   } else if (advantage === 'none' && targetImposesDisadvantage) {
     advantage = 'disadvantage';
   } else if (advantage === 'advantage' && targetImposesDisadvantage) {
     advantage = 'none';
-  } else if (advantage === 'disadvantage' && targetGrantsAdvantage) {
+  } else if (advantage === 'disadvantage' && effectivelyGrantsAdvantage) {
     advantage = 'none';
   }
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
@@ -277,9 +333,10 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     weaponDef.properties.includes('versatile') &&
     weaponDef.versatileDice !== undefined &&
     wieldedTwoHanded;
-  const damageExpression = useFlex && weaponDef.versatileDice !== undefined
+  const baseDamageExpression = useFlex && weaponDef.versatileDice !== undefined
     ? weaponDef.versatileDice
     : weaponDef.damageDice;
+  const damageExpression = applyMartialArtsDieScaling(attacker, weaponDef.id, baseDamageExpression);
   const parsed = parseDiceExpression(damageExpression);
   const totalRolls = critical ? parsed.count * 2 : parsed.count;
   const damageRolls: number[] = [];
