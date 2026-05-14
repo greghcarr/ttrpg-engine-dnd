@@ -115,7 +115,7 @@ const renderReady = (session: DemoSession): void => {
   setStatus(
     `Scenario ready (seed ${session.scenario.seed}). ` +
       `${session.host.getCampaign().events.length} seed events committed. ` +
-      `Active: ${initialActive ? session.idToName.get(initialActive) : '(none)'}. Click Dodge to dispatch.`,
+      `${initialActive ? `${session.idToName.get(initialActive)}'s turn` : 'No active combatant'} — pick an action from their row in the sandbox.`,
   );
 };
 
