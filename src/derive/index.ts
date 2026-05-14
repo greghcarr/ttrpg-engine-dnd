@@ -38,6 +38,7 @@ export {
   type SpellSlotsResult,
 } from './spell-slots.js';
 export { buildEffectStack, type BuildEffectStackInput } from './effect-stack.js';
+export { computeKnownLanguages, type ComputeKnownLanguagesInput } from './languages.js';
 export {
   computeDerivedCharacter,
   type DerivedCharacter,

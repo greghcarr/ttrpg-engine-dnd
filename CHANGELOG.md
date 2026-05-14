@@ -4,7 +4,11 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
-Banked work since alpha.4, awaiting an alpha.5 release. The headline is a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped). Test count grew from 698 to 763 (65 new tests across 11 new files), all on top of the unchanged architectural invariants. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` on combatant turn usage) are all additive.
+Banked work since alpha.4, awaiting an alpha.5 release. The headline is a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped), plus Tier 3 content stub closures landing one at a time. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` on combatant turn usage) are all additive; `DerivedCharacter.knownLanguages` is additive.
+
+### Tier 3 content stubs
+
+- **Druidic language wired.** Druid L1 Druidic now emits `GrantProficiency { target: 'language', id: 'druidic' }` instead of an empty `effects: []`. New `computeKnownLanguages` derivation combines species + background `languages[]` with any `GrantProficiency target: 'language'` effects from the active effect stack, returning a sorted deduplicated list. Surfaced on `DerivedCharacter.knownLanguages` and exported from the public barrel. Tests: [tests/unit/derive/languages.test.ts](tests/unit/derive/languages.test.ts) covers species-only PCs, Druid PCs (Druidic appears), and combined species + class language stacking. Feature-coverage matrix shifts to 37 wired / 11 stub.
 
 ### Fixed (RAW closures)
 

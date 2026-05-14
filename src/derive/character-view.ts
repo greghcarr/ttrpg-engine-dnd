@@ -9,6 +9,7 @@ import { computeAC, type ACResult } from './ac.js';
 import { computeSavingThrow, type SaveResult } from './save.js';
 import { computeSpellSlots, type SpellSlotsResult } from './spell-slots.js';
 import { buildEffectStack } from './effect-stack.js';
+import { computeKnownLanguages } from './languages.js';
 
 const ABILITIES: ReadonlyArray<AbilityScore> = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
 
@@ -31,6 +32,7 @@ export interface DerivedCharacter {
   readonly spellSlots: SpellSlotsResult;
   readonly hasPendingChoices: boolean;
   readonly pendingChoiceIds: ReadonlyArray<string>;
+  readonly knownLanguages: ReadonlyArray<string>;
 }
 
 export interface ComputeDerivedCharacterInput {
@@ -70,5 +72,6 @@ export const computeDerivedCharacter = (
       (id) => input.pendingChoices?.[id]?.resolution === undefined,
     ) || (input.pendingChoices === undefined && input.character.pendingChoiceIds.length > 0),
     pendingChoiceIds: [...input.character.pendingChoiceIds],
+    knownLanguages: computeKnownLanguages(input),
   };
 };

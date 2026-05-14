@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 12,
+  "stub": 11,
   "total": 48,
-  "wired": 36,
+  "wired": 37,
 }
 `;
 
@@ -23,7 +23,7 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "bard L5 font-of-inspiration [wired]",
   "cleric L1 channel-divinity [wired]",
   "cleric L6 channel-divinity-cleric-2 [wired]",
-  "druid L1 druidic [stub]",
+  "druid L1 druidic [wired]",
   "druid L2 wild-companion [stub]",
   "druid L2 wild-shape [wired]",
   "fighter L1 second-wind [wired]",

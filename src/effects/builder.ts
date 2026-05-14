@@ -191,6 +191,16 @@ export class EffectAccumulator {
   proficiencyLevel(target: string, id: string): 'none' | 'half' | 'proficient' | 'expertise' {
     return this.proficiencies.get(`${target}:${id}`) ?? 'none';
   }
+  proficienciesByTarget(target: string): ReadonlyArray<{ readonly id: string; readonly level: 'half' | 'proficient' | 'expertise' }> {
+    const prefix = `${target}:`;
+    const rows: { id: string; level: 'half' | 'proficient' | 'expertise' }[] = [];
+    for (const [key, level] of this.proficiencies) {
+      if (key.startsWith(prefix)) {
+        rows.push({ id: key.slice(prefix.length), level });
+      }
+    }
+    return rows;
+  }
 
   addActionEconomy(op: 'extraAttack' | 'extraAction' | 'extraBonusAction', count: number): void {
     const prior = this.actionEconomyMods.get(op) ?? 0;

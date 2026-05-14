@@ -451,7 +451,7 @@
       "skillChoices": { "choices": 2, "from": ["arcana", "animal-handling", "insight", "medicine", "nature", "perception", "religion", "survival"] },
       "subclassLevel": 3,
       "levelTable": {
-        "1": { "proficiencyBonus": 2, "features": [{ "id": "druidic", "name": "Druidic", "effects": [] }], "columns": {} },
+        "1": { "proficiencyBonus": 2, "features": [{ "id": "druidic", "name": "Druidic", "effects": [{ "kind": "GrantProficiency", "target": "language", "id": "druidic", "level": "proficient" }] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [{ "id": "wild-shape", "name": "Wild Shape", "effects": [{ "kind": "GrantResource", "resourceId": "wild-shape", "max": 2, "recharge": "shortRest" }] }, { "id": "wild-companion", "name": "Wild Companion", "effects": [] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },

@@ -330,6 +330,7 @@ export {
   spellSlotsForLevel,
   buildEffectStack,
   computeDerivedCharacter,
+  computeKnownLanguages,
   computeAbilityCheck,
   computePassiveScore,
   terrainAt,
