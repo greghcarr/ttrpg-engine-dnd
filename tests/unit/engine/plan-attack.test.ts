@@ -97,6 +97,82 @@ describe('engine.plan.attack', () => {
     ).toThrow(/already used their action/);
   });
 
+  it('rejects a melee attack when target is outside reach', () => {
+    // Regression: planAttack didn't consult positions, so a melee
+    // weapon could swing at a target 30 ft away. Caught via the web
+    // demo on 2026-05-14. Reach default is 5 ft; the `reach` weapon
+    // property bumps it to 10 ft. Combatants without positions are
+    // intentionally exempt so existing un-positioned fixtures keep
+    // working.
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(11) });
+    const longsword: ItemInstance = makeItemInstance('longsword');
+    const a = buildFighter({ name: 'A', STR: 18 });
+    const b = buildFighter({ name: 'B', hpMax: 30, hpCurrent: 30 });
+    let campaign: Campaign = engine.createCampaign({ name: 'range-test' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: a } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: b } satisfies CharacterCreatedEvent,
+    ]);
+    const enc = engine.plan.createEncounter(campaign.state, { combatantIds: [a.id, b.id] });
+    campaign = commit(campaign, enc.events);
+    campaign = commit(campaign, engine.plan.rollInitiative(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.startEncounter(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.beginFirstTurn(campaign.state, { encounterId: enc.encounterId }).events);
+    // Place 30 ft apart.
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CombatantMoved', encounterId: enc.encounterId, combatantId: a.id, fromPosition: { x: 0, y: 0 }, toPosition: { x: 0, y: 0 }, feetTraveled: 0 },
+      { id: eventId(), at: isoTimestamp(), type: 'CombatantMoved', encounterId: enc.encounterId, combatantId: b.id, fromPosition: { x: 0, y: 0 }, toPosition: { x: 30, y: 0 }, feetTraveled: 0 },
+    ]);
+    const encNow = campaign.state.encounters[enc.encounterId]!;
+    const attackerId = encNow.combatants[encNow.activeIndex]!.combatantId;
+    const targetId = encNow.combatants.find((c) => c.combatantId !== attackerId)!.combatantId;
+
+    expect(() =>
+      engine.plan.attack(campaign.state, {
+        attackerId,
+        targetId,
+        weaponInstanceId: longsword.id,
+      }),
+    ).toThrow(/can't reach/);
+  });
+
+  it('allows a melee attack when target is within reach', () => {
+    // Same setup as the out-of-reach case but 5 ft apart — the
+    // attack must go through with the normal AttackRolled chain.
+    const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(11) });
+    const longsword: ItemInstance = makeItemInstance('longsword');
+    const a = buildFighter({ name: 'A', STR: 18 });
+    const b = buildFighter({ name: 'B', hpMax: 30, hpCurrent: 30 });
+    let campaign: Campaign = engine.createCampaign({ name: 'range-test' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: a } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: b } satisfies CharacterCreatedEvent,
+    ]);
+    const enc = engine.plan.createEncounter(campaign.state, { combatantIds: [a.id, b.id] });
+    campaign = commit(campaign, enc.events);
+    campaign = commit(campaign, engine.plan.rollInitiative(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.startEncounter(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, engine.plan.beginFirstTurn(campaign.state, { encounterId: enc.encounterId }).events);
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CombatantMoved', encounterId: enc.encounterId, combatantId: a.id, fromPosition: { x: 0, y: 0 }, toPosition: { x: 0, y: 0 }, feetTraveled: 0 },
+      { id: eventId(), at: isoTimestamp(), type: 'CombatantMoved', encounterId: enc.encounterId, combatantId: b.id, fromPosition: { x: 0, y: 0 }, toPosition: { x: 5, y: 0 }, feetTraveled: 0 },
+    ]);
+    const encNow = campaign.state.encounters[enc.encounterId]!;
+    const attackerId = encNow.combatants[encNow.activeIndex]!.combatantId;
+    const targetId = encNow.combatants.find((c) => c.combatantId !== attackerId)!.combatantId;
+
+    const { events } = engine.plan.attack(campaign.state, {
+      attackerId,
+      targetId,
+      weaponInstanceId: longsword.id,
+    });
+    // Action economy emits at least one ActionEconomyConsumed; an
+    // AttackRolled must follow.
+    expect(events.some((e) => e.type === 'AttackRolled')).toBe(true);
+  });
+
   it('plan is deterministic given a seeded RNG', () => {
     const a = seedFightWithLongsword(seededRNG(123));
     const b = seedFightWithLongsword(seededRNG(123));

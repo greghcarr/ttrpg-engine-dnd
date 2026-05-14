@@ -23,6 +23,10 @@ import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import { chebyshevDistance } from './movement.js';
+
+const DEFAULT_MELEE_REACH_FEET = 5;
+const REACH_PROPERTY_FEET = 10;
 
 export const COVER_KINDS = ['none', 'half', 'three-quarters', 'total'] as const;
 export type CoverKind = (typeof COVER_KINDS)[number];
@@ -257,6 +261,65 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   ];
 };
 
+/**
+ * Throws if the attacker can't physically reach the target with the
+ * given weapon, given both combatants' current positions on the
+ * active encounter. Skipped when either side has no position set —
+ * preserves out-of-encounter / unpositioned-combatant test fixtures
+ * that have always relied on the engine not caring about geometry.
+ *
+ * Melee weapons: Chebyshev distance ≤ 5 ft, or ≤ 10 ft if the weapon
+ * has the `reach` property.
+ * Ranged weapons (including thrown daggers with rangeNormal set): the
+ * 2024 hard cap is the weapon's long range; in the band between
+ * normal and long, the engine should impose disadvantage, but that's
+ * an additional fix — for now we only reject the impossible.
+ */
+const assertWeaponInRange = (
+  state: CampaignState,
+  content: ResolvedContent,
+  intent: AttackIntent,
+): void => {
+  const encounter = state.activeEncounterId
+    ? state.encounters[state.activeEncounterId]
+    : undefined;
+  if (!encounter) return;
+  const attackerCb = encounter.combatants.find((c) => c.combatantId === intent.attackerId);
+  const targetCb = encounter.combatants.find((c) => c.combatantId === intent.targetId);
+  if (!attackerCb?.position || !targetCb?.position) return;
+
+  const weaponInstance = state.itemInstances[intent.weaponInstanceId];
+  if (!weaponInstance) return;
+  const weaponDef = content.items.get(weaponInstance.definitionId);
+  if (!weaponDef || weaponDef.itemKind !== 'weapon') return;
+
+  const attackerName = state.characters[intent.attackerId]?.name ?? intent.attackerId;
+  const distance = chebyshevDistance(attackerCb.position, targetCb.position);
+
+  if (weaponDef.attackKind === 'melee') {
+    const maxReach = weaponDef.properties.includes('reach')
+      ? REACH_PROPERTY_FEET
+      : DEFAULT_MELEE_REACH_FEET;
+    if (distance > maxReach) {
+      throw new Error(
+        `${attackerName}'s ${weaponDef.name} can't reach: target is ${distance}ft away (reach ${maxReach}ft)`,
+      );
+    }
+    return;
+  }
+
+  // attackKind === 'ranged': cap at the weapon's long range if set,
+  // otherwise normal range. RAW disadvantage in the (normal, long]
+  // band is deferred to a follow-up fix.
+  const cap = weaponDef.rangeLong ?? weaponDef.rangeNormal;
+  if (cap === undefined) return; // No range data — leave unenforced.
+  if (distance > cap) {
+    throw new Error(
+      `${attackerName}'s ${weaponDef.name} can't reach: target is ${distance}ft away (max ${cap}ft)`,
+    );
+  }
+};
+
 export const planAttack = (
   state: CampaignState,
   content: ResolvedContent,
@@ -264,6 +327,7 @@ export const planAttack = (
   intent: AttackIntent,
 ): ReadonlyArray<Event> => {
   const economyPrelude = planActionEconomyForAttack(state, content, intent);
+  assertWeaponInRange(state, content, intent);
   const at = intent.at ?? nowIso();
   const resolution = resolveAttack({
     state,
