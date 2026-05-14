@@ -1,6 +1,7 @@
 import { createEngineHost, type EngineHost } from './engine-host.js';
 import { mountCombatSandbox, type CombatSandbox } from './modes/combat-sandbox.js';
 import { mountEventInspector, type EventInspector } from './modes/event-inspector.js';
+import { mountRulesLab, type RulesLab } from './modes/rules-lab.js';
 import { mountPendingChoiceResolver, type PendingChoiceResolver } from './ui/pending-choice.js';
 import { buildGoblinSkirmish, type GoblinSkirmish } from './scenarios/goblin-skirmish.js';
 
@@ -19,6 +20,7 @@ const seedInput = document.getElementById('seed-input') as HTMLInputElement | nu
 const sandboxRoot = document.getElementById('combat-sandbox-root');
 const inspectorRoot = document.getElementById('event-inspector-root');
 const choiceRoot = document.getElementById('pending-choice-root');
+const rulesLabRoot = document.getElementById('rules-lab-root');
 
 // URL hash format: `#seed=42&mode=combat`. We only read/write `seed` for
 // now; `mode` lands when the second mode does. Keep this tolerant of
@@ -151,6 +153,14 @@ async function boot(): Promise<void> {
     }
   };
   mountPanels();
+  // Rules Lab is stateless w.r.t. the campaign — mount once, persists
+  // across Reset clicks. Each Run-audit click rebuilds engines from
+  // scratch using the loaded starter pack.
+  let rulesLab: RulesLab | undefined;
+  if (rulesLabRoot) {
+    rulesLab = mountRulesLab({ starter, root: rulesLabRoot, onStatus: setStatus });
+  }
+  void rulesLab;
   renderReady(session);
 
   const reset = (newSeed: number): void => {
