@@ -2,6 +2,37 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+Banked work since alpha.4, awaiting an alpha.5 release. The headline is a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped). Test count grew from 698 to 763 (65 new tests across 11 new files), all on top of the unchanged architectural invariants. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` on combatant turn usage) are all additive.
+
+### Fixed (RAW closures)
+
+- **Action-blocking conditions reject actions.** Incapacitated / Stunned / Paralyzed / Petrified / Unconscious actors, and any combatant at HP 0, can no longer attack / cast / dash / dodge / move. Threaded through every planner via a new `assertActorCanAct` helper.
+- **Move-into-occupied-space rejection.** `planMove` scans the active encounter and rejects a destination that matches another combatant's position. Previously two combatants could share a square.
+- **Opportunity attacks.** `planMove` now emits one `OpportunityAvailable` per eligible reactor (in-reach, has reaction, not the mover). `planOpportunityAttack` consumes the reaction; cap enforced via `reactionUsedThisRound`. The web demo surfaces an OA queue with Take / Pass per offer, auto-pruned when preconditions lapse.
+- **Prone stand-up costs half speed.** `planMove` debits half the actor's speed (rounded down) when standing from prone.
+- **Ranged-in-melee disadvantage.** Ranged attacks while a hostile combatant is adjacent to the attacker now resolve with disadvantage.
+- **Concentration auto-clears at HP 0.** A downed concentrator's effect is cleared in the same commit as the damage; the redundant invariant in `applyConcentrationBroken` was removed and the helper `clearConcentrationEffect` tolerates a dangling pointer.
+- **Spell casts consume the action.** `planCastSpell` now emits `ActionEconomyConsumed` based on the spell's parsed `castingTime` (action / bonus action / reaction / long-cast).
+- **Frightened / Charmed track their source.** New `sourceCharacterId` on `AppliedCondition` and `ConditionApplied`. Frightened rejects moves *closer* to the source; Charmed rejects attacks *against* the source.
+- **Heavy-weapon Small disadvantage.** A Small attacker with a Heavy weapon attacks with disadvantage.
+- **Sneak Attack: ally-adjacent qualifier.** `AttackRolled` carries `attackerHasAllyAdjacentToTarget`; the starter-pack Sneak Attack predicate triggers on advantage OR (used !== disadvantage AND ally-adjacent).
+- **Loading property on ranged weapons.** A loaded weapon (light crossbow, heavy crossbow, hand crossbow, longbow) can fire once per turn; `WeaponLoaded` records the consumption and resets at turn start.
+- **Difficult terrain doubles movement cost.** `planMove` walks the path via Bresenham cells, summing per-cell `movementCostAt`. Diagonal-through-difficult costs the right amount.
+- **`planEquip` rejects illegal equip combinations.** Two-handed weapon in mainHand while a shield is equipped (and vice versa) is now rejected before the `ItemEquipped` event fires.
+
+### Added
+
+- **Rules Lab in the web demo.** 19 showcase probes grouped by category; one-click "Run audit" runs them against a fresh engine + scenario and reports pass / fail per row. Source: [web/audit/probes.ts](web/audit/probes.ts), [web/modes/rules-lab.ts](web/modes/rules-lab.ts).
+- **Scenario gallery in the web demo.** Frightened Halfling (source-tracked movement restriction), Misty Step Occupied (occupancy-check rejection), Concentrating Wizard at 1 HP (concentration auto-clear on drop), in addition to the original Goblin Skirmish. URL hash includes `#scenario=<id>&seed=<n>`. Source: [web/scenarios/](web/scenarios/). CI replay test at [tests/integration/web-scenarios.test.ts](tests/integration/web-scenarios.test.ts) covers headline actions per scenario.
+- **Map panel in the web demo.** A small grid view between Combat Sandbox and Event Inspector showing each combatant token at their position with initials and color; auto-fits the actor bounds. Source: [web/modes/grid-view.ts](web/modes/grid-view.ts).
+- **Trustworthiness roadmap at [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md)** framing the four-tier path from alpha to "trustworthy for unsupervised tabletop play": Tier 1 close audit, Tier 2 extend audit, Tier 3 content stubs, Tier 4 real SRD pack.
+
+### Changed
+
+- **README cleanup** (1cd20dc): collapsed 70+ lines of in-line "✓ Closed in 2026-05-14 sweep" retrospective in the Engine gaps section into a one-line summary referencing the audit file. Test counts refreshed to 763 / 118.
+
 ## 0.1.0-alpha.4
 
 The fourth pre-alpha. Closes two engine bugs that the new browser demo surfaced (Dodge → Attack guard and weapon range enforcement), broadens the public type surface with 15 event-type re-exports, and ships a deployable web demo as a second adoption surface alongside the CLI examples.
