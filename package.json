@@ -41,6 +41,9 @@
     "dev:web": "vite --config vite.web.config.ts",
     "build:web": "vite build --config vite.web.config.ts",
     "preview:web": "vite preview --config vite.web.config.ts",
+    "dev:dndbnb": "vite --config vite.dndbnb.config.ts",
+    "build:dndbnb": "vite build --config vite.dndbnb.config.ts",
+    "preview:dndbnb": "vite preview --config vite.dndbnb.config.ts",
     "prepublishOnly": "npm run prepublish:check",
     "release": "npm publish && npm dist-tag add ttrpg-engine-dnd@$npm_package_version alpha"
   },

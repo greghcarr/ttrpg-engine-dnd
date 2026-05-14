@@ -1,6 +1,7 @@
 node_modules
 dist/
 dist-web/
+dist-dndbnb/
 release/
 coverage/
 # `coverage/` above matches anywhere — un-ignore the feature-coverage
