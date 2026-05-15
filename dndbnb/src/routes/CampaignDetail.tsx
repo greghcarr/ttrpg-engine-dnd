@@ -1,40 +1,45 @@
-// Campaign detail page.
+// Campaign detail route. Thin wrapper around <CampaignDetailBody> with
+// a breadcrumb back to the list and a redirect after the campaign is
+// left or deleted.
 //
-// Shows the join code (owners only), the member roster with
-// usernames, and the list of characters currently attached to the
-// campaign. Owners can delete the campaign; players can leave it.
+// The primary UX is inline expansion on /campaigns, so this route is
+// mainly a stable URL for direct links and post-create / post-join
+// navigation paths.
 
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import {
-  deleteCampaign,
-  fetchCampaignDetail,
-  leaveCampaign,
-  setCampaignIcon,
-  type CampaignDetail as CampaignDetailModel,
-} from '@/lib/campaigns';
-import { useUser } from '@/lib/session';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { BackLink } from '@/components/BackLink';
+import { fetchCampaignDetail, type CampaignDetail as CampaignDetailModel } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
-import { CheckIcon, CopyIcon, LogOutIcon, PencilIcon, TrashIcon } from '@/components/Icons';
-import { CAMPAIGN_ICON_IDS, CampaignIcon } from '@/components/CampaignIcons';
+import { useUser } from '@/lib/session';
+import { CampaignDetailBody } from '@/components/CampaignDetailBody';
+import {
+  CampaignIconButton,
+  CampaignNameEditor,
+} from '@/components/CampaignTitleControls';
 
 export const CampaignDetail = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
   const user = useUser();
   const navigate = useNavigate();
-  const [detail, setDetail] = useState<CampaignDetailModel | null>(null);
+  const [head, setHead] = useState<CampaignDetailModel | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [acting, setActing] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
-  const [iconPickerOpen, setIconPickerOpen] = useState(false);
-  const [savingIcon, setSavingIcon] = useState(false);
+
+  const reloadHead = useCallback(async (): Promise<void> => {
+    if (!id) return;
+    try {
+      setHead(await fetchCampaignDetail(id));
+    } catch (err) {
+      setError(errorMessage(err));
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
     fetchCampaignDetail(id)
       .then((d) => {
-        if (!cancelled) setDetail(d);
+        if (!cancelled) setHead(d);
       })
       .catch((err) => {
         if (!cancelled) setError(errorMessage(err));
@@ -44,218 +49,42 @@ export const CampaignDetail = (): JSX.Element => {
     };
   }, [id]);
 
-  if (!detail || !user) {
-    return (
-      <section className="campaign-detail">
-        <p className="breadcrumb">
-          <Link to="/campaigns">&larr; All campaigns</Link>
-        </p>
-        {error ? (
-          <p className="status error">{error}</p>
-        ) : (
-          <p className="status">Loading campaign...</p>
-        )}
-      </section>
-    );
-  }
+  if (!id) return <></>;
 
-  const isOwner = detail.campaign.owner_id === user.id;
-  const myMembership = detail.members.find((m) => m.user_id === user.id);
-  const canLeave = !!myMembership && !isOwner;
-
-  const onCopyCode = async (): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(detail.campaign.join_code);
-      setCodeCopied(true);
-      setTimeout(() => setCodeCopied(false), 1500);
-    } catch {
-      // ignore: copying isn't critical
-    }
-  };
-
-  const onLeave = async (): Promise<void> => {
-    if (!confirm('Leave this campaign? You can rejoin with the code.')) return;
-    setActing(true);
-    setError(null);
-    try {
-      await leaveCampaign(detail.campaign.id, user.id);
-      navigate('/campaigns');
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setActing(false);
-    }
-  };
-
-  const onPickIcon = async (newIcon: string): Promise<void> => {
-    if (!detail) return;
-    setSavingIcon(true);
-    setError(null);
-    try {
-      await setCampaignIcon(detail.campaign.id, newIcon);
-      setDetail({ ...detail, campaign: { ...detail.campaign, icon: newIcon } });
-      setIconPickerOpen(false);
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setSavingIcon(false);
-    }
-  };
-
-  const onDelete = async (): Promise<void> => {
-    if (
-      !confirm(
-        `Delete "${detail.campaign.name}"? This removes the campaign for every member and detaches all attached characters. Characters themselves are not deleted.`,
-      )
-    )
-      return;
-    setActing(true);
-    setError(null);
-    try {
-      await deleteCampaign(detail.campaign.id);
-      navigate('/campaigns');
-    } catch (err) {
-      setError(errorMessage(err));
-    } finally {
-      setActing(false);
-    }
-  };
+  const isOwner = !!head && !!user && head.campaign.owner_id === user.id;
 
   return (
     <section className="campaign-detail">
       <p className="breadcrumb">
-        <Link to="/campaigns">&larr; All campaigns</Link>
+        <BackLink fallback="/campaigns">&larr; Back</BackLink>
       </p>
-      <header className="campaign-header">
+      {head && (
         <div className="campaign-title-row">
-          <CampaignIcon
-            id={detail.campaign.icon}
+          <CampaignIconButton
+            campaignId={head.campaign.id}
+            icon={head.campaign.icon}
+            isOwner={isOwner}
             size={36}
             className="campaign-detail-icon"
+            onChanged={reloadHead}
           />
-          <h2>{detail.campaign.name}</h2>
-          {isOwner && (
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setIconPickerOpen((open) => !open)}
-              title="Change icon"
-              aria-label="Change icon"
-              aria-expanded={iconPickerOpen}
-            >
-              <PencilIcon />
-            </button>
-          )}
+          <CampaignNameEditor
+            campaignId={head.campaign.id}
+            name={head.campaign.name}
+            isOwner={isOwner}
+            as="h2"
+            onChanged={reloadHead}
+          />
         </div>
-        {isOwner && iconPickerOpen && (
-          <div className="icon-picker icon-picker-detail">
-            {CAMPAIGN_ICON_IDS.map((id) => (
-              <button
-                key={id}
-                type="button"
-                className={`icon-pick ${id === detail.campaign.icon ? 'is-selected' : ''}`}
-                onClick={() => onPickIcon(id)}
-                disabled={savingIcon}
-                aria-label={id}
-                title={id}
-                aria-pressed={id === detail.campaign.icon}
-              >
-                <CampaignIcon id={id} size={22} />
-              </button>
-            ))}
-          </div>
-        )}
-        {detail.campaign.description && (
-          <p className="campaign-desc">{detail.campaign.description}</p>
-        )}
-        <div className="campaign-actions">
-          {canLeave && (
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={onLeave}
-              disabled={acting}
-              title="Leave campaign"
-              aria-label="Leave campaign"
-            >
-              <LogOutIcon />
-            </button>
-          )}
-          {isOwner && (
-            <button
-              type="button"
-              className="icon-btn danger"
-              onClick={onDelete}
-              disabled={acting}
-              title="Delete campaign (permanent)"
-              aria-label="Delete campaign"
-            >
-              <TrashIcon />
-            </button>
-          )}
-        </div>
-      </header>
-
-      {error && <p className="form-error">{error}</p>}
-
-      {isOwner && (
-        <section className="join-code-card">
-          <h3>Invite code</h3>
-          <p className="step-help">Share this with your players. They enter it under Campaigns -&gt; Join with a code.</p>
-          <div className="join-code-row">
-            <code className="join-code">{detail.campaign.join_code}</code>
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={onCopyCode}
-              title={codeCopied ? 'Copied' : 'Copy join code'}
-              aria-label={codeCopied ? 'Copied' : 'Copy join code'}
-            >
-              {codeCopied ? <CheckIcon /> : <CopyIcon />}
-            </button>
-          </div>
-        </section>
       )}
-
-      <section className="campaign-section">
-        <h3>Members ({detail.members.length})</h3>
-        <ul className="roster">
-          {detail.members.map((m) => (
-            <li key={m.user_id} className="roster-row">
-              <span className="roster-name">{m.username ?? m.user_id.slice(0, 8)}</span>
-              <span className={`badge ${m.role === 'owner' ? 'badge-public' : 'badge-private'}`}>
-                {m.role}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="campaign-section">
-        <h3>Characters in this campaign ({detail.characters.length})</h3>
-        {detail.characters.length === 0 ? (
-          <p className="empty">
-            No characters attached yet. Open one of your characters and attach it from the sheet.
-          </p>
-        ) : (
-          <ul className="character-list">
-            {detail.characters.map((ch) => (
-              <li key={ch.id} className="character-card">
-                <Link to={`/characters/${ch.id}`}>
-                  <div className="character-card-head">
-                    <span className="character-name">{ch.name}</span>
-                  </div>
-                  <div className="character-meta">
-                    <span className="owner-label">
-                      by {ch.ownerUsername ?? ch.owner_id.slice(0, 8)}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {head?.campaign.description && (
+        <p className="campaign-desc">{head.campaign.description}</p>
+      )}
+      {error && !head ? (
+        <p className="status error">{error}</p>
+      ) : (
+        <CampaignDetailBody campaignId={id} onDestroyed={() => navigate('/campaigns')} />
+      )}
     </section>
   );
 };

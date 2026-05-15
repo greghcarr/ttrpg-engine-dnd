@@ -1,11 +1,12 @@
 // Campaigns list page.
 //
-// Lists every campaign the user is a member of, with a create-form
-// and a join-by-code form inline. Detail / member-roster lives at
-// /campaigns/:id.
+// Lists every campaign the user is a member of with a create-form and
+// a join-by-code form inline. Each card is an expandable <details>
+// element whose body renders <CampaignDetailBody>, so the member
+// roster, invite code, attached characters, leave / delete actions
+// all surface in-place. /campaigns/:id still works for direct links.
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import {
   createCampaign,
   joinCampaignByCode,
@@ -18,15 +19,32 @@ import {
   CampaignIcon,
   DEFAULT_CAMPAIGN_ICON,
 } from '@/components/CampaignIcons';
-import { KeyIcon, PlusIcon } from '@/components/Icons';
+import { CampaignDetailBody } from '@/components/CampaignDetailBody';
+import {
+  CampaignIconButton,
+  CampaignNameEditor,
+} from '@/components/CampaignTitleControls';
+import { CrownFilledIcon, KeyIcon, PlusIcon } from '@/components/Icons';
+import { Pagination, usePageSize } from '@/components/Pagination';
+import { useUser } from '@/lib/session';
 
 export const Campaigns = (): JSX.Element => {
+  const user = useUser();
   const [rows, setRows] = useState<ReadonlyArray<CampaignSummary> | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = usePageSize();
+  const [hasMore, setHasMore] = useState(false);
 
   const reload = async (): Promise<void> => {
     try {
-      setRows(await listMyCampaigns());
+      // Fetch one extra row to detect whether a next page exists.
+      const fetched = await listMyCampaigns({
+        from: page * pageSize,
+        to: page * pageSize + pageSize,
+      });
+      setHasMore(fetched.length > pageSize);
+      setRows(fetched.slice(0, pageSize));
     } catch (err) {
       setError(errorMessage(err));
     }
@@ -34,7 +52,8 @@ export const Campaigns = (): JSX.Element => {
 
   useEffect(() => {
     reload();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize]);
 
   return (
     <section className="characters-page">
@@ -52,26 +71,68 @@ export const Campaigns = (): JSX.Element => {
         </p>
       ) : (
         <ul className="campaign-list">
-          {rows.map((c) => (
-            <li key={c.id} className="campaign-card">
-              <Link to={`/campaigns/${c.id}`}>
-                <div className="campaign-card-row">
-                  <CampaignIcon id={c.icon} size={28} className="campaign-card-icon" />
-                  <div className="campaign-card-text">
-                    <span className="campaign-name">{c.name}</span>
-                    <span className="campaign-meta">
-                      {c.memberCount} member{c.memberCount === 1 ? '' : 's'} | Updated{' '}
-                      {new Date(c.updated_at).toLocaleDateString()}
-                    </span>
-                    {c.description && (
-                      <span className="campaign-desc">{c.description}</span>
-                    )}
+          {rows.map((c) => {
+            const isOwner = !!user && c.owner_id === user.id;
+            return (
+              <li key={c.id} className="campaign-card">
+                <details>
+                  <summary>
+                    <div className="campaign-card-row">
+                      <CampaignIconButton
+                        campaignId={c.id}
+                        icon={c.icon}
+                        isOwner={isOwner}
+                        size={28}
+                        className="campaign-card-icon"
+                        onChanged={reload}
+                      />
+                      <div className="campaign-card-text">
+                        <div className="campaign-title-line">
+                          {isOwner && (
+                            <CrownFilledIcon
+                              size={14}
+                              className="campaign-owner-crown"
+                            />
+                          )}
+                          <CampaignNameEditor
+                            campaignId={c.id}
+                            name={c.name}
+                            isOwner={isOwner}
+                            as="span"
+                            className="campaign-name"
+                            onChanged={reload}
+                          />
+                        </div>
+                        <span className="campaign-meta">
+                          {c.memberCount} member{c.memberCount === 1 ? '' : 's'},{' '}
+                          {c.characterCount} character{c.characterCount === 1 ? '' : 's'}
+                        </span>
+                        {c.description && (
+                          <span className="campaign-desc">{c.description}</span>
+                        )}
+                      </div>
+                    </div>
+                  </summary>
+                  <div className="campaign-card-body">
+                    <CampaignDetailBody campaignId={c.id} onDestroyed={reload} />
                   </div>
-                </div>
-              </Link>
-            </li>
-          ))}
+                </details>
+              </li>
+            );
+          })}
         </ul>
+      )}
+      {rows !== null && rows.length > 0 && (
+        <Pagination
+          page={page}
+          hasMore={hasMore}
+          onPageChange={setPage}
+          pageSize={pageSize}
+          onPageSizeChange={(next: number) => {
+            setPageSize(next);
+            setPage(0);
+          }}
+        />
       )}
 
       <div className="collapsibles-row">
@@ -83,7 +144,7 @@ export const Campaigns = (): JSX.Element => {
             Join a campaign
           </summary>
           <div className="collapsible-body">
-            <JoinCampaignForm />
+            <JoinCampaignForm onJoined={reload} />
           </div>
         </details>
 
@@ -113,19 +174,17 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
   const [icon, setIcon] = useState<string>(DEFAULT_CAMPAIGN_ICON);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setPending(true);
     setError(null);
     try {
-      const row = await createCampaign(name.trim(), description.trim(), icon);
+      await createCampaign(name.trim(), description.trim(), icon);
       setName('');
       setDescription('');
       setIcon(DEFAULT_CAMPAIGN_ICON);
       await onCreated();
-      navigate(`/campaigns/${row.id}`);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -180,11 +239,14 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
   );
 };
 
-const JoinCampaignForm = (): JSX.Element => {
+interface JoinCampaignFormProps {
+  readonly onJoined: () => void | Promise<void>;
+}
+
+const JoinCampaignForm = ({ onJoined }: JoinCampaignFormProps): JSX.Element => {
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -192,8 +254,9 @@ const JoinCampaignForm = (): JSX.Element => {
     setError(null);
     try {
       const cleaned = code.trim().toUpperCase();
-      const id = await joinCampaignByCode(cleaned);
-      navigate(`/campaigns/${id}`);
+      await joinCampaignByCode(cleaned);
+      setCode('');
+      await onJoined();
     } catch (err) {
       setError(humanizeJoinError(err));
     } finally {
