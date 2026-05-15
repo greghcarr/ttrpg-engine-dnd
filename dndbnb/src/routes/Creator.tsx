@@ -166,7 +166,7 @@ export const Creator = (): JSX.Element => {
 
       <div className="creator-titlebar">
         <p className="breadcrumb">
-          <Link to="/characters">&larr; All characters</Link>
+          <Link to="/characters">&larr; Back</Link>
         </p>
         <h2>Create a character</h2>
       </div>
