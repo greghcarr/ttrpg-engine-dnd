@@ -118,16 +118,24 @@ button.link-button {
   background: var(--card);
 }
 
-/* Title-centered header: the brand and the hamburger (or sign-in
-   link) sit together in a single flex group centered horizontally,
-   so the title appears in the middle of the bar with the menu button
-   tucked immediately to its right. */
+/* Title-centered header: the brand and the nav-icon row sit together
+   in a single flex group centered horizontally; the sign-out button
+   peels off to the right via absolute positioning so it doesn't
+   shift the center group when it's present. */
 .site-header-inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem 2rem;
+}
+
+.sign-out-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .site-header .brand a {
@@ -1035,10 +1043,28 @@ button.ghost {
   color: var(--muted);
 }
 
+/* Mid-line under the character name: "Tiefling Ranger" style species
+   + class summary. */
+.character-summary {
+  color: var(--fg);
+  font-size: 0.9rem;
+  margin-top: 0.1rem;
+}
+
+/* Bottom-line under the summary: "Updated by <em>username</em> on
+   Mar 12, 2026". The owner name renders italic via <em>. */
 .character-updated,
 .owner-label {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+}
+
+.character-updated {
+  margin-top: 0.2rem;
+}
+
+.character-owner {
+  font-style: italic;
 }
 
 .badge {

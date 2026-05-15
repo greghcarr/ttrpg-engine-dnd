@@ -6,17 +6,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type CharacterRow } from '@/lib/supabase';
-import { useUser } from '@/lib/session';
+import { useUser, useUsername } from '@/lib/session';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
 import { PlusIcon } from '@/components/Icons';
 
 type Row = Pick<
   CharacterRow,
-  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id'
+  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id' | 'species_id'
 >;
 
 export const MyCharacters = (): JSX.Element => {
   const user = useUser();
+  const username = useUsername();
   const [rows, setRows] = useState<ReadonlyArray<Row> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +26,7 @@ export const MyCharacters = (): JSX.Element => {
     let cancelled = false;
     supabase
       .from('characters')
-      .select('id, name, updated_at, is_public, primary_class_id')
+      .select('id, name, updated_at, is_public, primary_class_id, species_id')
       .eq('owner_id', user.id)
       .order('updated_at', { ascending: false })
       .then(({ data, error: err }) => {
@@ -62,7 +63,7 @@ export const MyCharacters = (): JSX.Element => {
           {rows.map((row) => (
             <CharacterCard
               key={row.id}
-              character={toCardModel(row)}
+              character={toCardModel(row, username)}
               showFavorite
               showVisibilityBadge
               onDeleted={(deletedId) =>
@@ -77,10 +78,12 @@ export const MyCharacters = (): JSX.Element => {
   );
 };
 
-const toCardModel = (row: Row): CharacterCardModel => ({
+const toCardModel = (row: Row, ownerLabel: string | null): CharacterCardModel => ({
   id: row.id,
   name: row.name,
   updated_at: row.updated_at,
   is_public: row.is_public,
   primary_class_id: row.primary_class_id,
+  species_id: row.species_id,
+  ownerLabel,
 });

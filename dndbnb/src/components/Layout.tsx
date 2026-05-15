@@ -67,16 +67,18 @@ export const Layout = (): JSX.Element => {
               >
                 {({ isActive }) => (isActive ? <UsersFilledIcon /> : <UsersIcon />)}
               </NavLink>
-              <button
-                type="button"
-                onClick={signOut}
-                className="nav-icon"
-                title="Sign out"
-                aria-label="Sign out"
-              >
-                <LogOutIcon />
-              </button>
             </nav>
+          )}
+          {session && (
+            <button
+              type="button"
+              onClick={signOut}
+              className="nav-icon sign-out-icon"
+              title="Sign out"
+              aria-label="Sign out"
+            >
+              <LogOutIcon />
+            </button>
           )}
         </div>
       </header>

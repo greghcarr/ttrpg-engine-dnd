@@ -8,15 +8,17 @@ import { useEffect, useState } from 'react';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
 import { useUser } from '@/lib/session';
+import { fetchUsernames } from '@/lib/campaigns';
 
 type Row = Pick<
   CharacterRow,
-  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id'
+  'id' | 'owner_id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id' | 'species_id'
 >;
 
 export const Favorites = (): JSX.Element => {
   const user = useUser();
   const [rows, setRows] = useState<ReadonlyArray<Row> | null>(null);
+  const [usernames, setUsernames] = useState<ReadonlyMap<string, string>>(new Map());
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export const Favorites = (): JSX.Element => {
       }
       const { data: chars, error: charsErr } = await supabase
         .from('characters')
-        .select('id, name, updated_at, is_public, primary_class_id')
+        .select('id, owner_id, name, updated_at, is_public, primary_class_id, species_id')
         .in('id', ids)
         .order('updated_at', { ascending: false });
       if (cancelled) return;
@@ -47,7 +49,15 @@ export const Favorites = (): JSX.Element => {
         setError(charsErr.message);
         return;
       }
-      setRows(chars ?? []);
+      const fetched = chars ?? [];
+      setRows(fetched);
+      try {
+        const map = await fetchUsernames(fetched.map((r) => r.owner_id));
+        if (!cancelled) setUsernames(map);
+      } catch {
+        // Non-fatal -- cards fall back to "Updated on ..." without
+        // the "by ..." segment.
+      }
     })();
     return () => {
       cancelled = true;
@@ -72,7 +82,7 @@ export const Favorites = (): JSX.Element => {
           {rows.map((row) => (
             <CharacterCard
               key={row.id}
-              character={cardModel(row)}
+              character={cardModel(row, usernames.get(row.owner_id) ?? null)}
               showFavorite
               showVisibilityBadge
             />
@@ -83,10 +93,12 @@ export const Favorites = (): JSX.Element => {
   );
 };
 
-const cardModel = (row: Row): CharacterCardModel => ({
+const cardModel = (row: Row, ownerLabel: string | null): CharacterCardModel => ({
   id: row.id,
   name: row.name,
   updated_at: row.updated_at,
   is_public: row.is_public,
   primary_class_id: row.primary_class_id,
+  species_id: row.species_id,
+  ownerLabel,
 });
