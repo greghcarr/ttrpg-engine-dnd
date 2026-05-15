@@ -99,6 +99,10 @@ export const MyCharacters = (): JSX.Element => {
               character={toCardModel(row)}
               showFavorite
               showVisibilityBadge
+              onDeleted={(deletedId) =>
+                setRows((current) => (current ?? []).filter((r) => r.id !== deletedId))
+              }
+              onError={setError}
             />
           ))}
         </ul>

@@ -738,6 +738,12 @@ button.ghost {
   color: var(--muted);
 }
 
+.character-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .star-btn {
   background: transparent;
   border: none;
@@ -757,6 +763,28 @@ button.ghost {
 }
 
 .star-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.trash-btn {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  line-height: 1;
+}
+
+.trash-btn:hover {
+  color: var(--danger);
+}
+
+.trash-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
