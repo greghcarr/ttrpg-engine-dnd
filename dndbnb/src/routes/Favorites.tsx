@@ -60,7 +60,7 @@ export const Favorites = (): JSX.Element => {
   return (
     <section className="characters-page">
       <div className="page-header">
-        <h2>My favorites</h2>
+        <h2>My favorite characters</h2>
       </div>
       {rows.length === 0 ? (
         <p className="empty">

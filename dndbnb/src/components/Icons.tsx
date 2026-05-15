@@ -104,3 +104,43 @@ export const CloseIcon = ({ size = 18, className }: IconProps): JSX.Element => (
     <line x1="6" y1="18" x2="18" y2="6" />
   </svg>
 );
+
+export const UserIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
+  </svg>
+);
+
+export const CompassIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+  </svg>
+);
+
+export const StarFilledIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+export const UsersIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
