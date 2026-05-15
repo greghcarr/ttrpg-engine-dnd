@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 18,
-  "total": 79,
-  "wired": 61,
+  "stub": 23,
+  "total": 88,
+  "wired": 65,
 }
 `;
 
@@ -53,6 +53,15 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "druid L1 druidic [wired]",
   "druid L2 wild-companion [wired]",
   "druid L2 wild-shape [wired]",
+  "druid L5 wild-resurgence [stub]",
+  "druid L5 wild-shape-uses-3 [wired]",
+  "druid L7 elemental-fury [stub]",
+  "druid L9 wild-shape-uses-4 [wired]",
+  "druid L13 wild-shape-uses-5 [wired]",
+  "druid L15 improved-elemental-fury [stub]",
+  "druid L17 wild-shape-uses-6 [wired]",
+  "druid L18 beast-spells [stub]",
+  "druid L20 archdruid [stub]",
   "fighter L1 fighting-style-fighter [wired]",
   "fighter L1 second-wind [wired]",
   "fighter L2 action-surge [wired]",

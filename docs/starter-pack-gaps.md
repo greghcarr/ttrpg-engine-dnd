@@ -115,7 +115,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | barbarian | 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 6 (ASI / subclass-only levels) |
 | bard | 1, 2, 3, 5, 7, 9, 10, 15, 20 | 11 (ASI / subclass-only / un-named levels) |
 | cleric | 1, 2, 5, 6, 7, 10, 17, 18, 20 | 11 (ASI / subclass-only levels) |
-| druid | 1, 2 | 18 |
+| druid | 1, 2, 5, 7, 9, 13, 15, 17, 18, 20 | 10 (ASI / subclass-only / un-named levels) |
 | fighter | 1, 2, 5 | 17 |
 | monk | 1, 2, 4, 5, 7 | 15 |
 | paladin | 1, 2, 3 | 17 |
@@ -125,7 +125,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | (none) | 20 |
 | wizard | 1 | 19 |
 
-Notable missing scaling: Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51.
+Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
 
 ### Barbarian stub features (effects: [], waiting on engine work)
 
@@ -161,6 +161,17 @@ Slice 51 filled L2, L5, L7, L10, L17, L18, L20. The L18 entry wires the Channel 
 - `divine-intervention` (L10) and `improved-divine-intervention` (L20) — 1/week (1/long-rest at L20) prayer for a divine effect. Needs a flag for "intervention used in last 7 days" plus a freeform DM-resolution event; closest existing surface is `CustomEffect`, but no handler ships.
 
 Open item: L1 Divine Order (choice between Protector and Thaumaturge sub-features at character creation) is not in the L1 features array. Same shape as Barbarian's missing L1 Weapon Mastery; deferred to a later one-line slice.
+
+### Druid stub features (effects: [], waiting on engine work)
+
+Slice 52 filled L5, L7, L9, L13, L15, L17, L18, L20. Wired entries hardcode Wild Shape use counts at PB-based tiers (3 / 4 / 5 / 6 at L5 / L9 / L13 / L17). The pack still uses short-rest recharge from the L2 entry; 2024 RAW is long-rest recharge with PB uses, so the use-count progression matches the rulebook but the recharge cadence is a pre-existing inconsistency. Stubs:
+
+- `wild-resurgence` (L5) — regain one Wild Shape charge when casting a 1st+ level spell, or convert a Wild Shape charge into a 1st-level slot. Needs a "gain resource" trigger action (the engine's `OnEvent` ships only `SpendResource`, not a grant) plus a player-elected reverse swap.
+- `elemental-fury` (L7) and `improved-elemental-fury` (L15) — choice between Potent Spellcasting (+WIS mod to druid cantrip damage) or Wild Strike (extra unarmed-strike rider when Wild Shaped). Needs the same on-hit-rider + cantrip-bonus primitives Cleric's Blessed Strikes is blocked on.
+- `beast-spells` (L18) — cast druid spells while in Wild Shape. Needs the engine's Wild Shape handler to consult an "allow caster actions" flag rather than swap the entire actor.
+- `archdruid` (L20) — unlimited Wild Shape (treat the resource as auto-refunded on use), plus the ability to disregard verbal / somatic / non-cost material components for druid spells. Needs an "ignore resource cost" override.
+
+The CR / movement-mode / size catalog of Wild Shape forms (Beast Shape, Combat Wild Shape, etc.) is still entirely consumer territory; the engine accepts a chosen statblock at transformation time but no canonical druid form library ships in the pack.
 
 ## Subclasses
 
