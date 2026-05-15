@@ -1384,27 +1384,6 @@ a.icon-btn {
   text-decoration: underline;
 }
 
-.campaign-attach {
-  margin-bottom: 1rem;
-}
-
-.campaign-attach label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.campaign-attach select {
-  font: inherit;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0.375rem;
-  background: var(--bg);
-  color: var(--fg);
-}
-
 .breadcrumb {
   margin: 0 0 1rem;
   font-size: 0.9rem;
@@ -1451,4 +1430,14 @@ a.icon-btn {
 
 .sheet dd {
   margin: 0;
+}
+
+.sheet-select {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg);
+  color: var(--fg);
+  max-width: 100%;
 }

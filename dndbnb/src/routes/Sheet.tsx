@@ -329,27 +329,6 @@ export const Sheet = (): JSX.Element => {
         )}
       </div>
       {error && <p className="form-error">{error}</p>}
-      {isOwner && (
-        <div className="campaign-attach">
-          <label>
-            Campaign
-            <select
-              value={row.campaign_id ?? ''}
-              disabled={attaching || campaigns === null}
-              onChange={(e) =>
-                onAttachCampaign(e.target.value === '' ? null : e.target.value)
-              }
-            >
-              <option value="">Not in a campaign</option>
-              {(campaigns ?? []).map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
       <dl className="sheet">
         {rows.map(([k, v]) => (
           <div key={k} className="sheet-row">
@@ -357,6 +336,28 @@ export const Sheet = (): JSX.Element => {
             <dd>{String(v)}</dd>
           </div>
         ))}
+        {isOwner && (
+          <div className="sheet-row">
+            <dt>Campaign</dt>
+            <dd>
+              <select
+                className="sheet-select"
+                value={row.campaign_id ?? ''}
+                disabled={attaching || campaigns === null}
+                onChange={(e) =>
+                  onAttachCampaign(e.target.value === '' ? null : e.target.value)
+                }
+              >
+                <option value="">Not in a campaign</option>
+                {(campaigns ?? []).map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </dd>
+          </div>
+        )}
       </dl>
     </section>
   );
