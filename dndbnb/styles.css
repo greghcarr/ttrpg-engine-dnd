@@ -366,21 +366,15 @@ button.ghost {
   border-color: var(--accent);
   opacity: 1;
   cursor: default;
-  /* Pin a 1px outline of the contrasting accent-fg color around the
-     label. On light class accents (wizard blue, paladin pink, etc.)
-     this gives the text-color characters a dark edge so they still
-     read clearly; on dark accents (warlock purple) the outline is
-     near-white and effectively invisible against the light text,
-     so it costs nothing. */
-  text-shadow:
-    -2px 0 var(--accent-fg),
-    2px 0 var(--accent-fg),
-    0 -2px var(--accent-fg),
-    0 2px var(--accent-fg),
-    -2px -2px var(--accent-fg),
-    2px -2px var(--accent-fg),
-    -2px 2px var(--accent-fg),
-    2px 2px var(--accent-fg);
+  /* True text stroke (drawn around each glyph) in the contrasting
+     accent-fg color. `paint-order: stroke fill` ensures the fill
+     paints on top of the stroke so the stroke shows as a clean edge
+     without bleeding into the letter shape. On light class accents
+     (wizard blue, paladin pink) this gives the text a dark edge;
+     on dark accents (warlock purple) the stroke is near-white and
+     blends with the light text. */
+  -webkit-text-stroke: 1.5px var(--accent-fg);
+  paint-order: stroke fill;
 }
 
 .step-pip.is-done:not(.is-active) button {
