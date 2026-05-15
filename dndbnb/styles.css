@@ -373,10 +373,14 @@ button.ghost {
      near-white and effectively invisible against the light text,
      so it costs nothing. */
   text-shadow:
-    -1px 0 var(--accent-fg),
-    1px 0 var(--accent-fg),
-    0 -1px var(--accent-fg),
-    0 1px var(--accent-fg);
+    -2px 0 var(--accent-fg),
+    2px 0 var(--accent-fg),
+    0 -2px var(--accent-fg),
+    0 2px var(--accent-fg),
+    -2px -2px var(--accent-fg),
+    2px -2px var(--accent-fg),
+    -2px 2px var(--accent-fg),
+    2px 2px var(--accent-fg);
 }
 
 .step-pip.is-done:not(.is-active) button {
