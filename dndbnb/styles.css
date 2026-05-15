@@ -14,7 +14,7 @@
   --accent-fg: #f0f1f3;
   --border: #b6b9c0;
   --card: #e6e8ec;
-  --danger: #b1481d;
+  --danger: #c41e3a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,7 +26,7 @@
     --accent-fg: #15171a;
     --border: #2e3138;
     --card: #1c1d22;
-    --danger: #ff9255;
+    --danger: #e2566b;
   }
 }
 
