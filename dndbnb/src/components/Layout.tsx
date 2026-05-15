@@ -33,7 +33,7 @@ export const Layout = (): JSX.Element => {
             </Link>
           </div>
 
-          {session ? (
+          {session && (
             <nav className="site-nav-icons" aria-label="Primary navigation">
               <NavLink
                 to="/characters"
@@ -77,10 +77,6 @@ export const Layout = (): JSX.Element => {
                 <LogOutIcon />
               </button>
             </nav>
-          ) : (
-            <Link to="/sign-in" className="link-button">
-              Sign in
-            </Link>
           )}
         </div>
       </header>
