@@ -64,16 +64,16 @@ export const Campaigns = (): JSX.Element => {
 
       <div className="collapsibles-row">
         <details className="collapsible">
-          <summary>Create a campaign</summary>
+          <summary>Join with a code</summary>
           <div className="collapsible-body">
-            <CreateCampaignForm onCreated={reload} />
+            <JoinCampaignForm />
           </div>
         </details>
 
         <details className="collapsible">
-          <summary>Join with a code</summary>
+          <summary>Create a campaign</summary>
           <div className="collapsible-body">
-            <JoinCampaignForm />
+            <CreateCampaignForm onCreated={reload} />
           </div>
         </details>
       </div>
