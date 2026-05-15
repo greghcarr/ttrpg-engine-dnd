@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 105 / ~370 | ~370 | 34 / 60 / 6 / 4 / 1 across L0–L4. Cantrips complete; L1 ships every PHB entry (~20 wired). L2+ stub-heavy. |
+| Spells | 162 / ~370 | ~370 | 34 / 60 / 63 / 4 / 1 across L0–L4. Cantrips complete; L1 + L2 ship every PHB entry (~20 wired at L1, ~17 wired at L2). L3+ stub-heavy. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -46,13 +46,32 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Type-conditional buff** (advantage / disadvantage keyed to creature type): `protection-from-evil-and-good`.
 - **Pure narrative / utility** (intentionally no mechanical event): `alarm`, `animal-friendship`, `comprehend-languages`, `compelled-duel`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-magic`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `longstrider`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Rituals, illusions, sensory spells; they parse and load, they just don't emit anything.
 
-### L2: 6 / ~44
+### L2: 63 / 63 (full PHB list)
 
-**Wired (5):** aid, hold-person, lesser-restoration, spiritual-weapon, web.
+**Wired (17):** aid, blindness-deafness, crown-of-madness, flame-blade, heat-metal, hold-person, invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, web.
 
 **Dedicated planner (1):** misty-step.
 
-**Schema-only:** none in pack yet. The other ~38 PHB L2 spells (Scorching Ray, Shatter, Moonbeam, etc.) are not yet in the pack.
+**Schema-only (45):** grouped by the engine primitive each one needs.
+
+- **On-hit trigger system** (rider that fires on the caster's next weapon attack): `branding-smite`. Continues the smite-pattern cohort from L1.
+- **Area-effect spell mechanic** (zone with save on enter, ongoing damage, or movement penalty): `cloud-of-daggers`, `darkness`, `dust-devil`, `flaming-sphere`, `silence`, `spike-growth`, `zone-of-truth`.
+- **Caster-chosen options at cast time** (variant chosen by caster, ability target chosen): `calm-emotions`, `enhance-ability`, `enlarge-reduce`.
+- **Summon system** (companion / construct creature instance): `find-steed`, `summon-beast`.
+- **AC-buff condition** (flat AC bonus tied to a condition): `barkskin` (sets AC to 17 — a "set AC" variant of the AC buff primitive).
+- **Attack-roll-buff condition** (impose advantage / disadvantage on attacks against target): `blur` (disadv against caster), `mirror-image` (duplicate intercept pool), `pass-without-trace` (+10 stealth).
+- **Item-buff condition** (modifies attack / damage of an equipped weapon while active): `magic-weapon`.
+- **On-hit weapon-damage rider** (modifies damage a target deals on subsequent attacks): `ray-of-enfeeblement`.
+- **Recurring-rider primitive** (effect that fires each turn while condition is active): `phantasmal-force` (1d6 psychic per believed turn).
+- **Movement-mode condition** (flying / climbing / hover modes): `levitate`, `spider-climb`.
+- **Aerial restraint condition** (knocks flying targets to ground): `earthbind`.
+- **Perception-buff condition**: `enthrall` (disadvantage on perception against caster).
+- **On-action trigger rider** (cast on willing creature who gains a one-time / per-action effect): `dragons-breath`.
+- **Trap mechanic** (placed delayed-effect area): `cordon-of-arrows`.
+- **Multi-target linked condition** (effect that ties two creatures together): `warding-bond`.
+- **Transformation handler** (shapeshift utility): `alter-self`.
+- **Push primitive** (move target via STR save with no damage): `gust-of-wind`.
+- **Pure narrative / utility** (intentionally no mechanical event): `animal-messenger`, `arcane-lock`, `augury`, `continual-flame`, `darkvision`, `detect-thoughts`, `find-traps`, `gentle-repose`, `knock`, `locate-animals-or-plants`, `locate-object`, `magic-mouth`, `nystuls-magic-aura`, `rope-trick`, `see-invisibility`, `skywrite`. Ritual, divination, illusion, and utility spells; they parse and load, they just don't emit a mechanical event.
 
 ### L3: 4 / ~36
 
