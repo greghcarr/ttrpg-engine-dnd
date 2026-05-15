@@ -24,6 +24,7 @@ import {
 import { buildCharacter } from '@/lib/creator/build';
 import { checkText } from '@/lib/moderation';
 import { errorMessage } from '@/lib/errors';
+import { classColorVars } from '@/lib/class-colors';
 import {
   StepAbilities,
   StepClass,
@@ -100,7 +101,7 @@ export const Creator = (): JSX.Element => {
   };
 
   return (
-    <section className="creator">
+    <section className="creator" style={classColorVars(state.classId)}>
       <p className="breadcrumb">
         <Link to="/characters">&larr; All characters</Link>
       </p>

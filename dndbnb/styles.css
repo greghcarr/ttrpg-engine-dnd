@@ -4,11 +4,14 @@
   /* Neutral gray surfaces, lime-green accent. Buttons, links, and
      active states glow green; the chrome itself stays Discord/VS Code
      style. */
+  /* Site is monochrome by default; the Sheet / Edit / Creator routes
+     override --accent / --accent-fg inline based on the character's
+     class (see lib/class-colors.ts). */
   --bg: #d8dade;
   --fg: #1a1c20;
   --muted: #5c606a;
-  --accent: #135018;
-  --accent-fg: #f5f8f0;
+  --accent: #3a3d44;
+  --accent-fg: #f0f1f3;
   --border: #b6b9c0;
   --card: #e6e8ec;
   --danger: #b1481d;
@@ -19,8 +22,8 @@
     --bg: #131418;
     --fg: #dbdee1;
     --muted: #8a8f99;
-    --accent: #449634;
-    --accent-fg: #08120a;
+    --accent: #c0c4cb;
+    --accent-fg: #15171a;
     --border: #2e3138;
     --card: #1c1d22;
     --danger: #ff9255;

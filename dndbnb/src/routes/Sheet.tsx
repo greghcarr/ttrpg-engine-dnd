@@ -26,6 +26,7 @@ import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
+import { classColorVars } from '@/lib/class-colors';
 
 const content = resolveContent([loadStarterPack()]);
 
@@ -229,7 +230,10 @@ export const Sheet = (): JSX.Element => {
       : null;
 
   return (
-    <section className="sheet-page">
+    <section
+      className="sheet-page"
+      style={classColorVars(character.classes[0]?.classId)}
+    >
       <div className="sheet-toolbar">
         <p className="breadcrumb">
           <Link to="/characters">&larr; All characters</Link>

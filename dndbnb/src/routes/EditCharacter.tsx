@@ -32,6 +32,7 @@ import { useUser } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
 import { checkText } from '@/lib/moderation';
 import { getSpellCounts, isCaster } from '@/lib/creator/spell-rules';
+import { classColorVars } from '@/lib/class-colors';
 
 const content = resolveContent([loadStarterPack()]);
 
@@ -212,7 +213,7 @@ export const EditCharacter = (): JSX.Element => {
   const backgrounds = [...content.backgrounds.values()].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <section className="edit-page">
+    <section className="edit-page" style={classColorVars(form.classId)}>
       <p className="breadcrumb">
         <Link to={`/characters/${original.id}`}>&larr; Cancel and return to sheet</Link>
       </p>
