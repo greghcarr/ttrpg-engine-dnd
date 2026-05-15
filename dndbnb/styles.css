@@ -255,10 +255,11 @@ button.ghost {
 .step-indicator {
   list-style: none;
   padding: 0;
-  margin: 0 0 1.5rem;
+  margin: 1.25rem 0 0.75rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .step-pip button {

@@ -104,6 +104,8 @@ export const Creator = (): JSX.Element => {
       <p className="breadcrumb">
         <Link to="/characters">&larr; All characters</Link>
       </p>
+      <StepBody step={state.step} state={state} dispatch={dispatch} />
+
       <ol className="step-indicator">
         {STEP_ORDER.map((s) => {
           const active = state.step === s;
@@ -136,8 +138,6 @@ export const Creator = (): JSX.Element => {
           </button>
         </li>
       </ol>
-
-      <StepBody step={state.step} state={state} dispatch={dispatch} />
 
       {error && <p className="form-error">{error}</p>}
 
