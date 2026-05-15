@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 45,
-  "total": 116,
-  "wired": 71,
+  "stub": 49,
+  "total": 126,
+  "wired": 77,
 }
 `;
 
@@ -66,6 +66,16 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "fighter L1 second-wind [wired]",
   "fighter L2 action-surge [wired]",
   "fighter L5 extra-attack [wired]",
+  "fighter L5 tactical-mind [stub]",
+  "fighter L9 indomitable [wired]",
+  "fighter L9 tactical-shift [stub]",
+  "fighter L11 extra-attack-2 [wired]",
+  "fighter L11 tactical-master [stub]",
+  "fighter L13 indomitable-2 [wired]",
+  "fighter L13 studied-attacks [stub]",
+  "fighter L17 action-surge-2 [wired]",
+  "fighter L20 extra-attack-3 [wired]",
+  "fighter L20 indomitable-3 [wired]",
   "monk L1 martial-arts [wired]",
   "monk L1 unarmored-defense-monk [wired]",
   "monk L2 monks-focus [wired]",

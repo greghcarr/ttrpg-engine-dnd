@@ -177,25 +177,26 @@
                   "count": 1
                 }
               ]
-            }
+            },
+            { "id": "tactical-mind", "name": "Tactical Mind", "effects": [] }
           ],
           "columns": {}
         },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [{ "id": "indomitable", "name": "Indomitable", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 1, "recharge": "longRest" }] }, { "id": "tactical-shift", "name": "Tactical Shift", "effects": [] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [{ "id": "extra-attack-2", "name": "Extra Attack (2)", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "tactical-master", "name": "Tactical Master", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [{ "id": "indomitable-2", "name": "Indomitable (2/long rest)", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 2, "recharge": "longRest" }] }, { "id": "studied-attacks", "name": "Studied Attacks", "effects": [] }], "columns": {} },
         "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [{ "id": "action-surge-2", "name": "Action Surge (2/short rest)", "effects": [{ "kind": "GrantResource", "resourceId": "action-surge", "max": 2, "recharge": "shortRest" }] }], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [{ "id": "extra-attack-3", "name": "Extra Attack (3)", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "indomitable-3", "name": "Indomitable (3/long rest)", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 3, "recharge": "longRest" }] }], "columns": {} }
       },
       "subclassLevel": 3
     },

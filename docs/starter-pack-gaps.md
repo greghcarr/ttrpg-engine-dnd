@@ -116,7 +116,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | bard | 1, 2, 3, 5, 7, 9, 10, 15, 20 | 11 (ASI / subclass-only / un-named levels) |
 | cleric | 1, 2, 5, 6, 7, 10, 17, 18, 20 | 11 (ASI / subclass-only levels) |
 | druid | 1, 2, 5, 7, 9, 13, 15, 17, 18, 20 | 10 (ASI / subclass-only / un-named levels) |
-| fighter | 1, 2, 5 | 17 |
+| fighter | 1, 2, 5, 9, 11, 13, 17, 20 | 12 (ASI / subclass-only levels) |
 | monk | 1, 2, 4, 5, 7 | 15 |
 | paladin | 1, 2, 3 | 17 |
 | ranger | 1, 2, 5 | 17 |
@@ -125,7 +125,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
 | wizard | 1, 2, 5, 18, 20 | 15 (ASI / subclass-only / un-named levels) |
 
-Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
+Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
 
 ### Barbarian stub features (effects: [], waiting on engine work)
 
@@ -203,6 +203,17 @@ Slice 55 filled L2, L5, L18, L20 plus an L1 addition. The L2 entry (`scholar`) w
 - `signature-spells` (L20) — pick two L3 spells; cast each 1/short rest with no slot. Same shape as Spell Mastery plus a short-rest cooldown.
 
 Pre-existing gap closed by this slice: Wizard now ships `skillChoices` (choose 2 from Arcana, History, Investigation, Medicine, Nature, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had no skill picks for wizards, which would have prevented a character creator from offering them.
+
+### Fighter stub features (effects: [], waiting on engine work)
+
+Slice 56 filled L9, L11, L13, L17, L20 plus an L5 addition. Six wired entries cover the major Fighter scaling: Indomitable use-count tiers (L9 / L13 / L20 = 1 / 2 / 3 per long rest via `GrantResource` overrides), the Action Surge tier bump at L17 (1 → 2 per short rest, same shape Cleric uses for Channel Divinity), and the Extra Attack tier bumps at L11 (count: +1 on top of L5) and L20 (another +1). The Extra Attack tier entries assume the engine sums `ModifyActionEconomy.extraAttack.count` across sources rather than overriding; if it overrides, the tier behavior would need a different shape (a single feature whose count grows by level, not three separate +1 entries). Stubs:
+
+- `tactical-mind` (L5) — when failing an ability check, spend a Second Wind use to add 1d10 to the check. Needs a "spend resource to reroll" trigger that fires on check-failure events.
+- `tactical-shift` (L9) — when using Second Wind, also move up to half your Speed without provoking opportunity attacks. Needs the same Second Wind-as-trigger hook plus a one-shot movement-grant primitive (the same gap Druid's Instinctive Pounce names).
+- `tactical-master` (L11) — apply a chosen Weapon Mastery property (Push, Sap, or Slow) on a weapon attack regardless of the weapon's mastery. Needs `planWeaponMastery` to accept an "override mastery for this attack" parameter; the existing planner reads the equipped weapon's mastery, not a per-attack choice.
+- `studied-attacks` (L13) — on missing a weapon attack, gain advantage on the next attack against the same target before the end of your next turn. Needs a per-target "studied" condition + an on-miss trigger; the on-hit trigger system is on the deferred-engine-slices list, this is its on-miss counterpart.
+
+Action Surge tier-up at L17 uses the same `GrantResource max:2 shortRest` shape as the L2 entry; the engine has been treating Action Surge as a real resource since its initial wiring, so this scales cleanly. Indomitable at L9 introduces the resource and L13 / L20 raise its max — same Channel Divinity / Rage / Wild Shape / Sorcery Points pattern (fifth class to follow that ladder).
 
 ## Subclasses
 
