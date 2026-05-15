@@ -728,10 +728,17 @@ button.ghost {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
+  text-align: center;
 }
 
 .auth-card h2 {
   margin: 0 0 1rem;
+}
+
+/* Form labels still left-align so input fields read naturally;
+   only the headline + toggle copy stay centered. */
+.auth-card form {
+  text-align: left;
 }
 
 .auth-card form {
