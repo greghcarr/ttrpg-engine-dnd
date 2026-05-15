@@ -104,6 +104,9 @@ export const Creator = (): JSX.Element => {
       <p className="breadcrumb">
         <Link to="/characters">&larr; All characters</Link>
       </p>
+      <div className="page-header">
+        <h2>Create a character</h2>
+      </div>
       <StepBody step={state.step} state={state} dispatch={dispatch} />
 
       <ol className="step-indicator">
