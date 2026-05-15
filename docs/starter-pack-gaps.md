@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 162 / ~370 | ~370 | 34 / 60 / 63 / 4 / 1 across L0–L4. Cantrips complete; L1 + L2 ship every PHB entry (~20 wired at L1, ~17 wired at L2). L3+ stub-heavy. |
+| Spells | 212 / ~370 | ~370 | 34 / 60 / 63 / 54 / 1 across L0–L4. Cantrips complete; L1 / L2 / L3 ship every PHB entry (~20 wired at L1, ~17 at L2, ~9 at L3). L4+ stub-heavy. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -73,13 +73,31 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Push primitive** (move target via STR save with no damage): `gust-of-wind`.
 - **Pure narrative / utility** (intentionally no mechanical event): `animal-messenger`, `arcane-lock`, `augury`, `continual-flame`, `darkvision`, `detect-thoughts`, `find-traps`, `gentle-repose`, `knock`, `locate-animals-or-plants`, `locate-object`, `magic-mouth`, `nystuls-magic-aura`, `rope-trick`, `see-invisibility`, `skywrite`. Ritual, divination, illusion, and utility spells; they parse and load, they just don't emit a mechanical event.
 
-### L3: 4 / ~36
+### L3: 54 / 54 (full PHB list)
 
-**Wired (2):** fireball, spirit-guardians.
+**Wired (9):** call-lightning, fear, fireball, hypnotic-pattern, lightning-bolt, mass-healing-word, sleet-storm, spirit-guardians, vampiric-touch.
 
 **Dedicated planner (2):** counterspell, dispel-magic.
 
-**Schema-only:** none in pack yet. The remaining ~32 PHB L3 spells are not yet in the pack.
+**Schema-only (43):** grouped by the engine primitive each one needs.
+
+- **Summon system** (companion / construct creature instance): `animate-dead`, `conjure-animals`, `phantom-steed`, `summon-fey`, `summon-lesser-demons`, `summon-shadowspawn`, `summon-undead`. Six of the seven are the spell-level-summon cohort from the 2024 Tasha-derived list.
+- **Area-effect spell mechanic** (zone with save on enter, ongoing damage, or movement penalty): `hunger-of-hadar`, `leomunds-tiny-hut`, `plant-growth`, `slow`, `stinking-cloud`, `wind-wall`. Several couple area with a recurring-rider primitive (Hunger, Stinking Cloud).
+- **On-hit trigger system** (rider that fires on a weapon attack): `blinding-smite`, `crusaders-mantle`, `lightning-arrow`. The smite-pattern cohort.
+- **Composite-buff condition** (single condition that imposes multiple distinct effects): `beacon-of-hope` (heal-max + advantage on WIS + death saves), `haste` (extra action + speed + AC + DEX-save advantage).
+- **Caster-chosen options at cast time** (variant chosen by caster, damage type chosen): `bestow-curse` (4-variant curse), `elemental-weapon` (damage type), `spirit-shroud` (damage type + on-hit).
+- **Type-conditional area-effect** (ward against creature types): `magic-circle`.
+- **Illusion mechanic** (INT save against interaction with illusion + recurring belief check): `major-image`.
+- **Resistance-buff condition** (damage-type resistance tied to a condition): `protection-from-energy`.
+- **Cursed condition** (the condition itself isn't yet modeled): `remove-curse` — once `cursed` lands, this is a one-line `remove-condition` wire.
+- **Movement-mode condition**: `fly`.
+- **Transformation handler** (shapeshift utility): `gaseous-form`.
+- **Trap mechanic** (placed delayed-effect): `glyph-of-warding`.
+- **Resurrection mechanic**: `revivify`.
+- **Scrying mechanic** (remote sensor): `clairvoyance`.
+- **Multi-mechanic teleport** (matches Misty Step's dedicated-planner pattern; needs its own planner for teleport + area damage): `thunder-step`.
+- **Recurring-rider primitive** (heal each turn from caster bonus action): `aura-of-vitality`.
+- **Pure narrative / utility** (intentionally no mechanical event): `create-food-and-water`, `daylight`, `feign-death`, `meld-into-stone`, `nondetection`, `sending`, `speak-with-dead`, `speak-with-plants`, `tongues`, `water-breathing`, `water-walk`. Rituals, divination, and quality-of-life spells.
 
 ### L4: 1 / ~28
 
