@@ -46,6 +46,7 @@ export const Sheet = (): JSX.Element => {
   const [cloning, setCloning] = useState(false);
   const [campaigns, setCampaigns] = useState<ReadonlyArray<CampaignSummary> | null>(null);
   const [attaching, setAttaching] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -159,6 +160,28 @@ export const Sheet = (): JSX.Element => {
     }
   };
 
+  const onDelete = async (): Promise<void> => {
+    if (!row || !isOwner || !character) return;
+    if (
+      !confirm(
+        `Delete "${character.name}"? This can't be undone. The character is removed for everyone, including any campaign it's attached to.`,
+      )
+    ) {
+      return;
+    }
+    setDeleting(true);
+    setError(null);
+    try {
+      const { error: err } = await supabase.from('characters').delete().eq('id', row.id);
+      if (err) throw err;
+      navigate('/characters');
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const onClone = async (): Promise<void> => {
     if (!character || !user) return;
     setCloning(true);
@@ -236,6 +259,17 @@ export const Sheet = (): JSX.Element => {
           <button type="button" className="ghost" onClick={onExportPdf} disabled={exporting}>
             {exporting ? 'Building PDF...' : 'Export PDF'}
           </button>
+          {isOwner && (
+            <button
+              type="button"
+              className="ghost danger"
+              onClick={onDelete}
+              disabled={deleting}
+              title="Permanently delete this character"
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          )}
         </div>
       </div>
       <div className="sheet-meta">
