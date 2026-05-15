@@ -27,8 +27,6 @@ import { FavoriteButton } from '@/components/FavoriteButton';
 import {
   CopyIcon,
   DownloadIcon,
-  GlobeIcon,
-  LockIcon,
   PencilIcon,
   TrashIcon,
 } from '@/components/Icons';
@@ -56,6 +54,10 @@ export const Sheet = (): JSX.Element => {
   const [campaigns, setCampaigns] = useState<ReadonlyArray<CampaignSummary> | null>(null);
   const [attaching, setAttaching] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  // First click that flips the character from private to public shows
+  // a confirm dialog. Subsequent toggles on the same page visit skip
+  // it since the user has acknowledged what going public means.
+  const [confirmedPublic, setConfirmedPublic] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -134,10 +136,17 @@ export const Sheet = (): JSX.Element => {
 
   const onToggleVisibility = async (): Promise<void> => {
     if (!row || !isOwner) return;
+    const target = !row.is_public;
+    if (target && !confirmedPublic) {
+      const ok = confirm(
+        `Make "${character?.name ?? 'this character'}" publicly visible? Anyone signed in will be able to see it on the Browse page, favorite it, or clone it for their own use. You can switch it back to private at any time.`,
+      );
+      if (!ok) return;
+      setConfirmedPublic(true);
+    }
     setToggling(true);
     setError(null);
     try {
-      const target = !row.is_public;
       const { error: err } = await supabase
         .from('characters')
         .update({ is_public: target })
@@ -260,18 +269,6 @@ export const Sheet = (): JSX.Element => {
         </p>
         <div className="sheet-actions">
           {user && <FavoriteButton characterId={row.id} />}
-          {isOwner && (
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={onToggleVisibility}
-              disabled={toggling}
-              title={row.is_public ? 'Make private' : 'Share publicly'}
-              aria-label={row.is_public ? 'Make private' : 'Share publicly'}
-            >
-              {row.is_public ? <GlobeIcon /> : <LockIcon />}
-            </button>
-          )}
           {user && !isOwner && (
             <button
               type="button"
@@ -318,16 +315,13 @@ export const Sheet = (): JSX.Element => {
           )}
         </div>
       </div>
-      <div className="sheet-meta">
-        <span className={`badge ${row.is_public ? 'badge-public' : 'badge-private'}`}>
-          {row.is_public ? 'Public' : 'Private'}
-        </span>
-        {currentCampaign && (
+      {currentCampaign && (
+        <div className="sheet-meta">
           <Link to={`/campaigns/${currentCampaign.id}`} className="campaign-link">
             in {currentCampaign.name}
           </Link>
-        )}
-      </div>
+        </div>
+      )}
       {error && <p className="form-error">{error}</p>}
       <dl className="sheet">
         {rows.map(([k, v]) => (
@@ -358,6 +352,26 @@ export const Sheet = (): JSX.Element => {
             </dd>
           </div>
         )}
+        <div className="sheet-row">
+          <dt>Visibility</dt>
+          <dd>
+            {isOwner ? (
+              <button
+                type="button"
+                className={`badge badge-toggle ${row.is_public ? 'badge-public' : 'badge-private'}`}
+                onClick={onToggleVisibility}
+                disabled={toggling}
+                title={row.is_public ? 'Click to make private' : 'Click to share publicly'}
+              >
+                {row.is_public ? 'Public' : 'Private'}
+              </button>
+            ) : (
+              <span className={`badge ${row.is_public ? 'badge-public' : 'badge-private'}`}>
+                {row.is_public ? 'Public' : 'Private'}
+              </span>
+            )}
+          </dd>
+        </div>
       </dl>
     </section>
   );

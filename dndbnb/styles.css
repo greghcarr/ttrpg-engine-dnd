@@ -1008,6 +1008,29 @@ button.ghost {
   border: 1px solid var(--border);
 }
 
+/* Clickable variant of the badge -- used on the sheet's Visibility
+   row so the pill itself toggles public/private when the viewer is
+   the owner. */
+button.badge-toggle {
+  cursor: pointer;
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+}
+
+button.badge-toggle:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+button.badge-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .badge-public {
   color: var(--accent);
   border-color: var(--accent);
