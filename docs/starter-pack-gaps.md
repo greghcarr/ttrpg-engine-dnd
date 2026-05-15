@@ -176,6 +176,37 @@ PHB 2024 ships ~30 general feats and ~25 origin feats; this pack carries the mos
 
 All 15 RAW conditions ship (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious). Ten engine-mechanic conditions also ship to back rider effects (e.g. `sapped`, `vexed-by`, `slowed-10ft` for weapon masteries; `blessed`, `mage-armored`, `guided`, `concentrating` for spell mechanics). Complete.
 
+## Future engine slices (what unblocks the deferred spells)
+
+Each entry below is one engine primitive: a focused engine slice that, once landed, retro-wires a cohort of spells currently shipping schema-only. Ranked roughly by spell-count payoff. When a slice lands, mark it `✓ shipped (slice N)` and walk the affected spells from schema-only to wired in the per-level breakdowns above.
+
+| Primitive | Spells unblocked | Notes |
+|---|---|---|
+| **Summon system** | 11+ (find-familiar, unseen-servant, find-steed, summon-beast, animate-dead, conjure-animals, phantom-steed, summon-fey, summon-lesser-demons, summon-shadowspawn, summon-undead) | `CompanionInstance` state slice, `CompanionSummoned` / `CompanionDismissed` events, slot-level scaling per summon, ties into concentration. Companions are commanded as caster-controlled combatants. |
+| **Area-effect spell mechanic** | ~13 (entangle, grease, cloud-of-daggers, darkness, dust-devil, flaming-sphere, silence, spike-growth, zone-of-truth, hunger-of-hadar, leomunds-tiny-hut, plant-growth, slow, stinking-cloud, wind-wall) | Persistent zone with on-enter / on-start-of-turn save handlers; couples with recurring-rider primitive for damage-per-turn variants. |
+| **On-hit trigger system** | ~9 (divine-favor, ensnaring-strike, hail-of-thorns, hex, searing-smite, thunderous-smite, wrathful-smite, branding-smite, blinding-smite, crusaders-mantle, lightning-arrow, ray-of-enfeeblement) | Effect rider that fires on caster's next weapon attack; unblocks all smite-pattern spells. Foundation already in place via Sneak Attack rider. |
+| **Composite-buff condition** | ~5 (haste, beacon-of-hope, blur, mirror-image, magic-weapon, pass-without-trace) | Single named condition that imposes multiple distinct modifiers (e.g. Haste = extra action + speed + AC + DEX-save adv). |
+| **Caster-chosen options at cast time** | ~7 (chromatic-orb, command, calm-emotions, enhance-ability, enlarge-reduce, bestow-curse, elemental-weapon, spirit-shroud) | Pending-choice protocol on cast: caster picks variant; resolution reads the choice and applies the matching effect. |
+| **Reaction system** | ~3 (absorb-elements, feather-fall, sanctuary), plus all future reaction spells | Cast as a reaction to a trigger event; needs `ReactionRegistered` event + a window on the appropriate `apply` calls. |
+| **Movement-mode condition** | ~3 (fly, spider-climb, levitate) | Adds a movement type (fly / climb / hover) to derived speed; sits next to existing `derivedSpeed` work. |
+| **Transformation handler** (spell variant) | ~2 (alter-self, gaseous-form) | Spell-side transformation; piggybacks on the existing `wildShape` / `polymorph` pattern but with spell-defined target shapes. |
+| **AC-buff condition** | ~3 (shield-of-faith, barkskin, false-life partial) | Flat AC modifier tied to a condition; "set AC to N" variant for barkskin. |
+| **Temp-HP grant primitive** | ~3 (false-life, heroism, plus aid's upcast variant) | Spell mechanic that writes to `hp.temp` and stacks per RAW (max, not additive). |
+| **Recurring-rider primitive** | ~4 (heroism, hex damage, aura-of-vitality, phantasmal-force) | Effect that re-fires each round / turn while a condition is active. Couples with area-effect for "damage on start of turn in zone". |
+| **Item-buff condition** | ~3 (magic-weapon, elemental-weapon, holy-weapon-eventually) | Tags an equipped weapon with +N to attack/damage + optional damage-type rider. |
+| **Attack-roll-buff condition** | ~3 (blur, mirror-image, pass-without-trace) | Imposes advantage / disadvantage on attacks against or by the target. Mirror Image's duplicate-pool is a variant. |
+| **Type-conditional buff / ward** | ~3 (protection-from-evil-and-good, magic-circle) | Effects whose application depends on the affected creature's type. |
+| **Cursed condition** | ~2 (remove-curse, plus future bestow-curse variants) | Standard cursed condition + remove-condition counterpart. |
+| **Resistance-buff condition** | 1 (protection-from-energy), plus future wired smites | Damage-type resistance tied to a condition. |
+| **Trap mechanic** | ~2 (glyph-of-warding, cordon-of-arrows) | Placed delayed-effect that fires on trigger. |
+| **Dedicated planner: Thunder Step** | 1 | Matches Misty Step's pattern but adds an area damage on the origin square. |
+| **Resurrection / death utility** | 1 (revivify) | Engine model for "creature was dead → now alive at N HP". |
+| **Scrying / divination utility** | 1 (clairvoyance) | Remote sensor primitive. |
+| **Illusion-interaction primitive** | ~2 (major-image, silent-image extended) | INT save on interaction + recurring belief check. |
+| **Push / aerial-restraint primitives** | ~2 (gust-of-wind, earthbind) | Forced movement on save + ground tether. |
+
+Picking from this list, top three by spell-count payoff: summon system (11+), area-effect mechanic (~13), on-hit trigger (~9). The other primitives each unblock smaller cohorts; bundle them together by primitive when their turn comes.
+
 ## How this list is maintained
 
-At the close of each content slice, update the relevant section here and bump the "Coverage at a glance" counts. If the slice introduces a new mechanic kind (e.g. a future reaction-spell primitive), retro-update the affected schema-only spells to either `wired` or move them to a different deferred bucket.
+At the close of each content slice, update the relevant section here and bump the "Coverage at a glance" counts. If the slice introduces a new mechanic kind (e.g. a future reaction-spell primitive), retro-update the affected schema-only spells to either `wired` or move them to a different deferred bucket. When an engine slice from the "Future engine slices" table ships, mark it as done and walk the affected spells in this doc to their new status.
