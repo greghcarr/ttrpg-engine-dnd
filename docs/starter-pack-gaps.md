@@ -112,7 +112,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 
 | Class | Levels with features | Empty rows |
 |---|---|---|
-| barbarian | 1, 2, 5, 7 | 16 |
+| barbarian | 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 6 (ASI / subclass-only levels) |
 | bard | 1, 2, 3, 5 | 16 |
 | cleric | 1, 6 | 18 |
 | druid | 1, 2 | 18 |
@@ -125,7 +125,21 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | (none) | 20 |
 | wizard | 1 | 19 |
 
-Notable missing scaling: Rage tiers, Bardic Inspiration die, Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L5/L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer).
+Notable missing scaling: Bardic Inspiration die, Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work.
+
+### Barbarian stub features (effects: [], waiting on engine work)
+
+Slice 49 filled the empty L3-L20 rows. Wired entries lift the rage use cap at L3 / L6 / L12 / L17. The remaining new features ship `effects: []` because each needs a primitive the engine doesn't have yet:
+
+- `primal-knowledge` (L3) — needs a "use STR mod instead of normal mod on these skill checks while raging" effect; depends on a `raging` condition the engine doesn't ship.
+- `instinctive-pounce` (L7) — bonus-action movement piggyback when entering Rage; needs the rage entry hook to attach a one-time movement grant.
+- `brutal-strike` (L9), `improved-brutal-strike` (L13), `improved-brutal-strike-mighty-roar` (L17) — replace Reckless Attack's advantage with a +1d10 (then +2d10) damage rider plus a chosen effect (Forceful Blow / Hamstring Blow / Sundering Blow / Staggering Blow). Needs a choice-at-attack-time primitive that the attack planner consults.
+- `relentless-rage` (L11) — auto-succeed a failed save once per Rage at the cost of Exhaustion; needs a save-result-replacement hook.
+- `persistent-rage` (L15) — drop the 10-round Rage duration but keep the "ends on no-attack-no-damage turn" rule; needs Rage to be a real ongoing effect with duration tracking the engine doesn't model.
+- `indomitable-might` (L18) — use STR score in place of a STR check total when lower; needs check-total replacement.
+- `primal-champion` (L20) — STR / CON +4 with a cap of 25; needs an ability-score-modification effect (the current schema only modifies derived values, not the base scores).
+
+Open item: the L1 Weapon Mastery feature (Barbarian gets 2 slots per the 2024 PHB) is not in the current pack — the L1 row only ships Rage + Unarmored Defense. That's a separate one-line fix outside this slice.
 
 ## Subclasses
 

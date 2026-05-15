@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 0,
-  "total": 52,
-  "wired": 52,
+  "stub": 9,
+  "total": 65,
+  "wired": 56,
 }
 `;
 
@@ -14,9 +14,22 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "barbarian L1 unarmored-defense-barbarian-feature [wired]",
   "barbarian L2 danger-sense [wired]",
   "barbarian L2 reckless-attack [wired]",
+  "barbarian L3 primal-knowledge [stub]",
+  "barbarian L3 rage-uses-3 [wired]",
   "barbarian L5 extra-attack-barb [wired]",
   "barbarian L5 fast-movement [wired]",
+  "barbarian L6 rage-uses-4 [wired]",
   "barbarian L7 feral-instinct [wired]",
+  "barbarian L7 instinctive-pounce [stub]",
+  "barbarian L9 brutal-strike [stub]",
+  "barbarian L11 relentless-rage [stub]",
+  "barbarian L12 rage-uses-5 [wired]",
+  "barbarian L13 improved-brutal-strike [stub]",
+  "barbarian L15 persistent-rage [stub]",
+  "barbarian L17 improved-brutal-strike-mighty-roar [stub]",
+  "barbarian L17 rage-uses-6 [wired]",
+  "barbarian L18 indomitable-might [stub]",
+  "barbarian L20 primal-champion [stub]",
   "bard L1 bardic-inspiration [wired]",
   "bard L2 jack-of-all-trades [wired]",
   "bard L3 expertise-bard [wired]",
