@@ -5,7 +5,7 @@
 // builds an engine `Character`, inserts it into Supabase, and routes
 // to the read-only sheet for the new character.
 
-import { useMemo, useReducer, useState } from 'react';
+import { useMemo, useReducer, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SCHEMA_VERSION, resolveContent } from 'ttrpg-engine-dnd';
 import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
@@ -69,6 +69,40 @@ export const Creator = (): JSX.Element => {
     [state],
   );
 
+  // Swipe-to-navigate on touch devices. Swipe left advances to the
+  // next step (if it's reachable); swipe right goes back. We ignore
+  // touches that start on form text inputs / textareas / selects so
+  // the user can still interact with those normally.
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const SWIPE_DISTANCE = 60;
+  const onTouchStart = (e: React.TouchEvent): void => {
+    const target = e.target as HTMLElement | null;
+    if (target?.matches('input, select, textarea')) {
+      touchStartRef.current = null;
+      return;
+    }
+    const touch = e.touches[0];
+    if (!touch) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const onTouchEnd = (e: React.TouchEvent): void => {
+    const start = touchStartRef.current;
+    touchStartRef.current = null;
+    if (!start) return;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    // Require mostly-horizontal motion past the distance threshold.
+    if (Math.abs(dx) <= SWIPE_DISTANCE) return;
+    if (Math.abs(dx) <= Math.abs(dy) * 1.4) return;
+    if (dx < 0 && next && canAdvance) {
+      dispatch({ type: 'set-step', step: next });
+    } else if (dx > 0 && prev) {
+      dispatch({ type: 'set-step', step: prev });
+    }
+  };
+
   const onSave = async (): Promise<void> => {
     const moderation = checkText(state.name);
     if (!moderation.clean) {
@@ -100,7 +134,12 @@ export const Creator = (): JSX.Element => {
   };
 
   return (
-    <section className="creator" style={classColorVars(state.classId)}>
+    <section
+      className="creator"
+      style={classColorVars(state.classId)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       {prev && (
         <button
           type="button"
