@@ -1116,7 +1116,11 @@ a.icon-btn {
 }
 
 .sheet-meta {
-  margin: 0 0 1rem;
+  /* Aligned to the same 36rem column as .sheet-toolbar and .sheet
+     below so the visibility / campaign badges line up with the
+     body rectangle's edges. */
+  max-width: 36rem;
+  margin: 0 auto 1rem;
 }
 
 .pagination {
@@ -1464,7 +1468,11 @@ a.icon-btn {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.5rem;
+  /* Align the breadcrumb (left) and action icons (right) with the
+     edges of the .sheet body rectangle below by inheriting the same
+     36rem max-width + auto margins. */
+  max-width: 36rem;
+  margin: 0 auto 0.5rem;
 }
 
 .sheet-toolbar .breadcrumb {
