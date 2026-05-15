@@ -1100,20 +1100,15 @@ a.icon-btn {
   gap: 1rem;
 }
 
-/* "Create a campaign" + "Join with a code" sit as a two-up row on
-   non-mobile viewports, each disclosure occupying half the row.
-   Below the mobile breakpoint they collapse to a single stacked
-   column. */
+/* "Create a campaign" + "Join with a code" stack vertically at every
+   viewport size, capped to match the campaign-list column width
+   above. */
 .collapsibles-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-@media (max-width: 720px) {
-  .collapsibles-row {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 32rem;
+  margin: 0 auto;
 }
 
 /* Collapsible disclosure rows used for "Join with a code" + "Create
