@@ -8,9 +8,8 @@
 import { useEffect, useState } from 'react';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
+import { Pagination, usePageSize } from '@/components/Pagination';
 import { fetchUsernames } from '@/lib/campaigns';
-
-const PAGE_SIZE = 24;
 
 type Row = Pick<
   CharacterRow,
@@ -21,6 +20,7 @@ export const Browse = (): JSX.Element => {
   const [rows, setRows] = useState<ReadonlyArray<Row> | null>(null);
   const [usernames, setUsernames] = useState<ReadonlyMap<string, string>>(new Map());
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = usePageSize();
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export const Browse = (): JSX.Element => {
         .select('id, owner_id, name, updated_at, is_public, primary_class_id, species_id')
         .eq('is_public', true)
         .order('updated_at', { ascending: false })
-        .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+        .range(page * pageSize, page * pageSize + pageSize);
       if (cancelled) return;
       if (err) {
         setError(err.message);
@@ -41,8 +41,8 @@ export const Browse = (): JSX.Element => {
       }
       const fetched = data ?? [];
       // We fetched one extra row to know whether there's another page.
-      setHasMore(fetched.length > PAGE_SIZE);
-      const trimmed = fetched.slice(0, PAGE_SIZE);
+      setHasMore(fetched.length > pageSize);
+      const trimmed = fetched.slice(0, pageSize);
       setRows(trimmed);
       try {
         const map = await fetchUsernames(trimmed.map((r) => r.owner_id));
@@ -55,7 +55,7 @@ export const Browse = (): JSX.Element => {
     return () => {
       cancelled = true;
     };
-  }, [page]);
+  }, [page, pageSize]);
 
   return (
     <section className="characters-page">
@@ -81,27 +81,16 @@ export const Browse = (): JSX.Element => {
               />
             ))}
           </ul>
-          {(page > 0 || hasMore) && (
-            <div className="pagination">
-              <button
-                type="button"
-                className="ghost"
-                disabled={page === 0}
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-              >
-                Previous
-              </button>
-              <span className="pagination-page">Page {page + 1}</span>
-              <button
-                type="button"
-                className="ghost"
-                disabled={!hasMore}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )}
+          <Pagination
+            page={page}
+            hasMore={hasMore}
+            onPageChange={setPage}
+            pageSize={pageSize}
+            onPageSizeChange={(next: number) => {
+              setPageSize(next);
+              setPage(0);
+            }}
+          />
         </>
       )}
     </section>

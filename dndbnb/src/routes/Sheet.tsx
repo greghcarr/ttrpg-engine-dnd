@@ -25,7 +25,8 @@ import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
-import { CopyIcon, PencilIcon, TrashIcon } from '@/components/Icons';
+import { CompassFilledIcon, CompassIcon, CopyIcon, PencilIcon, TrashIcon } from '@/components/Icons';
+import { BackLink } from '@/components/BackLink';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
@@ -248,7 +249,7 @@ export const Sheet = (): JSX.Element => {
     return (
       <section className="sheet-page">
         <p className="breadcrumb">
-          <Link to="/characters">&larr; All characters</Link>
+          <BackLink fallback="/characters">&larr; Back</BackLink>
         </p>
         {error ? (
           <p className="status error">{error}</p>
@@ -269,11 +270,6 @@ export const Sheet = (): JSX.Element => {
     ['Languages known', derived.knownLanguages.join(', ') || '(none)'],
   ];
 
-  const currentCampaign =
-    row.campaign_id && campaigns
-      ? campaigns.find((c) => c.id === row.campaign_id) ?? null
-      : null;
-
   return (
     <section
       className="sheet-page"
@@ -281,7 +277,7 @@ export const Sheet = (): JSX.Element => {
     >
       <div className="sheet-toolbar">
         <p className="breadcrumb">
-          <Link to="/characters">&larr; All characters</Link>
+          <BackLink fallback="/characters">&larr; Back</BackLink>
         </p>
         {user && !isOwner && (
           <button
@@ -296,13 +292,6 @@ export const Sheet = (): JSX.Element => {
           </button>
         )}
       </div>
-      {currentCampaign && (
-        <div className="sheet-meta">
-          <Link to={`/campaigns/${currentCampaign.id}`} className="campaign-link">
-            in {currentCampaign.name}
-          </Link>
-        </div>
-      )}
       {error && <p className="form-error">{error}</p>}
       <dl className="sheet">
         {/* Icons pinned to the top-right of the body rectangle.
@@ -318,6 +307,19 @@ export const Sheet = (): JSX.Element => {
             >
               <PencilIcon />
             </Link>
+          )}
+          {isOwner && (
+            <button
+              type="button"
+              className="sheet-icon"
+              onClick={onToggleVisibility}
+              disabled={toggling}
+              title={row.is_public ? 'Click to make private' : 'Click to share publicly'}
+              aria-label={row.is_public ? 'Make private' : 'Make public'}
+              aria-pressed={row.is_public}
+            >
+              {row.is_public ? <CompassFilledIcon /> : <CompassIcon />}
+            </button>
           )}
           {isOwner && (
             <button

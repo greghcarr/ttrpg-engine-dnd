@@ -9,6 +9,7 @@ import { resolveContent } from 'ttrpg-engine-dnd';
 import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { DeleteCharacterButton } from '@/components/DeleteCharacterButton';
+import { CompassFilledIcon, CompassIcon, DragHandleIcon } from '@/components/Icons';
 import { classColorVars } from '@/lib/class-colors';
 
 // Resolved once at module load so we can map species/class ids to
@@ -32,6 +33,25 @@ interface CharacterCardProps {
   readonly showFavorite?: boolean;
   readonly onDeleted?: (characterId: string) => void;
   readonly onError?: (message: string) => void;
+  /** When provided, the public-marker compass becomes a clickable
+   *  button that flips visibility. Pass it on owner-only surfaces
+   *  (MyCharacters). Leave undefined elsewhere so the compass
+   *  renders as a read-only status indicator. */
+  readonly onTogglePublic?: () => void | Promise<void>;
+  /** Forwarded to the outer <li> so callers can attach drag handlers,
+   *  extra class names, etc. without wrapping the card in another <li>. */
+  readonly itemProps?: Omit<React.LiHTMLAttributes<HTMLLIElement>, 'children' | 'style'>;
+  /** Extra CSS variables / styles to merge with the class-color vars on
+   *  the outer <li>. Used by callers that need to set per-row colors
+   *  for things like drop indicators. */
+  readonly extraStyle?: React.CSSProperties;
+  /** Ref to the outer <li>. Separate from itemProps because React
+   *  intercepts the `ref` key during spread before it reaches the DOM. */
+  readonly liRef?: React.Ref<HTMLLIElement>;
+  /** When provided, renders a three-line drag handle on the left edge
+   *  of the card. The props are spread onto the handle button so the
+   *  caller can attach pointer-event handlers. */
+  readonly dragHandleProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 const titleCase = (id: string): string =>
@@ -64,19 +84,64 @@ export const CharacterCard = ({
   showFavorite,
   onDeleted,
   onError,
+  itemProps,
+  extraStyle,
+  liRef,
+  dragHandleProps,
+  onTogglePublic,
 }: CharacterCardProps): JSX.Element => {
   const summary = formatSummary(character.species_id, character.primary_class_id);
+  const { className: extraClass, ...restItemProps } = itemProps ?? {};
+  const hasHandle = !!dragHandleProps;
   return (
-    <li className="character-card" style={classColorVars(character.primary_class_id)}>
+    <li
+      {...restItemProps}
+      ref={liRef}
+      className={`character-card${hasHandle ? ' has-drag-handle' : ''}${extraClass ? ` ${extraClass}` : ''}`}
+      style={{ ...classColorVars(character.primary_class_id), ...extraStyle }}
+    >
+      {hasHandle && (
+        <button
+          type="button"
+          {...dragHandleProps}
+          className={`character-drag-handle${dragHandleProps.className ? ` ${dragHandleProps.className}` : ''}`}
+          aria-label="Reorder character"
+          title="Drag to reorder"
+        >
+          <DragHandleIcon size={18} />
+        </button>
+      )}
       <Link to={`/characters/${character.id}`}>
         <div className="character-card-head">
-          <span className="character-name">
-            {character.name}
-            {character.is_public && showVisibilityBadge && (
-              <span className="badge badge-public">Public</span>
-            )}
-          </span>
+          <span className="character-name">{character.name}</span>
           <div className="character-card-actions">
+            {showVisibilityBadge &&
+              (onTogglePublic ? (
+                <button
+                  type="button"
+                  className="public-marker public-marker-btn"
+                  title={character.is_public ? 'Click to make private' : 'Click to share publicly'}
+                  aria-label={character.is_public ? 'Make private' : 'Make public'}
+                  aria-pressed={!!character.is_public}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onTogglePublic();
+                  }}
+                >
+                  {character.is_public ? <CompassFilledIcon size={16} /> : <CompassIcon size={16} />}
+                </button>
+              ) : (
+                character.is_public && (
+                  <span
+                    className="public-marker"
+                    title="Public"
+                    aria-label="Public character"
+                  >
+                    <CompassFilledIcon size={16} />
+                  </span>
+                )
+              ))}
             {onDeleted && (
               <DeleteCharacterButton
                 characterId={character.id}
