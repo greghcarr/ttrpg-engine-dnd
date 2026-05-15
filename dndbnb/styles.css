@@ -692,18 +692,25 @@ button.ghost {
   cursor: not-allowed;
 }
 
+/* Pinned to viewport center so the input sits between the two
+   fixed creator-arrow buttons, matching the .step-empty-state pattern
+   on the Spells step. */
 .name-input {
-  display: block;
-  margin: 0 auto;
-  max-width: 22rem;
-  width: 100%;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(22rem, 75vw);
+  margin: 0;
   font: inherit;
-  padding: 0.55rem 0.75rem;
+  font-size: 1.1rem;
+  padding: 0.65rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   background: var(--bg);
   color: var(--fg);
   text-align: center;
+  z-index: 10;
 }
 
 .step-controls {
