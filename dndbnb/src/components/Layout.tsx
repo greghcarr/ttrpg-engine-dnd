@@ -44,38 +44,42 @@ export const Layout = (): JSX.Element => {
   return (
     <>
       <header className="site-header">
-        <div className="brand">
-          <Link to="/characters">
-            <h1>dndbnb</h1>
-          </Link>
-          <p className="tagline">a D&amp;D character workbench</p>
-        </div>
+        <div className="site-header-inner">
+          <div className="brand">
+            <Link to="/characters">
+              <h1>dndbnb</h1>
+            </Link>
+            <p className="tagline">a D&amp;D character workbench</p>
+          </div>
 
-        {session ? (
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={() => setMenuOpen((open) => !open)}
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            title={menuOpen ? 'Close menu' : 'Open menu'}
-          >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
-        ) : (
-          <Link to="/sign-in" className="link-button">
-            Sign in
-          </Link>
-        )}
+          {session ? (
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              title={menuOpen ? 'Close menu' : 'Open menu'}
+            >
+              {menuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          ) : (
+            <Link to="/sign-in" className="link-button">
+              Sign in
+            </Link>
+          )}
+        </div>
 
         {menuOpen && session && (
           <div className="mobile-menu">
-            <div className="mobile-menu-links">{navLinks}</div>
-            <div className="mobile-menu-footer">
-              <span className="user-name">{username ?? 'signed in'}</span>
-              <button type="button" onClick={signOut} className="link-button">
-                Sign out
-              </button>
+            <div className="mobile-menu-inner">
+              <div className="mobile-menu-links">{navLinks}</div>
+              <div className="mobile-menu-footer">
+                <span className="user-name">{username ?? 'signed in'}</span>
+                <button type="button" onClick={signOut} className="link-button">
+                  Sign out
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -73,13 +73,21 @@ button.link-button {
 
 .site-header {
   position: relative;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+/* Inner wrapper constrains the brand + nav to the same max-width as
+   .site-main so the logo and hamburger line up with the body content
+   on wide displays, instead of pinning to the viewport edges. */
+.site-header-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
+  max-width: 64rem;
+  margin: 0 auto;
 }
 
 .site-header .brand a {
@@ -110,8 +118,13 @@ button.link-button {
   background: var(--card);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  padding: 0.5rem 1.25rem 1rem;
   z-index: 100;
+}
+
+.mobile-menu-inner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0.5rem 2rem 1rem;
 }
 
 .mobile-menu-links {
@@ -141,8 +154,11 @@ button.link-button {
 }
 
 @media (max-width: 720px) {
-  .site-header {
+  .site-header-inner {
     padding: 0.75rem 1rem;
+  }
+  .mobile-menu-inner {
+    padding: 0.5rem 1rem 1rem;
   }
   .tagline {
     display: none;
