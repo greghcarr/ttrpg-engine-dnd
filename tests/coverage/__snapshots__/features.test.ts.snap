@@ -314,6 +314,11 @@ exports[`feature-coverage matrix: feats > feat catalog by category + wire status
   },
   {
     "category": "origin",
+    "id": "healer",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
     "id": "lucky",
     "status": "wired",
   },
@@ -334,12 +339,22 @@ exports[`feature-coverage matrix: feats > feat catalog by category + wire status
   },
   {
     "category": "origin",
+    "id": "musician",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
     "id": "savage-attacker",
     "status": "stub",
   },
   {
     "category": "origin",
     "id": "skilled",
+    "status": "stub",
+  },
+  {
+    "category": "origin",
+    "id": "tavern-brawler",
     "status": "stub",
   },
   {
