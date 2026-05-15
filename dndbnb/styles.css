@@ -42,6 +42,47 @@ body {
   line-height: 1.5;
 }
 
+/* Custom hover tooltips driven by the same `title` attribute the
+   buttons already use. The native browser tooltip has a long delay
+   (and some browsers suppress it entirely on touch devices), so we
+   render our own immediately on hover via ::after.
+   We carefully avoid setting `position: relative` on elements that
+   are already positioned (e.g. .creator-arrow's fixed) -- their
+   existing positioning context anchors the ::after directly. */
+button[title]:hover:not(.creator-arrow),
+a[title]:hover:not(.creator-arrow) {
+  position: relative;
+}
+
+button[title]:hover::after,
+a[title]:hover::after,
+[role="button"][title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  padding: 0.32rem 0.6rem;
+  border-radius: 0.375rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  text-transform: none;
+}
+
+/* Header nav icons sit at the very top of the page; flip their
+   tooltip to drop down instead of clipping above the viewport. */
+.nav-icon[title]:hover::after {
+  bottom: auto;
+  top: calc(100% + 0.4rem);
+}
+
 a {
   color: var(--accent);
 }
