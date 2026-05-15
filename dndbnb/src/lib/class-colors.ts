@@ -10,11 +10,11 @@
 //
 // Classes that don't exist in WoW (Barbarian, Bard, Sorcerer) get
 // stand-ins picked to fit the class theme: rage red for Barbarian,
-// magnetic pink for Bard, electric royal blue for Sorcerer's innate
-// arcane lineage (distinct from Wizard's pale-sky mage blue).
-// Cleric inherits Priest white; Paladin gets a gold tone instead of
-// WoW's pink (which we use for Bard). Anything not in the map
-// (homebrew classes, future content packs) falls back to deep purple.
+// gold for Bard's flashy bard-tongue showmanship, electric royal blue
+// for Sorcerer's innate arcane lineage (distinct from Wizard's
+// pale-sky mage blue). Cleric inherits Priest white; Paladin keeps
+// WoW's canon pink. Anything not in the map (homebrew classes,
+// future content packs) falls back to deep purple.
 
 export interface ClassColor {
   readonly bg: string;
@@ -23,12 +23,12 @@ export interface ClassColor {
 
 const CLASS_COLORS: Readonly<Record<string, ClassColor>> = {
   barbarian: { bg: '#C41E3A', fg: '#fdf5f7' },
-  bard: { bg: '#F48CBA', fg: '#1a0a13' },
+  bard: { bg: '#E5C16C', fg: '#1a1305' },
   cleric: { bg: '#DCDCE0', fg: '#16161a' },
   druid: { bg: '#FF7C0A', fg: '#1a0d00' },
   fighter: { bg: '#C69B6D', fg: '#1a1108' },
   monk: { bg: '#00C97A', fg: '#001a0e' },
-  paladin: { bg: '#E5C16C', fg: '#1a1305' },
+  paladin: { bg: '#F48CBA', fg: '#1a0a13' },
   ranger: { bg: '#AAD372', fg: '#0e1a05' },
   rogue: { bg: '#E8D14B', fg: '#1a1500' },
   sorcerer: { bg: '#2E5CDB', fg: '#f0f5ff' },
