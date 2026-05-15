@@ -338,9 +338,9 @@ const PoolAssignTable = ({
                   })}
                 </div>
               </td>
-              <td className="num">{bgBonus > 0 ? `+${bgBonus}` : ''}</td>
-              <td className="num">{current === null ? '' : final}</td>
-              <td className="num">{current === null ? '' : formatMod(abilityMod(final))}</td>
+              <td className="num cell-bg">{bgBonus > 0 ? `+${bgBonus}` : ''}</td>
+              <td className="num cell-final">{current === null ? '' : final}</td>
+              <td className="num cell-mod">{current === null ? '' : formatMod(abilityMod(final))}</td>
             </tr>
           );
         })}
@@ -457,10 +457,10 @@ const PointBuyPanel = ({
                     </button>
                   </div>
                 </td>
-                <td className="num">{cost}</td>
-                <td className="num">{bgBonus > 0 ? `+${bgBonus}` : ''}</td>
-                <td className="num">{final}</td>
-                <td className="num">{formatMod(abilityMod(final))}</td>
+                <td className="num cell-cost">{cost}</td>
+                <td className="num cell-bg">{bgBonus > 0 ? `+${bgBonus}` : ''}</td>
+                <td className="num cell-final">{final}</td>
+                <td className="num cell-mod">{formatMod(abilityMod(final))}</td>
               </tr>
             );
           })}

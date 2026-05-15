@@ -169,6 +169,72 @@ button.link-button {
   .site-main {
     padding: 1.25rem 1rem;
   }
+
+  /* Ability scores table: drop table semantics and stack each row
+     vertically so the pills (or stepper) have full row width. The
+     Background column hides because the Final column already shows
+     the combined value; Final / Mod / Cost render as labelled inline
+     text below the assignment row. */
+  .ability-table {
+    display: block;
+  }
+  .ability-table thead {
+    display: none;
+  }
+  .ability-table tbody {
+    display: block;
+  }
+  .ability-table tr {
+    display: block;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ability-table tr:last-child {
+    border-bottom: none;
+  }
+  .ability-table th,
+  .ability-table td {
+    display: inline-block;
+    padding: 0;
+    border: none;
+    text-align: left;
+  }
+  .ability-table th[scope="row"] {
+    display: block;
+    width: auto;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  /* Pills / stepper cell -- always the first td -- spans the full row */
+  .ability-table tr > td:first-of-type {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.55rem;
+  }
+  .ability-table .cell-bg {
+    display: none;
+  }
+  .ability-table .cell-final,
+  .ability-table .cell-mod,
+  .ability-table .cell-cost {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-right: 1.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .ability-table .cell-final::before {
+    content: 'Final ';
+  }
+  .ability-table .cell-mod::before {
+    content: 'Mod ';
+  }
+  .ability-table .cell-cost::before {
+    content: 'Cost ';
+  }
+  .array-pills {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
 }
 
 .user-name {
