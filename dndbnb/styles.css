@@ -100,12 +100,6 @@ button.link-button {
   letter-spacing: -0.02em;
 }
 
-.tagline {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
 /* Header collapses to brand + hamburger at every viewport. The
    navigation lives entirely inside the dropdown panel rather than
    strewn across the top bar. */
@@ -160,9 +154,6 @@ button.link-button {
   }
   .mobile-menu-inner {
     padding: 0.5rem 1rem 1rem;
-  }
-  .tagline {
-    display: none;
   }
   .site-main {
     padding: 1.25rem 1rem;
