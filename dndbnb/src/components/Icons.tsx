@@ -203,6 +203,31 @@ export const ChevronRightIcon = ({ size = 18, className }: IconProps): JSX.Eleme
   </svg>
 );
 
+export const CrownFilledIcon = ({ size = 16, className }: IconProps): JSX.Element => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    stroke="currentColor"
+    strokeWidth={1.5}
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden
+  >
+    <path d="M3 18 L3 8 L9 13 L12 6 L15 13 L21 8 L21 18 Z" />
+    <line x1="3" y1="19" x2="21" y2="19" strokeLinecap="round" />
+  </svg>
+);
+
+export const DragHandleIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+
 export const DiceIcon = ({ size = 18, className }: IconProps): JSX.Element => (
   <svg {...baseSvgProps(size, className)}>
     <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />

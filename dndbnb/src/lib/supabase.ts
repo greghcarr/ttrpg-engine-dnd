@@ -32,6 +32,7 @@ export type Database = {
           campaign_id: string | null;
           primary_class_id: string | null;
           species_id: string | null;
+          sort_order: number;
           created_at: string;
           updated_at: string;
         };
@@ -42,6 +43,7 @@ export type Database = {
           payload: unknown;
           schema_version: number;
           campaign_id?: string | null;
+          sort_order?: number;
         };
         Update: {
           name?: string;
@@ -49,6 +51,7 @@ export type Database = {
           payload?: unknown;
           schema_version?: number;
           campaign_id?: string | null;
+          sort_order?: number;
         };
         Relationships: [];
       };

@@ -15,34 +15,55 @@ export interface CampaignSummary {
   readonly owner_id: string;
   readonly updated_at: string;
   readonly memberCount: number;
+  readonly characterCount: number;
 }
 
-// Lists every campaign the signed-in user is a member of. RLS gates
-// reads to membership, so this query needs no explicit user filter.
-export const listMyCampaigns = async (): Promise<CampaignSummary[]> => {
-  const { data, error } = await supabase
+// Lists campaigns the signed-in user is a member of. RLS gates reads
+// to membership, so this query needs no explicit user filter. The
+// optional `range` argument enables pagination; pass `{ from, to }`
+// matching Supabase's range semantics (inclusive). Without range,
+// every campaign is returned (used by code paths that need the
+// complete list, e.g. the Sheet's "attach to campaign" dropdown).
+export const listMyCampaigns = async (
+  range?: { readonly from: number; readonly to: number },
+): Promise<CampaignSummary[]> => {
+  let query = supabase
     .from('campaigns')
     .select('id, owner_id, name, description, icon, join_code, updated_at')
     .order('updated_at', { ascending: false });
+  if (range) query = query.range(range.from, range.to);
+  const { data, error } = await query;
   if (error) throw error;
   const campaigns = data ?? [];
   if (campaigns.length === 0) return [];
 
-  // Member counts: one query, group client-side. Saves a row per
-  // campaign vs an aggregation RPC.
+  // Member + character counts: one query each, group client-side.
+  // Saves a row per campaign vs an aggregation RPC.
+  const ids = campaigns.map((c) => c.id);
   const { data: memberRows, error: mErr } = await supabase
     .from('campaign_members')
     .select('campaign_id')
-    .in(
-      'campaign_id',
-      campaigns.map((c) => c.id),
-    );
+    .in('campaign_id', ids);
   if (mErr) throw mErr;
-  const counts = new Map<string, number>();
+  const memberCounts = new Map<string, number>();
   for (const row of memberRows ?? []) {
-    counts.set(row.campaign_id, (counts.get(row.campaign_id) ?? 0) + 1);
+    memberCounts.set(row.campaign_id, (memberCounts.get(row.campaign_id) ?? 0) + 1);
   }
-  return campaigns.map((c) => ({ ...c, memberCount: counts.get(c.id) ?? 0 }));
+  const { data: charRows, error: chErr } = await supabase
+    .from('characters')
+    .select('campaign_id')
+    .in('campaign_id', ids);
+  if (chErr) throw chErr;
+  const characterCounts = new Map<string, number>();
+  for (const row of charRows ?? []) {
+    if (!row.campaign_id) continue;
+    characterCounts.set(row.campaign_id, (characterCounts.get(row.campaign_id) ?? 0) + 1);
+  }
+  return campaigns.map((c) => ({
+    ...c,
+    memberCount: memberCounts.get(c.id) ?? 0,
+    characterCount: characterCounts.get(c.id) ?? 0,
+  }));
 };
 
 export const createCampaign = async (
@@ -118,6 +139,17 @@ export const setCampaignIcon = async (
   if (error) throw error;
 };
 
+export const setCampaignName = async (
+  campaignId: string,
+  name: string,
+): Promise<void> => {
+  const { error } = await supabase
+    .from('campaigns')
+    .update({ name })
+    .eq('id', campaignId);
+  if (error) throw error;
+};
+
 export interface CampaignDetail {
   readonly campaign: CampaignRow;
   readonly members: ReadonlyArray<MemberWithUsername>;
@@ -133,6 +165,10 @@ export interface CampaignCharacterRow {
   readonly name: string;
   readonly owner_id: string;
   readonly ownerUsername: string | null;
+  readonly updated_at: string;
+  readonly is_public: boolean;
+  readonly primary_class_id: string | null;
+  readonly species_id: string | null;
 }
 
 export const fetchCampaignDetail = async (
@@ -153,7 +189,7 @@ export const fetchCampaignDetail = async (
 
   const { data: characters, error: chErr } = await supabase
     .from('characters')
-    .select('id, name, owner_id')
+    .select('id, name, owner_id, updated_at, is_public, primary_class_id, species_id')
     .eq('campaign_id', campaignId)
     .order('name');
   if (chErr) throw chErr;
