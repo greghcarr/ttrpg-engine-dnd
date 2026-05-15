@@ -316,7 +316,8 @@ button.ghost {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, 14rem);
+  justify-content: center;
   gap: 0.75rem;
 }
 
@@ -792,6 +793,7 @@ button.ghost {
 .empty {
   color: var(--muted);
   font-style: italic;
+  text-align: center;
 }
 
 .character-list {
@@ -799,7 +801,11 @@ button.ghost {
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  /* Fixed-width tracks centered when there's room left over, so a
+     single card sits centered rather than orphaned at the left, and
+     a sparse list reads as a tidy centered group. */
+  grid-template-columns: repeat(auto-fill, 18rem);
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -1021,7 +1027,8 @@ a.icon-btn {
   padding: 0;
   margin: 0 0 1.25rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-template-columns: repeat(auto-fill, 20rem);
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -1252,7 +1259,7 @@ a.icon-btn {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   max-width: 36rem;
-  margin: 0;
+  margin: 0 auto;
 }
 
 .sheet-row {
