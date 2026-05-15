@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 49,
-  "total": 126,
-  "wired": 77,
+  "stub": 61,
+  "total": 142,
+  "wired": 81,
 }
 `;
 
@@ -80,10 +80,26 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "monk L1 unarmored-defense-monk [wired]",
   "monk L2 monks-focus [wired]",
   "monk L2 unarmored-movement-monk [wired]",
+  "monk L2 uncanny-metabolism [stub]",
+  "monk L3 deflect-attacks [stub]",
   "monk L4 slow-fall [wired]",
   "monk L5 extra-attack-monk [wired]",
+  "monk L5 ki-uses-5 [wired]",
+  "monk L5 martial-arts-die-d8 [stub]",
   "monk L5 stunning-strike [wired]",
+  "monk L6 empowered-strikes [stub]",
   "monk L7 evasion-monk [wired]",
+  "monk L7 heightened-mobility [stub]",
+  "monk L9 acrobatic-movement [stub]",
+  "monk L10 ki-uses-10 [wired]",
+  "monk L11 martial-arts-die-d10 [stub]",
+  "monk L13 deflect-energy [stub]",
+  "monk L15 ki-uses-15 [wired]",
+  "monk L15 perfect-focus [stub]",
+  "monk L17 martial-arts-die-d12 [stub]",
+  "monk L18 empty-body [stub]",
+  "monk L20 body-and-mind [stub]",
+  "monk L20 ki-uses-20 [wired]",
   "paladin L1 lay-on-hands [wired]",
   "paladin L2 fighting-style-paladin [wired]",
   "paladin L3 channel-divinity-paladin [wired]",

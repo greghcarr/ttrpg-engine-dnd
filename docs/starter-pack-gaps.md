@@ -117,7 +117,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | cleric | 1, 2, 5, 6, 7, 10, 17, 18, 20 | 11 (ASI / subclass-only levels) |
 | druid | 1, 2, 5, 7, 9, 13, 15, 17, 18, 20 | 10 (ASI / subclass-only / un-named levels) |
 | fighter | 1, 2, 5, 9, 11, 13, 17, 20 | 12 (ASI / subclass-only levels) |
-| monk | 1, 2, 4, 5, 7 | 15 |
+| monk | 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 18, 20 | 5 (ASI / subclass-only levels) |
 | paladin | 1, 2, 3 | 17 |
 | ranger | 1, 2, 5 | 17 |
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
@@ -125,7 +125,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
 | wizard | 1, 2, 5, 18, 20 | 15 (ASI / subclass-only / un-named levels) |
 
-Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
+Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Stunning Strike DC scaling, Martial Arts die (content-layer flags ship at L5 / L11 / L17 but stay as stubs — the engine's Custom martial-arts handler doesn't yet consult the level to compute the die), Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
 
 ### Barbarian stub features (effects: [], waiting on engine work)
 
@@ -214,6 +214,23 @@ Slice 56 filled L9, L11, L13, L17, L20 plus an L5 addition. Six wired entries co
 - `studied-attacks` (L13) — on missing a weapon attack, gain advantage on the next attack against the same target before the end of your next turn. Needs a per-target "studied" condition + an on-miss trigger; the on-hit trigger system is on the deferred-engine-slices list, this is its on-miss counterpart.
 
 Action Surge tier-up at L17 uses the same `GrantResource max:2 shortRest` shape as the L2 entry; the engine has been treating Action Surge as a real resource since its initial wiring, so this scales cleanly. Indomitable at L9 introduces the resource and L13 / L20 raise its max — same Channel Divinity / Rage / Wild Shape / Sorcery Points pattern (fifth class to follow that ladder).
+
+### Monk stub features (effects: [], waiting on engine work)
+
+Slice 57 filled L2 (addition), L3, L5 (addition), L6, L7 (addition), L9, L10, L11, L13, L15, L17, L18, L20. Four wired entries bump the Ki max via `GrantResource` overrides at milestones (L5 → 5, L10 → 10, L15 → 15, L20 → 20). Non-milestone levels keep the L2 hardcoded max of 2, undercounting by 1-4 vs the RAW "Ki = monk level" formula; the cleaner fix is a `Formula` max on the L2 entry that reads monk level (the wizard's Arcane Recovery uses this shape), deferred to keep the slice scoped. Stubs:
+
+- `uncanny-metabolism` (L2) — on initiative, regain Hit Points (martial-arts-die-roll + monk level) and regain all expended Ki points, once per long rest. Needs an on-initiative trigger hook plus a heal-by-formula primitive.
+- `deflect-attacks` (L3) — reaction to reduce damage from an attack, then redirect martial-arts-die + DEX + monk-level damage back at the attacker. Needs the reaction system plus a "reduce-then-counter" sequencing the engine doesn't model.
+- `martial-arts-die-d8` (L5), `martial-arts-die-d10` (L11), `martial-arts-die-d12` (L17) — the Custom martial-arts handler at L1 doesn't yet consult monk level to pick the die size. These tier-flags ship so the content surface acknowledges the scaling; the handler-side fix is a single line once someone wires it.
+- `empowered-strikes` (L6) — unarmed strikes count as magical and can deal force damage. Needs a "damage-type override on unarmed strike" content rider; the closest existing primitive is the on-hit damage rider used for Sneak Attack but it doesn't replace the base damage type.
+- `heightened-mobility` (L7) — Patient Defense and Step of the Wind cost zero Ki on the first use per turn. Needs a "free first cost per turn" tracker on specific Ki-using actions.
+- `acrobatic-movement` (L9) — move along walls or liquids on your turn without falling; advantage on STR (Athletics) checks. Needs a `MovementMode` extension plus a conditional advantage on a check.
+- `deflect-energy` (L13) — extend Deflect Attacks to also reduce damage from a damage type the attack deals. Same reaction hook as Deflect Attacks.
+- `perfect-focus` (L15) — when rolling initiative, if you have fewer than 4 Ki points, regain expended Ki up to a total of 4. Same on-initiative trigger as Uncanny Metabolism plus a conditional ceiling.
+- `empty-body` (L18) — spend 4 Ki to become Invisible and gain Resistance to all damage types except Force for 1 minute, no Concentration. Needs the Invisibility condition wired plus a multi-damage-type-resistance buff. Some of those conditions ship; bundling them into a single feature is a stub.
+- `body-and-mind` (L20) — DEX and WIS scores increase by 4, max 25 for those. Same shape as Barbarian's Primal Champion stub; needs an ability-score-modification effect with a max-override.
+
+Stunning Strike DC scaling (8 + prof + WIS) is still the engine's responsibility; the L5 stunning-strike entry is `Custom { handlerId: 'stunning-strike' }` and the handler is presumed to read the actor's stats.
 
 ## Subclasses
 
