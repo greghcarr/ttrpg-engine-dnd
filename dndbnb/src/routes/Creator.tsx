@@ -207,29 +207,13 @@ export const Creator = (): JSX.Element => {
 
       {error && <p className="form-error">{error}</p>}
 
-      <div className="step-controls">
-        <button
-          type="button"
-          className="ghost"
-          onClick={() => prev && dispatch({ type: 'set-step', step: prev })}
-          disabled={!prev}
-        >
-          Previous
-        </button>
-        {state.step === 'review' ? (
+      {state.step === 'review' && (
+        <div className="step-controls">
           <button type="button" onClick={onSave} disabled={!allComplete || saving}>
             {saving ? 'Saving...' : 'Save character'}
           </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => next && dispatch({ type: 'set-step', step: next })}
-            disabled={!canAdvance || !next}
-          >
-            Next
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
     </section>
   );
