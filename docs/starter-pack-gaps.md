@@ -121,7 +121,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | paladin | 1, 2, 3 | 17 |
 | ranger | 1, 2, 5 | 17 |
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
-| sorcerer | 1, 2, 5 | 17 |
+| sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
 | warlock | (none) | 20 |
 | wizard | 1 | 19 |
 
@@ -172,6 +172,15 @@ Slice 52 filled L5, L7, L9, L13, L15, L17, L18, L20. Wired entries hardcode Wild
 - `archdruid` (L20) — unlimited Wild Shape (treat the resource as auto-refunded on use), plus the ability to disregard verbal / somatic / non-cost material components for druid spells. Needs an "ignore resource cost" override.
 
 The CR / movement-mode / size catalog of Wild Shape forms (Beast Shape, Combat Wild Shape, etc.) is still entirely consumer territory; the engine accepts a chosen statblock at transformation time but no canonical druid form library ships in the pack.
+
+### Sorcerer stub features (effects: [], waiting on engine work)
+
+Slice 53 filled L10, L15, L17, L20 (plus an addition at L5). Wired entries bump the Sorcery Points max via `GrantResource` overrides at the milestone levels (L5 → 5, L10 → 10, L15 → 15, L17 → 17, L20 → 20). Non-milestone levels (L3 / L4 / L6 / L7 / L8 / L9 / L11 / L12 / L13 / L14 / L16 / L18 / L19) keep whichever max the last preceding milestone set, which under-counts the player's actual SP by 1 or 2 at most. The cleaner long-term fix is a `Formula` max on the L2 entry that reads the actor's sorcerer level; that's an L1-side edit deferred for now to keep this slice focused on filling empty rows. Stubs:
+
+- `metamagic-known-3` (L10) and `metamagic-known-4` (L17) — increase the count of Metamagic options the sorcerer knows. The L2 Metamagic entry ships as `Custom { handlerId: 'metamagic' }`; no handler is registered, and the "known options" count isn't a real engine concept (players track their own list). These tier entries note the level the count changes; full wiring needs Metamagic as a first-class concept with a per-option enum.
+- `arcane-apotheosis` (L20) — 2024 capstone: while Innate Sorcery is active, spending a Sorcery Point to use Metamagic on a spell costs zero points instead. Needs Innate Sorcery to be an actual condition the engine recognizes and a Metamagic-cost-zeroing override.
+
+Observation: `innate-sorcery` is currently a 2-use long-rest resource at L1 with no scaling. PHB 2024 keeps it at 2/long-rest through L20, so no tier ladder is required there.
 
 ## Subclasses
 

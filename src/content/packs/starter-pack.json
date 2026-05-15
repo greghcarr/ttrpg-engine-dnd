@@ -594,22 +594,22 @@
         "2": { "proficiencyBonus": 2, "features": [{ "id": "font-of-magic", "name": "Font of Magic (Sorcery Points)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 2, "recharge": "longRest" }] }, { "id": "metamagic", "name": "Metamagic", "effects": [{ "kind": "Custom", "handlerId": "metamagic" }] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
-        "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [{ "kind": "RecoverResource", "resourceId": "sorcery-points", "amount": 4, "when": "shortRest" }] }], "columns": {} },
+        "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [{ "kind": "RecoverResource", "resourceId": "sorcery-points", "amount": 4, "when": "shortRest" }] }, { "id": "sorcery-points-5", "name": "Sorcery Points (5)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 5, "recharge": "longRest" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [{ "id": "metamagic-known-3", "name": "Metamagic (3 known)", "effects": [] }, { "id": "sorcery-points-10", "name": "Sorcery Points (10)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 10, "recharge": "longRest" }] }], "columns": {} },
         "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "15": { "proficiencyBonus": 5, "features": [{ "id": "sorcery-points-15", "name": "Sorcery Points (15)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 15, "recharge": "longRest" }] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [{ "id": "metamagic-known-4", "name": "Metamagic (4 known)", "effects": [] }, { "id": "sorcery-points-17", "name": "Sorcery Points (17)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 17, "recharge": "longRest" }] }], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [{ "id": "sorcery-points-20", "name": "Sorcery Points (20)", "effects": [{ "kind": "GrantResource", "resourceId": "sorcery-points", "max": 20, "recharge": "longRest" }] }, { "id": "arcane-apotheosis", "name": "Arcane Apotheosis", "effects": [] }], "columns": {} }
       },
       "spellcasting": { "ability": "CHA", "type": "full" }
     }

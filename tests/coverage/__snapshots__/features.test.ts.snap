@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 23,
-  "total": 88,
-  "wired": 65,
+  "stub": 26,
+  "total": 96,
+  "wired": 70,
 }
 `;
 
@@ -97,6 +97,14 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "sorcerer L2 font-of-magic [wired]",
   "sorcerer L2 metamagic [wired]",
   "sorcerer L5 sorcerous-restoration [wired]",
+  "sorcerer L5 sorcery-points-5 [wired]",
+  "sorcerer L10 metamagic-known-3 [stub]",
+  "sorcerer L10 sorcery-points-10 [wired]",
+  "sorcerer L15 sorcery-points-15 [wired]",
+  "sorcerer L17 metamagic-known-4 [stub]",
+  "sorcerer L17 sorcery-points-17 [wired]",
+  "sorcerer L20 arcane-apotheosis [stub]",
+  "sorcerer L20 sorcery-points-20 [wired]",
   "wizard L1 arcane-recovery [wired]",
 ]
 `;
