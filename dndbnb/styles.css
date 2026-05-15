@@ -255,6 +255,18 @@ button.ghost {
   margin: 0 auto;
 }
 
+/* Above the mobile breakpoint the creator widens to 75% of the
+   viewport, escaping the .site-main 64rem cap via negative margins
+   so the step body actually reaches 75vw on wide monitors. */
+@media (min-width: 720px) {
+  .creator {
+    width: 75vw;
+    max-width: 75vw;
+    margin-left: calc(50% - 37.5vw);
+    margin-right: calc(50% - 37.5vw);
+  }
+}
+
 /* Big chevron arrows pinned to the viewport edges for prev/next
    step navigation. Hidden on mobile (the bottom Prev/Next buttons
    carry that role on small screens, where edge-pinning competes with
