@@ -18,7 +18,6 @@ import {
   prevStep,
   randomizeState,
   reduce,
-  stepIssue,
   type Step,
 } from '@/lib/creator/state';
 import { buildCharacter } from '@/lib/creator/build';
@@ -61,8 +60,7 @@ export const Creator = (): JSX.Element => {
     setError(null);
   };
 
-  const currentIssue = stepIssue(state, state.step);
-  const canAdvance = currentIssue === null;
+  const canAdvance = isStepComplete(state, state.step);
   const next = nextStep(state.step);
   const prev = prevStep(state.step);
   const allComplete = useMemo(
@@ -129,9 +127,6 @@ export const Creator = (): JSX.Element => {
 
       <StepBody step={state.step} state={state} dispatch={dispatch} />
 
-      {currentIssue && state.step !== 'review' && (
-        <p className="form-hint">{currentIssue}</p>
-      )}
       {error && <p className="form-error">{error}</p>}
 
       <div className="step-controls">
