@@ -1,0 +1,165 @@
+// Character creator wizard.
+//
+// Orchestrates the step components: shows the step indicator, the
+// active step body, and Prev/Next/Save controls. The Save button
+// builds an engine `Character`, inserts it into Supabase, and routes
+// to the read-only sheet for the new character.
+
+import { useMemo, useReducer, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { SCHEMA_VERSION, resolveContent } from 'ttrpg-engine-dnd';
+import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+import {
+  STEP_LABELS,
+  STEP_ORDER,
+  initialState,
+  isStepComplete,
+  nextStep,
+  prevStep,
+  reduce,
+  stepIssue,
+  type Step,
+} from '@/lib/creator/state';
+import { buildCharacter } from '@/lib/creator/build';
+import { checkText } from '@/lib/moderation';
+import {
+  StepAbilities,
+  StepClass,
+  StepIdentity,
+  StepOrigin,
+  StepReview,
+  StepSpells,
+} from '@/components/creator/Steps';
+import { supabase } from '@/lib/supabase';
+
+const content = resolveContent([loadStarterPack()]);
+
+export const Creator = (): JSX.Element => {
+  const [state, dispatch] = useReducer(reduce, initialState);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
+
+  const currentIssue = stepIssue(state, state.step);
+  const canAdvance = currentIssue === null;
+  const next = nextStep(state.step);
+  const prev = prevStep(state.step);
+  const allComplete = useMemo(
+    () => STEP_ORDER.every((s) => isStepComplete(state, s)),
+    [state],
+  );
+
+  const onSave = async (): Promise<void> => {
+    const moderation = checkText(state.name);
+    if (!moderation.clean) {
+      setError(
+        `Please choose a different name (flagged: ${moderation.matchedTerms.join(', ') || 'profanity'}).`,
+      );
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const character = buildCharacter(state, content);
+      const { data, error: err } = await supabase
+        .from('characters')
+        .insert({
+          name: character.name,
+          payload: character,
+          schema_version: SCHEMA_VERSION,
+        })
+        .select('id')
+        .single();
+      if (err) throw err;
+      navigate(`/characters/${data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="creator">
+      <p className="breadcrumb">
+        <Link to="/characters">&larr; All characters</Link>
+      </p>
+      <ol className="step-indicator">
+        {STEP_ORDER.map((s) => {
+          const active = state.step === s;
+          const complete = isStepComplete(state, s);
+          return (
+            <li
+              key={s}
+              className={`step-pip ${active ? 'is-active' : ''} ${complete ? 'is-done' : ''}`}
+            >
+              <button
+                type="button"
+                onClick={() => dispatch({ type: 'set-step', step: s })}
+                disabled={active}
+              >
+                <span className="pip-index">{STEP_ORDER.indexOf(s) + 1}</span>
+                <span className="pip-label">{STEP_LABELS[s]}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      <StepBody step={state.step} state={state} dispatch={dispatch} />
+
+      {currentIssue && state.step !== 'review' && (
+        <p className="form-hint">{currentIssue}</p>
+      )}
+      {error && <p className="form-error">{error}</p>}
+
+      <div className="step-controls">
+        <button
+          type="button"
+          className="ghost"
+          onClick={() => prev && dispatch({ type: 'set-step', step: prev })}
+          disabled={!prev}
+        >
+          Previous
+        </button>
+        {state.step === 'review' ? (
+          <button type="button" onClick={onSave} disabled={!allComplete || saving}>
+            {saving ? 'Saving...' : 'Save character'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => next && dispatch({ type: 'set-step', step: next })}
+            disabled={!canAdvance || !next}
+          >
+            Next
+          </button>
+        )}
+      </div>
+    </section>
+  );
+};
+
+interface StepBodyProps {
+  readonly step: Step;
+  readonly state: Parameters<typeof reduce>[0];
+  readonly dispatch: React.Dispatch<Parameters<typeof reduce>[1]>;
+}
+
+const StepBody = ({ step, state, dispatch }: StepBodyProps): JSX.Element => {
+  const props = { state, dispatch, content };
+  switch (step) {
+    case 'class':
+      return <StepClass {...props} />;
+    case 'origin':
+      return <StepOrigin {...props} />;
+    case 'abilities':
+      return <StepAbilities {...props} />;
+    case 'spells':
+      return <StepSpells {...props} />;
+    case 'identity':
+      return <StepIdentity {...props} />;
+    case 'review':
+      return <StepReview {...props} />;
+  }
+};

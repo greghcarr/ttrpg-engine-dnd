@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 
 // Vite config for dndbnb (`dndbnb/`).
 //
 // Separate from the library config (`vite.config.ts`) and the engine
-// web demo (`vite.web.config.ts`) so dndbnb can be its own plain-app
+// web demo (`vite.web.config.ts`) so dndbnb can be its own React app
 // build while sharing the engine source tree.
 //
 // Engine import boundary (same pattern as the web demo):
@@ -28,6 +29,7 @@ export default defineConfig(({ mode }) => {
   return {
     root: resolve(__dirname, 'dndbnb'),
     publicDir: false,
+    plugins: [react()],
     // The deployed site sits at greghcarr.github.io/dndbnb, so
     // production assets resolve from `/dndbnb/`. Local dev is at the
     // root (Vite's default).
@@ -36,6 +38,7 @@ export default defineConfig(({ mode }) => {
       alias: [
         { find: /^ttrpg-engine-dnd\/starter-pack$/, replacement: starterPath },
         { find: /^ttrpg-engine-dnd$/, replacement: enginePath },
+        { find: '@', replacement: resolve(__dirname, 'dndbnb/src') },
       ],
     },
     server: {

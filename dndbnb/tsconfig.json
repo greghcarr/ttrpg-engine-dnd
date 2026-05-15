@@ -2,15 +2,17 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": [],
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
     "noEmit": true,
     "rootDir": "..",
     "baseUrl": "..",
     "paths": {
       "ttrpg-engine-dnd": ["src/index.ts"],
-      "ttrpg-engine-dnd/starter-pack": ["src/starter-pack.ts"]
+      "ttrpg-engine-dnd/starter-pack": ["src/starter-pack.ts"],
+      "@/*": ["dndbnb/src/*"]
     }
   },
-  "include": ["./**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["../node_modules", "../dist"]
 }

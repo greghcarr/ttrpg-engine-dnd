@@ -11,4 +11,7 @@ coverage/
 .DS_Store
 *.log
 .env*
+# Templates checked in deliberately so contributors know which env
+# vars to set (dndbnb/.env.local.example).
+!.env*.example
 *.tsbuildinfo
