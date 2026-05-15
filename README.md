@@ -153,7 +153,7 @@ The starter pack is intentionally a slice, not the full 2024 catalogs. This tabl
 | Species | 7 | ~10 in PHB 2024 | ⚪ | Human, Elf, Dwarf, Halfling, Tiefling, Dragonborn, Gnome. Missing: Aasimar, Goliath, Orc, others. |
 | Backgrounds | 8 | ~16 in PHB 2024 | ⚪ | Soldier, Sage, Criminal, Acolyte, Folk Hero, Noble, Guild Artisan, Outlander. Half the PHB list missing. |
 | Feats | ~22 | ~50+ in PHB 2024 | ⚪ | Origin feats, general feats, all 6 Fighting Styles. Many general feats missing. |
-| Weapons / armors / tools / gear | ~25 + 5 tools + 7 gear | full PHB chapter | ⚪ | Common weapons and armors ship; many situational and exotic items missing. |
+| Weapons / armors / tools / gear | ~36 weapons + 13 armors + 5 tools + 7 gear | full PHB chapter | 🟡 | All 33 PHB 2024 weapons (simple + martial) plus their 9 masteries ship, including the prior gap (Club, Javelin, Light Hammer, Sickle, Dart, Shortbow, Sling, Battleaxe, Flail, Glaive, Halberd, Lance, Maul, Morningstar, Pike, Scimitar, Trident, War Pick, Whip, Blowgun, Hand / Heavy Crossbow). All 13 PHB armors (Padded + Hide added). Tools and adventuring gear are still partial. |
 | Conditions | 15 of 15 | 15 | ✓ | Complete (this is what makes the table look honest). |
 | Epic boons | 9 | ~16 in DMG 2024 | ⚪ | About half of the published list. |
 | Separate `ttrpg-engine-dnd-srd-2024` package | not built | — | 🟡 | Phase D Slice 31's deeper intent — extracting an SRD-derived pack as its own published package — was never done. The starter pack stands in. |

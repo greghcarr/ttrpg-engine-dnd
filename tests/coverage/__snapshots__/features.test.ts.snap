@@ -432,31 +432,53 @@ exports[`feature-coverage matrix: weapon masteries > mastery → weapon mapping 
 {
   "Cleave": [
     "greataxe",
+    "halberd",
   ],
   "Graze": [
+    "glaive",
     "greatsword",
   ],
   "Nick": [
     "dagger",
+    "light-hammer",
+    "scimitar",
+    "sickle",
   ],
   "Push": [
+    "crossbow-heavy",
+    "pike",
     "warhammer",
   ],
   "Sap": [
+    "flail",
     "longsword",
     "mace",
+    "morningstar",
     "spear",
+    "war-pick",
   ],
   "Slow": [
+    "club",
     "crossbow-light",
+    "javelin",
     "longbow",
+    "sling",
+    "whip",
   ],
   "Topple": [
+    "battleaxe",
+    "lance",
+    "maul",
     "quarterstaff",
+    "trident",
   ],
   "Vex": [
+    "blowgun",
+    "crossbow-hand",
+    "dart",
     "handaxe",
     "rapier",
+    "shortbow",
     "shortsword",
   ],
 }
