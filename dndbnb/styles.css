@@ -356,13 +356,11 @@ button.ghost {
 
 .step-pip.is-active button {
   background: var(--accent);
-  color: var(--accent-fg);
   border-color: var(--accent);
 }
 
 .step-pip.is-done:not(.is-active) button {
   border-color: var(--accent);
-  color: var(--accent);
 }
 
 .pip-index {
