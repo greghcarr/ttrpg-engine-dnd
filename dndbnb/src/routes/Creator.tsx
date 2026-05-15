@@ -170,8 +170,6 @@ export const Creator = (): JSX.Element => {
         </p>
         <h2>Create a character</h2>
       </div>
-      <StepBody step={state.step} state={state} dispatch={dispatch} />
-
       <ol className="step-indicator">
         {STEP_ORDER.map((s) => {
           const active = state.step === s;
@@ -204,6 +202,8 @@ export const Creator = (): JSX.Element => {
           </button>
         </li>
       </ol>
+
+      <StepBody step={state.step} state={state} dispatch={dispatch} />
 
       {error && <p className="form-error">{error}</p>}
 

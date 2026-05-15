@@ -322,7 +322,7 @@ button.ghost {
 .step-indicator {
   list-style: none;
   padding: 0;
-  margin: 1.25rem 0 0.75rem;
+  margin: 0 0 1.25rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
