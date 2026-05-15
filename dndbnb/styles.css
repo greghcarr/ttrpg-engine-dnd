@@ -686,21 +686,17 @@ button.ghost {
 }
 
 .name-input {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  display: block;
+  margin: 0 auto;
   max-width: 22rem;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.name-input input {
+  width: 100%;
   font: inherit;
-  padding: 0.5rem;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.375rem;
   background: var(--bg);
   color: var(--fg);
+  text-align: center;
 }
 
 .step-controls {
