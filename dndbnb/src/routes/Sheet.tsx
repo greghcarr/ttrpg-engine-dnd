@@ -219,8 +219,20 @@ export const Sheet = (): JSX.Element => {
     }
   };
 
-  if (error) return <p className="status error">{error}</p>;
-  if (!character || !derived || !row) return <p className="status">Loading character...</p>;
+  if (!character || !derived || !row) {
+    return (
+      <section className="sheet-page">
+        <p className="breadcrumb">
+          <Link to="/characters">&larr; All characters</Link>
+        </p>
+        {error ? (
+          <p className="status error">{error}</p>
+        ) : (
+          <p className="status">Loading character...</p>
+        )}
+      </section>
+    );
+  }
 
   const rows: ReadonlyArray<readonly [string, string | number]> = [
     ['Name', character.name],
@@ -316,6 +328,7 @@ export const Sheet = (): JSX.Element => {
           </Link>
         )}
       </div>
+      {error && <p className="form-error">{error}</p>}
       {isOwner && (
         <div className="campaign-attach">
           <label>

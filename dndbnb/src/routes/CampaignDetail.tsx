@@ -44,8 +44,20 @@ export const CampaignDetail = (): JSX.Element => {
     };
   }, [id]);
 
-  if (error) return <p className="status error">{error}</p>;
-  if (!detail || !user) return <p className="status">Loading campaign...</p>;
+  if (!detail || !user) {
+    return (
+      <section className="campaign-detail">
+        <p className="breadcrumb">
+          <Link to="/campaigns">&larr; All campaigns</Link>
+        </p>
+        {error ? (
+          <p className="status error">{error}</p>
+        ) : (
+          <p className="status">Loading campaign...</p>
+        )}
+      </section>
+    );
+  }
 
   const isOwner = detail.campaign.owner_id === user.id;
   const myMembership = detail.members.find((m) => m.user_id === user.id);
@@ -183,6 +195,8 @@ export const CampaignDetail = (): JSX.Element => {
           )}
         </div>
       </header>
+
+      {error && <p className="form-error">{error}</p>}
 
       {isOwner && (
         <section className="join-code-card">

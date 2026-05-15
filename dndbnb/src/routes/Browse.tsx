@@ -47,49 +47,48 @@ export const Browse = (): JSX.Element => {
     };
   }, [page]);
 
-  if (error) return <p className="status error">{error}</p>;
-  if (rows === null) return <p className="status">Loading public characters...</p>;
-
   return (
     <section className="characters-page">
       <div className="page-header">
         <h2>Browse public characters</h2>
       </div>
-      {rows.length === 0 && page === 0 ? (
+      {error ? (
+        <p className="status error">{error}</p>
+      ) : rows === null ? (
+        <p className="status">Loading public characters...</p>
+      ) : rows.length === 0 && page === 0 ? (
         <p className="empty">
           No public characters yet. Be the first: open one of yours and switch it to public.
         </p>
       ) : (
-        <ul className="character-list">
-          {rows.map((row) => (
-            <CharacterCard
-              key={row.id}
-              character={cardModel(row)}
-              showFavorite
-            />
-          ))}
-        </ul>
-      )}
-      {(page > 0 || hasMore) && (
-        <div className="pagination">
-          <button
-            type="button"
-            className="ghost"
-            disabled={page === 0}
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-          >
-            Previous
-          </button>
-          <span className="pagination-page">Page {page + 1}</span>
-          <button
-            type="button"
-            className="ghost"
-            disabled={!hasMore}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </button>
-        </div>
+        <>
+          <ul className="character-list">
+            {rows.map((row) => (
+              <CharacterCard key={row.id} character={cardModel(row)} showFavorite />
+            ))}
+          </ul>
+          {(page > 0 || hasMore) && (
+            <div className="pagination">
+              <button
+                type="button"
+                className="ghost"
+                disabled={page === 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+              >
+                Previous
+              </button>
+              <span className="pagination-page">Page {page + 1}</span>
+              <button
+                type="button"
+                className="ghost"
+                disabled={!hasMore}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

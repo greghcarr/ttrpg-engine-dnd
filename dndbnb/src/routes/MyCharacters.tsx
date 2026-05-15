@@ -38,9 +38,6 @@ export const MyCharacters = (): JSX.Element => {
     };
   }, [user]);
 
-  if (rows === null && !error) return <p className="status">Loading characters...</p>;
-  if (error) return <p className="status error">{error}</p>;
-
   return (
     <section className="characters-page">
       <div className="page-header">
@@ -54,11 +51,15 @@ export const MyCharacters = (): JSX.Element => {
           <PlusIcon />
         </Link>
       </div>
-      {rows && rows.length === 0 ? (
+      {error ? (
+        <p className="status error">{error}</p>
+      ) : rows === null ? (
+        <p className="status">Loading characters...</p>
+      ) : rows.length === 0 ? (
         <p className="empty">No characters yet.</p>
       ) : (
         <ul className="character-list">
-          {rows?.map((row) => (
+          {rows.map((row) => (
             <CharacterCard
               key={row.id}
               character={toCardModel(row)}

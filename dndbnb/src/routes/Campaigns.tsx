@@ -36,15 +36,16 @@ export const Campaigns = (): JSX.Element => {
     reload();
   }, []);
 
-  if (error) return <p className="status error">{error}</p>;
-  if (rows === null) return <p className="status">Loading campaigns...</p>;
-
   return (
     <section className="characters-page">
       <div className="page-header">
         <h2>My campaigns</h2>
       </div>
-      {rows.length === 0 ? (
+      {error ? (
+        <p className="status error">{error}</p>
+      ) : rows === null ? (
+        <p className="status">Loading campaigns...</p>
+      ) : rows.length === 0 ? (
         <p className="empty">
           You haven't joined any campaigns yet. Join one with a code, or create one of your own
           below.

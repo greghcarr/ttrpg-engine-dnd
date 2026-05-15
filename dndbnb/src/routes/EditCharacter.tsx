@@ -202,10 +202,29 @@ export const EditCharacter = (): JSX.Element => {
     }
   };
 
-  if (error && !form) return <p className="status error">{error}</p>;
-  if (!form || !original) return <p className="status">Loading character...</p>;
+  if (!form || !original) {
+    return (
+      <section className="edit-page">
+        <p className="breadcrumb">
+          <Link to={`/characters/${id ?? ''}`}>&larr; Cancel and return to sheet</Link>
+        </p>
+        {error ? (
+          <p className="status error">{error}</p>
+        ) : (
+          <p className="status">Loading character...</p>
+        )}
+      </section>
+    );
+  }
   if (!isOwner) {
-    return <p className="status error">You can only edit characters you own.</p>;
+    return (
+      <section className="edit-page">
+        <p className="breadcrumb">
+          <Link to={`/characters/${original.id}`}>&larr; Cancel and return to sheet</Link>
+        </p>
+        <p className="status error">You can only edit characters you own.</p>
+      </section>
+    );
   }
 
   const classes = [...content.classes.values()].sort((a, b) => a.name.localeCompare(b.name));

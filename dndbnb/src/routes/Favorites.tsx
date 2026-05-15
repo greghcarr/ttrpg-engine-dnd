@@ -54,15 +54,16 @@ export const Favorites = (): JSX.Element => {
     };
   }, [user]);
 
-  if (error) return <p className="status error">{error}</p>;
-  if (rows === null) return <p className="status">Loading favorites...</p>;
-
   return (
     <section className="characters-page">
       <div className="page-header">
         <h2>My favorite characters</h2>
       </div>
-      {rows.length === 0 ? (
+      {error ? (
+        <p className="status error">{error}</p>
+      ) : rows === null ? (
+        <p className="status">Loading favorites...</p>
+      ) : rows.length === 0 ? (
         <p className="empty">
           No favorites yet. Browse public characters and tap the star.
         </p>
