@@ -631,6 +631,7 @@ button.ghost {
 
 .edit-page h2 {
   margin: 0 0 1rem;
+  text-align: center;
 }
 
 .edit-section {
@@ -773,6 +774,7 @@ button.ghost {
 .page-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
