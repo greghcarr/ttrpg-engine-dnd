@@ -78,24 +78,24 @@ export const Campaigns = (): JSX.Element => {
         <details className="collapsible">
           <summary>
             <span className="summary-icon">
-              <PlusIcon />
-            </span>
-            Create a campaign
-          </summary>
-          <div className="collapsible-body">
-            <CreateCampaignForm onCreated={reload} />
-          </div>
-        </details>
-
-        <details className="collapsible">
-          <summary>
-            <span className="summary-icon">
               <KeyIcon />
             </span>
             Join a campaign
           </summary>
           <div className="collapsible-body">
             <JoinCampaignForm />
+          </div>
+        </details>
+
+        <details className="collapsible">
+          <summary>
+            <span className="summary-icon">
+              <PlusIcon />
+            </span>
+            Create a campaign
+          </summary>
+          <div className="collapsible-body">
+            <CreateCampaignForm onCreated={reload} />
           </div>
         </details>
       </div>

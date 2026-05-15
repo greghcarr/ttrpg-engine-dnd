@@ -1101,24 +1101,16 @@ a.icon-btn {
   gap: 1rem;
 }
 
-/* "Create a campaign" + "Join a campaign" sit side-by-side, centered.
-   `align-items: start` keeps each cell sized to its own content so
-   opening one doesn't stretch the other to match its height.
-   Stacks to a single column only at very narrow phone widths so the
-   summary labels don't crowd. */
+/* "Join a campaign" + "Create a campaign" stack vertically (Join on
+   top, Create below). Capped to match the campaign-list column
+   width above. */
 .collapsibles-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   align-items: start;
-  gap: 1rem;
-  max-width: 40rem;
+  gap: 0.6rem;
+  max-width: 32rem;
   margin: 0 auto;
-}
-
-@media (max-width: 480px) {
-  .collapsibles-row {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Collapsible disclosure rows used for "Join with a code" + "Create
