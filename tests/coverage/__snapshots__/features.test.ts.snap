@@ -208,6 +208,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "branding-smite-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 0,
     "id": "charmed",
     "stackable": false,
@@ -215,6 +220,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 0,
     "id": "deafened",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "divine-favor-active",
     "stackable": false,
   },
   {
@@ -299,6 +309,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 1,
+    "id": "searing-smite-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "shielded",
     "stackable": false,
   },
@@ -308,8 +323,18 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "thunderous-smite-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 3,
     "id": "unconscious",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "wrathful-smite-active",
     "stackable": false,
   },
 ]

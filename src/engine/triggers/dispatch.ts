@@ -10,7 +10,11 @@ import { evaluatePredicate } from '../../effects/predicate.js';
 import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
-import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
+import type {
+  ConditionRemovedEvent,
+  DamageAppliedEvent,
+} from '../../schemas/events/combat.js';
+import type { ConcentrationBrokenEvent } from '../../schemas/events/concentration.js';
 import type { TriggerFiredEvent } from '../../schemas/events/triggers.js';
 
 type OnEventEffect = Extract<Effect, { kind: 'OnEvent' }>;
@@ -146,6 +150,58 @@ const triggerIdOf = (effect: OnEventEffect, characterId: string): string => {
   return `${characterId}:${effect.trigger.eventType}:${filterHash}`;
 };
 
+// When an OnEvent with `consumeOnTrigger: true` fires, locate the parent
+// condition (the one whose effects array contains the OnEvent) and emit
+// the right cleanup event. If a concentration effect is tracking the
+// applied condition, emit `ConcentrationBroken` (reason: 'used') so the
+// existing cascade in `clearConcentrationEffect` lifts the condition for
+// us. Otherwise emit a stand-alone `ConditionRemoved`. Used by the
+// smite-pattern spells (Searing/Wrathful/Thunderous/Branding Smite, etc.)
+// whose RAW says "the spell ends after the next hit".
+const buildConsumeEvents = (input: {
+  character: Character;
+  content: ResolvedContent;
+  effectInstances: Readonly<CampaignState['effectInstances']>;
+  onEventId: string | undefined;
+  triggerFiredId: string;
+  at: string;
+}): Event[] => {
+  const { character, content, effectInstances, onEventId, triggerFiredId, at } = input;
+  if (onEventId === undefined) return [];
+
+  const parent = character.appliedConditions.find((applied) => {
+    const def = content.conditions.get(applied.conditionId);
+    return def?.effects.some((e) => e.kind === 'OnEvent' && e.id === onEventId) === true;
+  });
+  if (parent === undefined) return [];
+
+  for (const instance of Object.values(effectInstances)) {
+    if (instance.casterId !== character.id) continue;
+    if (!instance.requiresConcentration) continue;
+    if (!instance.conditionsApplied.some((c) => c.appliedConditionId === parent.id)) continue;
+    const broken: ConcentrationBrokenEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConcentrationBroken',
+      effectInstanceId: instance.id,
+      casterId: character.id as ULID,
+      reason: 'used',
+      causedByEventId: triggerFiredId as ULID,
+    };
+    return [broken];
+  }
+
+  const removed: ConditionRemovedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ConditionRemoved',
+    targetId: character.id as ULID,
+    conditionId: parent.conditionId,
+    causedByEventId: triggerFiredId as ULID,
+  };
+  return [removed];
+};
+
 export interface DispatchInput {
   readonly state: CampaignState;
   readonly content: ResolvedContent;
@@ -177,6 +233,21 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
       const fired = fireTrigger(effect, character, triggerId, event, rng, at);
       if (fired === null) continue;
       emitted.push(...fired.events);
+      if (effect.consumeOnTrigger === true) {
+        const triggerFiredId = fired.events[0]?.id;
+        if (triggerFiredId !== undefined) {
+          emitted.push(
+            ...buildConsumeEvents({
+              character,
+              content,
+              effectInstances: state.effectInstances,
+              onEventId: effect.id,
+              triggerFiredId,
+              at,
+            }),
+          );
+        }
+      }
     }
   }
   return emitted;

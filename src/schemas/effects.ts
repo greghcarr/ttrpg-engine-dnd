@@ -130,7 +130,7 @@ export type Effect =
   | { kind: 'GrantResource'; resourceId: string; max: number | Formula; recharge: Recharge; diceSize?: number }
   | { kind: 'GrantSpellSlots'; level: SpellLevel; count: number; source: 'full' | 'half' | 'third' | 'pact' }
   | { kind: 'GrantSpell'; spellId: string; preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest'; spellcastingAbility?: AbilityScore }
-  | { kind: 'OnEvent'; id?: string; trigger: { eventType: string; filter?: Predicate }; actions: TriggerAction[]; oncePer?: 'turn' | 'round' | 'shortRest' | 'longRest'; requiresReaction?: boolean }
+  | { kind: 'OnEvent'; id?: string; trigger: { eventType: string; filter?: Predicate }; actions: TriggerAction[]; oncePer?: 'turn' | 'round' | 'shortRest' | 'longRest'; requiresReaction?: boolean; consumeOnTrigger?: boolean }
   | { kind: 'RecoverResource'; resourceId: string; amount: number | 'all' | Formula; when: 'shortRest' | 'longRest' | 'turnStart' | 'turnEnd' | 'dawn' }
   | { kind: 'GrantAction'; actionId: string; name: string; cost: 'action' | 'bonusAction' | 'reaction' | 'free'; resourceCost?: { resourceId: string; amount: number } }
   | { kind: 'ModifyActionEconomy'; op: 'extraAttack' | 'extraAction' | 'extraBonusAction'; count: number; condition?: Predicate }
@@ -259,6 +259,7 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       actions: z.array(TriggerActionSchema),
       oncePer: z.enum(['turn', 'round', 'shortRest', 'longRest']).optional(),
       requiresReaction: z.boolean().optional(),
+      consumeOnTrigger: z.boolean().optional(),
     }),
     z.object({
       kind: z.literal('RecoverResource'),

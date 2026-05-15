@@ -1447,7 +1447,7 @@
     { "id": "detect-evil-and-good", "name": "Detect Evil and Good", "level": 1, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [] },
     { "id": "detect-poison-and-disease", "name": "Detect Poison and Disease", "level": 1, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a yew leaf" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": true, "classes": ["cleric", "druid", "paladin", "ranger"], "mechanicalEffects": [] },
     { "id": "disguise-self", "name": "Disguise Self", "level": 1, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
-    { "id": "divine-favor", "name": "Divine Favor", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
+    { "id": "divine-favor", "name": "Divine Favor", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "divine-favor-active" }] },
     { "id": "ensnaring-strike", "name": "Ensnaring Strike", "level": 1, "school": "conjuration", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "entangle", "name": "Entangle", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid"], "targeting": { "shape": "cube", "size": 20 }, "mechanicalEffects": [] },
     { "id": "expeditious-retreat", "name": "Expeditious Retreat", "level": 1, "school": "transmutation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
@@ -1466,13 +1466,13 @@
     { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "purify-food-and-drink", "name": "Purify Food and Drink", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "paladin"], "mechanicalEffects": [] },
     { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
-    { "id": "searing-smite", "name": "Searing Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
+    { "id": "searing-smite", "name": "Searing Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "searing-smite-active" }] },
     { "id": "shield-of-faith", "name": "Shield of Faith", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a small parchment with a bit of holy text" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [] },
     { "id": "silent-image", "name": "Silent Image", "level": 1, "school": "illusion", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "speak-with-animals", "name": "Speak with Animals", "level": 1, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "10 minutes", "concentration": false, "ritual": true, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
-    { "id": "thunderous-smite", "name": "Thunderous Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
+    { "id": "thunderous-smite", "name": "Thunderous Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "thunderous-smite-active" }] },
     { "id": "unseen-servant", "name": "Unseen Servant", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a piece of string and a bit of wood" }, "duration": "1 hour", "concentration": false, "ritual": true, "classes": ["bard", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Unseen Servant", "ac": 10, "hpBase": 2, "hpPerSlotAbove": 0, "baseSlotLevel": 1, "speedFeet": 15 }] },
-    { "id": "wrathful-smite", "name": "Wrathful Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
+    { "id": "wrathful-smite", "name": "Wrathful Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "wrathful-smite-active" }] },
     { "id": "blindness-deafness", "name": "Blindness/Deafness", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "CON", "conditionOnFail": "blinded" }] },
     { "id": "crown-of-madness", "name": "Crown of Madness", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "charmed" }] },
     { "id": "flame-blade", "name": "Flame Blade", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "leaf of sumac" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer"], "mechanicalEffects": [{ "kind": "attack", "attackKind": "melee", "damageDice": "3d6", "damageType": "fire", "extraDicePerSlotLevel": 1 }] },
@@ -1491,7 +1491,7 @@
     { "id": "augury", "name": "Augury", "level": 2, "school": "divination", "castingTime": "1 minute", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "specially marked sticks, bones, or cards worth 25+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "wizard"], "mechanicalEffects": [] },
     { "id": "barkskin", "name": "Barkskin", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a handful of oak bark" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
     { "id": "blur", "name": "Blur", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
-    { "id": "branding-smite", "name": "Branding Smite", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
+    { "id": "branding-smite", "name": "Branding Smite", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "branding-smite-active" }] },
     { "id": "calm-emotions", "name": "Calm Emotions", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [] },
     { "id": "cloud-of-daggers", "name": "Cloud of Daggers", "level": 2, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a sliver of glass" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "targeting": { "shape": "cube", "size": 5 }, "mechanicalEffects": [] },
     { "id": "continual-flame", "name": "Continual Flame", "level": 2, "school": "evocation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "ruby dust worth 50+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
@@ -2151,6 +2151,100 @@
         { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
         { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
         { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ]
+    },
+    {
+      "id": "divine-favor-active",
+      "name": "Divine Favor Active",
+      "description": "+1d4 radiant damage on every weapon hit while concentrating on Divine Favor.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "divine-favor-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d4", "damageType": "radiant" }]
+        }
+      ]
+    },
+    {
+      "id": "searing-smite-active",
+      "name": "Searing Smite Active",
+      "description": "Caster's next weapon hit deals +1d6 fire damage; the spell ends after that hit.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "searing-smite-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "fire" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "wrathful-smite-active",
+      "name": "Wrathful Smite Active",
+      "description": "Caster's next weapon hit deals +1d6 psychic damage; the spell ends after that hit.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "wrathful-smite-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "psychic" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "thunderous-smite-active",
+      "name": "Thunderous Smite Active",
+      "description": "Caster's next weapon hit deals +2d6 thunder damage; the spell ends after that hit.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "thunderous-smite-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "2d6", "damageType": "thunder" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "branding-smite-active",
+      "name": "Branding Smite Active",
+      "description": "Caster's next weapon hit deals +2d6 radiant damage; the spell ends after that hit.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "branding-smite-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "2d6", "damageType": "radiant" }],
+          "consumeOnTrigger": true
+        }
       ]
     }
   ]
