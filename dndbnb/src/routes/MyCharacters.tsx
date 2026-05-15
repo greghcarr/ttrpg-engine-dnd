@@ -55,9 +55,7 @@ export const MyCharacters = (): JSX.Element => {
         </Link>
       </div>
       {rows && rows.length === 0 ? (
-        <p className="empty">
-          No characters yet. <Link to="/characters/new">Start the creator</Link>.
-        </p>
+        <p className="empty">No characters yet.</p>
       ) : (
         <ul className="character-list">
           {rows?.map((row) => (
