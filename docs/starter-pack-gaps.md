@@ -157,8 +157,10 @@ Slice 51 filled L2, L5, L7, L10, L17, L18, L20. The L18 entry wires the Channel 
 
 - `divine-spark` (L2) — Channel Divinity option that lets the cleric heal or deal necrotic / radiant damage as a Bonus Action. Needs a "choose CD option at activation time" protocol and a saved-spell-like cast surface; the engine has `channel-divinity` as a resource but no per-option dispatch.
 - `sear-undead` (L5) — Channel Divinity (Turn Undead) adds radiant damage on a failed save. Needs Turn Undead modeled as an action plus a per-tier damage rider; not in pack.
-- `blessed-strikes` (L7) and `improved-blessed-strikes` (L17) — choice between Divine Strike (+1d8 damage type on weapon attack) or Potent Spellcasting (+WIS mod to cantrip damage). Needs a `OfferChoice` over once-per-acquisition options plus the on-hit-rider / cantrip-bonus primitives.
+- `improved-blessed-strikes` (L17) — boosts Divine Strike to +2d8. Same `OnEvent` rider shape as the L7 entry but with bigger dice; honest die-scaling needs either replace-by-id semantics on level-up (so L17's OnEvent overrides L7's) or a level-conditional dice expression. Deferred until the broader die-scaling concern (Sneak Attack is the only feature that scales properly today) lands.
 - `divine-intervention` (L10) and `improved-divine-intervention` (L20) — 1/week (1/long-rest at L20) prayer for a divine effect. Needs a flag for "intervention used in last 7 days" plus a freeform DM-resolution event; closest existing surface is `CustomEffect`, but no handler ships.
+
+`blessed-strikes` at L7 is **wired (partially)** after slice 62: the `OnEvent` rider that fires +1d8 radiant on weapon hits (once per turn) is fully wired via the on-hit trigger primitive shipped in slice 61. The L7 entry is an `OfferChoice` between Divine Strike (the wired branch) and Potent Spellcasting (a stub branch — adds caster's WIS modifier to cantrip damage, needs a `TriggerAction.AddAbilityModDamage` that the engine doesn't model).
 
 Open item: L1 Divine Order (choice between Protector and Thaumaturge sub-features at character creation) is not in the L1 features array. Same shape as Barbarian's missing L1 Weapon Mastery; deferred to a later one-line slice.
 

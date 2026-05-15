@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 80,
+  "stub": 79,
   "total": 172,
-  "wired": 92,
+  "wired": 93,
 }
 `;
 
@@ -45,7 +45,7 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "cleric L2 divine-spark [stub]",
   "cleric L5 sear-undead [stub]",
   "cleric L6 channel-divinity-cleric-2 [wired]",
-  "cleric L7 blessed-strikes [stub]",
+  "cleric L7 blessed-strikes [wired]",
   "cleric L10 divine-intervention [stub]",
   "cleric L17 improved-blessed-strikes [stub]",
   "cleric L18 channel-divinity-cleric-3 [wired]",
