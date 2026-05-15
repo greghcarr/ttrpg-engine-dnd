@@ -143,6 +143,9 @@ button.link-button {
   .site-main {
     padding: 1.25rem 1rem;
   }
+  .creator-arrow {
+    display: none;
+  }
 
   /* Ability scores table: drop table semantics and stack each row
      vertically so the pills (or stepper) have full row width. The
@@ -250,6 +253,48 @@ button.ghost {
 .creator {
   max-width: 56rem;
   margin: 0 auto;
+}
+
+/* Big chevron arrows pinned to the viewport edges for prev/next
+   step navigation. Hidden on mobile (the bottom Prev/Next buttons
+   carry that role on small screens, where edge-pinning competes with
+   the content for space). */
+.creator-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--accent);
+  cursor: pointer;
+  z-index: 50;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.creator-arrow:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 18%, var(--card));
+  border-color: var(--accent);
+}
+
+.creator-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--muted);
+}
+
+.creator-arrow.left {
+  left: 1.5rem;
+}
+
+.creator-arrow.right {
+  right: 1.5rem;
 }
 
 /* Breadcrumb on the left + page title centered on the same row.

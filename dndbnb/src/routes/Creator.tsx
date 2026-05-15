@@ -24,7 +24,7 @@ import { buildCharacter } from '@/lib/creator/build';
 import { checkText } from '@/lib/moderation';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
-import { DiceIcon } from '@/components/Icons';
+import { ChevronLeftIcon, ChevronRightIcon, DiceIcon } from '@/components/Icons';
 import {
   StepAbilities,
   StepClass,
@@ -101,6 +101,30 @@ export const Creator = (): JSX.Element => {
 
   return (
     <section className="creator" style={classColorVars(state.classId)}>
+      {prev && (
+        <button
+          type="button"
+          className="creator-arrow left"
+          onClick={() => dispatch({ type: 'set-step', step: prev })}
+          title="Previous step"
+          aria-label="Previous step"
+        >
+          <ChevronLeftIcon size={28} />
+        </button>
+      )}
+      {next && (
+        <button
+          type="button"
+          className="creator-arrow right"
+          onClick={() => dispatch({ type: 'set-step', step: next })}
+          disabled={!canAdvance}
+          title="Next step"
+          aria-label="Next step"
+        >
+          <ChevronRightIcon size={28} />
+        </button>
+      )}
+
       <div className="creator-titlebar">
         <p className="breadcrumb">
           <Link to="/characters">&larr; All characters</Link>
