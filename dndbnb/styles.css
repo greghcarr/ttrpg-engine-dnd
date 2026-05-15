@@ -352,11 +352,20 @@ button.ghost {
   border-radius: 999px;
   font-size: 0.85rem;
   cursor: pointer;
+  /* Unselected pips read as dim; the active pip stays at full
+     opacity below. Hover brightens to confirm clickability. */
+  opacity: 0.55;
+}
+
+.step-pip button:hover:not(:disabled) {
+  opacity: 1;
 }
 
 .step-pip.is-active button {
   background: var(--accent);
   border-color: var(--accent);
+  opacity: 1;
+  cursor: default;
 }
 
 .step-pip.is-done:not(.is-active) button {
