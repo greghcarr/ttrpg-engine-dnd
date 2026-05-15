@@ -145,6 +145,17 @@ The goal is parity with D&D Beyond on what a free-tier hobby player would actual
 - **Phase B remainder.** Locations + maps (unblocks the future map system); quests + objectives + milestone XP.
 - **Phase C combat fill-in.** Grapple / shove / hide, Counterspell / Dispel, full Weapon Mastery wiring, mounted combat, travel.
 - **Magic item charges.** Engine has the resource shape; full DSL coverage in content packs is still in progress.
+- **Spell mechanic primitives still missing.** Most L1 spells in the starter pack ship schema-only (`mechanicalEffects: []`) because they need primitives the engine doesn't yet model. The blockers grouped by what's needed:
+  - **On-hit trigger system** (riders that fire on the next weapon hit): blocks `divine-favor`, `ensnaring-strike`, `hail-of-thorns`, `hex`, `searing-smite`, `thunderous-smite`, `wrathful-smite`. Smite-pattern spells in general.
+  - **Reaction system** (cast as a reaction to a trigger event): blocks `absorb-elements`, `feather-fall`, `sanctuary`, plus future `silvery-barbs`, `shield`-as-spell.
+  - **Area-effect spell mechanic** (zone with save on enter + ongoing condition / damage): blocks `entangle`, `grease`, plus future `cloudkill`, `wall-of-fire`, etc.
+  - **Temp-HP grant as a spell mechanic** (current `heal` only writes to `current`): blocks `false-life`, `heroism`.
+  - **Caster-chosen options at cast time** (damage type, spell variant): blocks `chromatic-orb`, `command` (per-word effects).
+  - **Summon system** (companion / construct creature instance): blocks `find-familiar`, `unseen-servant`, plus future `conjure-animals`, etc.
+  - **AC-buff condition** (flat AC bonus while a condition is active): blocks `shield-of-faith` and any future "+N AC" buff.
+  - **Type-conditional buff** (advantage / disadvantage tied to creature type): blocks `protection-from-evil-and-good`.
+  - **Pure-narrative L1s with no mechanical event** intentionally ship empty: `alarm`, `animal-friendship`, `comprehend-languages`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `longstrider`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Most are ritual / utility; they parse and load, they just don't emit anything.
+  - **Already-planned-elsewhere:** `hunters-mark` has its own dedicated planner (concentration mark), so its `mechanicalEffects` stays empty by design. Same pattern as `shield`, `misty-step`, `counterspell`, `dispel-magic`, `identify`, `polymorph`.
 
 ## The long-tail visual ambition (parked until everything above)
 
