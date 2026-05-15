@@ -1,0 +1,144 @@
+# Starter pack coverage and gaps
+
+Engine-internal accounting of what currently ships in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) versus what's deferred. Consumers of `ttrpg-engine-dnd` who want fuller coverage will be extending this pack; this doc tells them where the holes are and why.
+
+This is separate from [content-attribution.md](content-attribution.md), which is a licensing audit (what's clearly SRD-derived vs needs verification). The two docs are kept in parallel: attribution tracks "may we ship this?", this doc tracks "is it actually in here, and how completely?".
+
+## Coverage at a glance
+
+| Category | In pack | Rough PHB total | Notes |
+|---|---|---|---|
+| Classes | 12 / 12 | 12 | All scaffolded with 1–20 level tables. Most L2+ rows ship empty (see Class features). |
+| Subclasses | 12 / ~50 | ~50 | One canonical L3 subclass per class. No L7 / L10 / L14 features for any. |
+| Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
+| Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
+| Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
+| Spells | 105 / ~370 | ~370 | 34 / 60 / 6 / 4 / 1 across L0–L4. Cantrips complete; L1 ships every PHB entry (~20 wired). L2+ stub-heavy. |
+| Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
+| Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
+| Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
+
+## Spells
+
+Status legend: `wired` = has `mechanicalEffects` array entries that the engine consumes. `planner` = handled by a dedicated planner (`planShield`, `planCounterspell`, `planDispelMagic`, `planIdentify`, `planMistyStep`, `planPolymorph`, `planHuntersMark`); `mechanicalEffects` stays empty by design. `schema-only` = ships in the pack so the schema validator + consumer code sees the spell, but no mechanical event is emitted on cast.
+
+### Cantrips (L0): 34 / 34
+
+**Wired (18):** acid-splash, chill-touch, eldritch-blast, fire-bolt, frostbite, guidance, mind-sliver, poison-spray, produce-flame, ray-of-frost, sacred-flame, shocking-grasp, starry-wisp, thorn-whip, thunderclap, toll-the-dead, vicious-mockery, word-of-radiance.
+
+**Schema-only (16):** blade-ward, dancing-lights, druidcraft, friends, light, mage-hand, mending, message, minor-illusion, mold-earth, prestidigitation, resistance, shillelagh, spare-the-dying, thaumaturgy, true-strike. All intentionally narrative / utility — no mechanical event to emit.
+
+### L1: 60 / 60 (full PHB list)
+
+**Wired (20):** bane, bless, burning-hands, cause-fear, charm-person, color-spray, cure-wounds, dissonant-whispers, earth-tremor, faerie-fire, guiding-bolt, healing-word, hellish-rebuke, inflict-wounds, mage-armor, magic-missile, ray-of-sickness, sleep, tashas-hideous-laughter, thunderwave.
+
+**Dedicated planner (3):** hunters-mark, identify, shield.
+
+**Schema-only (37):** grouped by the engine primitive each one needs.
+
+- **On-hit trigger system** (rider that fires on the caster's next weapon attack): `divine-favor`, `ensnaring-strike`, `hail-of-thorns`, `hex`, `searing-smite`, `thunderous-smite`, `wrathful-smite`. The smite-pattern cohort.
+- **Reaction system** (cast as a reaction to a trigger event): `absorb-elements`, `feather-fall`, `sanctuary`. Also future Silvery Barbs and a Shield-as-spell variant.
+- **Area-effect spell mechanic** (zone with save on enter + ongoing condition / damage): `entangle`, `grease`. Also future Cloudkill, Wall of Fire.
+- **Temp-HP grant as a spell mechanic** (current `heal` writes to `current` only): `false-life`, `heroism`.
+- **Caster-chosen options at cast time** (damage type or spell variant): `chromatic-orb`, `command` (per-word effects).
+- **Summon system** (companion / construct creature instance): `find-familiar`, `unseen-servant`. Also future Conjure Animals, Summon Beast.
+- **AC-buff condition** (flat AC bonus tied to a condition): `shield-of-faith`.
+- **Type-conditional buff** (advantage / disadvantage keyed to creature type): `protection-from-evil-and-good`.
+- **Pure narrative / utility** (intentionally no mechanical event): `alarm`, `animal-friendship`, `comprehend-languages`, `compelled-duel`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-magic`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `longstrider`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Rituals, illusions, sensory spells; they parse and load, they just don't emit anything.
+
+### L2: 6 / ~44
+
+**Wired (5):** aid, hold-person, lesser-restoration, spiritual-weapon, web.
+
+**Dedicated planner (1):** misty-step.
+
+**Schema-only:** none in pack yet. The other ~38 PHB L2 spells (Scorching Ray, Shatter, Moonbeam, etc.) are not yet in the pack.
+
+### L3: 4 / ~36
+
+**Wired (2):** fireball, spirit-guardians.
+
+**Dedicated planner (2):** counterspell, dispel-magic.
+
+**Schema-only:** none in pack yet. The remaining ~32 PHB L3 spells are not yet in the pack.
+
+### L4: 1 / ~28
+
+**Dedicated planner (1):** polymorph.
+
+**Schema-only:** none in pack yet. The remaining ~27 PHB L4 spells are not yet in the pack.
+
+### L5–L9: 0 / ~140
+
+Not in pack.
+
+## Class features
+
+All twelve classes have a `levelTable` keyed 1–20, but most rows ship `features: []`. The content shape exists; the data is the gap.
+
+| Class | Levels with features | Empty rows |
+|---|---|---|
+| barbarian | 1, 2, 5, 7 | 16 |
+| bard | 1, 2, 3, 5 | 16 |
+| cleric | 1, 6 | 18 |
+| druid | 1, 2 | 18 |
+| fighter | 1, 2, 5 | 17 |
+| monk | 1, 2, 4, 5, 7 | 15 |
+| paladin | 1, 2, 3 | 17 |
+| ranger | 1, 2, 5 | 17 |
+| rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
+| sorcerer | 1, 2, 5 | 17 |
+| warlock | (none) | 20 |
+| wizard | 1 | 19 |
+
+Notable missing scaling: Rage tiers, Bardic Inspiration die, Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L5/L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer).
+
+## Subclasses
+
+One canonical L3 subclass ships per class:
+
+- path-of-the-berserker, college-of-lore, life-domain, circle-of-the-land, champion, warrior-of-the-open-hand, oath-of-devotion, hunter, thief, draconic-sorcery, fiend-patron, evoker.
+
+Each entry's `levelGrants` only has an L3 row. L7 / L10 / L14 (the standard subclass progression points) are unstarted across every subclass. The additional 3–4 subclasses per class in the PHB are not in the pack.
+
+Even within the L3 row, several subclass features ship as content stubs (the names appear but no mechanical wiring): Wild Shape forms (druid), Patron Spells (warlock fiend, paladin devotion), Hunter's Lore + Hunter's Prey (ranger hunter), Fast Hands (rogue thief), Open Hand Technique (monk), Land's Aid (druid circle of the land), Sculpt Spells (evoker wizard), Dark One's Blessing (warlock fiend).
+
+## Items
+
+- **Weapons (40):** Every PHB 2024 simple + martial weapon plus tagged mastery (`vex`, `topple`, `sap`, `nick`, `push`, `slow`, `cleave`, `graze`, `flex`). Weapon catalogue is complete.
+- **Armor + shields (13):** Every PHB 2024 armor entry.
+- **Tools + mundane gear (~15):** Thieves' tools, smith's tools, herbalism kit, lute, torch, rope, backpack, rations, waterskin, bedroll, tinderbox.
+- **Magic items (9):** Bag of Holding, Cloak of Protection, Boots of Elvenkind, Wand of Magic Missiles, Ring of Protection, Amulet of Health, Gauntlets of Ogre Power, plus three potions (Healing, Greater Healing, Superior Healing).
+
+The DMG is hundreds of items long; this pack ships a representative slice. Magic item charges are tracked via the engine's `resources` shape; only Wand of Magic Missiles currently exercises that.
+
+## Monsters
+
+Six statblocks: Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
+
+Notable gaps for tutorial / starter encounters: Bandit, Cultist, Commoner, Guard, Veteran, Bandit Captain. CR 1/8 and the rest of CR 1/2–1 is the easiest near-term fill.
+
+## Species
+
+Seven species: Human, Elf, Dwarf, Halfling, Tiefling, Dragonborn, Gnome. PHB 2024 adds Aasimar, Goliath, and the 2024-edition Orc as a playable species. None are in the pack.
+
+## Backgrounds
+
+The full PHB 2024 list (16) is shipped: Acolyte, Artisan, Charlatan, Criminal, Entertainer, Farmer, Folk Hero, Guard, Guide, Hermit, Merchant, Noble, Outlander, Sage, Sailor, Scribe, Soldier, Wayfarer. Plus three legacy entries kept for round-trip compatibility.
+
+## Feats
+
+- **Origin (12):** Savage Attacker, Alert, Magic Initiate (Cleric / Wizard / Druid variants), Tough, Skilled, Crafter, Lucky, Healer, Musician, Tavern Brawler.
+- **Fighting Style (6):** Archery, Defense, Dueling, Great Weapon Fighting, Protection, Two-Weapon Fighting.
+- **General (6):** Great Weapon Master, Sharpshooter, Polearm Master, War Caster, Resilient (Constitution variant), Unarmored Defense (Barbarian).
+- **Epic Boon (9):** Combat Prowess, Dimensional Travel, Energy Resistance, Fortitude, Irresistible Offense, Skill, Spell Recall, the Night Spirit, Truesight.
+
+PHB 2024 ships ~30 general feats and ~25 origin feats; this pack carries the most common. The other ~20+ general feats (Ability Score Improvement, Athlete, Charger, Crusher, Defensive Duelist, Fey Touched, Heavily Armored, Inspiring Leader, Keen Mind, Magic Initiate as a general feat, Mage Slayer, Mounted Combatant, Observant, Piercer, Poisoner, Sentinel, Shadow Touched, Shield Master, Skill Expert, Skulker, Slasher, Speedy, Tavern Brawler upgrade tier, Telekinetic, Telepathic, Weapon Master) and the remaining origin feats are deferred.
+
+## Conditions
+
+All 15 RAW conditions ship (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious). Ten engine-mechanic conditions also ship to back rider effects (e.g. `sapped`, `vexed-by`, `slowed-10ft` for weapon masteries; `blessed`, `mage-armored`, `guided`, `concentrating` for spell mechanics). Complete.
+
+## How this list is maintained
+
+At the close of each content slice, update the relevant section here and bump the "Coverage at a glance" counts. If the slice introduces a new mechanic kind (e.g. a future reaction-spell primitive), retro-update the affected schema-only spells to either `wired` or move them to a different deferred bucket.
