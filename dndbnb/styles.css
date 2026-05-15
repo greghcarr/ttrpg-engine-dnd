@@ -99,19 +99,9 @@ button.link-button {
   font-size: 0.9rem;
 }
 
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Mobile hamburger + dropdown are hidden by default; the desktop nav
-   is the default state. The media query below flips that. */
-.site-nav-hamburger,
-.site-nav-hamburger-signin {
-  display: none;
-}
-
+/* Header collapses to brand + hamburger at every viewport. The
+   navigation lives entirely inside the dropdown panel rather than
+   strewn across the top bar. */
 .mobile-menu {
   position: absolute;
   top: 100%;
@@ -156,15 +146,6 @@ button.link-button {
   }
   .tagline {
     display: none;
-  }
-  .site-nav-desktop {
-    display: none;
-  }
-  .site-nav-hamburger {
-    display: inline-flex;
-  }
-  .site-nav-hamburger-signin {
-    display: inline-block;
   }
   .site-main {
     padding: 1.25rem 1rem;

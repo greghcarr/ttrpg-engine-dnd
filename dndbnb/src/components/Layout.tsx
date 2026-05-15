@@ -51,26 +51,10 @@ export const Layout = (): JSX.Element => {
           <p className="tagline">a D&amp;D character workbench</p>
         </div>
 
-        <nav className="site-nav site-nav-desktop">
-          {session && <div className="site-nav-links">{navLinks}</div>}
-          {session ? (
-            <>
-              <span className="user-name">{username ?? 'signed in'}</span>
-              <button type="button" onClick={signOut} className="link-button">
-                Sign out
-              </button>
-            </>
-          ) : (
-            <Link to="/sign-in" className="link-button">
-              Sign in
-            </Link>
-          )}
-        </nav>
-
         {session ? (
           <button
             type="button"
-            className="icon-btn site-nav-hamburger"
+            className="icon-btn"
             onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
@@ -79,7 +63,7 @@ export const Layout = (): JSX.Element => {
             {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
         ) : (
-          <Link to="/sign-in" className="link-button site-nav-hamburger-signin">
+          <Link to="/sign-in" className="link-button">
             Sign in
           </Link>
         )}
