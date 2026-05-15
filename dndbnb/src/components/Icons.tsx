@@ -182,6 +182,15 @@ export const UsersFilledIcon = ({ size = 18, className }: IconProps): JSX.Elemen
 );
 
 // Die-face icon (five-pip / classic d6) used for the Randomize action.
+export const KeyIcon = ({ size = 16, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <circle cx="8" cy="12" r="4" />
+    <line x1="12" y1="12" x2="22" y2="12" />
+    <line x1="19" y1="12" x2="19" y2="16" />
+    <line x1="16" y1="12" x2="16" y2="15" />
+  </svg>
+);
+
 export const ChevronLeftIcon = ({ size = 18, className }: IconProps): JSX.Element => (
   <svg {...baseSvgProps(size, className)}>
     <polyline points="15 18 9 12 15 6" />

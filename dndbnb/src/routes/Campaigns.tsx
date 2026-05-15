@@ -13,6 +13,12 @@ import {
   type CampaignSummary,
 } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
+import {
+  CAMPAIGN_ICON_IDS,
+  CampaignIcon,
+  DEFAULT_CAMPAIGN_ICON,
+} from '@/components/CampaignIcons';
+import { KeyIcon, PlusIcon } from '@/components/Icons';
 
 export const Campaigns = (): JSX.Element => {
   const [rows, setRows] = useState<ReadonlyArray<CampaignSummary> | null>(null);
@@ -48,14 +54,19 @@ export const Campaigns = (): JSX.Element => {
           {rows.map((c) => (
             <li key={c.id} className="campaign-card">
               <Link to={`/campaigns/${c.id}`}>
-                <span className="campaign-name">{c.name}</span>
-                <span className="campaign-meta">
-                  {c.memberCount} member{c.memberCount === 1 ? '' : 's'} | Updated{' '}
-                  {new Date(c.updated_at).toLocaleDateString()}
-                </span>
-                {c.description && (
-                  <span className="campaign-desc">{c.description}</span>
-                )}
+                <div className="campaign-card-row">
+                  <CampaignIcon id={c.icon} size={28} className="campaign-card-icon" />
+                  <div className="campaign-card-text">
+                    <span className="campaign-name">{c.name}</span>
+                    <span className="campaign-meta">
+                      {c.memberCount} member{c.memberCount === 1 ? '' : 's'} | Updated{' '}
+                      {new Date(c.updated_at).toLocaleDateString()}
+                    </span>
+                    {c.description && (
+                      <span className="campaign-desc">{c.description}</span>
+                    )}
+                  </div>
+                </div>
               </Link>
             </li>
           ))}
@@ -64,14 +75,24 @@ export const Campaigns = (): JSX.Element => {
 
       <div className="collapsibles-row">
         <details className="collapsible">
-          <summary>Join with a code</summary>
+          <summary>
+            <span className="summary-icon">
+              <KeyIcon />
+            </span>
+            Join with a code
+          </summary>
           <div className="collapsible-body">
             <JoinCampaignForm />
           </div>
         </details>
 
         <details className="collapsible">
-          <summary>Create a campaign</summary>
+          <summary>
+            <span className="summary-icon">
+              <PlusIcon />
+            </span>
+            Create a campaign
+          </summary>
           <div className="collapsible-body">
             <CreateCampaignForm onCreated={reload} />
           </div>
@@ -88,6 +109,7 @@ interface CreateCampaignFormProps {
 const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [icon, setIcon] = useState<string>(DEFAULT_CAMPAIGN_ICON);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -97,9 +119,10 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
     setPending(true);
     setError(null);
     try {
-      const row = await createCampaign(name.trim(), description.trim());
+      const row = await createCampaign(name.trim(), description.trim(), icon);
       setName('');
       setDescription('');
+      setIcon(DEFAULT_CAMPAIGN_ICON);
       await onCreated();
       navigate(`/campaigns/${row.id}`);
     } catch (err) {
@@ -130,6 +153,24 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
           onChange={(e) => setDescription(e.target.value)}
         />
       </label>
+      <fieldset className="icon-picker-fieldset">
+        <legend>Icon</legend>
+        <div className="icon-picker">
+          {CAMPAIGN_ICON_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              className={`icon-pick ${id === icon ? 'is-selected' : ''}`}
+              onClick={() => setIcon(id)}
+              aria-label={id}
+              title={id}
+              aria-pressed={id === icon}
+            >
+              <CampaignIcon id={id} size={22} />
+            </button>
+          ))}
+        </div>
+      </fieldset>
       {error && <p className="form-error">{error}</p>}
       <button type="submit" disabled={pending || name.trim().length === 0}>
         {pending ? 'Creating...' : 'Create'}

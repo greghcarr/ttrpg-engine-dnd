@@ -1125,12 +1125,19 @@ a.icon-btn {
 .collapsible > summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.6rem;
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   font-weight: 600;
   user-select: none;
   list-style: none;
+}
+
+.summary-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
 }
 
 .collapsible > summary::-webkit-details-marker {
@@ -1139,7 +1146,7 @@ a.icon-btn {
 
 .collapsible > summary::after {
   content: '\203A'; /* single right-pointing angle quote */
-  margin-left: 0.75rem;
+  margin-left: auto;
   font-size: 1.4rem;
   line-height: 1;
   color: var(--muted);
@@ -1160,9 +1167,7 @@ a.icon-btn {
 }
 
 .campaign-card a {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  display: block;
   padding: 1rem;
   background: var(--card);
   border: 1px solid var(--border);
@@ -1174,6 +1179,25 @@ a.icon-btn {
 
 .campaign-card a:hover {
   border-color: var(--accent);
+}
+
+.campaign-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.campaign-card-icon {
+  flex: 0 0 auto;
+  color: var(--accent);
+  margin-top: 0.15rem;
+}
+
+.campaign-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
 .campaign-name {
@@ -1204,6 +1228,76 @@ a.icon-btn {
 
 .campaign-detail .campaign-header h2 {
   margin: 0 0 0.25rem;
+}
+
+.campaign-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.campaign-detail-icon {
+  color: var(--accent);
+}
+
+/* Grid of selectable icons used in the Create form + the
+   Campaign-detail change-icon panel. */
+.icon-picker-fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.icon-picker-fieldset legend {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 2.75rem);
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.icon-picker-detail {
+  margin: 0.5rem auto;
+  max-width: 24rem;
+}
+
+.icon-pick {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.icon-pick:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.icon-pick.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+  color: var(--accent);
+}
+
+.icon-pick:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .campaign-actions {

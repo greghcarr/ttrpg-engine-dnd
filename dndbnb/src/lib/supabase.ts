@@ -84,6 +84,7 @@ export type Database = {
           owner_id: string;
           name: string;
           description: string;
+          icon: string;
           join_code: string;
           created_at: string;
           updated_at: string;
@@ -91,10 +92,12 @@ export type Database = {
         Insert: {
           name: string;
           description?: string;
+          icon?: string;
         };
         Update: {
           name?: string;
           description?: string;
+          icon?: string;
         };
         Relationships: [];
       };

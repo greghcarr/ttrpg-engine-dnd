@@ -10,11 +10,13 @@ import {
   deleteCampaign,
   fetchCampaignDetail,
   leaveCampaign,
+  setCampaignIcon,
   type CampaignDetail as CampaignDetailModel,
 } from '@/lib/campaigns';
 import { useUser } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
-import { CheckIcon, CopyIcon, LogOutIcon, TrashIcon } from '@/components/Icons';
+import { CheckIcon, CopyIcon, LogOutIcon, PencilIcon, TrashIcon } from '@/components/Icons';
+import { CAMPAIGN_ICON_IDS, CampaignIcon } from '@/components/CampaignIcons';
 
 export const CampaignDetail = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +26,8 @@ export const CampaignDetail = (): JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [acting, setActing] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [savingIcon, setSavingIcon] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -71,6 +75,21 @@ export const CampaignDetail = (): JSX.Element => {
     }
   };
 
+  const onPickIcon = async (newIcon: string): Promise<void> => {
+    if (!detail) return;
+    setSavingIcon(true);
+    setError(null);
+    try {
+      await setCampaignIcon(detail.campaign.id, newIcon);
+      setDetail({ ...detail, campaign: { ...detail.campaign, icon: newIcon } });
+      setIconPickerOpen(false);
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setSavingIcon(false);
+    }
+  };
+
   const onDelete = async (): Promise<void> => {
     if (
       !confirm(
@@ -96,12 +115,47 @@ export const CampaignDetail = (): JSX.Element => {
         <Link to="/campaigns">&larr; All campaigns</Link>
       </p>
       <header className="campaign-header">
-        <div>
+        <div className="campaign-title-row">
+          <CampaignIcon
+            id={detail.campaign.icon}
+            size={36}
+            className="campaign-detail-icon"
+          />
           <h2>{detail.campaign.name}</h2>
-          {detail.campaign.description && (
-            <p className="campaign-desc">{detail.campaign.description}</p>
+          {isOwner && (
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setIconPickerOpen((open) => !open)}
+              title="Change icon"
+              aria-label="Change icon"
+              aria-expanded={iconPickerOpen}
+            >
+              <PencilIcon />
+            </button>
           )}
         </div>
+        {isOwner && iconPickerOpen && (
+          <div className="icon-picker icon-picker-detail">
+            {CAMPAIGN_ICON_IDS.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className={`icon-pick ${id === detail.campaign.icon ? 'is-selected' : ''}`}
+                onClick={() => onPickIcon(id)}
+                disabled={savingIcon}
+                aria-label={id}
+                title={id}
+                aria-pressed={id === detail.campaign.icon}
+              >
+                <CampaignIcon id={id} size={22} />
+              </button>
+            ))}
+          </div>
+        )}
+        {detail.campaign.description && (
+          <p className="campaign-desc">{detail.campaign.description}</p>
+        )}
         <div className="campaign-actions">
           {canLeave && (
             <button

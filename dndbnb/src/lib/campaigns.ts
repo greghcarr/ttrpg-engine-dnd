@@ -10,6 +10,7 @@ export interface CampaignSummary {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  readonly icon: string;
   readonly join_code: string;
   readonly owner_id: string;
   readonly updated_at: string;
@@ -21,7 +22,7 @@ export interface CampaignSummary {
 export const listMyCampaigns = async (): Promise<CampaignSummary[]> => {
   const { data, error } = await supabase
     .from('campaigns')
-    .select('id, owner_id, name, description, join_code, updated_at')
+    .select('id, owner_id, name, description, icon, join_code, updated_at')
     .order('updated_at', { ascending: false });
   if (error) throw error;
   const campaigns = data ?? [];
@@ -47,10 +48,11 @@ export const listMyCampaigns = async (): Promise<CampaignSummary[]> => {
 export const createCampaign = async (
   name: string,
   description: string,
+  icon: string,
 ): Promise<CampaignRow> => {
   const { data, error } = await supabase
     .from('campaigns')
-    .insert({ name, description })
+    .insert({ name, description, icon })
     .select('*')
     .single();
   if (error) {
@@ -102,6 +104,17 @@ export const leaveCampaign = async (campaignId: string, userId: string): Promise
 
 export const deleteCampaign = async (campaignId: string): Promise<void> => {
   const { error } = await supabase.from('campaigns').delete().eq('id', campaignId);
+  if (error) throw error;
+};
+
+export const setCampaignIcon = async (
+  campaignId: string,
+  icon: string,
+): Promise<void> => {
+  const { error } = await supabase
+    .from('campaigns')
+    .update({ icon })
+    .eq('id', campaignId);
   if (error) throw error;
 };
 
