@@ -123,7 +123,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
 | sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
 | warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
-| wizard | 1 | 19 |
+| wizard | 1, 2, 5, 18, 20 | 15 (ASI / subclass-only / un-named levels) |
 
 Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
 
@@ -192,6 +192,17 @@ Slice 54 filled every Warlock level that has a PHB 2024 feature (L1, L2, L3, L5,
 - `eldritch-master` (L20) — 1/long-rest action to regain all Pact Magic slots. Same shape as Magical Cunning's regain mechanic; same missing primitive.
 
 Pre-existing gap closed by this slice: Warlock now ships `skillChoices` (choose 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion) and `subclassLevel: 3`, matching the shape every other class uses. Previously the entry shipped neither, which would have prevented a character creator from offering the Warlock's L1 skill picks or the Patron choice at L3.
+
+### Wizard stub features (effects: [], waiting on engine work)
+
+Slice 55 filled L2, L5, L18, L20 plus an L1 addition. The L2 entry (`scholar`) wires as the slice's only new fully-mechanical feature: an `OfferChoice` over the six academic skills (Arcana / History / Investigation / Medicine / Nature / Religion) with `oneOf: 2`, granting proficiency in the chosen pair. This is the first feature in the class-features fill-out that uses player-pick `OfferChoice` for proficiency (Bard's Expertise at L3 / L9 still hardcodes its picks; converting both is a separate small slice). Stubs:
+
+- `ritual-adept` (L1) — cast any ritual spell prepared in the spellbook without expending a slot. Needs a "treat spell cast as ritual variant" path the engine doesn't expose at cast time.
+- `memorize-spell` (L5) — once per turn, after a long rest, replace one prepared spell with another from the spellbook. Needs a per-turn one-shot edit to the prepared-list that the engine's level-up / long-rest events don't trigger.
+- `spell-mastery` (L18) — pick one L1 and one L2 spell from the spellbook; cast them at their lowest level without a slot. Fits `OfferChoice` over the wizard's spellbook plus a "cast this spell with cost 0 once per arbitrary use" rule the engine doesn't model.
+- `signature-spells` (L20) — pick two L3 spells; cast each 1/short rest with no slot. Same shape as Spell Mastery plus a short-rest cooldown.
+
+Pre-existing gap closed by this slice: Wizard now ships `skillChoices` (choose 2 from Arcana, History, Investigation, Medicine, Nature, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had no skill picks for wizards, which would have prevented a character creator from offering them.
 
 ## Subclasses
 

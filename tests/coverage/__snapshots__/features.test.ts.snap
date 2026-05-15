@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 41,
-  "total": 111,
-  "wired": 70,
+  "stub": 45,
+  "total": 116,
+  "wired": 71,
 }
 `;
 
@@ -121,6 +121,11 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "warlock L18 eldritch-invocations-9 [stub]",
   "warlock L20 eldritch-master [stub]",
   "wizard L1 arcane-recovery [wired]",
+  "wizard L1 ritual-adept [stub]",
+  "wizard L2 scholar [wired]",
+  "wizard L5 memorize-spell [stub]",
+  "wizard L18 spell-mastery [stub]",
+  "wizard L20 signature-spells [stub]",
 ]
 `;
 
