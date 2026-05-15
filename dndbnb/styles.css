@@ -706,18 +706,6 @@ button.ghost {
   text-align: center;
 }
 
-/* The Identity step's whole rectangle pins to viewport vertical
-   center, sitting between the two fixed creator-arrow buttons. The
-   input + title + help stay normally laid-out inside it. */
-.step.step-identity {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(28rem, 90vw);
-  max-width: 28rem;
-  z-index: 10;
-}
 
 .step-controls {
   margin-top: 1.25rem;
