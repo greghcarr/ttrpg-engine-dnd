@@ -16,6 +16,6 @@ Alyx summons **Bestial Spirit** (30 HP, AC 11) via summon-beast at slot 2.
 
 **Alyx** is now concentrating on Summon Beast.
 
-**Alyx**'s concentration on Summon Beast broke (damage).
+**Alyx**'s concentration on Summon Beast broke (failedSave).
 
 Familiar is dismissed.

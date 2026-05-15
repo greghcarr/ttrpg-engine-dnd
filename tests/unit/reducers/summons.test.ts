@@ -188,7 +188,7 @@ describe('concentration auto-dismiss', () => {
       type: 'ConcentrationBroken',
       effectInstanceId: effectId,
       casterId: caster.id,
-      reason: 'damage',
+      reason: 'failedSave',
     } satisfies ConcentrationBrokenEvent);
     expect(after.characters[companionId]).toBeUndefined();
   });

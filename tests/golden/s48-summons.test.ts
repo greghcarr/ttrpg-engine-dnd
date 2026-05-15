@@ -92,7 +92,7 @@ describe('golden: summons + concentration cleanup', () => {
         type: 'ConcentrationBroken',
         effectInstanceId: effectId!,
         casterId: alyx.id,
-        reason: 'damage',
+        reason: 'failedSave',
       } satisfies ConcentrationBrokenEvent,
     ]);
     expect(campaign.state.characters[beastId]).toBeUndefined();
