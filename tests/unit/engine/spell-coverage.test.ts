@@ -81,6 +81,34 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'aid': { kind: 'heal' },
   'polymorph': { kind: 'skip', reason: 'has dedicated planPolymorph (not planCastSpell)' },
   'lesser-restoration': { kind: 'remove-condition', seedConditionId: 'poisoned' },
+  // Additional PHB 2024 cantrips with attack rolls
+  'chill-touch': { kind: 'attack' },
+  'produce-flame': { kind: 'attack' },
+  'starry-wisp': { kind: 'attack' },
+  'thorn-whip': { kind: 'attack' },
+  // Additional PHB 2024 cantrips with saves
+  'acid-splash': { kind: 'save' },
+  'frostbite': { kind: 'save' },
+  'mind-sliver': { kind: 'save' },
+  'poison-spray': { kind: 'save' },
+  'thunderclap': { kind: 'save' },
+  'toll-the-dead': { kind: 'save' },
+  'vicious-mockery': { kind: 'save' },
+  'word-of-radiance': { kind: 'save' },
+  // Utility / narrative cantrips with no wired mechanical effect yet.
+  'blade-ward': { kind: 'skip', reason: 'self resistance buff, no condition wired' },
+  'dancing-lights': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'druidcraft': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'friends': { kind: 'skip', reason: 'social buff cantrip, no mechanical effect' },
+  'mending': { kind: 'skip', reason: 'utility repair, no mechanical effect' },
+  'message': { kind: 'skip', reason: 'utility communication, no mechanical effect' },
+  'minor-illusion': { kind: 'skip', reason: 'illusion cantrip, no mechanical effect' },
+  'mold-earth': { kind: 'skip', reason: 'utility cantrip, no mechanical effect' },
+  'resistance': { kind: 'skip', reason: 'narrow-window save buff, no condition wired' },
+  'shillelagh': { kind: 'skip', reason: 'weapon-enhancement cantrip, not wired through planCastSpell' },
+  'spare-the-dying': { kind: 'skip', reason: 'stabilize-only cantrip, no mechanical event yet' },
+  'thaumaturgy': { kind: 'skip', reason: 'narrative cantrip, no mechanical effect' },
+  'true-strike': { kind: 'skip', reason: '2024 weapon-attack rebrand, not wired through planCastSpell' },
 };
 
 const buildWizard = (preparedSpells: string[]): Character =>
