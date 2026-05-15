@@ -21,10 +21,12 @@ import {
   computeFinalAbilities,
   pointBuyRemaining,
   pointBuySpent,
+  randomName,
   type AbilityMode,
   type CreatorAction,
   type CreatorState,
 } from '@/lib/creator/state';
+import { DiceIcon } from '@/components/Icons';
 import { getSpellCounts, isCaster, SPELLCASTING_ABILITY } from '@/lib/creator/spell-rules';
 import { checkText } from '@/lib/moderation';
 
@@ -581,15 +583,26 @@ export const StepIdentity = ({ state, dispatch }: StepProps): JSX.Element => {
     <section className="step">
       <h3>Name your character</h3>
       <p className="step-help">Choose a name. You can change it later.</p>
-      <input
-        type="text"
-        className="name-input"
-        autoComplete="off"
-        maxLength={80}
-        aria-label="Character name"
-        value={state.name}
-        onChange={(e) => dispatch({ type: 'set-name', name: e.target.value })}
-      />
+      <div className="name-input-row">
+        <input
+          type="text"
+          className="name-input"
+          autoComplete="off"
+          maxLength={80}
+          aria-label="Character name"
+          value={state.name}
+          onChange={(e) => dispatch({ type: 'set-name', name: e.target.value })}
+        />
+        <button
+          type="button"
+          className="name-dice"
+          onClick={() => dispatch({ type: 'set-name', name: randomName() })}
+          title="Random name"
+          aria-label="Random name"
+        >
+          <DiceIcon size={16} />
+        </button>
+      </div>
       {state.name.length > 0 && !moderation.clean && (
         <p className="form-hint warning">
           That name will be rejected when public sharing lands (flagged: {moderation.matchedTerms.join(', ') || 'profanity'}).

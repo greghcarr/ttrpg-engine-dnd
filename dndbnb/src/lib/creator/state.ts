@@ -352,14 +352,42 @@ export const abilityMod = (score: number): number => Math.floor((score - 10) / 2
 // rolled values are visible on the abilities step.
 
 // Curated, intentionally safe fantasy names; sidesteps the moderation
-// pipeline since they're all pre-vetted.
-const RANDOM_NAMES: ReadonlyArray<string> = [
+// pipeline since they're all pre-vetted. Combining first + last gives
+// ~80 * 30 = 2400 possible names which keeps repeats rare even with
+// hundreds of rolls.
+const RANDOM_FIRST_NAMES: ReadonlyArray<string> = [
   'Aelar', 'Brom', 'Cedric', 'Darian', 'Eldrin', 'Fenwick', 'Garrick', 'Halia',
   'Ivor', 'Jora', 'Kalia', 'Lorin', 'Merrik', 'Nessa', 'Orin', 'Pendra',
   'Quenella', 'Roric', 'Selene', 'Talwyn', 'Ulric', 'Vesper', 'Wren', 'Xara',
   'Yvain', 'Zara', 'Velka', 'Korwin', 'Ondrel', 'Sephra', 'Thalin', 'Mira',
   'Drathi', 'Lirien', 'Borek', 'Cassia', 'Eowyn', 'Faelon', 'Gilda', 'Halvar',
+  'Aeris', 'Bardin', 'Caelum', 'Dorian', 'Elara', 'Fendrel', 'Gareth', 'Hilde',
+  'Idris', 'Jorund', 'Kavan', 'Lyra', 'Maren', 'Nymeria', 'Oswin', 'Perrin',
+  'Quinlan', 'Rhyssa', 'Sariel', 'Therion', 'Ulara', 'Varin', 'Wylla', 'Xavienne',
+  'Yara', 'Zephyra', 'Aldric', 'Bryn', 'Caelan', 'Doreen', 'Edran', 'Fellis',
+  'Galen', 'Helga', 'Iona', 'Joren', 'Kasimir', 'Loraine', 'Maelis', 'Nireth',
+  'Olwen', 'Pyriel', 'Renwick', 'Soraya', 'Tamsin', 'Uthred', 'Vidar', 'Wenna',
 ];
+
+const RANDOM_LAST_NAMES: ReadonlyArray<string> = [
+  'Ashweaver', 'Brightblade', 'Coldwater', 'Darkwood', 'Emberhand', 'Fellstrike',
+  'Galewind', 'Hollowmere', 'Ironhand', 'Jadewing', 'Knightsong', 'Lightbringer',
+  'Moonshadow', 'Nightwhisper', 'Oathkeeper', 'Pyrewatch', 'Quickstrike',
+  'Ravenwing', 'Stormbringer', 'Thornveil', 'Underhill', 'Valebrook', 'Wildmane',
+  'Yorespine', 'Zephyrcloak', 'Stormcaller', 'Highmoon', 'Greycloak',
+  'Steelheart', 'Frostvale', 'Wolfsbane', 'the Bold', 'the Wise', 'the Shadow',
+];
+
+// 50/50 chance to append a last name / epithet. Cap the combined
+// length at 80 chars to match the DB column constraint.
+export const randomName = (): string => {
+  const first = pick(RANDOM_FIRST_NAMES);
+  if (Math.random() < 0.5) {
+    const candidate = `${first} ${pick(RANDOM_LAST_NAMES)}`;
+    if (candidate.length <= 80) return candidate;
+  }
+  return first;
+};
 
 const pick = <T,>(arr: ReadonlyArray<T>): T => {
   if (arr.length === 0) throw new Error('Cannot pick from empty array.');
@@ -446,6 +474,6 @@ export const randomizeState = (
     arrayAssignment,
     cantrips,
     preparedSpells: prepared,
-    name: pick(RANDOM_NAMES),
+    name: randomName(),
   };
 };
