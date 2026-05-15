@@ -587,7 +587,6 @@ export const StepIdentity = ({ state, dispatch }: StepProps): JSX.Element => {
         autoComplete="off"
         maxLength={80}
         aria-label="Character name"
-        placeholder="Name"
         value={state.name}
         onChange={(e) => dispatch({ type: 'set-name', name: e.target.value })}
       />
