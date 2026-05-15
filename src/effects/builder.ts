@@ -339,6 +339,7 @@ export const applyEffectToBuilder = (
     case 'ExpandSpellList':
     case 'SetHPMaxFormula':
     case 'OfferChoice':
+    case 'GrantAura':
     case 'Custom':
       return;
     default: {

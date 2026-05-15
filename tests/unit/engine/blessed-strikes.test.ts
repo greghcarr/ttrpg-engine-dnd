@@ -17,7 +17,7 @@ import { CharacterSchema, type Character } from '../../../src/schemas/runtime/ch
 import { newCharacterId } from '../../../src/ids.js';
 import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
-import type { ChoiceRequiredEvent } from '../../../src/schemas/events/choice.js';
+import type { ChoiceRequiredEvent } from '../../../src/schemas/events/level-up.js';
 import type { AttackRolledEvent } from '../../../src/schemas/events/attack.js';
 
 const buildClericLevel6 = (): Character =>

@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 79,
+  "stub": 78,
   "total": 172,
-  "wired": 93,
+  "wired": 94,
 }
 `;
 
@@ -107,7 +107,7 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "paladin L5 faithful-steed [stub]",
   "paladin L6 aura-of-protection [stub]",
   "paladin L9 abjure-foes [stub]",
-  "paladin L10 aura-of-courage [stub]",
+  "paladin L10 aura-of-courage [wired]",
   "paladin L11 radiant-strike [stub]",
   "paladin L14 restoring-touch [stub]",
   "paladin L18 aura-improvements [stub]",
@@ -193,6 +193,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "aura-of-courage-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 7,
     "id": "baned",
     "stackable": false,
@@ -215,6 +220,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 0,
     "id": "charmed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "crusaders-mantle-active",
     "stackable": false,
   },
   {

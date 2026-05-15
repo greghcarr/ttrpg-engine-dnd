@@ -358,7 +358,7 @@
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "abjure-foes", "name": "Abjure Foes", "effects": [] }], "columns": {} },
-        "10": { "proficiencyBonus": 4, "features": [{ "id": "aura-of-courage", "name": "Aura of Courage", "effects": [] }], "columns": {} },
+        "10": { "proficiencyBonus": 4, "features": [{ "id": "aura-of-courage", "name": "Aura of Courage", "effects": [{ "kind": "GrantAura", "auraId": "aura-of-courage", "rangeFeet": 10, "allyConditionId": "aura-of-courage-active", "description": "You and allies within 10 ft can't be Frightened." }, { "kind": "GrantConditionImmunity", "conditionId": "frightened" }] }], "columns": {} },
         "11": { "proficiencyBonus": 4, "features": [{ "id": "radiant-strike", "name": "Radiant Strike", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
@@ -1545,7 +1545,7 @@
     { "id": "clairvoyance", "name": "Clairvoyance", "level": 3, "school": "divination", "castingTime": "10 minutes", "range": "1 mile", "components": { "verbal": true, "somatic": true, "material": "a focus worth 100+ GP, either a jeweled horn for hearing or a glass eye for seeing" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "conjure-animals", "name": "Conjure Animals", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "summon", "name": "Conjured Animal Spirit", "ac": 14, "hpBase": 30, "hpPerSlotAbove": 5, "baseSlotLevel": 3, "speedFeet": 30 }] },
     { "id": "create-food-and-water", "name": "Create Food and Water", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [] },
-    { "id": "crusaders-mantle", "name": "Crusader's Mantle", "level": 3, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "targeting": { "shape": "sphere", "size": 30 }, "mechanicalEffects": [] },
+    { "id": "crusaders-mantle", "name": "Crusader's Mantle", "level": 3, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "targeting": { "shape": "sphere", "size": 30 }, "mechanicalEffects": [{ "kind": "buff", "conditionId": "crusaders-mantle-active" }] },
     { "id": "daylight", "name": "Daylight", "level": 3, "school": "evocation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "paladin", "ranger", "sorcerer"], "mechanicalEffects": [] },
     { "id": "elemental-weapon", "name": "Elemental Weapon", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["paladin", "druid"], "mechanicalEffects": [] },
     { "id": "feign-death", "name": "Feign Death", "level": 3, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of graveyard dirt" }, "duration": "1 hour", "concentration": false, "ritual": true, "classes": ["bard", "cleric", "druid", "wizard"], "mechanicalEffects": [] },
@@ -2244,6 +2244,34 @@
           },
           "actions": [{ "kind": "AddDamage", "dice": "2d6", "damageType": "radiant" }],
           "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "aura-of-courage-active",
+      "name": "Aura of Courage Active",
+      "description": "Frightened immunity granted by a nearby Paladin's L10+ Aura of Courage.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "crusaders-mantle-active",
+      "name": "Crusader's Mantle Active",
+      "description": "+1d4 radiant damage on every weapon hit while the spell lasts.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "crusaders-mantle-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d4", "damageType": "radiant" }]
         }
       ]
     }

@@ -166,6 +166,17 @@ export type Effect =
   // need to know.
   | { kind: 'GrantAdvantageToAttackers'; condition?: Predicate }
   | { kind: 'ImposeDisadvantageOnAttackers'; condition?: Predicate }
+  // A "this character projects an aura" marker. Auras are inherently
+  // position-dependent (RAW typically "creatures within X feet"), and
+  // the engine doesn't model continuous position. So this effect is
+  // metadata-only: the consumer (dndbnb / DM tool / VTT) reads the
+  // bearer's `GrantAura` effects, decides which characters are
+  // currently in range using whatever position model it tracks, and
+  // applies / removes the `allyConditionId` on those characters via
+  // `ConditionApplied` / `ConditionRemoved` events. The bearer's own
+  // self-effect (e.g. Aura of Courage also making the bearer Frightened-
+  // immune) ships as a separate sibling effect on the same feature.
+  | { kind: 'GrantAura'; auraId: string; rangeFeet: number; allyConditionId: string; description?: string }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -341,6 +352,13 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       condition: PredicateSchema.optional(),
     }),
     z.object({
+      kind: z.literal('GrantAura'),
+      auraId: z.string(),
+      rangeFeet: z.number().int().min(0),
+      allyConditionId: z.string(),
+      description: z.string().optional(),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -379,5 +397,6 @@ export const EFFECT_KINDS = [
   'GrantEvasion',
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
+  'GrantAura',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;
