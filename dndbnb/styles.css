@@ -768,12 +768,11 @@ button.ghost {
   cursor: pointer;
 }
 
-.star-btn:hover {
-  color: var(--accent);
-}
-
+/* Favorite star is always gold, regardless of the surrounding class
+   accent. Stars are gold; that's the visual language. */
+.star-btn:hover,
 .star-btn.is-on {
-  color: var(--accent);
+  color: #f0b61e;
 }
 
 .star-btn:disabled {
