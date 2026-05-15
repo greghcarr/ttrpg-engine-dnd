@@ -45,13 +45,6 @@ export const Layout = (): JSX.Element => {
     <>
       <header className="site-header">
         <div className="site-header-inner">
-          <div className="brand">
-            <Link to="/characters">
-              <h1>dndbnb</h1>
-            </Link>
-            <p className="tagline">a D&amp;D character workbench</p>
-          </div>
-
           {session ? (
             <button
               type="button"
@@ -68,6 +61,13 @@ export const Layout = (): JSX.Element => {
               Sign in
             </Link>
           )}
+
+          <div className="brand">
+            <Link to="/characters">
+              <h1>dndbnb</h1>
+            </Link>
+            <p className="tagline">a D&amp;D character workbench</p>
+          </div>
         </div>
 
         {menuOpen && session && (
