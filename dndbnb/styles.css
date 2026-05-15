@@ -379,6 +379,22 @@ button.ghost {
   font-size: 0.95rem;
 }
 
+/* Placeholder shown when a step can't render yet (e.g. Spells with
+   no class picked). Pinned to viewport center so it sits between the
+   two fixed creator-arrows. */
+.step-empty-state {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 1.05rem;
+}
+
 .card-grid {
   list-style: none;
   padding: 0;

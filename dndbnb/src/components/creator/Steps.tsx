@@ -473,7 +473,7 @@ const PointBuyPanel = ({
 // ---- Step: Spells ---------------------------------------------------------
 
 export const StepSpells = ({ state, dispatch, content }: StepProps): JSX.Element => {
-  if (!state.classId) return <p>Pick a class first.</p>;
+  if (!state.classId) return <p className="step-empty-state">Pick a class first.</p>;
   if (!isCaster(state.classId)) {
     return (
       <section className="step">
