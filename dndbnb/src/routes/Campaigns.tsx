@@ -36,17 +36,12 @@ export const Campaigns = (): JSX.Element => {
   return (
     <section className="characters-page">
       <div className="page-header">
-        <h2>Campaigns</h2>
+        <h2>My campaigns</h2>
       </div>
-      <div className="campaign-forms">
-        <CreateCampaignForm onCreated={reload} />
-        <JoinCampaignForm />
-      </div>
-      <h3 className="campaigns-list-heading">My campaigns</h3>
       {rows.length === 0 ? (
         <p className="empty">
-          You haven't joined any campaigns yet. Create one above, or join with a code from a
-          friend.
+          You haven't joined any campaigns yet. Join one with a code, or create one of your own
+          below.
         </p>
       ) : (
         <ul className="campaign-list">
@@ -66,6 +61,20 @@ export const Campaigns = (): JSX.Element => {
           ))}
         </ul>
       )}
+
+      <details className="collapsible">
+        <summary>Join with a code</summary>
+        <div className="collapsible-body">
+          <JoinCampaignForm />
+        </div>
+      </details>
+
+      <details className="collapsible">
+        <summary>Create a campaign</summary>
+        <div className="collapsible-body">
+          <CreateCampaignForm onCreated={reload} />
+        </div>
+      </details>
     </section>
   );
 };
@@ -100,7 +109,6 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
 
   return (
     <form className="campaign-form" onSubmit={submit}>
-      <h3>Create a campaign</h3>
       <label>
         Name
         <input
@@ -151,7 +159,6 @@ const JoinCampaignForm = (): JSX.Element => {
 
   return (
     <form className="campaign-form" onSubmit={submit}>
-      <h3>Join with a code</h3>
       <label>
         Join code
         <input

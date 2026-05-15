@@ -976,26 +976,10 @@ a.icon-btn {
 }
 
 /* Campaigns */
-.campaign-forms {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
 .campaign-form {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding: 1rem 1.25rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-}
-
-.campaign-form h3 {
-  margin: 0;
-  font-size: 1.05rem;
 }
 
 .campaign-form label {
@@ -1017,17 +1001,61 @@ a.icon-btn {
   resize: vertical;
 }
 
-.campaigns-list-heading {
-  margin: 0 0 0.75rem;
-}
-
 .campaign-list {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 1.25rem;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
   gap: 1rem;
+}
+
+/* Collapsible disclosure rows used for "Join with a code" + "Create
+   a campaign" on the campaigns page. Native <details>/<summary> handles
+   the toggle state; we just style the chrome and swap a chevron. */
+.collapsible {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.collapsible > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  user-select: none;
+  list-style: none;
+}
+
+.collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible > summary::after {
+  content: '\203A'; /* single right-pointing angle quote */
+  margin-left: 0.75rem;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.15s;
+  display: inline-block;
+}
+
+.collapsible[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.collapsible[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.collapsible-body {
+  padding: 1rem 1.25rem;
 }
 
 .campaign-card a {
