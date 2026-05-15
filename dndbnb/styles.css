@@ -366,6 +366,17 @@ button.ghost {
   border-color: var(--accent);
   opacity: 1;
   cursor: default;
+  /* Pin a 1px outline of the contrasting accent-fg color around the
+     label. On light class accents (wizard blue, paladin pink, etc.)
+     this gives the text-color characters a dark edge so they still
+     read clearly; on dark accents (warlock purple) the outline is
+     near-white and effectively invisible against the light text,
+     so it costs nothing. */
+  text-shadow:
+    -1px 0 var(--accent-fg),
+    1px 0 var(--accent-fg),
+    0 -1px var(--accent-fg),
+    0 1px var(--accent-fg);
 }
 
 .step-pip.is-done:not(.is-active) button {
