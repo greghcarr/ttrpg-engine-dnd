@@ -786,6 +786,7 @@ button.ghost {
 .status {
   color: var(--muted);
   font-style: italic;
+  text-align: center;
 }
 
 .status.error,
