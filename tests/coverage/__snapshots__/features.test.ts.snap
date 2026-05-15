@@ -2,8 +2,8 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 26,
-  "total": 96,
+  "stub": 41,
+  "total": 111,
   "wired": 70,
 }
 `;
@@ -105,6 +105,21 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "sorcerer L17 sorcery-points-17 [wired]",
   "sorcerer L20 arcane-apotheosis [stub]",
   "sorcerer L20 sorcery-points-20 [wired]",
+  "warlock L1 eldritch-invocations-2 [stub]",
+  "warlock L2 eldritch-invocations-3 [stub]",
+  "warlock L2 magical-cunning [stub]",
+  "warlock L3 pact-boon [stub]",
+  "warlock L5 eldritch-invocations-4 [stub]",
+  "warlock L7 eldritch-invocations-5 [stub]",
+  "warlock L9 eldritch-invocations-6 [stub]",
+  "warlock L11 mystic-arcanum-6 [stub]",
+  "warlock L12 eldritch-invocations-7 [stub]",
+  "warlock L13 mystic-arcanum-7 [stub]",
+  "warlock L15 eldritch-invocations-8 [stub]",
+  "warlock L15 mystic-arcanum-8 [stub]",
+  "warlock L17 mystic-arcanum-9 [stub]",
+  "warlock L18 eldritch-invocations-9 [stub]",
+  "warlock L20 eldritch-master [stub]",
   "wizard L1 arcane-recovery [wired]",
 ]
 `;

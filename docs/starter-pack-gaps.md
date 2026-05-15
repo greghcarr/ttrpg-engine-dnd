@@ -122,7 +122,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | ranger | 1, 2, 5 | 17 |
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
 | sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
-| warlock | (none) | 20 |
+| warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
 | wizard | 1 | 19 |
 
 Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
@@ -181,6 +181,17 @@ Slice 53 filled L10, L15, L17, L20 (plus an addition at L5). Wired entries bump 
 - `arcane-apotheosis` (L20) — 2024 capstone: while Innate Sorcery is active, spending a Sorcery Point to use Metamagic on a spell costs zero points instead. Needs Innate Sorcery to be an actual condition the engine recognizes and a Metamagic-cost-zeroing override.
 
 Observation: `innate-sorcery` is currently a 2-use long-rest resource at L1 with no scaling. PHB 2024 keeps it at 2/long-rest through L20, so no tier ladder is required there.
+
+### Warlock stub features (effects: [], waiting on engine work)
+
+Slice 54 filled every Warlock level that has a PHB 2024 feature (L1, L2, L3, L5, L7, L9, L11, L12, L13, L15, L17, L18, L20). All entries ship `effects: []` because the Warlock's defining mechanics map poorly to the current effect vocabulary:
+
+- `eldritch-invocations-N` (L1 / L2 / L5 / L7 / L9 / L12 / L15 / L18) — the "known count" of invocations rises across eight tiers, but invocations themselves are a content catalog the pack doesn't ship. Each tier is a stub flag for now; full wiring needs (a) every PHB 2024 invocation as a Feat-like content row with its own `effects[]`, and (b) an `OfferChoice` at each tier that lets the player pick from the catalog. The L2 entry doubles as Magical Cunning's home (1/long-rest action that regains all expended Pact Magic slots after 1-minute meditation) — needs a "regain spell slots of a specific casting type" trigger action the engine doesn't expose.
+- `pact-boon` (L3) — choice between Pact of the Blade (summon a bound weapon), Chain (find familiar at-will + special familiar list), Tome (extra cantrips + ritual book), Talisman (proficiency-bonus die to ally checks). Each pact is itself a multi-effect bundle; needs a top-level `OfferChoice` whose options carry sub-effect arrays the engine already understands (`GrantSpell` at-will, summon-system reuse for Chain, `GrantProficiency` for Tome cantrips).
+- `mystic-arcanum-6/7/8/9` (L11 / L13 / L15 / L17) — one chosen Warlock spell of the given level, castable once per long rest without expending a Pact slot. Shape fits `OfferChoice + GrantSpell { preparation: 'oncePerLongRest' }` but the Warlock spell list isn't curated for the choice yet; stub until the spell catalog grows enough at L6+ to make the pick meaningful (the pack currently ships 0 spells at L6-9).
+- `eldritch-master` (L20) — 1/long-rest action to regain all Pact Magic slots. Same shape as Magical Cunning's regain mechanic; same missing primitive.
+
+Pre-existing gap closed by this slice: Warlock now ships `skillChoices` (choose 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion) and `subclassLevel: 3`, matching the shape every other class uses. Previously the entry shipped neither, which would have prevented a character creator from offering the Warlock's L1 skill picks or the Patron choice at L3.
 
 ## Subclasses
 
