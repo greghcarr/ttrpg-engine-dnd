@@ -25,7 +25,7 @@ import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
-import { CopyIcon, PencilIcon, TrashIcon } from '@/components/Icons';
+import { CopyIcon, GlobeIcon, PencilIcon, TrashIcon } from '@/components/Icons';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
@@ -363,7 +363,16 @@ export const Sheet = (): JSX.Element => {
         )}
         <div className="sheet-row">
           <dt>Visibility</dt>
-          <dd>
+          <dd className="visibility-cell">
+            {row.is_public && (
+              <span
+                className="public-marker"
+                title="Public character"
+                aria-label="Public character"
+              >
+                <GlobeIcon size={14} />
+              </span>
+            )}
             {isOwner ? (
               <button
                 type="button"

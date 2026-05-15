@@ -48,6 +48,9 @@ export const CharacterCard = ({
               <GlobeIcon size={13} />
             </span>
           )}
+          {character.is_public && showVisibilityBadge && (
+            <span className="badge badge-public">Public</span>
+          )}
         </span>
         <div className="character-card-actions">
           {onDeleted && (
@@ -62,11 +65,6 @@ export const CharacterCard = ({
         </div>
       </div>
       <div className="character-meta">
-        {showVisibilityBadge && (
-          <span className={`badge ${character.is_public ? 'badge-public' : 'badge-private'}`}>
-            {character.is_public ? 'Public' : 'Private'}
-          </span>
-        )}
         {character.ownerLabel && <span className="owner-label">by {character.ownerLabel}</span>}
         {character.updated_at && (
           <span className="character-updated">

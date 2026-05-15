@@ -1519,9 +1519,7 @@ a.icon-btn {
   position: relative;
   display: grid;
   gap: 0.5rem 1.5rem;
-  /* Extra top padding leaves room for the borderless icon row pinned
-     to the rectangle's top-right corner. */
-  padding: 2.6rem 1.5rem 1.25rem;
+  padding: 1.25rem 1.5rem;
   /* Background tints by class color (set inline on .sheet-page) the
      same way the character cards on My Characters do, so the sheet
      reads as the same "color of this character" surface. */
@@ -1629,4 +1627,10 @@ a.icon-btn {
   background: var(--bg);
   color: var(--fg);
   max-width: 100%;
+}
+
+.visibility-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
