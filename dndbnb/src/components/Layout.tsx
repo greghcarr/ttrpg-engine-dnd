@@ -2,10 +2,14 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/lib/session';
 import {
+  CompassFilledIcon,
   CompassIcon,
   LogOutIcon,
   StarFilledIcon,
+  StarOutlineIcon,
+  UserFilledIcon,
   UserIcon,
+  UsersFilledIcon,
   UsersIcon,
 } from '@/components/Icons';
 
@@ -37,7 +41,7 @@ export const Layout = (): JSX.Element => {
                 title="My characters"
                 aria-label="My characters"
               >
-                <UserIcon />
+                {({ isActive }) => (isActive ? <UserFilledIcon /> : <UserIcon />)}
               </NavLink>
               <NavLink
                 to="/browse"
@@ -45,7 +49,7 @@ export const Layout = (): JSX.Element => {
                 title="Browse public characters"
                 aria-label="Browse public characters"
               >
-                <CompassIcon />
+                {({ isActive }) => (isActive ? <CompassFilledIcon /> : <CompassIcon />)}
               </NavLink>
               <NavLink
                 to="/favorites"
@@ -53,7 +57,7 @@ export const Layout = (): JSX.Element => {
                 title="Favorites"
                 aria-label="Favorites"
               >
-                <StarFilledIcon />
+                {({ isActive }) => (isActive ? <StarFilledIcon /> : <StarOutlineIcon />)}
               </NavLink>
               <NavLink
                 to="/campaigns"
@@ -61,7 +65,7 @@ export const Layout = (): JSX.Element => {
                 title="Campaigns"
                 aria-label="Campaigns"
               >
-                <UsersIcon />
+                {({ isActive }) => (isActive ? <UsersFilledIcon /> : <UsersIcon />)}
               </NavLink>
               <button
                 type="button"
