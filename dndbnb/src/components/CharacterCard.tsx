@@ -7,6 +7,7 @@
 import { Link } from 'react-router-dom';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { DeleteCharacterButton } from '@/components/DeleteCharacterButton';
+import { GlobeIcon } from '@/components/Icons';
 import { classColorVars } from '@/lib/class-colors';
 
 export interface CharacterCardModel {
@@ -36,7 +37,18 @@ export const CharacterCard = ({
   <li className="character-card" style={classColorVars(character.primary_class_id)}>
     <Link to={`/characters/${character.id}`}>
       <div className="character-card-head">
-        <span className="character-name">{character.name}</span>
+        <span className="character-name">
+          {character.name}
+          {character.is_public && (
+            <span
+              className="public-marker"
+              title="Public character"
+              aria-label="Public character"
+            >
+              <GlobeIcon size={13} />
+            </span>
+          )}
+        </span>
         <div className="character-card-actions">
           {onDeleted && (
             <DeleteCharacterButton

@@ -980,6 +980,15 @@ button.ghost {
 .character-name {
   font-weight: 600;
   font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.public-marker {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
 }
 
 .character-meta {
@@ -1507,14 +1516,93 @@ a.icon-btn {
 }
 
 .sheet {
+  position: relative;
   display: grid;
   gap: 0.5rem 1.5rem;
-  padding: 1.25rem 1.5rem;
+  /* Extra top padding leaves room for the borderless icon row pinned
+     to the rectangle's top-right corner. */
+  padding: 2.6rem 1.5rem 1.25rem;
+  /* Background tints by class color (set inline on .sheet-page) the
+     same way the character cards on My Characters do, so the sheet
+     reads as the same "color of this character" surface. */
   background: var(--card);
+  background: color-mix(in srgb, var(--accent) 14%, var(--card));
   border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
   border-radius: 0.5rem;
   max-width: 36rem;
   margin: 0 auto;
+}
+
+.sheet-body-icons {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Borderless icon button used inside the sheet rectangle, matching
+   the trash/star icons on the character-card list. Stays muted until
+   hover, then picks up either the accent or the danger color. */
+.sheet-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.sheet-icon:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.sheet-icon.danger:hover:not(:disabled) {
+  color: var(--danger);
+}
+
+.sheet-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cluster of small text-only buttons (JSON / CSV / PDF) shown in the
+   Export row's dd slot. */
+.export-buttons {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.export-btn {
+  padding: 0.1rem 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: transparent;
+  color: var(--accent);
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: text-decoration-color 0.15s;
+}
+
+.export-btn:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .sheet-row {

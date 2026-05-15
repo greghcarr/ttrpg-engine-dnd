@@ -19,17 +19,13 @@ import {
   newCharacterId,
   resolveContent,
   type Character,
+  type DerivedCharacter,
 } from 'ttrpg-engine-dnd';
 import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
-import {
-  CopyIcon,
-  DownloadIcon,
-  PencilIcon,
-  TrashIcon,
-} from '@/components/Icons';
+import { CopyIcon, PencilIcon, TrashIcon } from '@/components/Icons';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
@@ -112,21 +108,41 @@ export const Sheet = (): JSX.Element => {
     [character],
   );
 
-  const onExportPdf = async (): Promise<void> => {
+  const triggerDownload = (blob: Blob, filename: string): void => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const onExport = async (format: 'json' | 'csv' | 'pdf'): Promise<void> => {
     if (!character || !derived) return;
     setExporting(true);
+    setError(null);
     try {
-      const { generateCharacterSheetPdf } = await import('@/lib/pdf/character-sheet');
-      const bytes = await generateCharacterSheetPdf({ character, derived, content });
-      const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${slugify(character.name)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const base = slugify(character.name);
+      if (format === 'json') {
+        // The ttrpg-engine-dnd `Character` JSON is the source of truth
+        // and round-trips back through CharacterSchema.parse.
+        const blob = new Blob([JSON.stringify(character, null, 2)], {
+          type: 'application/json',
+        });
+        triggerDownload(blob, `${base}.json`);
+      } else if (format === 'csv') {
+        const blob = new Blob([characterToCsv(character, derived)], {
+          type: 'text/csv;charset=utf-8',
+        });
+        triggerDownload(blob, `${base}.csv`);
+      } else {
+        const { generateCharacterSheetPdf } = await import('@/lib/pdf/character-sheet');
+        const bytes = await generateCharacterSheetPdf({ character, derived, content });
+        const blob = new Blob([bytes as BlobPart], { type: 'application/pdf' });
+        triggerDownload(blob, `${base}.pdf`);
+      }
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -267,53 +283,18 @@ export const Sheet = (): JSX.Element => {
         <p className="breadcrumb">
           <Link to="/characters">&larr; All characters</Link>
         </p>
-        <div className="sheet-actions">
-          {user && <FavoriteButton characterId={row.id} />}
-          {user && !isOwner && (
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={onClone}
-              disabled={cloning}
-              title="Clone to my characters"
-              aria-label="Clone to my characters"
-            >
-              <CopyIcon />
-            </button>
-          )}
+        {user && !isOwner && (
           <button
             type="button"
-            className="icon-btn"
-            onClick={onExportPdf}
-            disabled={exporting}
-            title="Export as PDF"
-            aria-label="Export as PDF"
+            className="sheet-icon"
+            onClick={onClone}
+            disabled={cloning}
+            title="Clone to my characters"
+            aria-label="Clone to my characters"
           >
-            <DownloadIcon />
+            <CopyIcon />
           </button>
-          {isOwner && (
-            <Link
-              to={`/characters/${row.id}/edit`}
-              className="icon-btn"
-              title="Edit character"
-              aria-label="Edit character"
-            >
-              <PencilIcon />
-            </Link>
-          )}
-          {isOwner && (
-            <button
-              type="button"
-              className="icon-btn danger"
-              onClick={onDelete}
-              disabled={deleting}
-              title="Delete character (permanent)"
-              aria-label="Delete character"
-            >
-              <TrashIcon />
-            </button>
-          )}
-        </div>
+        )}
       </div>
       {currentCampaign && (
         <div className="sheet-meta">
@@ -324,6 +305,34 @@ export const Sheet = (): JSX.Element => {
       )}
       {error && <p className="form-error">{error}</p>}
       <dl className="sheet">
+        {/* Icons pinned to the top-right of the body rectangle.
+            Order L->R: star, trash, edit. Borderless to match the
+            character-card icons. */}
+        <div className="sheet-body-icons">
+          {user && <FavoriteButton characterId={row.id} />}
+          {isOwner && (
+            <button
+              type="button"
+              className="sheet-icon danger"
+              onClick={onDelete}
+              disabled={deleting}
+              title="Delete character (permanent)"
+              aria-label="Delete character"
+            >
+              <TrashIcon />
+            </button>
+          )}
+          {isOwner && (
+            <Link
+              to={`/characters/${row.id}/edit`}
+              className="sheet-icon"
+              title="Edit character"
+              aria-label="Edit character"
+            >
+              <PencilIcon />
+            </Link>
+          )}
+        </div>
         {rows.map(([k, v]) => (
           <div key={k} className="sheet-row">
             <dt>{k}</dt>
@@ -372,6 +381,40 @@ export const Sheet = (): JSX.Element => {
             )}
           </dd>
         </div>
+        <div className="sheet-row">
+          <dt>Export</dt>
+          <dd>
+            <div className="export-buttons">
+              <button
+                type="button"
+                className="export-btn"
+                onClick={() => onExport('json')}
+                disabled={exporting}
+                title="Download as ttrpg-engine-dnd JSON"
+              >
+                JSON
+              </button>
+              <button
+                type="button"
+                className="export-btn"
+                onClick={() => onExport('csv')}
+                disabled={exporting}
+                title="Download as CSV"
+              >
+                CSV
+              </button>
+              <button
+                type="button"
+                className="export-btn"
+                onClick={() => onExport('pdf')}
+                disabled={exporting}
+                title="Download as PDF character sheet"
+              >
+                PDF
+              </button>
+            </div>
+          </dd>
+        </div>
       </dl>
     </section>
   );
@@ -382,6 +425,49 @@ const slugify = (name: string): string =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '') || 'character';
+
+// Flat single-row CSV of the most-useful character fields. The
+// engine's full Character shape is too deeply nested for tabular form,
+// so this is intentionally a summary -- use the JSON export for the
+// round-trippable representation.
+const characterToCsv = (character: Character, derived: DerivedCharacter): string => {
+  const escape = (v: unknown): string => {
+    const s = v == null ? '' : String(v);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  };
+  const headers = [
+    'name', 'species', 'background', 'classes',
+    'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA',
+    'hp_current', 'hp_max', 'hp_temp',
+    'ac', 'proficiency_bonus', 'total_level',
+    'feats', 'languages', 'prepared_spells',
+  ];
+  const row: ReadonlyArray<unknown> = [
+    character.name,
+    character.speciesId,
+    character.backgroundId,
+    character.classes.map((c) => `${c.classId} ${c.level}`).join('|'),
+    character.abilityScores.STR,
+    character.abilityScores.DEX,
+    character.abilityScores.CON,
+    character.abilityScores.INT,
+    character.abilityScores.WIS,
+    character.abilityScores.CHA,
+    character.hp.current,
+    character.hp.max,
+    character.hp.temp,
+    derived.ac.total,
+    derived.proficiencyBonus,
+    derived.totalLevel,
+    character.featsTaken.join('|'),
+    derived.knownLanguages.join('|'),
+    character.preparedSpells.join('|'),
+  ];
+  return `${headers.join(',')}\n${row.map(escape).join(',')}\n`;
+};
 
 // "Velka (clone)", "Velka (clone 2)", etc., capped so the DB constraint
 // (length <= 80) can't be tripped by deep clone-of-clone chains.
