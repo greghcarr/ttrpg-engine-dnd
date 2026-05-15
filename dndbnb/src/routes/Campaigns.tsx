@@ -62,19 +62,21 @@ export const Campaigns = (): JSX.Element => {
         </ul>
       )}
 
-      <details className="collapsible">
-        <summary>Join with a code</summary>
-        <div className="collapsible-body">
-          <JoinCampaignForm />
-        </div>
-      </details>
+      <div className="collapsibles-row">
+        <details className="collapsible">
+          <summary>Create a campaign</summary>
+          <div className="collapsible-body">
+            <CreateCampaignForm onCreated={reload} />
+          </div>
+        </details>
 
-      <details className="collapsible">
-        <summary>Create a campaign</summary>
-        <div className="collapsible-body">
-          <CreateCampaignForm onCreated={reload} />
-        </div>
-      </details>
+        <details className="collapsible">
+          <summary>Join with a code</summary>
+          <div className="collapsible-body">
+            <JoinCampaignForm />
+          </div>
+        </details>
+      </div>
     </section>
   );
 };

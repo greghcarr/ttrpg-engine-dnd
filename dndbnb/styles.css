@@ -1090,11 +1090,30 @@ a.icon-btn {
 .campaign-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 1.25rem;
+  margin: 0 auto 1.25rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, 20rem);
-  justify-content: center;
+  /* Single centered column up to ~half the main content width, so
+     each campaign card sits at half-page width stacked vertically
+     instead of in a multi-column grid. */
+  grid-template-columns: 1fr;
+  max-width: 32rem;
   gap: 1rem;
+}
+
+/* "Create a campaign" + "Join with a code" sit as a two-up row on
+   non-mobile viewports, each disclosure occupying half the row.
+   Below the mobile breakpoint they collapse to a single stacked
+   column. */
+.collapsibles-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .collapsibles-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Collapsible disclosure rows used for "Join with a code" + "Create
