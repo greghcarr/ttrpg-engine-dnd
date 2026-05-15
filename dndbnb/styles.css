@@ -252,6 +252,28 @@ button.ghost {
   margin: 0 auto;
 }
 
+/* Breadcrumb on the left + page title centered on the same row.
+   3-column grid: left filler holds the breadcrumb (justify-self
+   start), middle holds the title, right filler stays empty so the
+   title is centered relative to the page, not the row. */
+.creator-titlebar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.creator-titlebar .breadcrumb {
+  margin: 0;
+  justify-self: start;
+}
+
+.creator-titlebar h2 {
+  margin: 0;
+  text-align: center;
+}
+
 .step-indicator {
   list-style: none;
   padding: 0;

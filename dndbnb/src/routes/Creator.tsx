@@ -101,10 +101,10 @@ export const Creator = (): JSX.Element => {
 
   return (
     <section className="creator" style={classColorVars(state.classId)}>
-      <p className="breadcrumb">
-        <Link to="/characters">&larr; All characters</Link>
-      </p>
-      <div className="page-header">
+      <div className="creator-titlebar">
+        <p className="breadcrumb">
+          <Link to="/characters">&larr; All characters</Link>
+        </p>
         <h2>Create a character</h2>
       </div>
       <StepBody step={state.step} state={state} dispatch={dispatch} />
