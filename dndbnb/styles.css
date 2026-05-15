@@ -14,7 +14,10 @@
   --accent-fg: #f0f1f3;
   --border: #b6b9c0;
   --card: #e6e8ec;
-  --danger: #c41e3a;
+  /* Distinct from the barbarian class red (#c41e3a). That one has a
+     rose/magenta lean; this is a more pure stop-sign red so the two
+     don't read as identical when a barbarian sheet is open. */
+  --danger: #d62828;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,7 +29,7 @@
     --accent-fg: #15171a;
     --border: #2e3138;
     --card: #1c1d22;
-    --danger: #e2566b;
+    --danger: #f26b6b;
   }
 }
 
