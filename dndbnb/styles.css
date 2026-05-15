@@ -494,6 +494,21 @@ button.ghost {
   gap: 1rem;
 }
 
+.creator-randomize {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.creator-randomize-help {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .site-main {
   padding: 2rem;
   max-width: 64rem;

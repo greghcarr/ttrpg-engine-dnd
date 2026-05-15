@@ -6,7 +6,7 @@
 // can ask "can I move on from this step?" without each step knowing
 // the rules in two places.
 
-import { ABILITY_SCORES, type AbilityScore } from 'ttrpg-engine-dnd';
+import { ABILITY_SCORES, type AbilityScore, type ResolvedContent } from 'ttrpg-engine-dnd';
 import { getSpellCounts, isCaster } from './spell-rules';
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;
@@ -118,7 +118,8 @@ export type CreatorAction =
   | { type: 'roll-abilities' }
   | { type: 'toggle-cantrip'; spellId: string; max: number }
   | { type: 'toggle-prepared'; spellId: string; max: number }
-  | { type: 'set-name'; name: string };
+  | { type: 'set-name'; name: string }
+  | { type: 'replace'; next: CreatorState };
 
 const stripDuplicate = (
   asn: Readonly<Record<AbilityScore, number | null>>,
@@ -228,6 +229,8 @@ export const reduce = (state: CreatorState, action: CreatorAction): CreatorState
       };
     case 'set-name':
       return { ...state, name: action.name };
+    case 'replace':
+      return action.next;
   }
 };
 
@@ -338,3 +341,111 @@ export const computeFinalAbilities = (
 };
 
 export const abilityMod = (score: number): number => Math.floor((score - 10) / 2);
+
+// ----- Randomize ------------------------------------------------------------
+//
+// Returns a fully-populated CreatorState by randomly picking class,
+// species, background (and its +2/+1 ability allocation), rolling
+// 4d6-drop-lowest abilities and shuffling them across the six slots,
+// picking class-appropriate cantrips + L1 spells for casters, and
+// assigning a curated fantasy name. Uses manual-roll mode so the
+// rolled values are visible on the abilities step.
+
+// Curated, intentionally safe fantasy names; sidesteps the moderation
+// pipeline since they're all pre-vetted.
+const RANDOM_NAMES: ReadonlyArray<string> = [
+  'Aelar', 'Brom', 'Cedric', 'Darian', 'Eldrin', 'Fenwick', 'Garrick', 'Halia',
+  'Ivor', 'Jora', 'Kalia', 'Lorin', 'Merrik', 'Nessa', 'Orin', 'Pendra',
+  'Quenella', 'Roric', 'Selene', 'Talwyn', 'Ulric', 'Vesper', 'Wren', 'Xara',
+  'Yvain', 'Zara', 'Velka', 'Korwin', 'Ondrel', 'Sephra', 'Thalin', 'Mira',
+  'Drathi', 'Lirien', 'Borek', 'Cassia', 'Eowyn', 'Faelon', 'Gilda', 'Halvar',
+];
+
+const pick = <T,>(arr: ReadonlyArray<T>): T => {
+  if (arr.length === 0) throw new Error('Cannot pick from empty array.');
+  return arr[Math.floor(Math.random() * arr.length)]!;
+};
+
+const shuffle = <T,>(arr: ReadonlyArray<T>): T[] => {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = out[i]!;
+    out[i] = out[j]!;
+    out[j] = tmp;
+  }
+  return out;
+};
+
+const pickN = <T,>(arr: ReadonlyArray<T>, n: number): T[] =>
+  shuffle(arr).slice(0, Math.min(n, arr.length));
+
+// Same 4d6-drop-lowest as the reducer's roll-abilities action, kept
+// in a module-local so randomizeState doesn't have to dispatch.
+const rollAbilityScore = (): number => {
+  const die = (): number => 1 + Math.floor(Math.random() * 6);
+  const rolls = [die(), die(), die(), die()].sort((a, b) => b - a);
+  return rolls[0]! + rolls[1]! + rolls[2]!;
+};
+
+export const randomizeState = (
+  state: CreatorState,
+  content: ResolvedContent,
+): CreatorState => {
+  const classes = [...content.classes.values()];
+  const species = [...content.species.values()];
+  const backgrounds = [...content.backgrounds.values()];
+  if (classes.length === 0 || species.length === 0 || backgrounds.length === 0) {
+    return state;
+  }
+
+  const klass = pick(classes);
+  const sp = pick(species);
+  const bg = pick(backgrounds);
+
+  const bgOptions = bg.abilityScoreIncreases.options;
+  const shuffledBgOptions = shuffle(bgOptions);
+  const bgPrimary = shuffledBgOptions[0] ?? null;
+  const bgSecondary = shuffledBgOptions[1] ?? null;
+
+  const rolled: number[] = Array.from({ length: 6 }, rollAbilityScore);
+  const shuffledRolls = shuffle(rolled);
+  const arrayAssignment: Record<AbilityScore, number | null> = {
+    STR: shuffledRolls[0] ?? null,
+    DEX: shuffledRolls[1] ?? null,
+    CON: shuffledRolls[2] ?? null,
+    INT: shuffledRolls[3] ?? null,
+    WIS: shuffledRolls[4] ?? null,
+    CHA: shuffledRolls[5] ?? null,
+  };
+
+  let cantrips: ReadonlyArray<string> = [];
+  let prepared: ReadonlyArray<string> = [];
+  if (isCaster(klass.id)) {
+    const counts = getSpellCounts(klass.id);
+    const allSpells = [...content.spells.values()];
+    const cantripPool = allSpells.filter(
+      (s) => s.level === 0 && s.classes?.includes(klass.id),
+    );
+    const lvl1Pool = allSpells.filter(
+      (s) => s.level === 1 && s.classes?.includes(klass.id),
+    );
+    cantrips = pickN(cantripPool, counts.cantrips).map((s) => s.id);
+    prepared = pickN(lvl1Pool, counts.prepared).map((s) => s.id);
+  }
+
+  return {
+    ...state,
+    classId: klass.id,
+    speciesId: sp.id,
+    backgroundId: bg.id,
+    bgPrimaryAbility: bgPrimary,
+    bgSecondaryAbility: bgSecondary,
+    abilityMode: 'manual-roll',
+    rolledValues: rolled,
+    arrayAssignment,
+    cantrips,
+    preparedSpells: prepared,
+    name: pick(RANDOM_NAMES),
+  };
+};

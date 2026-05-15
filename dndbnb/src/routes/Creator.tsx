@@ -16,6 +16,7 @@ import {
   isStepComplete,
   nextStep,
   prevStep,
+  randomizeState,
   reduce,
   stepIssue,
   type Step,
@@ -39,7 +40,25 @@ export const Creator = (): JSX.Element => {
   const [state, dispatch] = useReducer(reduce, initialState);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // True once the user has confirmed a randomize this page visit;
+  // subsequent clicks skip the dialog so re-rolling is fast.
+  const [confirmedRandomize, setConfirmedRandomize] = useState(false);
   const navigate = useNavigate();
+
+  const onRandomize = (): void => {
+    if (!confirmedRandomize) {
+      const ok = confirm(
+        'Replace all your selections with random choices? This overwrites everything you have picked so far on this character.',
+      );
+      if (!ok) return;
+      setConfirmedRandomize(true);
+    }
+    const next = randomizeState(state, content);
+    // Drop the user on Review so they can save immediately, or step
+    // back through to inspect / tweak the random pick.
+    dispatch({ type: 'replace', next: { ...next, step: 'review' } });
+    setError(null);
+  };
 
   const currentIssue = stepIssue(state, state.step);
   const canAdvance = currentIssue === null;
@@ -136,6 +155,15 @@ export const Creator = (): JSX.Element => {
             Next
           </button>
         )}
+      </div>
+
+      <div className="creator-randomize">
+        <button type="button" className="ghost" onClick={onRandomize} disabled={saving}>
+          Randomize
+        </button>
+        <span className="creator-randomize-help">
+          Roll a random class, species, background, abilities, spells, and name.
+        </span>
       </div>
     </section>
   );
