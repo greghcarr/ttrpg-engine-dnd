@@ -114,7 +114,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 |---|---|---|
 | barbarian | 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 6 (ASI / subclass-only levels) |
 | bard | 1, 2, 3, 5, 7, 9, 10, 15, 20 | 11 (ASI / subclass-only / un-named levels) |
-| cleric | 1, 6 | 18 |
+| cleric | 1, 2, 5, 6, 7, 10, 17, 18, 20 | 11 (ASI / subclass-only levels) |
 | druid | 1, 2 | 18 |
 | fighter | 1, 2, 5 | 17 |
 | monk | 1, 2, 4, 5, 7 | 15 |
@@ -125,7 +125,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | (none) | 20 |
 | wizard | 1 | 19 |
 
-Notable missing scaling: Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1.
+Notable missing scaling: Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51.
 
 ### Barbarian stub features (effects: [], waiting on engine work)
 
@@ -150,6 +150,17 @@ Slice 50 filled L7, L9, L10, L15, L20. Wired entries scale the Bardic Inspiratio
 - `superior-inspiration` (L20) — regain one Bardic Inspiration use on rolling initiative if at zero; needs an on-initiative trigger hook the engine doesn't model.
 
 The Expertise picks at L3 and L9 are hardcoded skill pairs because the existing `OfferChoice` protocol can express a player-pick but the L3 entry that shipped earlier didn't use it; the L9 entry matches L3's pattern for consistency. Moving both to player-pick is a separate small slice once any class needs the pattern (Rogue Expertise is the obvious next consumer).
+
+### Cleric stub features (effects: [], waiting on engine work)
+
+Slice 51 filled L2, L5, L7, L10, L17, L18, L20. The L18 entry wires the Channel Divinity use-count to 3/rest via `GrantResource`, completing the L1 / L6 / L18 tier ladder. The remaining stubs:
+
+- `divine-spark` (L2) — Channel Divinity option that lets the cleric heal or deal necrotic / radiant damage as a Bonus Action. Needs a "choose CD option at activation time" protocol and a saved-spell-like cast surface; the engine has `channel-divinity` as a resource but no per-option dispatch.
+- `sear-undead` (L5) — Channel Divinity (Turn Undead) adds radiant damage on a failed save. Needs Turn Undead modeled as an action plus a per-tier damage rider; not in pack.
+- `blessed-strikes` (L7) and `improved-blessed-strikes` (L17) — choice between Divine Strike (+1d8 damage type on weapon attack) or Potent Spellcasting (+WIS mod to cantrip damage). Needs a `OfferChoice` over once-per-acquisition options plus the on-hit-rider / cantrip-bonus primitives.
+- `divine-intervention` (L10) and `improved-divine-intervention` (L20) — 1/week (1/long-rest at L20) prayer for a divine effect. Needs a flag for "intervention used in last 7 days" plus a freeform DM-resolution event; closest existing surface is `CustomEffect`, but no handler ships.
+
+Open item: L1 Divine Order (choice between Protector and Thaumaturge sub-features at character creation) is not in the L1 features array. Same shape as Barbarian's missing L1 Weapon Mastery; deferred to a later one-line slice.
 
 ## Subclasses
 
