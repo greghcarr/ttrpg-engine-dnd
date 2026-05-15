@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 72,
-  "total": 160,
-  "wired": 88,
+  "stub": 80,
+  "total": 172,
+  "wired": 92,
 }
 `;
 
@@ -126,17 +126,29 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "ranger L17 hunters-mark-uses-6 [wired]",
   "ranger L18 feral-senses [wired]",
   "ranger L20 foe-slayer [stub]",
+  "rogue L1 expertise-rogue [wired]",
   "rogue L1 sneak-attack [wired]",
+  "rogue L1 thieves-cant [stub]",
+  "rogue L1 weapon-mastery-rogue [wired]",
+  "rogue L2 cunning-action [stub]",
   "rogue L3 sneak-attack [wired]",
+  "rogue L3 steady-aim [stub]",
+  "rogue L5 cunning-strike [stub]",
   "rogue L5 sneak-attack [wired]",
+  "rogue L6 expertise-rogue-2 [wired]",
   "rogue L7 evasion-rogue [wired]",
   "rogue L7 sneak-attack [wired]",
   "rogue L9 sneak-attack [wired]",
+  "rogue L11 reliable-talent [stub]",
   "rogue L11 sneak-attack [wired]",
   "rogue L13 sneak-attack [wired]",
+  "rogue L14 improved-cunning-strike [stub]",
+  "rogue L15 slippery-mind [wired]",
   "rogue L15 sneak-attack [wired]",
   "rogue L17 sneak-attack [wired]",
+  "rogue L18 devious-strikes [stub]",
   "rogue L19 sneak-attack [wired]",
+  "rogue L20 stroke-of-luck [stub]",
   "sorcerer L1 innate-sorcery [wired]",
   "sorcerer L2 font-of-magic [wired]",
   "sorcerer L2 metamagic [wired]",

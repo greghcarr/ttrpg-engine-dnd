@@ -120,7 +120,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | monk | 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 18, 20 | 5 (ASI / subclass-only levels) |
 | paladin | 1, 2, 3, 5, 6, 9, 10, 11, 14, 18 | 10 (ASI / subclass-only levels) |
 | ranger | 1, 2, 5, 6, 9, 10, 13, 17, 18, 20 | 10 (ASI / subclass-only levels) |
-| rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
+| rogue | 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 15, 17, 18, 19, 20 | 5 (ASI / subclass-only levels) |
 | sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
 | warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
 | wizard | 1, 2, 5, 18, 20 | 15 (ASI / subclass-only / un-named levels) |
@@ -256,6 +256,22 @@ Slice 59 filled L5 (addition), L6, L9, L10, L13, L17, L18, L20. Six wired entrie
 - `foe-slayer` (L20) — once per turn, add WIS modifier to one weapon attack roll or damage roll against a creature marked by Hunter's Mark. Needs an on-attack-or-damage trigger filtered on the target's marked state.
 
 The Roving climb/swim "equal to walking speed" pattern recurs across classes that gain climb / swim modes (some subclass features do the same). A `ModifySpeed mode: 'climb' op: 'matchWalk'` extension would wire several deferred features in one shot.
+
+### Rogue stub features (effects: [], waiting on engine work)
+
+Slice 60 filled L1 (three additions), L2, L3, L5, L6, L11, L14, L15, L18, L20. The L15 entry (Slippery Mind) wires cleanly via two `GrantProficiency` saves (WIS and CHA). The L1 Expertise (`expertise-rogue`) and L6 Expertise (`expertise-rogue-2`) both use `OfferChoice` with `oneOf: 2` over the full 11-skill rogue list, plus a Weapon Mastery grant (2 slots) at L1. Four wired entries plus eight stubs:
+
+- `thieves-cant` (L1) — language proficiency for the rogue dialect. Could wire via `GrantProficiency { target: 'language', id: 'thieves-cant' }`, but the language isn't in the pack's language list yet; stub until the language ships.
+- `cunning-action` (L2) — bonus action: Dash, Disengage, or Hide. Each sub-effect already has a planner (`planDash`, etc.); needs a top-level "grant an alternate bonus action with N options" surface plus the action-economy attribution.
+- `steady-aim` (L3) — bonus action: grant yourself advantage on the next attack this turn, but your speed becomes 0 until end of turn. Needs a self-effect that lasts until end of turn plus a speed-0 condition.
+- `cunning-strike` (L5) and `improved-cunning-strike` (L14) — when dealing Sneak Attack damage, forgo 1d6 (Improved: 2d6) to apply one of several effects (Poison, Trip, Withdraw, Daze, Knock Out, Obscure). Needs a "trade damage dice for a condition application" primitive that hooks into the Sneak Attack `OnEvent` already in place; the existing rider doesn't yet support an "exchange" mode.
+- `reliable-talent` (L11) — treat any natural d20 roll of 9 or lower as 10 when making an ability check using a skill or tool you have proficiency in. Needs a per-roll floor that the check planner consults; closest existing surface is `GrantHalfProficiencyBonusFloor` but that adds to the total, not a die-floor.
+- `devious-strikes` (L18) — upgrades Cunning Strike effects with three more options (Daze, Knock Out, Obscure). Same primitive gap as Cunning Strike.
+- `stroke-of-luck` (L20) — once per short rest, turn a missed attack into a hit or a failed check into a 20. Needs a per-resolve override hook on attack and check events.
+
+Sneak Attack damage scaling continues to be the only fully-modeled scaling-by-level class feature in the pack (each odd level rewrites the `AddDamage.dice` literal). All four wired entries this slice plus the existing odd-level Sneak Attack ladder make Rogue the highest-coverage class in the pack: 15 of 20 levels carry features after this slice.
+
+Pre-existing gap closed: Rogue now ships `skillChoices` (choose 4 from Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth) and `subclassLevel: 3`, matching every other class.
 
 ## Subclasses
 
