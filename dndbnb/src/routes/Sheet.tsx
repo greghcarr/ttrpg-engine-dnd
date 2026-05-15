@@ -24,6 +24,14 @@ import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
+import {
+  CopyIcon,
+  DownloadIcon,
+  GlobeIcon,
+  LockIcon,
+  PencilIcon,
+  TrashIcon,
+} from '@/components/Icons';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
@@ -243,40 +251,57 @@ export const Sheet = (): JSX.Element => {
           {isOwner && (
             <button
               type="button"
-              className="ghost"
+              className="icon-btn"
               onClick={onToggleVisibility}
               disabled={toggling}
               title={row.is_public ? 'Make private' : 'Share publicly'}
+              aria-label={row.is_public ? 'Make private' : 'Share publicly'}
             >
-              {toggling
-                ? 'Working...'
-                : row.is_public
-                  ? 'Make private'
-                  : 'Make public'}
+              {row.is_public ? <GlobeIcon /> : <LockIcon />}
             </button>
           )}
           {user && !isOwner && (
-            <button type="button" className="ghost" onClick={onClone} disabled={cloning}>
-              {cloning ? 'Cloning...' : 'Clone to my characters'}
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={onClone}
+              disabled={cloning}
+              title="Clone to my characters"
+              aria-label="Clone to my characters"
+            >
+              <CopyIcon />
             </button>
           )}
-          <button type="button" className="ghost" onClick={onExportPdf} disabled={exporting}>
-            {exporting ? 'Building PDF...' : 'Export PDF'}
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={onExportPdf}
+            disabled={exporting}
+            title="Export as PDF"
+            aria-label="Export as PDF"
+          >
+            <DownloadIcon />
           </button>
           {isOwner && (
-            <Link to={`/characters/${row.id}/edit`} className="ghost button-like">
-              Edit
+            <Link
+              to={`/characters/${row.id}/edit`}
+              className="icon-btn"
+              title="Edit character"
+              aria-label="Edit character"
+            >
+              <PencilIcon />
             </Link>
           )}
           {isOwner && (
             <button
               type="button"
-              className="ghost danger"
+              className="icon-btn danger"
               onClick={onDelete}
               disabled={deleting}
-              title="Permanently delete this character"
+              title="Delete character (permanent)"
+              aria-label="Delete character"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              <TrashIcon />
             </button>
           )}
         </div>

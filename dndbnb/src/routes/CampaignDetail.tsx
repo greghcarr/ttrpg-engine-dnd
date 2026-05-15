@@ -14,6 +14,7 @@ import {
 } from '@/lib/campaigns';
 import { useUser } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';
+import { CheckIcon, CopyIcon, LogOutIcon, TrashIcon } from '@/components/Icons';
 
 export const CampaignDetail = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
@@ -102,14 +103,28 @@ export const CampaignDetail = (): JSX.Element => {
           )}
         </div>
         <div className="campaign-actions">
-          {isOwner && (
-            <button type="button" className="ghost danger" onClick={onDelete} disabled={acting}>
-              Delete campaign
+          {canLeave && (
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={onLeave}
+              disabled={acting}
+              title="Leave campaign"
+              aria-label="Leave campaign"
+            >
+              <LogOutIcon />
             </button>
           )}
-          {canLeave && (
-            <button type="button" className="ghost" onClick={onLeave} disabled={acting}>
-              Leave campaign
+          {isOwner && (
+            <button
+              type="button"
+              className="icon-btn danger"
+              onClick={onDelete}
+              disabled={acting}
+              title="Delete campaign (permanent)"
+              aria-label="Delete campaign"
+            >
+              <TrashIcon />
             </button>
           )}
         </div>
@@ -121,8 +136,14 @@ export const CampaignDetail = (): JSX.Element => {
           <p className="step-help">Share this with your players. They enter it under Campaigns -&gt; Join with a code.</p>
           <div className="join-code-row">
             <code className="join-code">{detail.campaign.join_code}</code>
-            <button type="button" className="ghost" onClick={onCopyCode}>
-              {codeCopied ? 'Copied' : 'Copy'}
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={onCopyCode}
+              title={codeCopied ? 'Copied' : 'Copy join code'}
+              aria-label={codeCopied ? 'Copied' : 'Copy join code'}
+            >
+              {codeCopied ? <CheckIcon /> : <CopyIcon />}
             </button>
           </div>
         </section>
