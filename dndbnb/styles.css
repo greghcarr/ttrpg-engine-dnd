@@ -509,6 +509,87 @@ button.ghost {
   font-size: 0.85rem;
 }
 
+/* Edit-character page */
+.edit-page {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.edit-page h2 {
+  margin: 0 0 1rem;
+}
+
+.edit-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.edit-section h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.edit-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.edit-field input,
+.edit-field select {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.ability-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.ability-grid .edit-field input {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.button-like {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.ghost.button-like {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
 .site-main {
   padding: 2rem;
   max-width: 64rem;

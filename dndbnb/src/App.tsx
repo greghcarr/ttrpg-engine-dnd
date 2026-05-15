@@ -6,6 +6,7 @@ import { SignIn } from '@/routes/SignIn';
 import { MyCharacters } from '@/routes/MyCharacters';
 import { Sheet } from '@/routes/Sheet';
 import { Creator } from '@/routes/Creator';
+import { EditCharacter } from '@/routes/EditCharacter';
 import { Browse } from '@/routes/Browse';
 import { Favorites } from '@/routes/Favorites';
 import { Campaigns } from '@/routes/Campaigns';
@@ -40,6 +41,14 @@ export const App = (): JSX.Element => {
           element={
             <RequireAuth>
               <Sheet />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/characters/:id/edit"
+          element={
+            <RequireAuth>
+              <EditCharacter />
             </RequireAuth>
           }
         />

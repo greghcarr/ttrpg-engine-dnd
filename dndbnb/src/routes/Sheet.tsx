@@ -260,6 +260,11 @@ export const Sheet = (): JSX.Element => {
             {exporting ? 'Building PDF...' : 'Export PDF'}
           </button>
           {isOwner && (
+            <Link to={`/characters/${row.id}/edit`} className="ghost button-like">
+              Edit
+            </Link>
+          )}
+          {isOwner && (
             <button
               type="button"
               className="ghost danger"
