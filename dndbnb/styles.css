@@ -985,12 +985,6 @@ button.ghost {
   gap: 0.4rem;
 }
 
-.public-marker {
-  display: inline-flex;
-  align-items: center;
-  color: var(--muted);
-}
-
 .character-meta {
   display: flex;
   flex-wrap: wrap;
