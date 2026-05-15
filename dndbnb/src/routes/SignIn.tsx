@@ -14,6 +14,7 @@ import {
   usernameToEmail,
   validateUsername,
 } from '@/lib/username';
+import { errorMessage } from '@/lib/errors';
 
 type Mode = 'sign-in' | 'sign-up';
 
@@ -122,7 +123,7 @@ export const SignIn = (): JSX.Element => {
 // the @dndbnb.invalid suffix and rephrase a few common cases so the
 // user never sees the internal email format.
 const humanizeAuthError = (err: unknown): string => {
-  const raw = err instanceof Error ? err.message : String(err);
+  const raw = errorMessage(err);
   const cleaned = raw.replace(/@dndbnb\.invalid/g, '');
   if (/invalid login credentials/i.test(cleaned)) return 'Invalid username or password.';
   if (/already registered/i.test(cleaned) || /already.*exists/i.test(cleaned)) {

@@ -19,6 +19,7 @@ dndbnb is a database-backed app. Before `npm run dev:dndbnb` will boot you need 
    - [supabase/migrations/0001_init.sql](../supabase/migrations/0001_init.sql), the `characters` table and RLS.
    - [supabase/migrations/0002_browse_favorites_moderation.sql](../supabase/migrations/0002_browse_favorites_moderation.sql), the `favorites` table and the server-side moderation trigger that rejects offensive character names.
    - [supabase/migrations/0003_campaigns.sql](../supabase/migrations/0003_campaigns.sql), profiles + campaigns + members + the `characters.campaign_id` column with extended RLS.
+   - [supabase/migrations/0004_fix_campaign_owner_seed.sql](../supabase/migrations/0004_fix_campaign_owner_seed.sql), one-line fix: marks the AFTER INSERT trigger that seeds the owner's membership row as SECURITY DEFINER so it isn't blocked by RLS.
 3. **Enable email/password auth and turn off email confirmation.** Authentication -> Providers -> Email (enabled). Then Authentication -> Settings (or Sign In / Up) -> uncheck "Confirm email". dndbnb is a username-only product: usernames map to a non-routable synthetic address (`<username>@dndbnb.invalid`), so no real email can ever be confirmed.
 4. **Wire the client.** Copy [dndbnb/.env.local.example](.env.local.example) to `dndbnb/.env.local` and fill in:
    - `VITE_SUPABASE_URL`: Settings -> API -> Project URL.

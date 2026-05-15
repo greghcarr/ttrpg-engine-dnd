@@ -11,6 +11,7 @@ import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { buildSampleCharacter } from '@/lib/sample-character';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
+import { errorMessage } from '@/lib/errors';
 
 type Row = Pick<CharacterRow, 'id' | 'name' | 'updated_at' | 'is_public'>;
 
@@ -57,7 +58,7 @@ export const MyCharacters = (): JSX.Element => {
       if (err) throw err;
       navigate(`/characters/${data.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setCreating(false);
     }

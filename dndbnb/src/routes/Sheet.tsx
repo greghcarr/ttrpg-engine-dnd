@@ -25,6 +25,7 @@ import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { listMyCampaigns, type CampaignSummary } from '@/lib/campaigns';
+import { errorMessage } from '@/lib/errors';
 
 const content = resolveContent([loadStarterPack()]);
 
@@ -64,7 +65,7 @@ export const Sheet = (): JSX.Element => {
         try {
           setCharacter(CharacterSchema.parse(data.payload));
         } catch (parseErr) {
-          setError(parseErr instanceof Error ? parseErr.message : String(parseErr));
+          setError(errorMessage(parseErr));
         }
       });
     return () => {
@@ -115,7 +116,7 @@ export const Sheet = (): JSX.Element => {
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setExporting(false);
     }
@@ -134,7 +135,7 @@ export const Sheet = (): JSX.Element => {
       if (err) throw err;
       setRow({ ...row, is_public: target });
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setToggling(false);
     }
@@ -152,7 +153,7 @@ export const Sheet = (): JSX.Element => {
       if (err) throw err;
       setRow({ ...row, campaign_id: campaignId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setAttaching(false);
     }
@@ -180,7 +181,7 @@ export const Sheet = (): JSX.Element => {
       if (err) throw err;
       navigate(`/characters/${data.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setCloning(false);
     }

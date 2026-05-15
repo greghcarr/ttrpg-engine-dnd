@@ -22,6 +22,7 @@ import {
 } from '@/lib/creator/state';
 import { buildCharacter } from '@/lib/creator/build';
 import { checkText } from '@/lib/moderation';
+import { errorMessage } from '@/lib/errors';
 import {
   StepAbilities,
   StepClass,
@@ -73,7 +74,7 @@ export const Creator = (): JSX.Element => {
       if (err) throw err;
       navigate(`/characters/${data.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setSaving(false);
     }

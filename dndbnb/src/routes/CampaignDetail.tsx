@@ -13,6 +13,7 @@ import {
   type CampaignDetail as CampaignDetailModel,
 } from '@/lib/campaigns';
 import { useUser } from '@/lib/session';
+import { errorMessage } from '@/lib/errors';
 
 export const CampaignDetail = (): JSX.Element => {
   const { id } = useParams<{ id: string }>();
@@ -31,7 +32,7 @@ export const CampaignDetail = (): JSX.Element => {
         if (!cancelled) setDetail(d);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+        if (!cancelled) setError(errorMessage(err));
       });
     return () => {
       cancelled = true;
@@ -63,7 +64,7 @@ export const CampaignDetail = (): JSX.Element => {
       await leaveCampaign(detail.campaign.id, user.id);
       navigate('/campaigns');
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setActing(false);
     }
@@ -82,7 +83,7 @@ export const CampaignDetail = (): JSX.Element => {
       await deleteCampaign(detail.campaign.id);
       navigate('/campaigns');
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setActing(false);
     }

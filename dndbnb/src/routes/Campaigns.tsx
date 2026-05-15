@@ -12,6 +12,7 @@ import {
   listMyCampaigns,
   type CampaignSummary,
 } from '@/lib/campaigns';
+import { errorMessage } from '@/lib/errors';
 
 export const Campaigns = (): JSX.Element => {
   const [rows, setRows] = useState<ReadonlyArray<CampaignSummary> | null>(null);
@@ -21,7 +22,7 @@ export const Campaigns = (): JSX.Element => {
     try {
       setRows(await listMyCampaigns());
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     }
   };
 
@@ -91,7 +92,7 @@ const CreateCampaignForm = ({ onCreated }: CreateCampaignFormProps): JSX.Element
       await onCreated();
       navigate(`/campaigns/${row.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(errorMessage(err));
     } finally {
       setPending(false);
     }
@@ -175,7 +176,7 @@ const JoinCampaignForm = (): JSX.Element => {
 };
 
 const humanizeJoinError = (err: unknown): string => {
-  const raw = err instanceof Error ? err.message : String(err);
+  const raw = errorMessage(err);
   if (/no campaign with that join code/i.test(raw)) return 'No campaign with that code.';
   return raw;
 };
