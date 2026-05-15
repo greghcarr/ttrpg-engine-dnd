@@ -30,6 +30,7 @@ export type Database = {
           payload: unknown;
           schema_version: number;
           campaign_id: string | null;
+          primary_class_id: string | null;
           created_at: string;
           updated_at: string;
         };

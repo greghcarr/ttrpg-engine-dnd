@@ -13,7 +13,10 @@ import { buildSampleCharacter } from '@/lib/sample-character';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
 import { errorMessage } from '@/lib/errors';
 
-type Row = Pick<CharacterRow, 'id' | 'name' | 'updated_at' | 'is_public'>;
+type Row = Pick<
+  CharacterRow,
+  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id'
+>;
 
 export const MyCharacters = (): JSX.Element => {
   const user = useUser();
@@ -27,7 +30,7 @@ export const MyCharacters = (): JSX.Element => {
     let cancelled = false;
     supabase
       .from('characters')
-      .select('id, name, updated_at, is_public')
+      .select('id, name, updated_at, is_public, primary_class_id')
       .eq('owner_id', user.id)
       .order('updated_at', { ascending: false })
       .then(({ data, error: err }) => {
@@ -116,4 +119,5 @@ const toCardModel = (row: Row): CharacterCardModel => ({
   name: row.name,
   updated_at: row.updated_at,
   is_public: row.is_public,
+  primary_class_id: row.primary_class_id,
 });

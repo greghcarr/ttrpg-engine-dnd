@@ -7,6 +7,7 @@
 import { Link } from 'react-router-dom';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { DeleteCharacterButton } from '@/components/DeleteCharacterButton';
+import { classColorVars } from '@/lib/class-colors';
 
 export interface CharacterCardModel {
   readonly id: string;
@@ -14,6 +15,7 @@ export interface CharacterCardModel {
   readonly updated_at?: string;
   readonly is_public?: boolean;
   readonly ownerLabel?: string | null;
+  readonly primary_class_id?: string | null;
 }
 
 interface CharacterCardProps {
@@ -31,7 +33,7 @@ export const CharacterCard = ({
   onDeleted,
   onError,
 }: CharacterCardProps): JSX.Element => (
-  <li className="character-card">
+  <li className="character-card" style={classColorVars(character.primary_class_id)}>
     <Link to={`/characters/${character.id}`}>
       <div className="character-card-head">
         <span className="character-name">{character.name}</span>

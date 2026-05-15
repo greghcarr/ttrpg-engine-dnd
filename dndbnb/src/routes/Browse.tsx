@@ -11,7 +11,10 @@ import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCa
 
 const PAGE_SIZE = 24;
 
-type Row = Pick<CharacterRow, 'id' | 'name' | 'updated_at' | 'is_public'>;
+type Row = Pick<
+  CharacterRow,
+  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id'
+>;
 
 export const Browse = (): JSX.Element => {
   const [rows, setRows] = useState<ReadonlyArray<Row> | null>(null);
@@ -24,7 +27,7 @@ export const Browse = (): JSX.Element => {
     setRows(null);
     supabase
       .from('characters')
-      .select('id, name, updated_at, is_public')
+      .select('id, name, updated_at, is_public, primary_class_id')
       .eq('is_public', true)
       .order('updated_at', { ascending: false })
       .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
@@ -97,4 +100,5 @@ const cardModel = (row: Row): CharacterCardModel => ({
   name: row.name,
   updated_at: row.updated_at,
   is_public: row.is_public,
+  primary_class_id: row.primary_class_id,
 });

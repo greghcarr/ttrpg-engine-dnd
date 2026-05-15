@@ -682,16 +682,24 @@ button.ghost {
   flex-direction: column;
   gap: 0.4rem;
   padding: 1rem;
+  /* Each .character-card sets --accent inline to its class color.
+     The card gets a subtle wash of that color over the normal card
+     background, and the hover state turns the border into the full
+     class hue. color-mix is supported across all modern browsers; the
+     plain background-color above is the fallback for older ones. */
   background: var(--card);
+  background: color-mix(in srgb, var(--accent) 14%, var(--card));
   border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
   border-radius: 0.5rem;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
 .character-list a:hover {
   border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--card));
 }
 
 .character-card-head {

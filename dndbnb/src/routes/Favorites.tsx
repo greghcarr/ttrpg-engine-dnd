@@ -9,7 +9,10 @@ import { supabase, type CharacterRow } from '@/lib/supabase';
 import { CharacterCard, type CharacterCardModel } from '@/components/CharacterCard';
 import { useUser } from '@/lib/session';
 
-type Row = Pick<CharacterRow, 'id' | 'name' | 'updated_at' | 'is_public'>;
+type Row = Pick<
+  CharacterRow,
+  'id' | 'name' | 'updated_at' | 'is_public' | 'primary_class_id'
+>;
 
 export const Favorites = (): JSX.Element => {
   const user = useUser();
@@ -36,7 +39,7 @@ export const Favorites = (): JSX.Element => {
       }
       const { data: chars, error: charsErr } = await supabase
         .from('characters')
-        .select('id, name, updated_at, is_public')
+        .select('id, name, updated_at, is_public, primary_class_id')
         .in('id', ids)
         .order('updated_at', { ascending: false });
       if (cancelled) return;
@@ -84,4 +87,5 @@ const cardModel = (row: Row): CharacterCardModel => ({
   name: row.name,
   updated_at: row.updated_at,
   is_public: row.is_public,
+  primary_class_id: row.primary_class_id,
 });
