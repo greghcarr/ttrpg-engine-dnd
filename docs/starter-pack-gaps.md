@@ -118,7 +118,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | druid | 1, 2, 5, 7, 9, 13, 15, 17, 18, 20 | 10 (ASI / subclass-only / un-named levels) |
 | fighter | 1, 2, 5, 9, 11, 13, 17, 20 | 12 (ASI / subclass-only levels) |
 | monk | 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 18, 20 | 5 (ASI / subclass-only levels) |
-| paladin | 1, 2, 3 | 17 |
+| paladin | 1, 2, 3, 5, 6, 9, 10, 11, 14, 18 | 10 (ASI / subclass-only levels) |
 | ranger | 1, 2, 5 | 17 |
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
 | sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
@@ -231,6 +231,20 @@ Slice 57 filled L2 (addition), L3, L5 (addition), L6, L7 (addition), L9, L10, L1
 - `body-and-mind` (L20) — DEX and WIS scores increase by 4, max 25 for those. Same shape as Barbarian's Primal Champion stub; needs an ability-score-modification effect with a max-override.
 
 Stunning Strike DC scaling (8 + prof + WIS) is still the engine's responsibility; the L5 stunning-strike entry is `Custom { handlerId: 'stunning-strike' }` and the handler is presumed to read the actor's stats.
+
+### Paladin stub features (effects: [], waiting on engine work)
+
+Slice 58 filled L5, L6, L9, L10, L11, L14, L18. One wired entry: Extra Attack at L5 (same `ModifyActionEconomy.extraAttack count: 1` shape Fighter / Ranger / Barbarian / Monk use). Seven stubs cover the aura cohort plus the Smite-adjacent and Channel Divinity options:
+
+- `faithful-steed` (L5) — cast Find Steed without expending a spell slot, once per long rest. Shape fits `GrantSpell { preparation: 'oncePerLongRest' }` once Find Steed is wired (it ships as a summon spell after slice 48); the wire is short-circuited because the existing Find Steed entry assumes a 2nd-level slot is consumed and there's no "free cast" flag on the spell mechanic yet.
+- `aura-of-protection` (L6), `aura-of-courage` (L10), `aura-improvements` (L18) — friendly creatures within 10ft (30ft at L18) gain CHA-mod to saves (Aura of Protection) and immunity to Frightened (Aura of Courage). Needs an aura primitive: a persistent effect on the paladin whose radius and on-enter / on-leave hooks gate sub-effects on allies. The closest existing surface is concentration-style effect instances, but no "radius + ally-check" wrapper ships.
+- `abjure-foes` (L9) — Channel Divinity option that frightens creatures within 60ft on a failed WIS save and prevents them from approaching. Same per-CD-option dispatch primitive Cleric's Divine Spark and Sear Undead are blocked on.
+- `radiant-strike` (L11) — on a weapon attack hit, deal +1d8 radiant damage. Fits the on-hit trigger system named in the deferred-engine-slices table; once that ships, this and the smite cohort (Branding Smite, Searing Smite, Divine Favor, etc) wire together.
+- `restoring-touch` (L14) — when using Lay on Hands, also cure one disease or condition (Blinded, Charmed, Deafened, Frightened, Paralyzed, Poisoned, Stunned) by spending an additional 5 HP from the pool. Needs Lay on Hands to be planner-modeled rather than purely a resource grant; the resource ships but no `planLayOnHands` exists yet.
+
+Pre-existing gap closed by this slice: Paladin now ships `skillChoices` (choose 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had neither.
+
+Open item: Divine Smite is L2 in PHB 2024 (the paladin can deal +2d8 radiant damage by spending a 1st-level spell slot on a weapon hit, scaling +1d8 per slot level up to 5d8). Not yet in the L2 features. Wireable as a planner (`planDivineSmite` consuming a slot and emitting damage) once the on-hit trigger pathway lands, similar to how the smite-pattern spells will land. Deferred to keep this slice's scope tight; flagged here for the next paladin-touch.
 
 ## Subclasses
 
