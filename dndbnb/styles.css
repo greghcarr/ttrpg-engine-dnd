@@ -614,19 +614,16 @@ button.ghost {
   gap: 1rem;
 }
 
-.creator-randomize {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px dashed var(--border);
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+/* Randomize "step pip" appears after the last real step. Same shape
+   as a regular step button (rounded pill, border, accent on hover)
+   but holds the dice icon instead of an index + label. */
+.step-pip-randomize button {
+  padding: 0.35rem 0.6rem;
 }
 
-.creator-randomize-help {
-  color: var(--muted);
-  font-size: 0.85rem;
+.step-pip-randomize button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* Edit-character page */

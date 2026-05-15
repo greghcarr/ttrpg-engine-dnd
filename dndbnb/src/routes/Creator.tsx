@@ -24,6 +24,7 @@ import { buildCharacter } from '@/lib/creator/build';
 import { checkText } from '@/lib/moderation';
 import { errorMessage } from '@/lib/errors';
 import { classColorVars } from '@/lib/class-colors';
+import { DiceIcon } from '@/components/Icons';
 import {
   StepAbilities,
   StepClass,
@@ -123,6 +124,17 @@ export const Creator = (): JSX.Element => {
             </li>
           );
         })}
+        <li className="step-pip step-pip-randomize">
+          <button
+            type="button"
+            onClick={onRandomize}
+            disabled={saving}
+            title="Randomize this character"
+            aria-label="Randomize this character"
+          >
+            <DiceIcon size={16} />
+          </button>
+        </li>
       </ol>
 
       <StepBody step={state.step} state={state} dispatch={dispatch} />
@@ -153,14 +165,6 @@ export const Creator = (): JSX.Element => {
         )}
       </div>
 
-      <div className="creator-randomize">
-        <button type="button" className="ghost" onClick={onRandomize} disabled={saving}>
-          Randomize
-        </button>
-        <span className="creator-randomize-help">
-          Roll a random class, species, background, abilities, spells, and name.
-        </span>
-      </div>
     </section>
   );
 };

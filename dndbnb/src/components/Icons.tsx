@@ -180,3 +180,15 @@ export const UsersFilledIcon = ({ size = 18, className }: IconProps): JSX.Elemen
     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
+
+// Die-face icon (five-pip / classic d6) used for the Randomize action.
+export const DiceIcon = ({ size = 18, className }: IconProps): JSX.Element => (
+  <svg {...baseSvgProps(size, className)}>
+    <rect x="3" y="3" width="18" height="18" rx="2.5" ry="2.5" />
+    <circle cx="8" cy="8" r="1" fill="currentColor" stroke="none" />
+    <circle cx="16" cy="8" r="1" fill="currentColor" stroke="none" />
+    <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
+    <circle cx="8" cy="16" r="1" fill="currentColor" stroke="none" />
+    <circle cx="16" cy="16" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
