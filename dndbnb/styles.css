@@ -42,47 +42,6 @@ body {
   line-height: 1.5;
 }
 
-/* Custom hover tooltips driven by the same `title` attribute the
-   buttons already use. The native browser tooltip has a long delay
-   (and some browsers suppress it entirely on touch devices), so we
-   render our own immediately on hover via ::after.
-   We carefully avoid setting `position: relative` on elements that
-   are already positioned (e.g. .creator-arrow's fixed) -- their
-   existing positioning context anchors the ::after directly. */
-button[title]:hover:not(.creator-arrow),
-a[title]:hover:not(.creator-arrow) {
-  position: relative;
-}
-
-button[title]:hover::after,
-a[title]:hover::after,
-[role="button"][title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: calc(100% + 0.4rem);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--fg);
-  color: var(--bg);
-  padding: 0.32rem 0.6rem;
-  border-radius: 0.375rem;
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-  text-transform: none;
-}
-
-/* Header nav icons sit at the very top of the page; flip their
-   tooltip to drop down instead of clipping above the viewport. */
-.nav-icon[title]:hover::after {
-  bottom: auto;
-  top: calc(100% + 0.4rem);
-}
-
 a {
   color: var(--accent);
 }
@@ -415,14 +374,13 @@ button.ghost {
   border-color: var(--accent);
   opacity: 1;
   cursor: default;
-  /* True text stroke (drawn around each glyph) in the contrasting
-     accent-fg color. `paint-order: stroke fill` ensures the fill
-     paints on top of the stroke so the stroke shows as a clean edge
-     without bleeding into the letter shape. On light class accents
-     (wizard blue, paladin pink) this gives the text a dark edge;
-     on dark accents (warlock purple) the stroke is near-white and
-     blends with the light text. */
-  -webkit-text-stroke: 3px var(--accent-fg);
+  /* True text stroke drawn around each glyph. `paint-order: stroke
+     fill` paints the fill on top of the stroke so the edge stays
+     crisp without bleeding into the letter shape. The stroke is
+     hardcoded black so it reads the same on every class accent
+     (including the light-fg classes — barbarian, sorcerer, warlock
+     — whose accent-fg would otherwise produce a near-white halo). */
+  -webkit-text-stroke: 3px #000;
   paint-order: stroke fill;
 }
 
@@ -815,7 +773,10 @@ button.ghost {
 
 /* Edit-character page */
 .edit-page {
-  max-width: 52rem;
+  /* Matches the .character-list / .campaign-list column width so the
+     edit form reads as the same column as the lists it sits next to.
+     Phones fall back to 100% via the min(). */
+  width: min(100%, 32rem);
   margin: 0 auto;
 }
 
@@ -827,8 +788,13 @@ button.ghost {
 .edit-section {
   margin-bottom: 1.5rem;
   padding: 1rem 1.25rem;
+  /* Same class-color wash pattern as the character card and sheet
+     rectangles: the --accent inline on the .edit-page section tints
+     both the surface and the border. */
   background: var(--card);
+  background: color-mix(in srgb, var(--accent) 14%, var(--card));
   border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
   border-radius: 0.5rem;
 }
 
@@ -871,6 +837,20 @@ button.ghost {
 .ability-grid .edit-field input {
   text-align: center;
   font-variant-numeric: tabular-nums;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  min-width: 0;
+  /* Hide the browser-default number spinner buttons; the cells are
+     narrow on phones and the spinners crowd out the digits. Tap +
+     keyboard entry still work. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.ability-grid .edit-field input::-webkit-outer-spin-button,
+.ability-grid .edit-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .edit-actions {
@@ -986,10 +966,12 @@ button.ghost {
   padding: 0;
   margin: 0;
   display: grid;
-  /* Fixed-width tracks centered when there's room left over, so a
-     single card sits centered rather than orphaned at the left, and
-     a sparse list reads as a tidy centered group. */
-  grid-template-columns: repeat(auto-fill, 18rem);
+  /* Single track, centered. min(100%, 32rem) matches the
+     .campaign-list width so the two grids read as the same column.
+     Shrinks to the viewport on narrow screens so nothing overflows.
+     One card per row across every viewport so the drag-to-reorder
+     divider reads as a clean horizontal line between two stacked cards. */
+  grid-template-columns: min(100%, 32rem);
   justify-content: center;
   gap: 1rem;
 }
@@ -1019,6 +1001,82 @@ button.ghost {
   background: color-mix(in srgb, var(--accent) 22%, var(--card));
 }
 
+/* Drag-to-reorder visual state for My Characters cards. The dragged
+   card fades; the drop indicator is a 3px accent-coloured divider at
+   the top or bottom edge of the card under the pointer, depending on
+   which half of the card the user is hovering. */
+.character-card {
+  position: relative;
+}
+
+.character-card.is-dragging > a {
+  opacity: 0.4;
+}
+
+.character-card.drop-before::before,
+.character-card.drop-after::after {
+  content: '';
+  position: absolute;
+  left: -0.25rem;
+  right: -0.25rem;
+  height: 3px;
+  /* --drop-color is set inline on each row while a drag is active and
+     carries the dragged character's class color. Falls back to the
+     row's own accent when there's no drag in progress (shouldn't be
+     visible then, but defensive). */
+  background: var(--drop-color, var(--accent));
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.character-card.drop-before::before {
+  top: -0.6rem;
+}
+
+.character-card.drop-after::after {
+  bottom: -0.6rem;
+}
+
+/* Three-line drag handle on the left edge of the card. Pointer events
+   on the handle drive the reorder (works on mouse, pen, and touch).
+   `touch-action: none` is essential -- without it, the browser steals
+   touch-drag for scrolling and our pointermove handler never fires. */
+.character-drag-handle {
+  position: absolute;
+  top: 50%;
+  left: 0.35rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2.25rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 1;
+}
+
+.character-drag-handle:hover {
+  color: var(--accent);
+}
+
+.character-card.is-dragging .character-drag-handle {
+  cursor: grabbing;
+}
+
+/* Push the card content right so it doesn't overlap the handle. */
+.character-card.has-drag-handle > a {
+  padding-left: 2.4rem;
+}
+
 .character-card-head {
   display: flex;
   align-items: flex-start;
@@ -1029,9 +1087,32 @@ button.ghost {
 .character-name {
   font-weight: 600;
   font-size: 1.05rem;
+}
+
+/* Compass-icon "this character is public" marker, matching the
+   compass icon used on the Browse tab in the header. Sits in the
+   actions row just left of the trash button and inherits the same
+   muted color so the two icons read as a pair. */
+.public-marker {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  padding: 0.25rem;
+  color: var(--muted);
+}
+
+/* Clickable variant used on owner-only surfaces. Behaves like the
+   trash and favorite buttons in the same row: borderless, transparent
+   background, accent on hover. */
+.public-marker-btn {
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.public-marker-btn:hover {
+  color: var(--accent);
 }
 
 .character-meta {
@@ -1102,8 +1183,11 @@ button.badge-toggle:disabled {
 }
 
 .badge-public {
-  color: var(--accent);
-  border-color: var(--accent);
+  /* Always off-white regardless of the surrounding accent / class
+     tint, so the Public pill reads as a neutral status flag rather
+     than picking up the card's class color. */
+  color: #f0f1f3;
+  border-color: #f0f1f3;
 }
 
 .badge-private {
@@ -1209,10 +1293,10 @@ a.icon-btn {
 }
 
 .sheet-meta {
-  /* Aligned to the same 36rem column as .sheet-toolbar and .sheet
+  /* Aligned to the same 32rem column as .sheet-toolbar and .sheet
      below so the visibility / campaign badges line up with the
      body rectangle's edges. */
-  max-width: 36rem;
+  max-width: 32rem;
   margin: 0 auto 1rem;
 }
 
@@ -1221,12 +1305,31 @@ a.icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .pagination-page {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.pagination-size select {
+  font: inherit;
+  padding: 0.25rem 0.4rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
 }
 
 /* Campaigns */
@@ -1335,19 +1438,52 @@ a.icon-btn {
   padding: 1rem 1.25rem;
 }
 
-.campaign-card a {
-  display: block;
-  padding: 1rem;
+.campaign-card > details {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  text-decoration: none;
-  color: inherit;
+  overflow: hidden;
   transition: border-color 0.15s;
 }
 
-.campaign-card a:hover {
+.campaign-card > details:hover {
   border-color: var(--accent);
+}
+
+.campaign-card > details > summary {
+  display: block;
+  padding: 1rem;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+
+.campaign-card > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.campaign-card > details > summary::after {
+  content: '\203A';
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+
+.campaign-card > details[open] > summary::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.campaign-card > details[open] > summary {
+  border-bottom: 1px solid var(--border);
+}
+
+.campaign-card-body {
+  padding: 1rem 1.25rem 1.25rem;
 }
 
 .campaign-card-row {
@@ -1360,6 +1496,20 @@ a.icon-btn {
   flex: 0 0 auto;
   color: var(--accent);
   margin-top: 0.15rem;
+}
+
+/* Row that pairs the owner-crown badge with the campaign name + the
+   rename pencil, so the badge sits flush with the title baseline. */
+.campaign-title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.campaign-owner-crown {
+  color: #E5C16C;
+  flex: 0 0 auto;
 }
 
 .campaign-card-text {
@@ -1480,6 +1630,7 @@ a.icon-btn {
 }
 
 .join-code-card {
+  margin-top: 1rem;
   margin-bottom: 1.5rem;
   padding: 1rem 1.25rem;
   background: var(--card);
@@ -1495,7 +1646,14 @@ a.icon-btn {
 .join-code-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.join-code-card .step-help {
+  text-align: center;
+  margin: 0.1rem 0;
 }
 
 .join-code {
@@ -1563,8 +1721,8 @@ a.icon-btn {
   gap: 1rem;
   /* Align the breadcrumb (left) and action icons (right) with the
      edges of the .sheet body rectangle below by inheriting the same
-     36rem max-width + auto margins. */
-  max-width: 36rem;
+     32rem max-width + auto margins. */
+  max-width: 32rem;
   margin: 0 auto 0.5rem;
 }
 
@@ -1572,15 +1730,28 @@ a.icon-btn {
   margin: 0;
 }
 
-.breadcrumb a {
+.breadcrumb a,
+.breadcrumb .back-link {
+  /* Match the page title color (not the class accent) so the back
+     link reads as neutral chrome rather than a class-tinted link. */
+  color: var(--fg);
   text-decoration: none;
+}
+
+.breadcrumb a:hover,
+.breadcrumb .back-link:hover {
+  text-decoration: underline;
 }
 
 .sheet {
   position: relative;
   display: grid;
   gap: 0.5rem 1.5rem;
-  padding: 1.25rem 1.5rem;
+  /* Top padding is bumped so the sheet body starts on the row below
+     the absolutely-positioned .sheet-body-icons cluster (2rem icons
+     at top: 0.5rem). Without the extra space the first sheet row
+     and the icons share the same row. */
+  padding: 2.75rem 1.5rem 1.25rem;
   /* Background tints by class color (set inline on .sheet-page) the
      same way the character cards on My Characters do, so the sheet
      reads as the same "color of this character" surface. */
@@ -1589,7 +1760,7 @@ a.icon-btn {
   border: 1px solid var(--border);
   border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
   border-radius: 0.5rem;
-  max-width: 36rem;
+  max-width: 32rem;
   margin: 0 auto;
 }
 
@@ -1694,4 +1865,155 @@ a.icon-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* Modal overlay shared by the campaign icon picker. Centered panel
+   on a dimmed backdrop; click backdrop to dismiss. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  max-width: 32rem;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  margin: 0 0 0.75rem;
+}
+
+/* Wrapping grid of (icon over name) cells used in the campaign-icon
+   modal. Each cell is taller than the unlabeled .icon-pick because
+   it stacks the icon over the name. */
+.icon-picker-named {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.icon-pick-named {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.25rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--fg);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.icon-pick-named:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.icon-pick-named.is-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg));
+}
+
+.icon-pick-name {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* The clickable campaign icon in summaries / headers — owner-only. */
+.campaign-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.campaign-icon-button:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Row that pairs the campaign name with the rename pencil button. */
+.campaign-name-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.campaign-name-row-editing {
+  /* Take the remaining space on the title line (next to the crown
+     and any other inline siblings) rather than forcing a full-width
+     break, which used to push the input below the crown. */
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.campaign-rename-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.campaign-rename-input {
+  flex: 1 1 8rem;
+  min-width: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.campaign-rename-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+/* Bottom-of-card destructive action area. Sits below every other
+   campaign section; holds the Delete / Leave text button. */
+.campaign-destructive {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.danger-button {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 0.45rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+.danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

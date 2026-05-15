@@ -6,7 +6,8 @@
 // to the read-only sheet for the new character.
 
 import { useMemo, useReducer, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { BackLink } from '@/components/BackLink';
 import { SCHEMA_VERSION, resolveContent } from 'ttrpg-engine-dnd';
 import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
 import {
@@ -166,7 +167,7 @@ export const Creator = (): JSX.Element => {
 
       <div className="creator-titlebar">
         <p className="breadcrumb">
-          <Link to="/characters">&larr; Back</Link>
+          <BackLink fallback="/characters">&larr; Back</BackLink>
         </p>
         <h2>Create a character</h2>
       </div>

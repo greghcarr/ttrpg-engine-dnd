@@ -17,6 +17,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { BackLink } from '@/components/BackLink';
 import {
   ABILITY_SCORES,
   CharacterSchema,
@@ -192,9 +193,9 @@ export const EditCharacter = (): JSX.Element => {
           payload: updated,
           schema_version: SCHEMA_VERSION,
         })
-        .eq('id', original.id);
+        .eq('id', id!);
       if (err) throw err;
-      navigate(`/characters/${original.id}`);
+      navigate(`/characters/${id}`);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -206,7 +207,7 @@ export const EditCharacter = (): JSX.Element => {
     return (
       <section className="edit-page">
         <p className="breadcrumb">
-          <Link to={`/characters/${id ?? ''}`}>&larr; Cancel and return to sheet</Link>
+          <BackLink fallback={`/characters/${id ?? ''}`}>&larr; Back</BackLink>
         </p>
         {error ? (
           <p className="status error">{error}</p>
@@ -220,7 +221,7 @@ export const EditCharacter = (): JSX.Element => {
     return (
       <section className="edit-page">
         <p className="breadcrumb">
-          <Link to={`/characters/${original.id}`}>&larr; Cancel and return to sheet</Link>
+          <BackLink fallback={`/characters/${id}`}>&larr; Back</BackLink>
         </p>
         <p className="status error">You can only edit characters you own.</p>
       </section>
@@ -234,7 +235,7 @@ export const EditCharacter = (): JSX.Element => {
   return (
     <section className="edit-page" style={classColorVars(form.classId)}>
       <p className="breadcrumb">
-        <Link to={`/characters/${original.id}`}>&larr; Cancel and return to sheet</Link>
+        <BackLink fallback={`/characters/${id}`}>&larr; Back</BackLink>
       </p>
       <h2>Edit {original.name}</h2>
 
@@ -344,7 +345,7 @@ export const EditCharacter = (): JSX.Element => {
       {error && <p className="form-error">{error}</p>}
 
       <div className="edit-actions">
-        <Link to={`/characters/${original.id}`} className="ghost button-like">
+        <Link to={`/characters/${id}`} className="ghost button-like">
           Cancel
         </Link>
         <button type="button" onClick={onSave} disabled={saving}>
