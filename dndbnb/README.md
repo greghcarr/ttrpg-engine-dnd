@@ -21,6 +21,7 @@ dndbnb is a database-backed app. Before `npm run dev:dndbnb` will boot you need 
    - [supabase/migrations/0003_campaigns.sql](../supabase/migrations/0003_campaigns.sql), profiles + campaigns + members + the `characters.campaign_id` column with extended RLS.
    - [supabase/migrations/0004_fix_campaign_owner_seed.sql](../supabase/migrations/0004_fix_campaign_owner_seed.sql), one-line fix: marks the AFTER INSERT trigger that seeds the owner's membership row as SECURITY DEFINER so it isn't blocked by RLS.
    - [supabase/migrations/0005_campaign_insert_policy.sql](../supabase/migrations/0005_campaign_insert_policy.sql), rebinds the campaigns INSERT policy to the `authenticated` role and gives the owner-setting trigger a clearer error when `auth.uid()` is null.
+   - [supabase/migrations/0006_campaigns_trust_trigger.sql](../supabase/migrations/0006_campaigns_trust_trigger.sql), makes the campaigns INSERT policy fully permissive and hands the gate to the BEFORE INSERT trigger. Adds a `debug_auth_state()` RPC and forces a PostgREST schema reload.
 3. **Enable email/password auth and turn off email confirmation.** Authentication -> Providers -> Email (enabled). Then Authentication -> Settings (or Sign In / Up) -> uncheck "Confirm email". dndbnb is a username-only product: usernames map to a non-routable synthetic address (`<username>@dndbnb.invalid`), so no real email can ever be confirmed.
 4. **Wire the client.** Copy [dndbnb/.env.local.example](.env.local.example) to `dndbnb/.env.local` and fill in:
    - `VITE_SUPABASE_URL`: Settings -> API -> Project URL.

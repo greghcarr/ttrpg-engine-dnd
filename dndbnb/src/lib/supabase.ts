@@ -118,6 +118,10 @@ export type Database = {
         Args: { code: string };
         Returns: string;
       };
+      debug_auth_state: {
+        Args: Record<string, never>;
+        Returns: { uid: string | null; role: string | null; has_jwt_claims: boolean };
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

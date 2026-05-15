@@ -53,8 +53,34 @@ export const createCampaign = async (
     .insert({ name, description })
     .select('*')
     .single();
-  if (error) throw error;
+  if (error) {
+    // If the failure looks auth-shaped, attach the server's view of
+    // the request's auth state. Helps diagnose cases where the client
+    // session looks signed-in but the server is treating the request
+    // as anon.
+    if (looksLikeAuthFailure(error.message)) {
+      const diag = await fetchAuthDiagnostic();
+      if (diag) (error as { message: string }).message += ` (server saw: ${diag})`;
+    }
+    throw error;
+  }
   return data;
+};
+
+const looksLikeAuthFailure = (msg: string | undefined): boolean => {
+  if (!msg) return false;
+  return /row-level security|insufficient privilege|signed in|jwt/i.test(msg);
+};
+
+const fetchAuthDiagnostic = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.rpc('debug_auth_state');
+    if (error || !data) return null;
+    const d = data as { uid: string | null; role: string | null; has_jwt_claims: boolean };
+    return `role=${d.role ?? 'null'}, uid=${d.uid ?? 'null'}, jwt=${d.has_jwt_claims}`;
+  } catch {
+    return null;
+  }
 };
 
 // Calls the SECURITY DEFINER `join_campaign(code)` RPC. Returns the
