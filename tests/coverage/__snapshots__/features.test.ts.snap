@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 68,
-  "total": 150,
-  "wired": 82,
+  "stub": 72,
+  "total": 160,
+  "wired": 88,
 }
 `;
 
@@ -116,6 +116,16 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "ranger L2 deft-explorer [wired]",
   "ranger L2 fighting-style-ranger [wired]",
   "ranger L5 extra-attack-ranger [wired]",
+  "ranger L5 hunters-mark-uses-3 [wired]",
+  "ranger L6 roving [wired]",
+  "ranger L9 hunters-mark-uses-4 [wired]",
+  "ranger L9 natures-veil [stub]",
+  "ranger L10 tireless [stub]",
+  "ranger L13 hunters-mark-uses-5 [wired]",
+  "ranger L13 relentless-hunter [stub]",
+  "ranger L17 hunters-mark-uses-6 [wired]",
+  "ranger L18 feral-senses [wired]",
+  "ranger L20 foe-slayer [stub]",
   "rogue L1 sneak-attack [wired]",
   "rogue L3 sneak-attack [wired]",
   "rogue L5 sneak-attack [wired]",

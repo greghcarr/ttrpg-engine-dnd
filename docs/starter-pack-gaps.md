@@ -119,7 +119,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | fighter | 1, 2, 5, 9, 11, 13, 17, 20 | 12 (ASI / subclass-only levels) |
 | monk | 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 18, 20 | 5 (ASI / subclass-only levels) |
 | paladin | 1, 2, 3, 5, 6, 9, 10, 11, 14, 18 | 10 (ASI / subclass-only levels) |
-| ranger | 1, 2, 5 | 17 |
+| ranger | 1, 2, 5, 6, 9, 10, 13, 17, 18, 20 | 10 (ASI / subclass-only levels) |
 | rogue | 1, 3, 5, 7, 9, 11, 13, 15, 17, 19 | 10 (Sneak Attack scales at every odd level) |
 | sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
 | warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
@@ -245,6 +245,17 @@ Slice 58 filled L5, L6, L9, L10, L11, L14, L18. One wired entry: Extra Attack at
 Pre-existing gap closed by this slice: Paladin now ships `skillChoices` (choose 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had neither.
 
 Open item: Divine Smite is L2 in PHB 2024 (the paladin can deal +2d8 radiant damage by spending a 1st-level spell slot on a weapon hit, scaling +1d8 per slot level up to 5d8). Not yet in the L2 features. Wireable as a planner (`planDivineSmite` consuming a slot and emitting damage) once the on-hit trigger pathway lands, similar to how the smite-pattern spells will land. Deferred to keep this slice's scope tight; flagged here for the next paladin-touch.
+
+### Ranger stub features (effects: [], waiting on engine work)
+
+Slice 59 filled L5 (addition), L6, L9, L10, L13, L17, L18, L20. Six wired entries: Hunter's Mark use-count tiers at L5 / L9 / L13 / L17 (3 / 4 / 5 / 6 uses, matching the 2024 PB-uses-per-long-rest formula by hardcoding milestones), Roving at L6 (`ModifySpeed walk +5` — the climb/swim "equal to walking speed" portion of Roving is not yet expressed because the schema's `ModifySpeed` only adjusts the named mode, not "match another mode"), and Feral Senses at L18 (`GrantSense blindsight 30` — exact RAW shape for 2024). Stubs:
+
+- `natures-veil` (L9) — bonus action: become Invisible until the start of your next turn, expending a Hunter's Mark use. Needs an action surface that consumes a resource and applies the Invisible condition for a duration; the Invisible condition ships and `SpendResource` is a `TriggerAction`, but they're not bundled into a single feature shape.
+- `tireless` (L10) — gain temp HP when finishing a Short Rest (10 + WIS mod), and Hunter's Mark uses refresh on Short Rest. Needs a temp-HP grant primitive (the deferred temp-HP slice in the spell engine table covers this) plus a recharge-frequency-override on the existing `hunters-mark` resource.
+- `relentless-hunter` (L13) — taking damage while concentrating on Hunter's Mark doesn't break concentration. Needs a per-spell concentration-immunity flag or a condition that the concentration-check planner consults.
+- `foe-slayer` (L20) — once per turn, add WIS modifier to one weapon attack roll or damage roll against a creature marked by Hunter's Mark. Needs an on-attack-or-damage trigger filtered on the target's marked state.
+
+The Roving climb/swim "equal to walking speed" pattern recurs across classes that gain climb / swim modes (some subclass features do the same). A `ModifySpeed mode: 'climb' op: 'matchWalk'` extension would wire several deferred features in one shot.
 
 ## Subclasses
 
