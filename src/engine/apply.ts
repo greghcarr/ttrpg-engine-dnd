@@ -150,6 +150,10 @@ import {
   applySimulacrumCreated,
   applyWishGranted,
 } from './reducers/transformations.js';
+import {
+  applyCompanionSummoned,
+  applyCompanionDismissed,
+} from './reducers/summons.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -485,6 +489,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'WishGranted':
         applyWishGranted(draft, event);
+        break;
+      case 'CompanionSummoned':
+        applyCompanionSummoned(draft, event);
+        break;
+      case 'CompanionDismissed':
+        applyCompanionDismissed(draft, event);
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);

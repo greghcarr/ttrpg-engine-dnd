@@ -36,6 +36,7 @@ type Expectation =
   | { kind: 'buff'; conditionId: string }
   | { kind: 'remove-condition'; seedConditionId: string }
   | { kind: 'hp-pool-knockout' }
+  | { kind: 'summon' }
   | { kind: 'skip'; reason: string };
 
 const SPELL_EXPECTATIONS: Record<string, Expectation> = {
@@ -139,7 +140,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'expeditious-retreat': { kind: 'skip', reason: 'bonus-action speed buff, narrative only' },
   'false-life': { kind: 'skip', reason: 'self temp-HP; temp-HP-grant mechanic not wired for spells' },
   'feather-fall': { kind: 'skip', reason: 'reaction, narrative only' },
-  'find-familiar': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'find-familiar': { kind: 'summon' },
   'fog-cloud': { kind: 'skip', reason: 'area obscurement, narrative only' },
   'goodberry': { kind: 'skip', reason: 'creates consumable items; item-creation mechanic not wired for spells' },
   'grease': { kind: 'skip', reason: 'area difficult terrain + DEX save for prone; area mechanic not modeled' },
@@ -157,7 +158,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'silent-image': { kind: 'skip', reason: 'illusion concentration, narrative only' },
   'speak-with-animals': { kind: 'skip', reason: 'ritual, narrative only' },
   'thunderous-smite': { kind: 'skip', reason: 'paladin smite with on-hit damage + push; on-hit trigger system not modeled' },
-  'unseen-servant': { kind: 'skip', reason: 'summon utility; summon system not modeled' },
+  'unseen-servant': { kind: 'summon' },
   'wrathful-smite': { kind: 'skip', reason: 'paladin smite with on-hit frightened rider; on-hit trigger system not modeled' },
   // PHB 2024 L2 spells with wired mechanics
   'blindness-deafness': { kind: 'save' },
@@ -194,7 +195,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'enhance-ability': { kind: 'skip', reason: 'caster-chosen ability buff; ability-check-buff condition not modeled' },
   'enlarge-reduce': { kind: 'skip', reason: 'caster-chosen variant (grow vs shrink); choice protocol + size condition not modeled' },
   'enthrall': { kind: 'skip', reason: 'WIS save against perception disadvantage on caster; perception-buff condition not modeled' },
-  'find-steed': { kind: 'skip', reason: 'summon utility (companion mount); summon system not modeled' },
+  'find-steed': { kind: 'summon' },
   'find-traps': { kind: 'skip', reason: 'divination utility; detection mechanic not modeled' },
   'flaming-sphere': { kind: 'skip', reason: 'mobile area damage; area-effect mechanic not modeled' },
   'gentle-repose': { kind: 'skip', reason: 'utility ritual (preserves corpse), narrative only' },
@@ -216,7 +217,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'skywrite': { kind: 'skip', reason: 'utility (writes in sky), narrative only' },
   'spider-climb': { kind: 'skip', reason: 'wall-walking utility; movement-mode condition not modeled' },
   'spike-growth': { kind: 'skip', reason: 'area damage on movement; area-effect mechanic not modeled' },
-  'summon-beast': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'summon-beast': { kind: 'summon' },
   'warding-bond': { kind: 'skip', reason: 'damage-share + AC/save buff; multi-target linked condition not modeled' },
   'zone-of-truth': { kind: 'skip', reason: 'area + CHA save against deception; area-effect mechanic not modeled' },
   // PHB 2024 L3 spells with wired mechanics
@@ -228,13 +229,13 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'sleet-storm': { kind: 'save' },
   'vampiric-touch': { kind: 'attack' },
   // PHB 2024 L3 spells shipped schema-only; see docs/starter-pack-gaps.md.
-  'animate-dead': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'animate-dead': { kind: 'summon' },
   'aura-of-vitality': { kind: 'skip', reason: 'recurring bonus-action heal aura; recurring-rider primitive not modeled' },
   'beacon-of-hope': { kind: 'skip', reason: 'multi-buff condition (advantage on WIS + death saves + max heal); composite-buff condition not modeled' },
   'bestow-curse': { kind: 'skip', reason: 'caster-chosen curse variant (disadvantage / movement / damage / paralysis); choice protocol not modeled' },
   'blinding-smite': { kind: 'skip', reason: 'paladin smite with on-hit save → blinded rider; on-hit trigger system not modeled' },
   'clairvoyance': { kind: 'skip', reason: 'remote sensor utility; scrying mechanic not modeled' },
-  'conjure-animals': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'conjure-animals': { kind: 'summon' },
   'create-food-and-water': { kind: 'skip', reason: 'utility (food creation), narrative only' },
   'crusaders-mantle': { kind: 'skip', reason: 'paladin aura granting +1d4 radiant to ally weapon attacks; on-hit-rider on aura not modeled' },
   'daylight': { kind: 'skip', reason: 'utility (creates bright light), narrative only' },
@@ -251,7 +252,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'major-image': { kind: 'skip', reason: 'illusion with INT save on interaction; illusion + recurring-rider primitives not modeled' },
   'meld-into-stone': { kind: 'skip', reason: 'utility (merge with stone), narrative only' },
   'nondetection': { kind: 'skip', reason: 'utility (anti-detect buff), narrative only' },
-  'phantom-steed': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'phantom-steed': { kind: 'summon' },
   'plant-growth': { kind: 'skip', reason: 'area difficult terrain + agricultural utility; area-effect mechanic not modeled' },
   'protection-from-energy': { kind: 'skip', reason: 'resistance to chosen damage type; resistance-buff condition not modeled' },
   'remove-curse': { kind: 'skip', reason: 'removes the cursed condition; cursed condition itself not yet modeled' },
@@ -262,10 +263,10 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'speak-with-plants': { kind: 'skip', reason: 'utility (talk to plants), narrative only' },
   'spirit-shroud': { kind: 'skip', reason: 'caster-chosen damage type + on-hit rider; on-hit trigger + caster-chosen variant not modeled' },
   'stinking-cloud': { kind: 'skip', reason: 'area + per-turn CON save → incapacitated; area-effect + recurring-rider mechanics not modeled' },
-  'summon-fey': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
-  'summon-lesser-demons': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
-  'summon-shadowspawn': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
-  'summon-undead': { kind: 'skip', reason: 'companion summon; summon system not modeled' },
+  'summon-fey': { kind: 'summon' },
+  'summon-lesser-demons': { kind: 'summon' },
+  'summon-shadowspawn': { kind: 'summon' },
+  'summon-undead': { kind: 'summon' },
   'thunder-step': { kind: 'skip', reason: 'teleport + area thunder damage; multi-mechanic spell with dedicated planner pattern not yet implemented' },
   'tongues': { kind: 'skip', reason: 'utility (language understanding), narrative only' },
   'water-breathing': { kind: 'skip', reason: 'utility (breathe underwater), narrative only' },
@@ -408,6 +409,10 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
           const removals = events.filter((e): e is Extract<Event, { type: 'ConditionRemoved' }> => e.type === 'ConditionRemoved');
           expect(removals.length, 'expected at least one ConditionRemoved').toBeGreaterThanOrEqual(1);
           expect(removals.some((e) => e.conditionId === expectation.seedConditionId)).toBe(true);
+          break;
+        }
+        case 'summon': {
+          expect(types, 'expected CompanionSummoned').toContain('CompanionSummoned');
           break;
         }
         case 'hp-pool-knockout': {

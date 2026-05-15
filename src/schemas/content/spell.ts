@@ -103,6 +103,25 @@ const SpellAuraDamageMechanicSchema = z.object({
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
 });
 
+// Creates a controllable companion ("summon") under the caster's
+// control. Each summon spell carries its statblock inline so a pack
+// can wire a spell without referencing an external creature
+// catalogue. HP scales with slot level as
+// `hpBase + hpPerSlotAbove * (slotLevel - baseSlotLevel)`. When the
+// spell is concentration, the companion is dismissed automatically
+// when concentration ends (clearConcentrationEffect walks the
+// characters map and removes any whose `summonSource.effectInstanceId`
+// matches the ending effect).
+const SpellSummonMechanicSchema = z.object({
+  kind: z.literal('summon'),
+  name: z.string(),
+  ac: z.number().int().min(0),
+  hpBase: z.number().int().min(1),
+  hpPerSlotAbove: z.number().int().min(0).default(0),
+  baseSlotLevel: z.number().int().min(1).max(9),
+  speedFeet: z.number().int().min(0).default(30),
+});
+
 export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
 export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
 export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
@@ -130,6 +149,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellRemoveConditionMechanicSchema,
   SpellHPPoolKnockoutMechanicSchema,
   SpellAuraDamageMechanicSchema,
+  SpellSummonMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;
 

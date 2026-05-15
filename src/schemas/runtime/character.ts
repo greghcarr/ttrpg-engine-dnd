@@ -167,6 +167,21 @@ export const CharacterSchema = z.object({
       armorClass: z.number().int().min(0).optional(),
     })
     .optional(),
+  // Set on characters that exist because a summon spell created them
+  // (Find Familiar, Conjure Animals, Summon Beast, etc). The controller
+  // is the caster. The effectInstanceId, when present, ties the
+  // companion to a concentration effect; when that effect's
+  // concentration ends, `clearConcentrationEffect` removes the
+  // companion from state.characters along with the conditions the
+  // effect applied. Unset on PCs / NPCs / non-summon creatures.
+  summonSource: z
+    .object({
+      controllerId: ULIDSchema,
+      spellId: z.string(),
+      slotLevel: z.number().int().min(1).max(9),
+      effectInstanceId: ULIDSchema.optional(),
+    })
+    .optional(),
 });
 export type Character = z.infer<typeof CharacterSchema>;
 

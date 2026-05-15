@@ -596,6 +596,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       if (event.customHouserulesRemove !== undefined) toggles.push(`-houserules: ${event.customHouserulesRemove.join(', ')}`);
       return `Campaign settings: ${toggles.join(', ')}.`;
     }
+    case 'CompanionSummoned': {
+      const owner = characterName(stateBefore, event.controllerId);
+      return `${owner} summons **${event.name}** (${event.hp} HP, AC ${event.ac}) via ${event.spellId} at slot ${event.slotLevel}.`;
+    }
+    case 'CompanionDismissed': {
+      const name = characterName(stateBefore, event.companionId);
+      return `${name} is dismissed.`;
+    }
   }
 };
 

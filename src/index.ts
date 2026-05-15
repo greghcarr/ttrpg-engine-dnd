@@ -439,6 +439,7 @@ export type {
   SimulacrumOutcome,
   WishIntent,
   WishOutcome,
+  DismissCompanionIntent,
   GrantInitialHeroPointsIntent,
   SpendHeroPointIntent,
   SpendHeroPointOutcome,
@@ -535,6 +536,14 @@ export type {
   WishGrantedEvent,
   PolymorphForm,
   PolymorphKind,
+} from './schemas/events/index.js';
+export {
+  CompanionSummonedEventSchema,
+  CompanionDismissedEventSchema,
+} from './schemas/events/index.js';
+export type {
+  CompanionSummonedEvent,
+  CompanionDismissedEvent,
 } from './schemas/events/index.js';
 export {
   SpellCounteredEventSchema,

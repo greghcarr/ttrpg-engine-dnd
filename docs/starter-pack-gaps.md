@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 212 / ~370 | ~370 | 34 / 60 / 63 / 54 / 1 across L0–L4. Cantrips complete; L1 / L2 / L3 ship every PHB entry (~20 wired at L1, ~17 at L2, ~9 at L3). L4+ stub-heavy. |
+| Spells | 212 / ~370 | ~370 | 34 / 60 / 63 / 54 / 1 across L0–L4. Cantrips complete; L1 / L2 / L3 ship every PHB entry (~22 wired at L1, ~19 at L2, ~16 at L3 — counting summon-system wiring). L4+ stub-heavy. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -30,34 +30,32 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### L1: 60 / 60 (full PHB list)
 
-**Wired (20):** bane, bless, burning-hands, cause-fear, charm-person, color-spray, cure-wounds, dissonant-whispers, earth-tremor, faerie-fire, guiding-bolt, healing-word, hellish-rebuke, inflict-wounds, mage-armor, magic-missile, ray-of-sickness, sleep, tashas-hideous-laughter, thunderwave.
+**Wired (22):** bane, bless, burning-hands, cause-fear, charm-person, color-spray, cure-wounds, dissonant-whispers, earth-tremor, faerie-fire, find-familiar (summon), guiding-bolt, healing-word, hellish-rebuke, inflict-wounds, mage-armor, magic-missile, ray-of-sickness, sleep, tashas-hideous-laughter, thunderwave, unseen-servant (summon).
 
 **Dedicated planner (3):** hunters-mark, identify, shield.
 
-**Schema-only (37):** grouped by the engine primitive each one needs.
+**Schema-only (35):** grouped by the engine primitive each one needs.
 
 - **On-hit trigger system** (rider that fires on the caster's next weapon attack): `divine-favor`, `ensnaring-strike`, `hail-of-thorns`, `hex`, `searing-smite`, `thunderous-smite`, `wrathful-smite`. The smite-pattern cohort.
 - **Reaction system** (cast as a reaction to a trigger event): `absorb-elements`, `feather-fall`, `sanctuary`. Also future Silvery Barbs and a Shield-as-spell variant.
 - **Area-effect spell mechanic** (zone with save on enter + ongoing condition / damage): `entangle`, `grease`. Also future Cloudkill, Wall of Fire.
 - **Temp-HP grant as a spell mechanic** (current `heal` writes to `current` only): `false-life`, `heroism`.
 - **Caster-chosen options at cast time** (damage type or spell variant): `chromatic-orb`, `command` (per-word effects).
-- **Summon system** (companion / construct creature instance): `find-familiar`, `unseen-servant`. Also future Conjure Animals, Summon Beast.
 - **AC-buff condition** (flat AC bonus tied to a condition): `shield-of-faith`.
 - **Type-conditional buff** (advantage / disadvantage keyed to creature type): `protection-from-evil-and-good`.
 - **Pure narrative / utility** (intentionally no mechanical event): `alarm`, `animal-friendship`, `comprehend-languages`, `compelled-duel`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-magic`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `longstrider`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Rituals, illusions, sensory spells; they parse and load, they just don't emit anything.
 
 ### L2: 63 / 63 (full PHB list)
 
-**Wired (17):** aid, blindness-deafness, crown-of-madness, flame-blade, heat-metal, hold-person, invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, web.
+**Wired (19):** aid, blindness-deafness, crown-of-madness, find-steed (summon), flame-blade, heat-metal, hold-person, invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, summon-beast (summon), web.
 
 **Dedicated planner (1):** misty-step.
 
-**Schema-only (45):** grouped by the engine primitive each one needs.
+**Schema-only (43):** grouped by the engine primitive each one needs.
 
 - **On-hit trigger system** (rider that fires on the caster's next weapon attack): `branding-smite`. Continues the smite-pattern cohort from L1.
 - **Area-effect spell mechanic** (zone with save on enter, ongoing damage, or movement penalty): `cloud-of-daggers`, `darkness`, `dust-devil`, `flaming-sphere`, `silence`, `spike-growth`, `zone-of-truth`.
 - **Caster-chosen options at cast time** (variant chosen by caster, ability target chosen): `calm-emotions`, `enhance-ability`, `enlarge-reduce`.
-- **Summon system** (companion / construct creature instance): `find-steed`, `summon-beast`.
 - **AC-buff condition** (flat AC bonus tied to a condition): `barkskin` (sets AC to 17 — a "set AC" variant of the AC buff primitive).
 - **Attack-roll-buff condition** (impose advantage / disadvantage on attacks against target): `blur` (disadv against caster), `mirror-image` (duplicate intercept pool), `pass-without-trace` (+10 stealth).
 - **Item-buff condition** (modifies attack / damage of an equipped weapon while active): `magic-weapon`.
@@ -75,13 +73,12 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### L3: 54 / 54 (full PHB list)
 
-**Wired (9):** call-lightning, fear, fireball, hypnotic-pattern, lightning-bolt, mass-healing-word, sleet-storm, spirit-guardians, vampiric-touch.
+**Wired (16):** animate-dead (summon), call-lightning, conjure-animals (summon), fear, fireball, hypnotic-pattern, lightning-bolt, mass-healing-word, phantom-steed (summon), sleet-storm, spirit-guardians, summon-fey (summon), summon-lesser-demons (summon), summon-shadowspawn (summon), summon-undead (summon), vampiric-touch.
 
 **Dedicated planner (2):** counterspell, dispel-magic.
 
-**Schema-only (43):** grouped by the engine primitive each one needs.
+**Schema-only (36):** grouped by the engine primitive each one needs.
 
-- **Summon system** (companion / construct creature instance): `animate-dead`, `conjure-animals`, `phantom-steed`, `summon-fey`, `summon-lesser-demons`, `summon-shadowspawn`, `summon-undead`. Six of the seven are the spell-level-summon cohort from the 2024 Tasha-derived list.
 - **Area-effect spell mechanic** (zone with save on enter, ongoing damage, or movement penalty): `hunger-of-hadar`, `leomunds-tiny-hut`, `plant-growth`, `slow`, `stinking-cloud`, `wind-wall`. Several couple area with a recurring-rider primitive (Hunger, Stinking Cloud).
 - **On-hit trigger system** (rider that fires on a weapon attack): `blinding-smite`, `crusaders-mantle`, `lightning-arrow`. The smite-pattern cohort.
 - **Composite-buff condition** (single condition that imposes multiple distinct effects): `beacon-of-hope` (heal-max + advantage on WIS + death saves), `haste` (extra action + speed + AC + DEX-save advantage).
@@ -182,7 +179,7 @@ Each entry below is one engine primitive: a focused engine slice that, once land
 
 | Primitive | Spells unblocked | Notes |
 |---|---|---|
-| **Summon system** | 11+ (find-familiar, unseen-servant, find-steed, summon-beast, animate-dead, conjure-animals, phantom-steed, summon-fey, summon-lesser-demons, summon-shadowspawn, summon-undead) | `CompanionInstance` state slice, `CompanionSummoned` / `CompanionDismissed` events, slot-level scaling per summon, ties into concentration. Companions are commanded as caster-controlled combatants. |
+| **~~Summon system~~** ✓ shipped | 11 wired (find-familiar, unseen-servant, find-steed, summon-beast, animate-dead, conjure-animals, phantom-steed, summon-fey, summon-lesser-demons, summon-shadowspawn, summon-undead) | `CompanionSummoned` / `CompanionDismissed` events, `summon` SpellMechanic with inline statblock, slot-level HP scaling, concentration auto-dismiss via `clearConcentrationEffect`. Companions are stored as `kind: 'creature'` Characters with a `summonSource` pointer to controller / spell / slot / effect. |
 | **Area-effect spell mechanic** | ~13 (entangle, grease, cloud-of-daggers, darkness, dust-devil, flaming-sphere, silence, spike-growth, zone-of-truth, hunger-of-hadar, leomunds-tiny-hut, plant-growth, slow, stinking-cloud, wind-wall) | Persistent zone with on-enter / on-start-of-turn save handlers; couples with recurring-rider primitive for damage-per-turn variants. |
 | **On-hit trigger system** | ~9 (divine-favor, ensnaring-strike, hail-of-thorns, hex, searing-smite, thunderous-smite, wrathful-smite, branding-smite, blinding-smite, crusaders-mantle, lightning-arrow, ray-of-enfeeblement) | Effect rider that fires on caster's next weapon attack; unblocks all smite-pattern spells. Foundation already in place via Sneak Attack rider. |
 | **Composite-buff condition** | ~5 (haste, beacon-of-hope, blur, mirror-image, magic-weapon, pass-without-trace) | Single named condition that imposes multiple distinct modifiers (e.g. Haste = extra action + speed + AC + DEX-save adv). |

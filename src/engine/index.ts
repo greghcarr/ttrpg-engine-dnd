@@ -77,6 +77,7 @@ import {
   planWildShape,
   planSimulacrum,
   planWish,
+  planDismissCompanion,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -104,6 +105,7 @@ import {
   type SimulacrumOutcome,
   type WishIntent,
   type WishOutcome,
+  type DismissCompanionIntent,
   type RestIntent,
   type AttackIntent,
   type CleaveIntent,
@@ -259,6 +261,10 @@ export interface Engine {
     wildShape(state: CampaignState, intent: Omit<WildShapeIntent, 'type'>): PlanResult;
     simulacrum(state: CampaignState, intent: Omit<SimulacrumIntent, 'type'>): SimulacrumOutcome;
     wish(state: CampaignState, intent: Omit<WishIntent, 'type'>): WishOutcome;
+    dismissCompanion(
+      state: CampaignState,
+      intent: Omit<DismissCompanionIntent, 'type'>,
+    ): PlanResult;
   };
 
   derive: {
@@ -491,6 +497,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     wish(state, intent) {
       return planWish(state, content, rng, { type: 'Wish', ...intent });
+    },
+    dismissCompanion(state, intent) {
+      return { events: planDismissCompanion(state, { type: 'DismissCompanion', ...intent }) };
     },
   };
 

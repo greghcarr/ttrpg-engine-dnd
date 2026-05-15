@@ -79,6 +79,16 @@ export const clearConcentrationEffect = (
   if (caster?.concentrationEffectId === effectInstanceId) {
     caster.concentrationEffectId = undefined;
   }
+  // Auto-dismiss any companions whose summon was bound to this
+  // concentration effect. Mirrors the condition-removal pattern just
+  // above: the companion's existence depended on the effect, so it
+  // goes when the effect goes. No explicit CompanionDismissed event
+  // fires; the ConcentrationBroken event covers the cause.
+  for (const ch of Object.values(state.characters)) {
+    if (ch.summonSource?.effectInstanceId === effectInstanceId) {
+      delete state.characters[ch.id];
+    }
+  }
   delete state.effectInstances[effectInstanceId];
 };
 

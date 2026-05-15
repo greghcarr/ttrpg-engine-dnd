@@ -152,3 +152,7 @@ export {
   type WishIntent,
   type WishOutcome,
 } from './transformations.js';
+export {
+  planDismissCompanion,
+  type DismissCompanionIntent,
+} from './dismiss-companion.js';

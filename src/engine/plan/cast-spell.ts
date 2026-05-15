@@ -23,6 +23,7 @@ import type {
   ConcentrationBrokenEvent,
   ConcentrationStartedEvent,
 } from '../../schemas/events/concentration.js';
+import type { CompanionSummonedEvent } from '../../schemas/events/summons.js';
 import type { Spell, SpellMechanic } from '../../schemas/content/spell.js';
 import { cantripExtraDice } from '../../schemas/content/spell.js';
 import type { Character } from '../../schemas/runtime/character.js';
@@ -30,7 +31,12 @@ import { computeTotalLevel } from '../../schemas/runtime/character.js';
 import type { AppliedConditionRef } from '../../schemas/runtime/effect-instance.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
-import { newAppliedConditionId, newEffectInstanceId, newEventId } from '../../ids.js';
+import {
+  newAppliedConditionId,
+  newCharacterId,
+  newEffectInstanceId,
+  newEventId,
+} from '../../ids.js';
 import { computeSpellSaveDC, computeSpellAttackBonus } from '../../derive/spell-dc.js';
 import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
 import { computeAC } from '../../derive/ac.js';
@@ -644,6 +650,44 @@ const planHPPoolKnockoutMechanic = (
   return events;
 };
 
+// Casts a summon spell (Find Familiar, Conjure Animals, Summon Beast, etc):
+// emits a single CompanionSummoned event. The reducer creates the
+// companion Character. HP scales by slot level via the spell mechanic's
+// `hpBase + (slotLevel - baseSlotLevel) * hpPerSlotAbove`. When the
+// spell is concentration the event carries the concentration effect's
+// ID so the auto-dismiss in clearConcentrationEffect removes the
+// companion at the same time as the effect's conditions.
+const planSummonMechanic = (
+  intent: CastSpellIntent,
+  spell: Spell,
+  mechanic: Extract<SpellMechanic, { kind: 'summon' }>,
+  declaredEventId: string,
+  at: string,
+  concentrationEffectId: string | undefined,
+): Event[] => {
+  const slotsAboveBase = Math.max(0, intent.slotLevel - mechanic.baseSlotLevel);
+  const hp = mechanic.hpBase + slotsAboveBase * mechanic.hpPerSlotAbove;
+  const companionId = newCharacterId();
+  const event: CompanionSummonedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'CompanionSummoned',
+    companionId,
+    controllerId: intent.characterId as ULID,
+    spellId: spell.id,
+    slotLevel: intent.slotLevel,
+    name: mechanic.name,
+    ac: mechanic.ac,
+    hp,
+    speedFeet: mechanic.speedFeet,
+    causedByEventId: declaredEventId as ULID,
+    ...(concentrationEffectId !== undefined
+      ? { effectInstanceId: concentrationEffectId as ULID }
+      : {}),
+  };
+  return [event];
+};
+
 export const planCastSpell = (
   state: CampaignState,
   content: ResolvedContent,
@@ -792,6 +836,13 @@ export const planCastSpell = (
   }
 
   const conditionsApplied: AppliedConditionRef[] = [];
+  // Pre-generate the concentration effect ID when the spell concentrates.
+  // The summon mechanic needs it during dispatch to bind the companion
+  // to the effect; the ConcentrationStarted event below reuses the same
+  // ID so the link is honored by `clearConcentrationEffect`.
+  const concentrationEffectId =
+    spell.concentration === true ? newEffectInstanceId() : undefined;
+
   for (const mechanic of spell.mechanicalEffects) {
     if (mechanic.kind === 'attack') {
       events.push(
@@ -822,6 +873,10 @@ export const planCastSpell = (
       // The aura's parameters are read from the spell content at tick
       // time; concentration tracking is enough to know which aura is
       // active.
+    } else if (mechanic.kind === 'summon') {
+      events.push(
+        ...planSummonMechanic(intent, spell, mechanic, declared.id, at, concentrationEffectId),
+      );
     } else {
       events.push(...planHealMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     }
@@ -845,7 +900,7 @@ export const planCastSpell = (
       id: newEventId() as ULID,
       at,
       type: 'ConcentrationStarted',
-      effectInstanceId: newEffectInstanceId(),
+      effectInstanceId: concentrationEffectId as ULID,
       casterId: intent.characterId as ULID,
       spellId: intent.spellId,
       targetIds: [...intent.targetIds] as ULID[],

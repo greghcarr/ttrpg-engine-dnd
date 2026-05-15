@@ -158,6 +158,10 @@ import {
   SimulacrumCreatedEventSchema,
   WishGrantedEventSchema,
 } from './transformations.js';
+import {
+  CompanionSummonedEventSchema,
+  CompanionDismissedEventSchema,
+} from './summons.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -268,6 +272,8 @@ export const EventSchema = z.discriminatedUnion('type', [
   PolymorphRevertedEventSchema,
   SimulacrumCreatedEventSchema,
   WishGrantedEventSchema,
+  CompanionSummonedEventSchema,
+  CompanionDismissedEventSchema,
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
@@ -767,3 +773,11 @@ export type {
   PolymorphForm,
   PolymorphKind,
 } from './transformations.js';
+export {
+  CompanionSummonedEventSchema,
+  CompanionDismissedEventSchema,
+} from './summons.js';
+export type {
+  CompanionSummonedEvent,
+  CompanionDismissedEvent,
+} from './summons.js';
