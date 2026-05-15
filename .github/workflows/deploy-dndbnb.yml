@@ -61,6 +61,11 @@ jobs:
         run: npm run build:dndbnb
         env:
           NODE_ENV: production
+          # vite inlines VITE_*-prefixed env vars at build time. Without
+          # these, supabase.ts's runtime guard fires on first load and
+          # the deployed site is a blank error page.
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - name: Deploy to greghcarr/dndbnb gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
