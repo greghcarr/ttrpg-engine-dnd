@@ -113,7 +113,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | Class | Levels with features | Empty rows |
 |---|---|---|
 | barbarian | 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 6 (ASI / subclass-only levels) |
-| bard | 1, 2, 3, 5 | 16 |
+| bard | 1, 2, 3, 5, 7, 9, 10, 15, 20 | 11 (ASI / subclass-only / un-named levels) |
 | cleric | 1, 6 | 18 |
 | druid | 1, 2 | 18 |
 | fighter | 1, 2, 5 | 17 |
@@ -125,7 +125,7 @@ All twelve classes have a `levelTable` keyed 1–20, but most rows ship `feature
 | warlock | (none) | 20 |
 | wizard | 1 | 19 |
 
-Notable missing scaling: Bardic Inspiration die, Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work.
+Notable missing scaling: Channel Divinity uses, Wild Shape forms, Action Surge count, Extra Attack at L11/L20, Stunning Strike DC scaling, Martial Arts die, Ki uses, Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1.
 
 ### Barbarian stub features (effects: [], waiting on engine work)
 
@@ -140,6 +140,16 @@ Slice 49 filled the empty L3-L20 rows. Wired entries lift the rage use cap at L3
 - `primal-champion` (L20) — STR / CON +4 with a cap of 25; needs an ability-score-modification effect (the current schema only modifies derived values, not the base scores).
 
 Open item: the L1 Weapon Mastery feature (Barbarian gets 2 slots per the 2024 PHB) is not in the current pack — the L1 row only ships Rage + Unarmored Defense. That's a separate one-line fix outside this slice.
+
+### Bard stub features (effects: [], waiting on engine work)
+
+Slice 50 filled L7, L9, L10, L15, L20. Wired entries scale the Bardic Inspiration die (d8 / d10 / d12 at L5 / L10 / L15) and add a second Expertise pair at L9 (currently hardcoded to performance + deception, mirroring the L3 hardcode of insight + persuasion). The remaining stubs:
+
+- `countercharm` (L7) — Performance check to grant nearby allies a saving-throw advantage against Charmed / Frightened or to interrupt a hostile spell; needs a reaction-window primitive and a recurring action.
+- `magical-secrets` (L10) — daily-rest spell swap from any class's spell list; needs cross-class spell access plus a choice protocol that fires on long rest.
+- `superior-inspiration` (L20) — regain one Bardic Inspiration use on rolling initiative if at zero; needs an on-initiative trigger hook the engine doesn't model.
+
+The Expertise picks at L3 and L9 are hardcoded skill pairs because the existing `OfferChoice` protocol can express a player-pick but the L3 entry that shipped earlier didn't use it; the L9 entry matches L3's pattern for consistency. Moving both to player-pick is a separate small slice once any class needs the pattern (Rogue Expertise is the obvious next consumer).
 
 ## Subclasses
 
