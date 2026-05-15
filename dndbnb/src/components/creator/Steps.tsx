@@ -444,6 +444,7 @@ const PointBuyPanel = ({
                       disabled={!canDec}
                       onClick={() => dispatch({ type: 'adjust-point-buy', ability: ab, delta: -1 })}
                       aria-label={`Decrease ${ABILITY_LABEL[ab]}`}
+                      title={`Decrease ${ABILITY_LABEL[ab]}`}
                     >
                       &minus;
                     </button>
@@ -454,6 +455,7 @@ const PointBuyPanel = ({
                       disabled={!canInc}
                       onClick={() => dispatch({ type: 'adjust-point-buy', ability: ab, delta: 1 })}
                       aria-label={`Increase ${ABILITY_LABEL[ab]}`}
+                      title={`Increase ${ABILITY_LABEL[ab]}`}
                     >
                       +
                     </button>

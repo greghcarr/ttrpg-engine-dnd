@@ -306,10 +306,19 @@ export const Sheet = (): JSX.Element => {
       {error && <p className="form-error">{error}</p>}
       <dl className="sheet">
         {/* Icons pinned to the top-right of the body rectangle.
-            Order L->R: star, trash, edit. Borderless to match the
+            Order L->R: edit, trash, star. Borderless to match the
             character-card icons. */}
         <div className="sheet-body-icons">
-          {user && <FavoriteButton characterId={row.id} />}
+          {isOwner && (
+            <Link
+              to={`/characters/${row.id}/edit`}
+              className="sheet-icon"
+              title="Edit character"
+              aria-label="Edit character"
+            >
+              <PencilIcon />
+            </Link>
+          )}
           {isOwner && (
             <button
               type="button"
@@ -322,16 +331,7 @@ export const Sheet = (): JSX.Element => {
               <TrashIcon />
             </button>
           )}
-          {isOwner && (
-            <Link
-              to={`/characters/${row.id}/edit`}
-              className="sheet-icon"
-              title="Edit character"
-              aria-label="Edit character"
-            >
-              <PencilIcon />
-            </Link>
-          )}
+          {user && <FavoriteButton characterId={row.id} />}
         </div>
         {rows.map(([k, v]) => (
           <div key={k} className="sheet-row">
