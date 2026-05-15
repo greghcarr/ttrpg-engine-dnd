@@ -692,24 +692,30 @@ button.ghost {
   cursor: not-allowed;
 }
 
-/* Pinned to viewport center so the input sits between the two
-   fixed creator-arrow buttons, matching the .step-empty-state pattern
-   on the Spells step. */
 .name-input {
+  display: block;
+  margin: 0 auto;
+  max-width: 22rem;
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg);
+  color: var(--fg);
+  text-align: center;
+}
+
+/* The Identity step's whole rectangle pins to viewport vertical
+   center, sitting between the two fixed creator-arrow buttons. The
+   input + title + help stay normally laid-out inside it. */
+.step.step-identity {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(22rem, 75vw);
-  margin: 0;
-  font: inherit;
-  font-size: 1.1rem;
-  padding: 0.65rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--bg);
-  color: var(--fg);
-  text-align: center;
+  width: min(28rem, 90vw);
+  max-width: 28rem;
   z-index: 10;
 }
 

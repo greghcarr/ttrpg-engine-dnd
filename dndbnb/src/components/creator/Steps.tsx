@@ -578,7 +578,7 @@ const SpellPicker = ({
 export const StepIdentity = ({ state, dispatch }: StepProps): JSX.Element => {
   const moderation = useMemo(() => checkText(state.name), [state.name]);
   return (
-    <section className="step">
+    <section className="step step-identity">
       <h3>Name your character</h3>
       <p className="step-help">Choose a name. You can change it later.</p>
       <input
