@@ -209,6 +209,22 @@ export class EffectAccumulator {
 
   private disadvantageOnAttackersFlag = false;
 
+  // True when any active effect on this character blocks them from
+  // regaining hit points. Heal planners consult this and, when set,
+  // emit a Healed event with amount=0 (the reducer's amount<=0
+  // early-return makes it a no-op) plus an annotation in `source`.
+  // Set by `BlockHealing` effects on applied conditions like Spirit
+  // Shroud's `healing-blocked-active`.
+  private healingBlockedFlag = false;
+
+  markHealingBlocked(): void {
+    this.healingBlockedFlag = true;
+  }
+
+  hasHealingBlocked(): boolean {
+    return this.healingBlockedFlag;
+  }
+
   hasResistance(type: DamageType): boolean {
     return this.resistances.has(type) || this.resistances.has('all');
   }
@@ -332,6 +348,9 @@ export const applyEffectToBuilder = (
       if (ctx.sourceCharacterId !== undefined) {
         acc.setAdvantageVsSource(effect.on, ctx.sourceCharacterId, effect.mode);
       }
+      return;
+    case 'BlockHealing':
+      acc.markHealingBlocked();
       return;
     case 'GrantResistance':
       acc.addResistance(effect.damageType);

@@ -2864,7 +2864,7 @@
     {
       "id": "spirit-shroud-cold-active",
       "name": "Spirit Shroud: Cold",
-      "description": "Caster's weapon attacks deal +1d8 cold damage on hit. RAW gates this on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The 'target can't regain HP until start of caster's next turn' rider needs a heal-blocking primitive that doesn't exist yet.",
+      "description": "Caster's weapon attacks deal +1d8 cold damage on hit, and the target can't regain HP until the start of the caster's next turn. RAW gates the damage on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The heal-block applies via an ApplyCondition TriggerAction that stamps `healing-blocked-active` on the hit target; the consumer (DM, dndbnb) is responsible for removing the condition at the start of the caster's next turn (no auto-expiry today).",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -2875,14 +2875,17 @@
             "eventType": "AttackRolled",
             "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
           },
-          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "cold" }]
+          "actions": [
+            { "kind": "AddDamage", "dice": "1d8", "damageType": "cold" },
+            { "kind": "ApplyCondition", "conditionId": "healing-blocked-active", "durationRounds": 1 }
+          ]
         }
       ]
     },
     {
       "id": "spirit-shroud-necrotic-active",
       "name": "Spirit Shroud: Necrotic",
-      "description": "Caster's weapon attacks deal +1d8 necrotic damage on hit. Same shape as the cold variant — RAW range gate, slot-level scaling, and heal-blocking rider all unmodeled (see cold variant description).",
+      "description": "Caster's weapon attacks deal +1d8 necrotic damage on hit, and the target can't regain HP until the start of the caster's next turn. Same shape as the cold variant (see cold variant description for the RAW range gate and slot scaling caveats).",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -2893,14 +2896,17 @@
             "eventType": "AttackRolled",
             "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
           },
-          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" }]
+          "actions": [
+            { "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" },
+            { "kind": "ApplyCondition", "conditionId": "healing-blocked-active", "durationRounds": 1 }
+          ]
         }
       ]
     },
     {
       "id": "spirit-shroud-radiant-active",
       "name": "Spirit Shroud: Radiant",
-      "description": "Caster's weapon attacks deal +1d8 radiant damage on hit. Same shape as the cold variant — RAW range gate, slot-level scaling, and heal-blocking rider all unmodeled (see cold variant description).",
+      "description": "Caster's weapon attacks deal +1d8 radiant damage on hit, and the target can't regain HP until the start of the caster's next turn. Same shape as the cold variant (see cold variant description).",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -2911,7 +2917,10 @@
             "eventType": "AttackRolled",
             "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
           },
-          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "radiant" }]
+          "actions": [
+            { "kind": "AddDamage", "dice": "1d8", "damageType": "radiant" },
+            { "kind": "ApplyCondition", "conditionId": "healing-blocked-active", "durationRounds": 1 }
+          ]
         }
       ]
     },
@@ -2972,6 +2981,14 @@
       "stackable": false,
       "endsOn": [],
       "effects": [{ "kind": "GrantResistance", "damageType": "thunder" }]
+    },
+    {
+      "id": "healing-blocked-active",
+      "name": "Healing Blocked",
+      "description": "Bearer cannot regain hit points. Heal planners consult this via the effect stack and, when set, emit Healed with amount=0 (the reducer's amount<=0 early-return makes it a no-op) plus an annotation in the Healed event's `source` field. Applied by Spirit Shroud's three variants via an ApplyCondition TriggerAction on each weapon-hit rider; duration is consumer-managed (the consumer removes the condition at the start of the caster's next turn — the engine has no auto-expiry for trigger-applied conditions today).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "BlockHealing" }]
     },
     {
       "id": "freedom-of-movement-active",

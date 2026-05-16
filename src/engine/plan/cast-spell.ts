@@ -49,6 +49,7 @@ import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
 import { isImmuneToCondition } from '../../derive/condition-immunity.js';
+import { isHealingBlocked } from '../../derive/healing-block.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { assertActorCanAct } from './_actor-state.js';
 import { parseSpellDurationMinutes } from '../../internal/spell-duration.js';
@@ -607,14 +608,15 @@ const planHealMechanic = (
       const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
       rolledAmount = rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod;
     }
-    const amount = Math.max(0, rolledAmount + flatAmount + healingBoost);
+    const targetBlocked = isHealingBlocked({ state, content, targetId });
+    const amount = targetBlocked ? 0 : Math.max(0, rolledAmount + flatAmount + healingBoost);
     const heal: HealedEvent = {
       id: newEventId() as ULID,
       at,
       type: 'Healed',
       targetId,
       amount,
-      source: spell.id,
+      source: targetBlocked ? `${spell.id} (blocked)` : spell.id,
       causedByEventId: declaredEventId as ULID,
     };
     events.push(heal);

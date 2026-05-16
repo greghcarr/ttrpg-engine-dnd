@@ -12,14 +12,17 @@ import type { AppliedCondition } from '../../schemas/runtime/character.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
 import type {
+  ConditionAppliedEvent,
   ConditionRemovedEvent,
   DamageAppliedEvent,
 } from '../../schemas/events/combat.js';
+import { newAppliedConditionId } from '../../ids.js';
 import type { ConcentrationBrokenEvent } from '../../schemas/events/concentration.js';
 import type { TriggerFiredEvent } from '../../schemas/events/triggers.js';
 
 type OnEventEffect = Extract<Effect, { kind: 'OnEvent' }>;
 type AddDamageAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamage' }>;
+type ApplyConditionAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyCondition' }>;
 
 // When an OnEvent rider lives inside a condition that was applied by
 // some caster (Hex, Bestow Curse, etc.), the `appliedFrom` argument
@@ -134,6 +137,36 @@ const fireAddDamage = (
   return [damageApplied];
 };
 
+// Fires an ApplyCondition TriggerAction. Targets the event's target
+// creature (Spirit Shroud's hit rider: target of the attack that
+// triggered the rider). Stamps the bearer's id as `sourceCharacterId`
+// so source-relative effects (SetAdvantageVsSource and friends)
+// resolve correctly. The `durationRounds` field on the action is
+// declarative metadata for the consumer today — the engine doesn't
+// auto-expire applied conditions; the consumer (DM, dndbnb) is
+// responsible for removing the condition at the appropriate moment
+// (start of bearer's next turn for Spirit Shroud).
+const fireApplyCondition = (
+  action: ApplyConditionAction,
+  event: Event,
+  bearerId: string,
+  causedByEventId: string,
+): Event[] => {
+  if (event.type !== 'AttackRolled' && event.type !== 'DamageApplied') return [];
+  const targetId = event.type === 'AttackRolled' ? event.targetId : event.targetId;
+  const applied: ConditionAppliedEvent = {
+    id: newEventId() as ULID,
+    at: event.at,
+    type: 'ConditionApplied',
+    targetId,
+    conditionId: action.conditionId,
+    appliedConditionId: newAppliedConditionId() as ULID,
+    sourceCharacterId: bearerId as ULID,
+    causedByEventId: causedByEventId as ULID,
+  };
+  return [applied];
+};
+
 const fireTrigger = (
   effect: OnEventEffect,
   character: Character,
@@ -156,6 +189,8 @@ const fireTrigger = (
   for (const action of effect.actions) {
     if (action.kind === 'AddDamage') {
       events.push(...fireAddDamage(action, event, rng, triggerFired.id));
+    } else if (action.kind === 'ApplyCondition') {
+      events.push(...fireApplyCondition(action, event, character.id, triggerFired.id));
     }
   }
   return { events, triggerId, cadence };

@@ -129,6 +129,14 @@ export type Effect =
   // bearing condition has no `sourceCharacterId` (the planner stamps
   // this on spell-applied conditions since slice 88).
   | { kind: 'SetAdvantageVsSource'; on: RollTarget; mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail' }
+  // While the bearing condition is active, the bearer cannot regain
+  // hit points. Heal planners consult this via the effect stack and,
+  // when blocked, emit a Healed event with amount=0 (the reducer's
+  // `amount <= 0` early-return makes it a no-op) plus an annotation
+  // in the `source` field. Used by Spirit Shroud's "target can't
+  // regain HP until start of caster's next turn" rider on a hit;
+  // duration is consumer-managed today (no auto-expiry).
+  | { kind: 'BlockHealing' }
   | { kind: 'GrantResistance'; damageType: DamageType | 'all'; condition?: Predicate }
   | { kind: 'GrantImmunity'; damageType: DamageType | 'all' }
   | { kind: 'GrantVulnerability'; damageType: DamageType }
@@ -235,6 +243,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('SetAdvantageVsSource'),
       on: RollTargetSchema,
       mode: z.enum(['advantage', 'disadvantage', 'auto-crit', 'auto-fail']),
+    }),
+    z.object({
+      kind: z.literal('BlockHealing'),
     }),
     z.object({
       kind: z.literal('GrantResistance'),
@@ -408,6 +419,7 @@ export const EFFECT_KINDS = [
   'AddModifier',
   'SetAdvantage',
   'SetAdvantageVsSource',
+  'BlockHealing',
   'GrantResistance',
   'GrantImmunity',
   'GrantVulnerability',
