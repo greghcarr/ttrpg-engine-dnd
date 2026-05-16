@@ -275,6 +275,26 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 0,
+    "id": "cursed-ability-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "cursed-attacks-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "cursed-inert-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "cursed-vulnerable-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
     "id": "deafened",
     "stackable": false,
   },

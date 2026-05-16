@@ -234,7 +234,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'animate-dead': { kind: 'summon' },
   'aura-of-vitality': { kind: 'skip', reason: 'recurring bonus-action heal aura; recurring-rider primitive not modeled' },
   'beacon-of-hope': { kind: 'skip', reason: 'multi-buff condition (advantage on WIS + death saves + max heal); composite-buff condition not modeled' },
-  'bestow-curse': { kind: 'skip', reason: 'caster-chosen curse variant (disadvantage / movement / damage / paralysis); choice protocol not modeled' },
+  'bestow-curse': { kind: 'save', casterChoice: { kind: 'variant', value: 'ability-disadvantage' } },
   'blinding-smite': { kind: 'skip', reason: 'paladin smite with on-hit save → blinded rider; on-hit trigger system not modeled' },
   'clairvoyance': { kind: 'skip', reason: 'remote sensor utility; scrying mechanic not modeled' },
   'conjure-animals': { kind: 'summon' },

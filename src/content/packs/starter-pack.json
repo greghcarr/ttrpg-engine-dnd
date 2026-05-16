@@ -1727,7 +1727,7 @@
     { "id": "animate-dead", "name": "Animate Dead", "level": 3, "school": "necromancy", "castingTime": "1 minute", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "a drop of blood, a piece of flesh, and a pinch of bone dust" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Animated Skeleton", "ac": 12, "hpBase": 13, "hpPerSlotAbove": 4, "baseSlotLevel": 3, "speedFeet": 30 }] },
     { "id": "aura-of-vitality", "name": "Aura of Vitality", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "targeting": { "shape": "sphere", "size": 30 }, "mechanicalEffects": [] },
     { "id": "beacon-of-hope", "name": "Beacon of Hope", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
-    { "id": "bestow-curse", "name": "Bestow Curse", "level": 3, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "wizard"], "mechanicalEffects": [] },
+    { "id": "bestow-curse", "name": "Bestow Curse", "level": 3, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "casterChoosesVariant": { "variants": [{ "key": "ability-disadvantage", "conditionId": "cursed-ability-active" }, { "key": "attack-disadvantage", "conditionId": "cursed-attacks-active" }, { "key": "inactive-turn", "conditionId": "cursed-inert-active" }, { "key": "extra-damage", "conditionId": "cursed-vulnerable-active" }] } }] },
     { "id": "blinding-smite", "name": "Blinding Smite", "level": 3, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
     { "id": "clairvoyance", "name": "Clairvoyance", "level": 3, "school": "divination", "castingTime": "10 minutes", "range": "1 mile", "components": { "verbal": true, "somatic": true, "material": "a focus worth 100+ GP, either a jeweled horn for hearing or a glass eye for seeing" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "conjure-animals", "name": "Conjure Animals", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "summon", "name": "Conjured Animal Spirit", "ac": 14, "hpBase": 30, "hpPerSlotAbove": 5, "baseSlotLevel": 3, "speedFeet": 30 }] },
@@ -2493,6 +2493,38 @@
       "effects": [
         { "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }
       ]
+    },
+    {
+      "id": "cursed-ability-active",
+      "name": "Cursed: Ability Score Disadvantage",
+      "description": "The caster chose one ability score at cast time; while Cursed, the target has Disadvantage on ability checks and saves made with that ability. The chosen ability isn't represented in the condition itself (the engine's casterChoosesVariant primitive is flat; a nested sub-choice for the specific ability isn't modeled), so the consumer carries the ability name out-of-band and enforces the disadvantage on checks/saves.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "cursed-attacks-active",
+      "name": "Cursed: Attack Disadvantage",
+      "description": "While Cursed, the target has Disadvantage on attack rolls against the caster. Not auto-applied because the engine doesn't model attacker-vs-specific-target relationships — a generic SetAdvantage on attack would be broader than RAW. Consumer enforces the directional disadvantage.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "cursed-inert-active",
+      "name": "Cursed: Inactive Turn",
+      "description": "While Cursed, the target must make a Wisdom saving throw at the start of each of its turns. On a failed save, it wastes its action that turn. The recurring per-turn-save-with-action-consume primitive isn't modeled; the consumer fires the save (via engine.plan.save) and on failure marks the action as consumed.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "cursed-vulnerable-active",
+      "name": "Cursed: Extra Damage",
+      "description": "While Cursed, the caster's attacks and spells deal an extra 1d8 Necrotic damage to the target. The on-hit-add-damage primitive with target-side condition lookup isn't modeled (same gap as Hex). The condition is the metadata that a future on-hit add-damage rider will read; today it's consumer-side.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "bears-endurance-active",
