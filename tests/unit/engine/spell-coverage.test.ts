@@ -27,9 +27,10 @@ import { CharacterSchema, type Character } from '../../../src/schemas/runtime/ch
 import { newCharacterId } from '../../../src/ids.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
 import type { Event } from '../../../src/schemas/events/index.js';
+import type { CasterChoice } from '../../../src/engine/plan/cast-spell.js';
 
 type Expectation =
-  | { kind: 'attack' }
+  | { kind: 'attack'; casterChoice?: CasterChoice }
   | { kind: 'save' }
   | { kind: 'heal' }
   | { kind: 'auto-hit'; minDarts: number }
@@ -127,7 +128,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'absorb-elements': { kind: 'skip', reason: 'reaction-cast with damage-absorption rider; reaction system not modeled' },
   'alarm': { kind: 'skip', reason: 'ritual alarm zone; no combat-event side' },
   'animal-friendship': { kind: 'skip', reason: 'charmed-beast-only variant; condition target restriction not modeled' },
-  'chromatic-orb': { kind: 'skip', reason: 'caster-chosen damage type at cast time; choice protocol not exposed in spell mechanic schema' },
+  'chromatic-orb': { kind: 'attack', casterChoice: { kind: 'damageType', value: 'fire' } },
   'command': { kind: 'skip', reason: 'per-word condition effects vary; not modeled generically' },
   'compelled-duel': { kind: 'skip', reason: 'movement-aversion rider on charm; rider primitive not modeled' },
   'comprehend-languages': { kind: 'skip', reason: 'utility ritual, narrative only' },
@@ -576,6 +577,9 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         spellId,
         slotLevel: spell.level,
         targetIds,
+        ...(expectation.kind === 'attack' && expectation.casterChoice !== undefined
+          ? { casterChoice: expectation.casterChoice }
+          : {}),
       }).events as ReadonlyArray<Event>;
       const types = events.map((e) => e.type);
 

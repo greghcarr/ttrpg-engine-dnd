@@ -46,6 +46,7 @@ export {
 export {
   planCastSpell,
   type CastSpellIntent,
+  type CasterChoice,
 } from './cast-spell.js';
 export {
   planCheckConcentration,

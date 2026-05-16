@@ -9,10 +9,23 @@ import {
 
 const CANTRIP_SCALING_THRESHOLDS = [5, 11, 17] as const;
 
+// Attack-roll spell mechanic. The damage type is normally fixed
+// (`damageType`), but a few spells let the caster pick at cast time
+// (Chromatic Orb: acid / cold / fire / lightning / poison / thunder).
+// For those, omit `damageType` and set `casterChoosesDamageType` with
+// the allowed list; the planner reads `intent.casterChoice` and uses
+// the picked value. Exactly one of the two must be set; the invariant
+// is enforced in the planner (Zod's discriminated union doesn't accept
+// `.refine()` on its members, so we validate at plan time instead).
 const SpellAttackMechanicSchema = z.object({
   kind: z.literal('attack'),
   damageDice: DiceExpressionSchema,
-  damageType: DamageTypeSchema,
+  damageType: DamageTypeSchema.optional(),
+  casterChoosesDamageType: z
+    .object({
+      allowed: z.array(DamageTypeSchema).min(1),
+    })
+    .optional(),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
   cantripScalingDice: DiceExpressionSchema.optional(),
 });

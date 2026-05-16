@@ -407,6 +407,7 @@ export type {
   SaveIntent,
   AbilityCheckIntent,
   CastSpellIntent,
+  CasterChoice,
   CheckConcentrationIntent,
   ExpireSpellDurationsIntent,
   TickAuraIntent,

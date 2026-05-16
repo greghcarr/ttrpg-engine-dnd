@@ -27,6 +27,7 @@ import type {
 import type { CompanionSummonedEvent } from '../../schemas/events/summons.js';
 import type { Spell, SpellMechanic } from '../../schemas/content/spell.js';
 import { cantripExtraDice } from '../../schemas/content/spell.js';
+import type { DamageType } from '../../schemas/primitives.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import { computeTotalLevel } from '../../schemas/runtime/character.js';
 import type { AppliedConditionRef } from '../../schemas/runtime/effect-instance.js';
@@ -58,6 +59,14 @@ import {
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 
+// Caster-chosen options resolved at cast time (immediate, not stored
+// in state). Distinct from the `PendingChoice` protocol, which models
+// deferred decisions (level-up ASI / feat picks, subclass selection)
+// that persist between sessions. Cast-time choices are passed inline
+// with the intent and consumed at plan time.
+export type CasterChoice =
+  | { readonly kind: 'damageType'; readonly value: DamageType };
+
 export interface CastSpellIntent {
   readonly type: 'CastSpell';
   readonly characterId: string;
@@ -67,6 +76,10 @@ export interface CastSpellIntent {
   readonly targetIds: ReadonlyArray<string>;
   readonly castingClassId?: string;
   readonly asRitual?: boolean;
+  // Required when the chosen mechanic carries `casterChoosesDamageType`
+  // (Chromatic Orb picks acid / cold / fire / lightning / poison /
+  // thunder at cast). Ignored otherwise.
+  readonly casterChoice?: CasterChoice;
   readonly at?: string;
 }
 
@@ -140,6 +153,42 @@ const rollCantripScaling = (
 
 const halveDamage = (totalDamage: number): number => Math.floor(totalDamage / 2);
 
+// Resolves the damage type for an attack mechanic, honoring caster
+// choice when the mechanic flags `casterChoosesDamageType`. Throws on
+// missing or invalid choices so misuse surfaces at plan time rather
+// than as silently-wrong damage.
+const resolveAttackDamageType = (
+  mechanic: Extract<SpellMechanic, { kind: 'attack' }>,
+  intent: CastSpellIntent,
+  spellId: string,
+): DamageType => {
+  if (mechanic.casterChoosesDamageType !== undefined) {
+    if (mechanic.damageType !== undefined) {
+      throw new Error(
+        `Spell ${spellId} attack mechanic sets both damageType and casterChoosesDamageType; pick exactly one`,
+      );
+    }
+    const choice = intent.casterChoice;
+    if (choice === undefined || choice.kind !== 'damageType') {
+      throw new Error(
+        `Spell ${spellId} requires a casterChoice { kind: 'damageType', value }; received ${choice?.kind ?? 'none'}`,
+      );
+    }
+    if (!mechanic.casterChoosesDamageType.allowed.includes(choice.value)) {
+      throw new Error(
+        `Spell ${spellId}: damage type '${choice.value}' not in allowed list [${mechanic.casterChoosesDamageType.allowed.join(', ')}]`,
+      );
+    }
+    return choice.value;
+  }
+  if (mechanic.damageType === undefined) {
+    throw new Error(
+      `Spell ${spellId} attack mechanic has neither damageType nor casterChoosesDamageType`,
+    );
+  }
+  return mechanic.damageType;
+};
+
 const planAttackMechanic = (
   state: CampaignState,
   content: ResolvedContent,
@@ -161,6 +210,7 @@ const planAttackMechanic = (
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
+  const damageType = resolveAttackDamageType(mechanic, intent, spell.id);
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
@@ -212,7 +262,7 @@ const planAttackMechanic = (
           expression: mechanic.damageDice,
           rolls,
           modifier,
-          type: mechanic.damageType,
+          type: damageType,
         } satisfies DamageRoll,
       ],
       critical: isCrit,
@@ -223,7 +273,7 @@ const planAttackMechanic = (
       character: target,
       itemInstances: state.itemInstances,
       content,
-      rawComponents: [{ amount: Math.max(0, damageTotal), type: mechanic.damageType }],
+      rawComponents: [{ amount: Math.max(0, damageTotal), type: damageType }],
     });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,

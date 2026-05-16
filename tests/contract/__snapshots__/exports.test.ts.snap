@@ -399,6 +399,7 @@ exports[`public API contract: src/index.ts > source-level exports (runtime + typ
   "CampaignSettingsSchema",
   "CampaignStateSchema",
   "CastSpellIntent",
+  "CasterChoice",
   "CharacterCreatedEventSchema",
   "CharacterId",
   "CharacterLevelSchema",
