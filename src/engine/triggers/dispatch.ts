@@ -170,19 +170,25 @@ const fireAddDamageToAttacker = (
 // creature (Spirit Shroud's hit rider: target of the attack that
 // triggered the rider). Stamps the bearer's id as `sourceCharacterId`
 // so source-relative effects (SetAdvantageVsSource and friends)
-// resolve correctly. The `durationRounds` field on the action is
-// declarative metadata for the consumer today — the engine doesn't
-// auto-expire applied conditions; the consumer (DM, dndbnb) is
-// responsible for removing the condition at the appropriate moment
-// (start of bearer's next turn for Spirit Shroud).
+// resolve correctly. When both `durationRounds` and `currentRound` are
+// available, stamps `expiresOnRound = currentRound + durationRounds`
+// so planAdvanceTurn can auto-expire the condition at the start of the
+// source's turn in the target round (Spirit Shroud: heal-block lifts
+// at the start of the caster's next turn). Outside an active encounter
+// `currentRound` is undefined and expiry stays consumer-managed.
 const fireApplyCondition = (
   action: ApplyConditionAction,
   event: Event,
   bearerId: string,
   causedByEventId: string,
+  currentRound: number | undefined,
 ): Event[] => {
   if (event.type !== 'AttackRolled' && event.type !== 'DamageApplied') return [];
-  const targetId = event.type === 'AttackRolled' ? event.targetId : event.targetId;
+  const targetId = event.targetId;
+  const expiresOnRound =
+    action.durationRounds !== undefined && currentRound !== undefined
+      ? currentRound + action.durationRounds
+      : undefined;
   const applied: ConditionAppliedEvent = {
     id: newEventId() as ULID,
     at: event.at,
@@ -191,6 +197,7 @@ const fireApplyCondition = (
     conditionId: action.conditionId,
     appliedConditionId: newAppliedConditionId() as ULID,
     sourceCharacterId: bearerId as ULID,
+    ...(expiresOnRound !== undefined ? { expiresOnRound } : {}),
     causedByEventId: causedByEventId as ULID,
   };
   return [applied];
@@ -203,6 +210,7 @@ const fireTrigger = (
   event: Event,
   rng: RNG,
   at: string,
+  currentRound: number | undefined,
 ): FiredTrigger | null => {
   const cadence = cadencePayload(effect.oncePer);
   const triggerFired: TriggerFiredEvent = {
@@ -221,7 +229,9 @@ const fireTrigger = (
     } else if (action.kind === 'AddDamageToAttacker') {
       events.push(...fireAddDamageToAttacker(action, event, rng, triggerFired.id));
     } else if (action.kind === 'ApplyCondition') {
-      events.push(...fireApplyCondition(action, event, character.id, triggerFired.id));
+      events.push(
+        ...fireApplyCondition(action, event, character.id, triggerFired.id, currentRound),
+      );
     }
   }
   return { events, triggerId, cadence };
@@ -312,6 +322,9 @@ const findAppliedConditionForOnEvent = (
 
 export const dispatchTriggers = (input: DispatchInput): Event[] => {
   const { state, content, rng, event, at } = input;
+  const currentRound = state.activeEncounterId
+    ? state.encounters[state.activeEncounterId]?.round
+    : undefined;
   const emitted: Event[] = [];
   for (const characterId of Object.keys(state.characters)) {
     const character = state.characters[characterId];
@@ -331,7 +344,7 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
       if (filter !== undefined && !evaluatePredicate(filter, { facts })) continue;
       const triggerId = triggerIdOf(effect, characterId);
       if (!cadenceAllowsFiring(character, triggerId, effect.oncePer)) continue;
-      const fired = fireTrigger(effect, character, triggerId, event, rng, at);
+      const fired = fireTrigger(effect, character, triggerId, event, rng, at, currentRound);
       if (fired === null) continue;
       emitted.push(...fired.events);
       if (effect.consumeOnTrigger === true) {

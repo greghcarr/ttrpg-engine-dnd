@@ -11,7 +11,10 @@ import type {
   TurnEndedEvent,
   TurnStartedEvent,
 } from '../../schemas/events/encounter.js';
-import type { DeathSaveRolledEvent } from '../../schemas/events/combat.js';
+import type {
+  ConditionRemovedEvent,
+  DeathSaveRolledEvent,
+} from '../../schemas/events/combat.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie } from '../../rng/dice.js';
 import { newEventId, newEncounterId } from '../../ids.js';
@@ -25,6 +28,41 @@ import type { Character } from '../../schemas/runtime/character.js';
 const DEATH_SAVE_SUCCESS_THRESHOLD = 10;
 const DEATH_SAVE_FAILURES_TO_DIE = 3;
 const DEATH_SAVE_SUCCESSES_TO_STABILIZE = 3;
+
+/**
+ * At the start of a combatant's turn, sweep every other character's
+ * applied conditions for any whose `sourceCharacterId` is the combatant
+ * starting the turn and whose `expiresOnRound` has now arrived (or
+ * passed). RAW shape this models: "until the start of the source's
+ * next turn" duration metadata stamped by ApplyCondition trigger
+ * actions (Spirit Shroud's heal-block rider, future similar riders).
+ * Returns one `ConditionRemoved` event per matching applied condition.
+ */
+const planAutoExpireConditionsAtTurnStart = (
+  state: CampaignState,
+  sourceCharacterId: string,
+  round: number,
+  causedByEventId: ULID,
+  at: string,
+): ReadonlyArray<ConditionRemovedEvent> => {
+  const events: ConditionRemovedEvent[] = [];
+  for (const character of Object.values(state.characters)) {
+    for (const applied of character.appliedConditions) {
+      if (applied.sourceCharacterId !== sourceCharacterId) continue;
+      if (applied.expiresOnRound === undefined) continue;
+      if (applied.expiresOnRound > round) continue;
+      events.push({
+        id: newEventId() as ULID,
+        at,
+        type: 'ConditionRemoved',
+        targetId: character.id as ULID,
+        conditionId: applied.conditionId,
+        causedByEventId,
+      });
+    }
+  }
+  return events;
+};
 
 /**
  * RAW 2024 PHB ch.1: at the start of an unconscious creature's turn at 0 HP,
@@ -210,7 +248,14 @@ export const planAdvanceTurn = (
       nextTurn.id,
       at,
     );
-    return [turnEnd, roundEnd, nextTurn, ...deathSave];
+    const expired = planAutoExpireConditionsAtTurnStart(
+      state,
+      first.combatantId,
+      encounter.round + 1,
+      nextTurn.id,
+      at,
+    );
+    return [turnEnd, roundEnd, nextTurn, ...deathSave, ...expired];
   }
   const next = encounter.combatants[encounter.activeIndex + 1];
   if (!next) throw new Error('Bad combatant index');
@@ -228,7 +273,14 @@ export const planAdvanceTurn = (
     nextTurn.id,
     at,
   );
-  return [turnEnd, nextTurn, ...deathSave];
+  const expired = planAutoExpireConditionsAtTurnStart(
+    state,
+    next.combatantId,
+    encounter.round,
+    nextTurn.id,
+    at,
+  );
+  return [turnEnd, nextTurn, ...deathSave, ...expired];
 };
 
 export interface BeginFirstTurnIntent {

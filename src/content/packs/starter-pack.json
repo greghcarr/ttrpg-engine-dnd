@@ -2864,7 +2864,7 @@
     {
       "id": "spirit-shroud-cold-active",
       "name": "Spirit Shroud: Cold",
-      "description": "Caster's weapon attacks deal +1d8 cold damage on hit, and the target can't regain HP until the start of the caster's next turn. RAW gates the damage on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The heal-block applies via an ApplyCondition TriggerAction that stamps `healing-blocked-active` on the hit target; the consumer (DM, dndbnb) is responsible for removing the condition at the start of the caster's next turn (no auto-expiry today).",
+      "description": "Caster's weapon attacks deal +1d8 cold damage on hit, and the target can't regain HP until the start of the caster's next turn. RAW gates the damage on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The heal-block applies via an ApplyCondition TriggerAction (`durationRounds: 1`) that stamps `healing-blocked-active` on the hit target; inside an active encounter the engine auto-expires the condition at the start of the caster's next turn via `planAdvanceTurn` (slice 102). Outside an encounter the consumer manages the expiry.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -2985,7 +2985,7 @@
     {
       "id": "healing-blocked-active",
       "name": "Healing Blocked",
-      "description": "Bearer cannot regain hit points. Heal planners consult this via the effect stack and, when set, emit Healed with amount=0 (the reducer's amount<=0 early-return makes it a no-op) plus an annotation in the Healed event's `source` field. Applied by Spirit Shroud's three variants via an ApplyCondition TriggerAction on each weapon-hit rider; duration is consumer-managed (the consumer removes the condition at the start of the caster's next turn — the engine has no auto-expiry for trigger-applied conditions today).",
+      "description": "Bearer cannot regain hit points. Heal planners consult this via the effect stack and, when set, emit Healed with amount=0 (the reducer's amount<=0 early-return makes it a no-op) plus an annotation in the Healed event's `source` field. Applied by Spirit Shroud's three variants via an ApplyCondition TriggerAction on each weapon-hit rider with `durationRounds: 1`; the dispatcher stamps `expiresOnRound = currentRound + 1` on the ConditionApplied event (when inside an active encounter), and `planAdvanceTurn` emits a `ConditionRemoved` at the start of the source caster's next turn. Outside an encounter the expiry stays consumer-managed.",
       "stackable": false,
       "endsOn": [],
       "effects": [{ "kind": "BlockHealing" }]
