@@ -383,6 +383,21 @@ const planSaveMechanic = (
         });
       }
     }
+    // Forced movement on a failed save (Gust of Wind etc.). Pure
+    // informational event — the consumer applies the position
+    // change since the engine doesn't model positions.
+    if (!success && mechanic.pushedFeetOnFail !== undefined && mechanic.pushedFeetOnFail > 0) {
+      events.push({
+        id: newEventId() as ULID,
+        at,
+        type: 'CreaturePushed',
+        targetId: targetId as ULID,
+        distanceFeet: mechanic.pushedFeetOnFail,
+        sourceCharacterId: intent.characterId as ULID,
+        source: spell.id,
+        causedByEventId: saveEvent.id,
+      });
+    }
   }
   return { events, conditionsApplied };
 };

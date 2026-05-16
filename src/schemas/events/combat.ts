@@ -67,6 +67,22 @@ export const ConditionRemovedEventSchema = EventEnvelopeSchema.extend({
 });
 export type ConditionRemovedEvent = z.infer<typeof ConditionRemovedEventSchema>;
 
+// Forced movement: the named source attempted to push a creature
+// `distanceFeet` away from the source's position. The engine
+// doesn't model positions, so this event is purely informational
+// (like TriggerFired) — consumers (dndbnb, VTTs) read it and apply
+// the position change themselves. RAW examples: Gust of Wind
+// pushes 15 ft on a failed STR save; some monster shoves pushed
+// directions vary.
+export const CreaturePushedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('CreaturePushed'),
+  targetId: ULIDSchema,
+  distanceFeet: z.number().int().min(0),
+  sourceCharacterId: ULIDSchema.optional(),
+  source: z.string().optional(),
+});
+export type CreaturePushedEvent = z.infer<typeof CreaturePushedEventSchema>;
+
 export const ExhaustionChangedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('ExhaustionChanged'),
   targetId: ULIDSchema,

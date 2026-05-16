@@ -5,6 +5,7 @@ import { applyCharacterCreated } from './reducers/progression.js';
 import {
   applyConditionApplied,
   applyConditionRemoved,
+  applyCreaturePushed,
   applyDamageApplied,
   applyDeathSaveRolled,
   applyExhaustionChanged,
@@ -178,6 +179,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ConditionRemoved':
         applyConditionRemoved(draft, event);
+        break;
+      case 'CreaturePushed':
+        applyCreaturePushed(draft, event);
         break;
       case 'ExhaustionChanged':
         applyExhaustionChanged(draft, event);

@@ -1688,7 +1688,7 @@
     { "id": "detect-thoughts", "name": "Detect Thoughts", "level": 2, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a copper coin" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "dragons-breath", "name": "Dragon's Breath", "level": 2, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a hot pepper" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "dust-devil", "name": "Dust Devil", "level": 2, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a pinch of dust" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "cube", "size": 5 }, "mechanicalEffects": [] },
-    { "id": "earthbind", "name": "Earthbind", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "300 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
+    { "id": "earthbind", "name": "Earthbind", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "300 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "STR", "conditionOnFail": "earthbound-active" }] },
     { "id": "enhance-ability", "name": "Enhance Ability", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "fur or a feather from a beast" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "druid", "sorcerer"], "mechanicalEffects": [] },
     { "id": "enlarge-reduce", "name": "Enlarge/Reduce", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a pinch of powdered iron" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "druid", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "enthrall", "name": "Enthrall", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["bard", "warlock"], "mechanicalEffects": [] },
@@ -1696,7 +1696,7 @@
     { "id": "find-traps", "name": "Find Traps", "level": 2, "school": "divination", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "ranger"], "mechanicalEffects": [] },
     { "id": "flaming-sphere", "name": "Flaming Sphere", "level": 2, "school": "evocation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of tallow, a pinch of brimstone, and a dusting of powdered iron" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "wizard"], "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 5, "saveAbility": "DEX", "damageDice": "2d6", "damageType": "fire", "halfOnSuccess": true, "extraDicePerSlotLevel": 1 }] },
     { "id": "gentle-repose", "name": "Gentle Repose", "level": 2, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of salt and one copper piece placed on each of the corpse's eyes" }, "duration": "10 days", "concentration": false, "ritual": true, "classes": ["cleric", "wizard"], "mechanicalEffects": [] },
-    { "id": "gust-of-wind", "name": "Gust of Wind", "level": 2, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a legume seed" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "line", "size": 60 }, "mechanicalEffects": [] },
+    { "id": "gust-of-wind", "name": "Gust of Wind", "level": 2, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a legume seed" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "line", "size": 60 }, "mechanicalEffects": [{ "kind": "save", "ability": "STR", "pushedFeetOnFail": 15 }] },
     { "id": "knock", "name": "Knock", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "levitate", "name": "Levitate", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a small leather loop or a piece of golden wire bent into a cup shape with a long shank on one end" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "locate-animals-or-plants", "name": "Locate Animals or Plants", "level": 2, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a bit of fur from a bloodhound" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
@@ -2442,6 +2442,16 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "earthbound-active",
+      "name": "Earthbound",
+      "description": "Flying speed reduced to 0. If the target is airborne when the spell is cast, they fall (consumer applies the descent / falling damage).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "fly", "op": "set", "value": 0 }
       ]
     },
     {

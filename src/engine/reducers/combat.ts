@@ -3,6 +3,7 @@ import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type {
   ConditionAppliedEvent,
   ConditionRemovedEvent,
+  CreaturePushedEvent,
   DamageAppliedEvent,
   DeathSaveRolledEvent,
   ExhaustionChangedEvent,
@@ -174,6 +175,15 @@ export const applyConditionRemoved = (
   character.appliedConditions = character.appliedConditions.filter(
     (c) => c.conditionId !== event.conditionId,
   );
+};
+
+export const applyCreaturePushed = (
+  _state: Draft<CampaignState>,
+  _event: CreaturePushedEvent,
+): void => {
+  // No-op: positions are consumer state. The event is a log entry
+  // the consumer reads to apply the position change. Same shape as
+  // TriggerFired — informational, not state-mutating.
 };
 
 export const applyExhaustionChanged = (

@@ -24,6 +24,11 @@ const SpellSaveMechanicSchema = z.object({
   damageType: DamageTypeSchema.optional(),
   halfOnSuccess: z.boolean().optional(),
   conditionOnFail: z.string().optional(),
+  // Forced movement on a failed save (Gust of Wind: 15 ft). The
+  // planner emits a `CreaturePushed` informational event per failed
+  // target so consumers can apply the position change. The engine
+  // doesn't model positions, so no state mutation happens.
+  pushedFeetOnFail: z.number().int().min(0).optional(),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
   cantripScalingDice: DiceExpressionSchema.optional(),
 });

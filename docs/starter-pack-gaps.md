@@ -415,7 +415,7 @@ Each entry below is one engine primitive: a focused engine slice that, once land
 | **Resurrection / death utility** | 1 (revivify) | Engine model for "creature was dead → now alive at N HP". |
 | **Scrying / divination utility** | 1 (clairvoyance) | Remote sensor primitive. |
 | **Illusion-interaction primitive** | ~2 (major-image, silent-image extended) | INT save on interaction + recurring belief check. |
-| **Push / aerial-restraint primitives** | ~2 (gust-of-wind, earthbind) | Forced movement on save + ground tether. |
+| **~~Push / aerial-restraint primitives~~** ✓ shipped | 2 wired (gust-of-wind, earthbind) | Slice 78 adds a `CreaturePushed` event (informational, like TriggerFired — the engine doesn't model positions, so the consumer applies the position change). The save mechanic gains an optional `pushedFeetOnFail` field that emits the event per failed target. Gust of Wind wires as STR save + 15 ft push. Earthbind wires the aerial restraint via a save → `earthbound-active` condition with `ModifySpeed mode:'fly' op:'set' value:0`; slice 77's getEffectiveSpeed retrofit ensures the fly-zero actually applies. The "falls when grounded" portion of Earthbind is consumer-side (falling damage). |
 
 Picking from this list, top three by spell-count payoff: summon system (11+), area-effect mechanic (~13), on-hit trigger (~9). The other primitives each unblock smaller cohorts; bundle them together by primitive when their turn comes.
 
