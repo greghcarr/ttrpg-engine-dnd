@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 212 / ~370 | ~370 | 34 / 60 / 63 / 54 / 1 across L0–L4. Cantrips complete; L1 / L2 / L3 ship every PHB entry (~26 wired at L1, ~20 at L2, ~16 at L3 — counting summon-system + on-hit-trigger wiring). L4+ stub-heavy. |
+| Spells | 251 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 across L0–L4. Cantrips, L1, L2, L3, and L4 each ship every PHB 2024 entry. ~93 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L5+ not in pack. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -96,11 +96,31 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Recurring-rider primitive** (heal each turn from caster bonus action): `aura-of-vitality`.
 - **Pure narrative / utility** (intentionally no mechanical event): `create-food-and-water`, `daylight`, `feign-death`, `meld-into-stone`, `nondetection`, `sending`, `speak-with-dead`, `speak-with-plants`, `tongues`, `water-breathing`, `water-walk`. Rituals, divination, and quality-of-life spells.
 
-### L4: 1 / ~28
+### L4: 40 / 40 (full PHB list)
+
+**Wired (12):** blight, charm-monster, conjure-minor-elementals (summon), conjure-woodland-beings (summon), freedom-of-movement, greater-invisibility, ice-storm, phantasmal-killer, summon-aberration (summon), summon-construct (summon), summon-elemental (summon), summon-greater-demon (summon).
 
 **Dedicated planner (1):** polymorph.
 
-**Schema-only:** none in pack yet. The remaining ~27 PHB L4 spells are not yet in the pack.
+**Schema-only (27):** grouped by the engine primitive each one needs.
+
+- **Area-effect spell mechanic**: `black-tentacles`, `wall-of-fire`, `guardian-of-faith`, `private-sanctum`, `compulsion`. Five area shapes / variants of the same deferred primitive.
+- **Sensor / scrying primitive**: `arcane-eye`, `locate-creature`. Remote viewing surfaces.
+- **Aura primitive (sub-effects beyond simple condition projection)**: `aura-of-life` (sub-HP-floor mechanic + auto-revive at 0 HP), `aura-of-purity` (multi-effect resistance + condition immunities).
+- **Cross-plane travel / banishment**: `banishment` (CHA save → other plane; return on concentration end).
+- **Multi-target movement-restriction**: `resilient-sphere`, `watery-sphere`. Force-cage variants needing per-target restraint with sphere-shaped lifetime.
+- **Terrain / shaping utilities**: `control-water`, `hallucinatory-terrain`, `stone-shape`, `fabricate`. Terrain primitive not modeled.
+- **Targeted teleport (planner)**: `dimension-door` — same shape as Misty Step but multi-target; a `planDimensionDoor` is the obvious follow-up.
+- **DM-resolution ritual**: `divination`.
+- **Action-table riser**: `confusion` — failed save makes target take random actions per turn; no "confused" condition / action-table mechanic.
+- **Domination semantics**: `dominate-beast` — distinct from Charmed (full control); not modeled.
+- **Caster-chosen damage type + on-attack output**: `elemental-bane`.
+- **Alarm + delayed-attack pattern**: `faithful-hound`.
+- **AddDamageToAttacker TriggerAction**: `fire-shield` — retaliation damage when caster is hit; the existing `AddDamage` TriggerAction emits damage to `event.targetId` not `event.attackerId`.
+- **Transformation handler for non-self targets**: `giant-insect`.
+- **On-fatal-damage trigger primitive**: `death-ward`.
+- **Resistance qualifier (magical-vs-nonmagical)**: `stoneskin` — half damage from nonmagical B/P/S only.
+- **Extradimensional storage**: `secret-chest`.
 
 ### L5–L9: 0 / ~140
 
