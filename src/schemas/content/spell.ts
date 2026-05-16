@@ -30,6 +30,14 @@ const SpellAttackMechanicSchema = z.object({
   cantripScalingDice: DiceExpressionSchema.optional(),
 });
 
+// Save-based spell mechanic. `conditionOnFail` is the standard
+// "single condition on failed save" shape (Hold Person, Tasha's
+// Hideous Laughter, etc.). For spells that let the caster pick the
+// variant at cast time (Calm Emotions: suppress vs make indifferent),
+// omit `conditionOnFail` and set `casterChoosesVariant` listing each
+// variant's `key` and the condition that applies on a failed save.
+// Exactly one of the two must be set when condition-on-fail is wanted;
+// the planner validates at cast time.
 const SpellSaveMechanicSchema = z.object({
   kind: z.literal('save'),
   ability: AbilityScoreSchema,
@@ -37,6 +45,18 @@ const SpellSaveMechanicSchema = z.object({
   damageType: DamageTypeSchema.optional(),
   halfOnSuccess: z.boolean().optional(),
   conditionOnFail: z.string().optional(),
+  casterChoosesVariant: z
+    .object({
+      variants: z
+        .array(
+          z.object({
+            key: z.string(),
+            conditionId: z.string(),
+          }),
+        )
+        .min(2),
+    })
+    .optional(),
   // Forced movement on a failed save (Gust of Wind: 15 ft). The
   // planner emits a `CreaturePushed` informational event per failed
   // target so consumers can apply the position change. The engine

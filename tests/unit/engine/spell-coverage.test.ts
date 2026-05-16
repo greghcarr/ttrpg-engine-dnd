@@ -31,7 +31,7 @@ import type { CasterChoice } from '../../../src/engine/plan/cast-spell.js';
 
 type Expectation =
   | { kind: 'attack'; casterChoice?: CasterChoice }
-  | { kind: 'save' }
+  | { kind: 'save'; casterChoice?: CasterChoice }
   | { kind: 'heal' }
   | { kind: 'auto-hit'; minDarts: number }
   | { kind: 'buff'; conditionId: string; casterChoice?: CasterChoice }
@@ -184,7 +184,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'barkskin': { kind: 'buff', conditionId: 'barkskin-active' },
   'blur': { kind: 'buff', conditionId: 'blurred-active' },
   'branding-smite': { kind: 'buff', conditionId: 'branding-smite-active' },
-  'calm-emotions': { kind: 'skip', reason: 'caster-chosen variant (suppress charm/frighten vs make indifferent); choice protocol not modeled' },
+  'calm-emotions': { kind: 'save', casterChoice: { kind: 'variant', value: 'suppress' } },
   'cloud-of-daggers': { kind: 'skip', reason: 'aura-damage mechanic (no save, 4d4 slashing auto-damage); fires via engine.plan.tickAura per-turn / on-enter, not on cast' },
   'continual-flame': { kind: 'skip', reason: 'utility (creates flame); no combat-event side' },
   'cordon-of-arrows': { kind: 'skip', reason: 'placed-trap area effect; trap mechanic not modeled' },
@@ -573,7 +573,7 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         : [t1.id, t2.id];
 
       const casterChoice =
-        (expectation.kind === 'attack' || expectation.kind === 'buff')
+        (expectation.kind === 'attack' || expectation.kind === 'buff' || expectation.kind === 'save')
           ? expectation.casterChoice
           : undefined;
       const events = engine.plan.castSpell(campaign.state, {

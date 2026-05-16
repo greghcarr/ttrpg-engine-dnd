@@ -1679,7 +1679,7 @@
     { "id": "barkskin", "name": "Barkskin", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a handful of oak bark" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "barkskin-active" }] },
     { "id": "blur", "name": "Blur", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "blurred-active" }] },
     { "id": "branding-smite", "name": "Branding Smite", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "branding-smite-active" }] },
-    { "id": "calm-emotions", "name": "Calm Emotions", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [] },
+    { "id": "calm-emotions", "name": "Calm Emotions", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "save", "ability": "CHA", "casterChoosesVariant": { "variants": [{ "key": "suppress", "conditionId": "emotion-suppressed-active" }, { "key": "indifferent", "conditionId": "emotionally-indifferent-active" }] } }] },
     { "id": "cloud-of-daggers", "name": "Cloud of Daggers", "level": 2, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a sliver of glass" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "targeting": { "shape": "cube", "size": 5 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 5, "damageDice": "4d4", "damageType": "slashing", "extraDicePerSlotLevel": 2 }] },
     { "id": "continual-flame", "name": "Continual Flame", "level": 2, "school": "evocation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "ruby dust worth 50+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
     { "id": "cordon-of-arrows", "name": "Cordon of Arrows", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "5 feet", "components": { "verbal": true, "somatic": true, "material": "four arrows or bolts" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
@@ -2493,6 +2493,25 @@
       "effects": [
         { "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }
       ]
+    },
+    {
+      "id": "emotion-suppressed-active",
+      "name": "Emotion Suppressed",
+      "description": "Immune to Charmed and Frightened for the duration. RAW also ends any existing Charmed / Frightened on application; the engine doesn't auto-strip them yet (the consumer can emit ConditionRemoved if desired).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantConditionImmunity", "conditionId": "charmed" },
+        { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "emotionally-indifferent-active",
+      "name": "Emotionally Indifferent",
+      "description": "Indifferent toward creatures of the caster's choice that the target was Hostile toward; the indifference ends if the target takes damage or witnesses an ally being harmed. Pure narrative on the engine side — creature-vs-creature relationships and 'witnesses ally damaged' triggers aren't modeled; consumers track hostility lists and end the condition manually.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "enlarged-active",

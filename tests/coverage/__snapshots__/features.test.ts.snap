@@ -265,6 +265,16 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 2,
+    "id": "emotion-suppressed-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "emotionally-indifferent-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 2,
     "id": "enlarged-active",
     "stackable": false,
   },

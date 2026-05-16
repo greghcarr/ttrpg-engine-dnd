@@ -160,6 +160,53 @@ const rollCantripScaling = (
 
 const halveDamage = (totalDamage: number): number => Math.floor(totalDamage / 2);
 
+// Shared variant-resolution for buff and save mechanics. The two
+// mechanic kinds share the same `casterChoosesVariant` shape (a
+// list of { key, conditionId } pairs); when present, the caster must
+// supply `intent.casterChoice` with `kind: 'variant'` and a matching
+// key. Throws with intent-revealing messages on misuse.
+const resolveVariantConditionId = (
+  casterChoosesVariant: { variants: readonly { key: string; conditionId: string }[] },
+  intent: CastSpellIntent,
+  spellId: string,
+  mechanicKind: 'buff' | 'save',
+): string => {
+  const choice = intent.casterChoice;
+  if (choice === undefined || choice.kind !== 'variant') {
+    throw new Error(
+      `Spell ${spellId} ${mechanicKind} mechanic requires a casterChoice { kind: 'variant', value }; received ${choice?.kind ?? 'none'}`,
+    );
+  }
+  const match = casterChoosesVariant.variants.find((v) => v.key === choice.value);
+  if (match === undefined) {
+    const keys = casterChoosesVariant.variants.map((v) => v.key).join(', ');
+    throw new Error(
+      `Spell ${spellId}: variant '${choice.value}' not in allowed list [${keys}]`,
+    );
+  }
+  return match.conditionId;
+};
+
+// Resolves the conditionId applied on a failed save. Returns
+// `undefined` when the mechanic has neither `conditionOnFail` nor
+// `casterChoosesVariant` (a damage-only save mechanic). Throws when
+// both are set.
+const resolveSaveConditionOnFail = (
+  mechanic: Extract<SpellMechanic, { kind: 'save' }>,
+  intent: CastSpellIntent,
+  spellId: string,
+): string | undefined => {
+  if (mechanic.casterChoosesVariant !== undefined) {
+    if (mechanic.conditionOnFail !== undefined) {
+      throw new Error(
+        `Spell ${spellId} save mechanic sets both conditionOnFail and casterChoosesVariant; pick exactly one`,
+      );
+    }
+    return resolveVariantConditionId(mechanic.casterChoosesVariant, intent, spellId, 'save');
+  }
+  return mechanic.conditionOnFail;
+};
+
 // Resolves the buff conditionId, honoring caster choice when the
 // mechanic flags `casterChoosesVariant`. Throws on missing / wrong-kind
 // / unknown-key choices so misuse surfaces at plan time.
@@ -174,20 +221,7 @@ const resolveBuffConditionId = (
         `Spell ${spellId} buff mechanic sets both conditionId and casterChoosesVariant; pick exactly one`,
       );
     }
-    const choice = intent.casterChoice;
-    if (choice === undefined || choice.kind !== 'variant') {
-      throw new Error(
-        `Spell ${spellId} requires a casterChoice { kind: 'variant', value }; received ${choice?.kind ?? 'none'}`,
-      );
-    }
-    const match = mechanic.casterChoosesVariant.variants.find((v) => v.key === choice.value);
-    if (match === undefined) {
-      const keys = mechanic.casterChoosesVariant.variants.map((v) => v.key).join(', ');
-      throw new Error(
-        `Spell ${spellId}: variant '${choice.value}' not in allowed list [${keys}]`,
-      );
-    }
-    return match.conditionId;
+    return resolveVariantConditionId(mechanic.casterChoosesVariant, intent, spellId, 'buff');
   }
   if (mechanic.conditionId === undefined) {
     throw new Error(
@@ -363,6 +397,7 @@ const planSaveMechanic = (
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
+  const conditionOnFail = resolveSaveConditionOnFail(mechanic, intent, spell.id);
   const events: Event[] = [];
   const conditionsApplied: AppliedConditionRef[] = [];
 
@@ -451,12 +486,12 @@ const planSaveMechanic = (
         );
       }
     }
-    if (!success && mechanic.conditionOnFail !== undefined) {
+    if (!success && conditionOnFail !== undefined) {
       const immune = isImmuneToCondition({
         state,
         content,
         targetId,
-        conditionId: mechanic.conditionOnFail,
+        conditionId: conditionOnFail,
       });
       if (!immune) {
         const appliedConditionId = newAppliedConditionId();
@@ -465,14 +500,14 @@ const planSaveMechanic = (
           at,
           type: 'ConditionApplied',
           targetId,
-          conditionId: mechanic.conditionOnFail,
+          conditionId: conditionOnFail,
           appliedConditionId,
           causedByEventId: saveEvent.id,
         };
         events.push(cond);
         conditionsApplied.push({
           targetId: targetId as ULID,
-          conditionId: mechanic.conditionOnFail,
+          conditionId: conditionOnFail,
           appliedConditionId,
         });
       }
