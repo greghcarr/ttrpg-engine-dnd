@@ -294,7 +294,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'banishment': { kind: 'skip', reason: 'CHA save banishes target to another plane; cross-plane travel + return-on-concentration-drop not modeled' },
   'black-tentacles': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 3d6 bludgeoning + conditionOnFail: restrained); fires via engine.plan.tickAura on enter / per-turn, not on cast' },
   'compulsion': { kind: 'skip', reason: 'forced movement on WIS save with recurring re-save; recurring-save area mechanic not modeled' },
-  'confusion': { kind: 'skip', reason: 'forces random actions on failed WIS save; confused condition not modeled (would need an action-table riser)' },
+  'confusion': { kind: 'save' },
   'control-water': { kind: 'skip', reason: 'water-shape utility; terrain primitive not modeled' },
   'death-ward': { kind: 'skip', reason: 'prevents one death; on-fatal-damage trigger primitive not modeled' },
   'dimension-door': { kind: 'skip', reason: 'short-range teleport (with optional passenger); has a teleport-pattern similar to Misty Step but no dedicated planner yet' },

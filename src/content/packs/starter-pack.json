@@ -961,7 +961,7 @@
         {
           "kind": "save",
           "ability": "WIS",
-          "conditionOnFail": "paralyzed"
+          "conditionOnFail": "held-paralyzed-active"
         }
       ]
     },
@@ -1243,7 +1243,7 @@
     { "id": "blight", "name": "Blight", "level": 4, "school": "necromancy", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "CON", "damageDice": "8d8", "damageType": "necrotic", "halfOnSuccess": true, "extraDicePerSlotLevel": 1 }] },
     { "id": "charm-monster", "name": "Charm Monster", "level": 4, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "charmed" }] },
     { "id": "compulsion", "name": "Compulsion", "level": 4, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard"], "mechanicalEffects": [] },
-    { "id": "confusion", "name": "Confusion", "level": 4, "school": "enchantment", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "three nut shells" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "druid", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [] },
+    { "id": "confusion", "name": "Confusion", "level": 4, "school": "enchantment", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "three nut shells" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "druid", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "confused-active" }] },
     { "id": "conjure-minor-elementals", "name": "Conjure Minor Elementals", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Minor Elemental Spirit", "ac": 13, "hpBase": 40, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 40 }] },
     { "id": "conjure-woodland-beings", "name": "Conjure Woodland Beings", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "one holly berry per creature summoned" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "summon", "name": "Fey Spirit", "ac": 13, "hpBase": 30, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 30 }] },
     { "id": "control-water", "name": "Control Water", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "300 feet", "components": { "verbal": true, "somatic": true, "material": "a drop of water and a pinch of dust" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
@@ -1295,7 +1295,7 @@
     { "id": "geas", "name": "Geas", "level": 5, "school": "enchantment", "castingTime": "1 minute", "range": "60 feet", "components": { "verbal": true }, "duration": "30 days", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "druid", "paladin", "wizard"], "mechanicalEffects": [] },
     { "id": "greater-restoration", "name": "Greater Restoration", "level": 5, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "diamond dust worth 100+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "druid"], "mechanicalEffects": [{ "kind": "remove-condition", "eligibleConditionIds": ["charmed", "petrified", "paralyzed", "stunned", "poisoned", "blinded", "deafened"] }] },
     { "id": "hallow", "name": "Hallow", "level": 5, "school": "abjuration", "castingTime": "24 hours", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "herbs, oils, and incense worth 1,000+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
-    { "id": "hold-monster", "name": "Hold Monster", "level": 5, "school": "enchantment", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a small, straight piece of iron" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "paralyzed" }] },
+    { "id": "hold-monster", "name": "Hold Monster", "level": 5, "school": "enchantment", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a small, straight piece of iron" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "held-paralyzed-active" }] },
     { "id": "holy-weapon", "name": "Holy Weapon", "level": 5, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "holy-weapon-active" }] },
     { "id": "insect-plague", "name": "Insect Plague", "level": 5, "school": "conjuration", "castingTime": "Action", "range": "300 feet", "components": { "verbal": true, "somatic": true, "material": "a few grains of sugar, some kernels of grain, and a smear of fat" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "sorcerer"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "save", "ability": "CON", "damageDice": "4d10", "damageType": "piercing", "halfOnSuccess": true, "extraDicePerSlotLevel": 1 }] },
     { "id": "legend-lore", "name": "Legend Lore", "level": 5, "school": "divination", "castingTime": "10 minutes", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "incense worth 250+ GP, which the spell consumes" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "wizard"], "mechanicalEffects": [] },
@@ -1622,7 +1622,7 @@
     { "id": "hellish-rebuke", "name": "Hellish Rebuke", "level": 1, "school": "evocation", "castingTime": "Reaction", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [{ "kind": "save", "ability": "DEX", "damageDice": "2d10", "damageType": "fire", "halfOnSuccess": true, "extraDicePerSlotLevel": 1 }] },
     { "id": "inflict-wounds", "name": "Inflict Wounds", "level": 1, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "2d10", "damageType": "necrotic", "extraDicePerSlotLevel": 1 }] },
     { "id": "ray-of-sickness", "name": "Ray of Sickness", "level": 1, "school": "necromancy", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "2d8", "damageType": "poison", "extraDicePerSlotLevel": 1 }] },
-    { "id": "tashas-hideous-laughter", "name": "Tasha's Hideous Laughter", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "tiny tarts and a feather waved in the air" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "incapacitated" }] },
+    { "id": "tashas-hideous-laughter", "name": "Tasha's Hideous Laughter", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "tiny tarts and a feather waved in the air" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "conditionOnFail": "hideous-laughter-active" }] },
     { "id": "absorb-elements", "name": "Absorb Elements", "level": 1, "school": "abjuration", "castingTime": "Reaction", "range": "Self", "components": { "somatic": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "alarm", "name": "Alarm", "level": 1, "school": "abjuration", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a tiny bell and a piece of fine silver wire" }, "duration": "8 hours", "concentration": false, "ritual": true, "classes": ["ranger", "wizard"], "mechanicalEffects": [] },
     { "id": "animal-friendship", "name": "Animal Friendship", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a morsel of food" }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
@@ -2554,6 +2554,37 @@
           "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" }]
         }
       ]
+    },
+    {
+      "id": "held-paralyzed-active",
+      "name": "Held (Paralyzed)",
+      "description": "The spell-bound variant of Paralyzed applied by Hold Person and Hold Monster. Same mechanical effects as the bare Paralyzed condition (speed 0, auto-fail STR/DEX saves) plus a Wisdom save at the end of each of the bearer's turns against the caster's spell DC; on success, the spell ends on the target. The consumer calls `engine.plan.tickRecurringSave({ targetId, conditionId: 'held-paralyzed-active' })` at the end of the bearer's turn while the spell holds.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "set", "value": 0 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "auto-fail" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "auto-fail" }
+      ],
+      "recurringSave": { "ability": "WIS", "trigger": "turnEnd", "onSuccess": "removeCondition" }
+    },
+    {
+      "id": "hideous-laughter-active",
+      "name": "Hideous Laughter",
+      "description": "The target falls Prone and is Incapacitated for the spell's duration, unable to stand up. At the end of each of its turns it makes a Wisdom save against the caster's spell DC; on success, the spell ends on it. The RAW 'extra save with advantage when damaged' branch is not modeled — only the end-of-turn save is wired. Bare Prone + Incapacitated currently carry empty mechanical effects in the pack, so this condition is also effects-empty; the recurring save is the load-bearing wire.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [],
+      "recurringSave": { "ability": "WIS", "trigger": "turnEnd", "onSuccess": "removeCondition" }
+    },
+    {
+      "id": "confused-active",
+      "name": "Confused",
+      "description": "The target rolls on the Confusion behavior table at the start of each of its turns and acts per that result. The behavior table itself is not modeled (would need a planner-level action overrider). What IS wired is the end-of-turn Wisdom save against the caster's spell DC; on success the spell ends on the target.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [],
+      "recurringSave": { "ability": "WIS", "trigger": "turnEnd", "onSuccess": "removeCondition" }
     },
     {
       "id": "bears-endurance-active",

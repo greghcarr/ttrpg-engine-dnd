@@ -12,6 +12,7 @@ import { computeSpellSaveDC } from '../../derive/spell-dc.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import type { ConditionRemovedEvent } from '../../schemas/events/combat.js';
 
 export interface TickRecurringSaveIntent {
   readonly type: 'TickRecurringSave';
@@ -44,16 +45,23 @@ const findPrimarySpellcastingClass = (
 /**
  * One tick of a recurring-save effect against the named condition on
  * the named bearer. The consumer calls this at the trigger moment
- * (typically the bearer's start of turn) for any condition that
- * declares `recurringSave` metadata. Bestow Curse's "Inactive Turn"
- * variant is the canonical user: WIS save against the curse caster's
- * spell DC; on failure, the bearer's action is consumed.
+ * (start or end of the bearer's turn, per the condition's metadata)
+ * for any condition that declares `recurringSave`. Two RAW shapes:
  *
- * Emits a `SaveRolled` event; if the save fails and the bearer is a
- * combatant in the active encounter, also emits an
- * `ActionEconomyConsumed` (action). Out-of-encounter ticks roll the
- * save but skip action-consume since action economy only exists
- * inside initiative.
+ *   - onFail = 'consumeAction' (Bestow Curse "Inactive Turn"): WIS
+ *     save against the curse caster's spell DC; failure consumes the
+ *     bearer's action that turn.
+ *   - onSuccess = 'removeCondition' (Hold Person / Hold Monster /
+ *     Hideous Laughter / Confusion): save against the caster's DC;
+ *     success lifts the condition off the bearer (the spell ends on
+ *     the target).
+ *
+ * Emits a `SaveRolled` event. On failure, if onFail is set and the
+ * bearer is a combatant in the active encounter, emits an
+ * `ActionEconomyConsumed` (action) — out-of-encounter ticks skip
+ * action-consume since action economy only exists inside initiative.
+ * On success, if onSuccess is set, emits a `ConditionRemoved` for
+ * the named condition on the bearer.
  */
 export const planTickRecurringSave = (
   state: CampaignState,
@@ -151,6 +159,18 @@ export const planTickRecurringSave = (
         events.push(consumed);
       }
     }
+  }
+
+  if (success && conditionDef.recurringSave.onSuccess === 'removeCondition') {
+    const removed: ConditionRemovedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionRemoved',
+      targetId: intent.targetId as ULID,
+      conditionId: intent.conditionId,
+      causedByEventId: saveEvent.id,
+    };
+    events.push(removed);
   }
 
   return events;

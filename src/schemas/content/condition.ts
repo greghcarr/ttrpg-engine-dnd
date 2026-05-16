@@ -5,26 +5,40 @@ import { AbilityScoreSchema } from '../primitives.js';
 // Recurring saving-throw metadata. When set, the consumer calls
 // `engine.plan.tickRecurringSave` at the indicated trigger moment on
 // the bearer's turn; the planner rolls a save against the source
-// caster's spell DC, emits a SaveRolled, and on failure executes the
-// `onFail` consequence. Bestow Curse's "Inactive Turn" variant uses
-// this to enforce the WIS save / wasted action on the cursed
-// creature's turn. Source caster + casting class are read from the
-// AppliedCondition's `sourceCharacterId` (set by spell planners since
-// slice 88) and the caster's primary spellcasting class, with consumer
-// overrides on the intent.
-export const RecurringSaveSchema = z.object({
-  ability: AbilityScoreSchema,
-  // 'turnStart' fires when the consumer ticks at the bearer's start
-  // of turn; 'turnEnd' at the end. Engine doesn't track turn moments
-  // directly — this field is metadata that the consumer reads to know
-  // when to fire the tick.
-  trigger: z.enum(['turnStart', 'turnEnd']).default('turnStart'),
-  // What happens on a failed save:
-  //   'consumeAction' = ActionEconomyConsumed (action) for the bearer
-  //                     (only emitted when the bearer is a combatant
-  //                     in the active encounter).
-  onFail: z.enum(['consumeAction']),
-});
+// caster's spell DC, emits a SaveRolled, and applies the configured
+// success / failure consequence. Two callers today:
+//   1. Bestow Curse "Inactive Turn": onFail consumes the bearer's
+//      action; success has no effect (the curse persists).
+//   2. Hold Person / Hold Monster / Hideous Laughter / Confusion:
+//      onSuccess lifts the spell-bound condition off the bearer (the
+//      RAW "the spell ends on the target" pattern); failure has no
+//      extra effect (the condition persists into the next turn).
+// Source caster + casting class are read from the AppliedCondition's
+// `sourceCharacterId` (set by spell planners since slice 88) and the
+// caster's primary spellcasting class, with consumer overrides on
+// the intent. At least one of `onFail` / `onSuccess` must be set.
+export const RecurringSaveSchema = z
+  .object({
+    ability: AbilityScoreSchema,
+    // 'turnStart' fires when the consumer ticks at the bearer's start
+    // of turn; 'turnEnd' at the end. Engine doesn't track turn moments
+    // directly — this field is metadata that the consumer reads to know
+    // when to fire the tick.
+    trigger: z.enum(['turnStart', 'turnEnd']).default('turnStart'),
+    // What happens on a failed save:
+    //   'consumeAction' = ActionEconomyConsumed (action) for the bearer
+    //                     (only emitted when the bearer is a combatant
+    //                     in the active encounter).
+    onFail: z.enum(['consumeAction']).optional(),
+    // What happens on a successful save:
+    //   'removeCondition' = ConditionRemoved for this condition on the
+    //                       bearer (the spell ends on the target).
+    onSuccess: z.enum(['removeCondition']).optional(),
+  })
+  .refine(
+    (rs) => rs.onFail !== undefined || rs.onSuccess !== undefined,
+    { message: 'recurringSave requires at least one of onFail / onSuccess' },
+  );
 export type RecurringSave = z.infer<typeof RecurringSaveSchema>;
 
 export const ConditionSchema = z.object({
