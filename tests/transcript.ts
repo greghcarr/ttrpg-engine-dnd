@@ -252,6 +252,10 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `**${characterName(stateBefore, event.characterId)}** attunes to ${itemName(stateBefore, content, event.instanceId)}.`;
     case 'ItemUnattuned':
       return `**${characterName(stateBefore, event.characterId)}** ends attunement to ${itemName(stateBefore, content, event.instanceId)}.`;
+    case 'ItemBuffApplied':
+      return `${itemName(stateBefore, content, event.instanceId)} gains +${event.attackBonus} attack / +${event.damageBonus} damage (${event.source ?? 'spell'}).`;
+    case 'ItemBuffRemoved':
+      return `${itemName(stateBefore, content, event.instanceId)} loses its temporary buff.`;
     case 'PartyCreated': {
       const members = event.memberIds.length === 0
         ? 'no members'

@@ -47,6 +47,7 @@ import {
   planMistyStep,
   planActionSurge,
   planSacredWeapon,
+  planMagicWeapon,
   planRecklessAttack,
   planStunningStrike,
   planFrenzy,
@@ -118,6 +119,7 @@ import {
   type MistyStepIntent,
   type ActionSurgeIntent,
   type SacredWeaponIntent,
+  type MagicWeaponIntent,
   type RecklessAttackIntent,
   type StunningStrikeIntent,
   type FrenzyIntent,
@@ -224,6 +226,7 @@ export interface Engine {
     mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     sacredWeapon(state: CampaignState, intent: Omit<SacredWeaponIntent, 'type'>): PlanResult;
+    magicWeapon(state: CampaignState, intent: Omit<MagicWeaponIntent, 'type'>): PlanResult;
     recklessAttack(state: CampaignState, intent: Omit<RecklessAttackIntent, 'type'>): PlanResult;
     stunningStrike(state: CampaignState, intent: Omit<StunningStrikeIntent, 'type'>): PlanResult;
     frenzy(state: CampaignState, intent: Omit<FrenzyIntent, 'type'>): PlanResult;
@@ -407,6 +410,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     sacredWeapon(state, intent) {
       return { events: planSacredWeapon(state, content, { type: 'SacredWeapon', ...intent }) };
+    },
+    magicWeapon(state, intent) {
+      return { events: planMagicWeapon(state, content, { type: 'MagicWeapon', ...intent }) };
     },
     recklessAttack(state, intent) {
       return { events: planRecklessAttack(state, content, { type: 'RecklessAttack', ...intent }) };

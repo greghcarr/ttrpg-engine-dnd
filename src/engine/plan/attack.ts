@@ -343,10 +343,16 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   for (let i = 0; i < totalRolls; i++) {
     damageRolls.push(rollDie(parsed.die, rng));
   }
+  // Spell-applied weapon buff stamped on this instance (Magic
+  // Weapon, Elemental Weapon, etc.). Adds a flat damage bonus to
+  // the existing ability-mod + dice-modifier roll. Distinct from
+  // the generic effect-stack 'damage' modifier because the buff is
+  // weapon-specific to this exact instance.
+  const weaponBuffDamageBonus = weaponInstance.temporaryBuff?.damageBonus ?? 0;
   const damageRollPayload: DamageRoll = {
     expression: damageExpression,
     rolls: damageRolls,
-    modifier: damageAbilityMod + parsed.modifier,
+    modifier: damageAbilityMod + parsed.modifier + weaponBuffDamageBonus,
     type: weaponDef.damageType,
   };
 

@@ -72,6 +72,7 @@ export {
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planSacredWeapon, type SacredWeaponIntent } from './sacred-weapon.js';
+export { planMagicWeapon, type MagicWeaponIntent } from './magic-weapon.js';
 export { planRecklessAttack, type RecklessAttackIntent } from './reckless-attack.js';
 export { planStunningStrike, type StunningStrikeIntent } from './stunning-strike.js';
 export { planFrenzy, type FrenzyIntent } from './frenzy.js';

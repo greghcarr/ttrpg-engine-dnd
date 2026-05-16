@@ -206,7 +206,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'locate-animals-or-plants': { kind: 'skip', reason: 'divination utility, narrative only' },
   'locate-object': { kind: 'skip', reason: 'divination utility, narrative only' },
   'magic-mouth': { kind: 'skip', reason: 'utility (programmed illusion), narrative only' },
-  'magic-weapon': { kind: 'skip', reason: '+1 weapon attack/damage buff; item-buff condition not modeled' },
+  'magic-weapon': { kind: 'skip', reason: 'has dedicated engine.plan.magicWeapon (needs a specific weaponInstanceId target, not planCastSpell)' },
   'mirror-image': { kind: 'skip', reason: 'creates three duplicates that intercept attacks; duplicate-pool condition not modeled' },
   'nystuls-magic-aura': { kind: 'skip', reason: 'utility (anti-detect), narrative only' },
   'pass-without-trace': { kind: 'buff', conditionId: 'pass-without-trace-active' },

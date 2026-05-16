@@ -89,6 +89,15 @@ export const clearConcentrationEffect = (
       delete state.characters[ch.id];
     }
   }
+  // Strip any item buffs (Magic Weapon, Elemental Weapon, etc.) that
+  // were stamped onto an item instance by this concentration effect.
+  // No standalone ItemBuffRemoved event fires — the ConcentrationBroken
+  // event covers the cause and this loop does the actual clear.
+  for (const instance of Object.values(state.itemInstances)) {
+    if (instance.temporaryBuff?.sourceEffectInstanceId === effectInstanceId) {
+      instance.temporaryBuff = undefined;
+    }
+  }
   delete state.effectInstances[effectInstanceId];
 };
 

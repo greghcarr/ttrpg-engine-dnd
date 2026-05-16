@@ -41,3 +41,19 @@ export const ItemUnattunedEventSchema = EventEnvelopeSchema.extend({
   instanceId: ULIDSchema,
 });
 export type ItemUnattunedEvent = z.infer<typeof ItemUnattunedEventSchema>;
+
+export const ItemBuffAppliedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ItemBuffApplied'),
+  instanceId: ULIDSchema,
+  attackBonus: z.number().int().default(0),
+  damageBonus: z.number().int().default(0),
+  sourceEffectInstanceId: ULIDSchema,
+  source: z.string().optional(),
+});
+export type ItemBuffAppliedEvent = z.infer<typeof ItemBuffAppliedEventSchema>;
+
+export const ItemBuffRemovedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ItemBuffRemoved'),
+  instanceId: ULIDSchema,
+});
+export type ItemBuffRemovedEvent = z.infer<typeof ItemBuffRemovedEventSchema>;

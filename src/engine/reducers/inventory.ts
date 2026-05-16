@@ -3,6 +3,8 @@ import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type {
   ItemAcquiredEvent,
   ItemAttunedEvent,
+  ItemBuffAppliedEvent,
+  ItemBuffRemovedEvent,
   ItemEquippedEvent,
   ItemUnattunedEvent,
   ItemUnequippedEvent,
@@ -80,4 +82,32 @@ export const applyItemUnattuned = (
   character.equipped.attuned = character.equipped.attuned.filter(
     (id) => id !== event.instanceId,
   );
+};
+
+export const applyItemBuffApplied = (
+  state: Draft<CampaignState>,
+  event: ItemBuffAppliedEvent,
+): void => {
+  const instance = state.itemInstances[event.instanceId];
+  invariant(instance !== undefined, `Item instance ${event.instanceId} not found`);
+  // A new buff replaces any prior buff on the instance — RAW for
+  // Magic Weapon / Elemental Weapon stacking ("a creature can have
+  // only one of these effects at a time on a given weapon"). The
+  // concentration cleanup walks state on concentration drop and
+  // removes any buffs linked to the dropped effect's id.
+  instance.temporaryBuff = {
+    attackBonus: event.attackBonus,
+    damageBonus: event.damageBonus,
+    sourceEffectInstanceId: event.sourceEffectInstanceId,
+    ...(event.source !== undefined ? { source: event.source } : {}),
+  };
+};
+
+export const applyItemBuffRemoved = (
+  state: Draft<CampaignState>,
+  event: ItemBuffRemovedEvent,
+): void => {
+  const instance = state.itemInstances[event.instanceId];
+  if (instance === undefined) return;
+  instance.temporaryBuff = undefined;
 };

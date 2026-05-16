@@ -81,6 +81,17 @@ export const computeAttackBonus = (input: ComputeAttackInput): AttackResult => {
   const modifierBonus = effects.modifierSum('attack');
   if (modifierBonus !== 0) breakdown.push({ source: 'modifier', value: modifierBonus });
 
+  // Spell-applied temporary buff stamped on this specific weapon
+  // instance (Magic Weapon's +N, etc.). Distinct from the generic
+  // 'attack' modifier sum because the buff is weapon-specific —
+  // only this weapon's attacks get the bonus.
+  if (instance.temporaryBuff !== undefined && instance.temporaryBuff.attackBonus !== 0) {
+    breakdown.push({
+      source: instance.temporaryBuff.source ?? 'weapon-buff',
+      value: instance.temporaryBuff.attackBonus,
+    });
+  }
+
   const total = breakdown.reduce((acc, e) => acc + e.value, 0);
   return { total, breakdown };
 };
