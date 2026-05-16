@@ -99,6 +99,8 @@ export const applyItemBuffApplied = (
     attackBonus: event.attackBonus,
     damageBonus: event.damageBonus,
     sourceEffectInstanceId: event.sourceEffectInstanceId,
+    ...(event.extraDamageDice !== undefined ? { extraDamageDice: event.extraDamageDice } : {}),
+    ...(event.extraDamageType !== undefined ? { extraDamageType: event.extraDamageType } : {}),
     ...(event.source !== undefined ? { source: event.source } : {}),
   };
 };

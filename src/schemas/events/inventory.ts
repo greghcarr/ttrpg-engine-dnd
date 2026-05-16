@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { ItemInstanceSchema } from '../runtime/item-instance.js';
-import { ULIDSchema } from '../primitives.js';
+import { DamageTypeSchema, ULIDSchema } from '../primitives.js';
 import { EventEnvelopeSchema } from './envelope.js';
 
 export const ItemAcquiredEventSchema = EventEnvelopeSchema.extend({
@@ -47,6 +47,8 @@ export const ItemBuffAppliedEventSchema = EventEnvelopeSchema.extend({
   instanceId: ULIDSchema,
   attackBonus: z.number().int().default(0),
   damageBonus: z.number().int().default(0),
+  extraDamageDice: z.string().optional(),
+  extraDamageType: DamageTypeSchema.optional(),
   sourceEffectInstanceId: ULIDSchema,
   source: z.string().optional(),
 });

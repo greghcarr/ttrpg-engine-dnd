@@ -7,6 +7,7 @@ import type {
   DamageRoll,
 } from '../../schemas/events/attack.js';
 import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
+import type { ItemTemporaryBuff } from '../../schemas/runtime/item-instance.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
@@ -28,6 +29,29 @@ import { chebyshevDistance } from './movement.js';
 
 const DEFAULT_MELEE_REACH_FEET = 5;
 const REACH_PROPERTY_FEET = 10;
+
+// Rolls an item buff's per-hit extra-damage rider (Elemental Weapon:
+// +1d4/2d4/3d4 of the caster-chosen type). Returns undefined when the
+// buff has no extra damage configured. Crits double the dice per RAW.
+const buildBuffExtraDamageRoll = (
+  buff: ItemTemporaryBuff | undefined,
+  rng: RNG,
+  critical: boolean,
+): DamageRoll | undefined => {
+  if (buff?.extraDamageDice === undefined || buff.extraDamageType === undefined) return undefined;
+  const parsed = parseDiceExpression(buff.extraDamageDice);
+  const totalDice = critical ? parsed.count * 2 : parsed.count;
+  const rolls: number[] = [];
+  for (let i = 0; i < totalDice; i++) {
+    rolls.push(rollDie(parsed.die, rng));
+  }
+  return {
+    expression: buff.extraDamageDice,
+    rolls,
+    modifier: parsed.modifier,
+    type: buff.extraDamageType,
+  };
+};
 
 export const COVER_KINDS = ['none', 'half', 'three-quarters', 'total'] as const;
 export type CoverKind = (typeof COVER_KINDS)[number];
@@ -356,6 +380,12 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     type: weaponDef.damageType,
   };
 
+  // Item-buff extra-damage rider (Elemental Weapon: +1d4/2d4/3d4 of
+  // chosen type per hit). Rolled here so the dice are baked into the
+  // resolution event and the replay path is RNG-free. Crits double the
+  // extra dice per RAW.
+  const extraDamageRoll = buildBuffExtraDamageRoll(weaponInstance.temporaryBuff, rng, critical);
+
   const damageRolled: DamageRolledEvent = {
     id: newEventId() as ULID,
     at,
@@ -363,17 +393,24 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     attackerId: input.attackerId,
     targetId: input.targetId,
     weaponInstanceId: input.weaponInstanceId,
-    rolls: [damageRollPayload],
+    rolls: extraDamageRoll === undefined ? [damageRollPayload] : [damageRollPayload, extraDamageRoll],
     critical,
     causedByEventId: attackRolled.id,
   };
 
   const damageTotal = damageRolls.reduce((s, v) => s + v, 0) + damageRollPayload.modifier;
+  const rawComponents: { amount: number; type: typeof weaponDef.damageType }[] = [
+    { amount: Math.max(0, damageTotal), type: weaponDef.damageType },
+  ];
+  if (extraDamageRoll !== undefined) {
+    const extraTotal = extraDamageRoll.rolls.reduce((s, v) => s + v, 0) + extraDamageRoll.modifier;
+    rawComponents.push({ amount: Math.max(0, extraTotal), type: extraDamageRoll.type });
+  }
   const mitigatedComponents = mitigateDamage({
     character: target,
     itemInstances: state.itemInstances,
     content,
-    rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
+    rawComponents,
   });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,

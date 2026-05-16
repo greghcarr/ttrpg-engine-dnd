@@ -241,7 +241,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'create-food-and-water': { kind: 'skip', reason: 'utility (food creation), narrative only' },
   'crusaders-mantle': { kind: 'buff', conditionId: 'crusaders-mantle-active' },
   'daylight': { kind: 'skip', reason: 'utility (creates bright light), narrative only' },
-  'elemental-weapon': { kind: 'skip', reason: 'caster-chosen damage type weapon enhance; item-buff + caster-chosen variant not modeled' },
+  'elemental-weapon': { kind: 'skip', reason: 'has dedicated engine.plan.elementalWeapon (needs a specific weaponInstanceId + damageType, not planCastSpell)' },
   'feign-death': { kind: 'skip', reason: 'utility (death simulation), narrative only' },
   'fly': { kind: 'buff', conditionId: 'flying-active' },
   'gaseous-form': { kind: 'skip', reason: 'transformation utility; transformation handler not modeled for spells' },

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ULIDSchema } from '../primitives.js';
+import { DamageTypeSchema, ULIDSchema } from '../primitives.js';
 
 // Spell-applied temporary buff stamped onto a specific item instance.
 // Magic Weapon (+1 / +2 / +3 attack and damage) and similar effects
@@ -9,9 +9,18 @@ import { ULIDSchema } from '../primitives.js';
 // bonus) read them back when this instance is used as the weapon.
 // `sourceEffectInstanceId` links the buff to the concentration effect
 // so `clearConcentrationEffect` lifts it when concentration ends.
+//
+// `extraDamageDice` + `extraDamageType` carry a per-hit elemental
+// rider for Elemental Weapon (1d4 / 2d4 / 3d4 of a caster-chosen
+// type, scaling with slot level). When both are set, the attack
+// planner rolls the dice on hit and emits a second damage component
+// alongside the weapon's native damage. Crits double the extra dice
+// per RAW.
 export const ItemTemporaryBuffSchema = z.object({
   attackBonus: z.number().int().default(0),
   damageBonus: z.number().int().default(0),
+  extraDamageDice: z.string().optional(),
+  extraDamageType: DamageTypeSchema.optional(),
   sourceEffectInstanceId: ULIDSchema,
   source: z.string().optional(),
 });
