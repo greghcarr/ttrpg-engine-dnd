@@ -2531,10 +2531,11 @@
     {
       "id": "cursed-inert-active",
       "name": "Cursed: Inactive Turn",
-      "description": "While Cursed, the target must make a Wisdom saving throw at the start of each of its turns. On a failed save, it wastes its action that turn. The recurring per-turn-save-with-action-consume primitive isn't modeled; the consumer fires the save (via engine.plan.save) and on failure marks the action as consumed.",
+      "description": "While Cursed, the target must make a Wisdom saving throw at the start of each of its turns against the curse caster's spell DC. On a failed save, it wastes its action that turn. The consumer calls `engine.plan.tickRecurringSave({ targetId, conditionId: 'cursed-inert-active' })` at the start of the bearer's turn while the curse holds; the planner emits SaveRolled + (on fail, when in encounter) ActionEconomyConsumed action.",
       "stackable": false,
       "endsOn": [],
-      "effects": []
+      "effects": [],
+      "recurringSave": { "ability": "WIS", "onFail": "consumeAction" }
     },
     {
       "id": "cursed-vulnerable-active",

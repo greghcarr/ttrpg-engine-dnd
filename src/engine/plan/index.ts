@@ -61,6 +61,10 @@ export {
   type TickRecurringIntent,
 } from './concentration.js';
 export {
+  planTickRecurringSave,
+  type TickRecurringSaveIntent,
+} from './recurring-save.js';
+export {
   planMove,
   planDash,
   planDisengage,
