@@ -8,8 +8,8 @@ import { newCharacterId } from '../../../src/ids.js';
 import type { Campaign } from '../../../src/engine/commit.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
 import type { ItemBuffAppliedEvent } from '../../../src/schemas/events/inventory.js';
-import type { AttackRolledEvent } from '../../../src/schemas/events/attack.js';
-import type { DamageAppliedEvent, DamageRolledEvent } from '../../../src/schemas/events/combat.js';
+import type { AttackRolledEvent, DamageRolledEvent } from '../../../src/schemas/events/attack.js';
+import type { DamageAppliedEvent } from '../../../src/schemas/events/combat.js';
 import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
 
 // Tests Elemental Weapon's item-buff path. The dedicated planner

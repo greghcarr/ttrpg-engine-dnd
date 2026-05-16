@@ -7,7 +7,8 @@ import { CharacterSchema, type Character } from '../../../src/schemas/runtime/ch
 import { newCharacterId } from '../../../src/ids.js';
 import type { Campaign } from '../../../src/engine/commit.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
-import type { DamageAppliedEvent, DamageRolledEvent } from '../../../src/schemas/events/combat.js';
+import type { DamageAppliedEvent } from '../../../src/schemas/events/combat.js';
+import type { DamageRolledEvent } from '../../../src/schemas/events/attack.js';
 import { eventId, isoTimestamp } from '../../fixtures/index.js';
 
 // Tests Chromatic Orb's cast-time damage-type choice. Bug this prevents:

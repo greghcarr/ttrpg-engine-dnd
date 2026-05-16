@@ -427,6 +427,10 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const who = characterName(stateBefore, event.targetId);
       return `**${who}** spends Guidance: +${event.d4} to the ability check.`;
     }
+    case 'AbsorbElementsCast': {
+      const who = characterName(stateBefore, event.casterId);
+      return `**${who}** casts Absorb Elements: heals ${event.halvedAmount} ${event.damageType}.`;
+    }
     case 'HPMaxBonusChanged': {
       const who = characterName(stateBefore, event.targetId);
       const sign = event.delta >= 0 ? '+' : '';
@@ -609,6 +613,17 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     case 'CompanionDismissed': {
       const name = characterName(stateBefore, event.companionId);
       return `${name} is dismissed.`;
+    }
+    case 'TrapArmed': {
+      const who = characterName(stateBefore, event.sourceCharacterId);
+      return `**${who}** arms ${event.label} (${event.chargesRemaining} ${event.chargesRemaining === 1 ? 'charge' : 'charges'}, ${event.payload.damageDice} ${event.payload.damageType}, DC ${event.payload.saveDC} ${event.payload.saveAbility}).`;
+    }
+    case 'TrapTriggered': {
+      const who = characterName(stateBefore, event.triggeringCharacterId);
+      return `**${who}** triggers a trap.`;
+    }
+    case 'TrapExpired': {
+      return `Trap expired (${event.reason}).`;
     }
   }
 };
