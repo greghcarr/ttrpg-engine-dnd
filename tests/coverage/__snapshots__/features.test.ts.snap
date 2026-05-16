@@ -489,6 +489,31 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "protection-acid-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "protection-cold-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "protection-fire-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "protection-lightning-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "protection-thunder-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 2,
     "id": "reduced-active",
     "stackable": false,

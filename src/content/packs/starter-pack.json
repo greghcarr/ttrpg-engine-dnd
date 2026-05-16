@@ -1749,7 +1749,7 @@
     { "id": "nondetection", "name": "Nondetection", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of diamond dust worth 25+ GP" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["bard", "ranger", "wizard"], "mechanicalEffects": [] },
     { "id": "phantom-steed", "name": "Phantom Steed", "level": 3, "school": "illusion", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 hour", "concentration": false, "ritual": true, "classes": ["wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Phantom Steed", "ac": 13, "hpBase": 30, "hpPerSlotAbove": 0, "baseSlotLevel": 3, "speedFeet": 100 }] },
     { "id": "plant-growth", "name": "Plant Growth", "level": 3, "school": "transmutation", "castingTime": "Action or 8 hours", "range": "150 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
-    { "id": "protection-from-energy", "name": "Protection from Energy", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "protection-from-energy", "name": "Protection from Energy", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "acid", "conditionId": "protection-acid-active" }, { "key": "cold", "conditionId": "protection-cold-active" }, { "key": "fire", "conditionId": "protection-fire-active" }, { "key": "lightning", "conditionId": "protection-lightning-active" }, { "key": "thunder", "conditionId": "protection-thunder-active" }] } }] },
     { "id": "remove-curse", "name": "Remove Curse", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "revivify", "name": "Revivify", "level": 3, "school": "necromancy", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "diamonds worth 300+ GP, which the spell consumes" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["artificer", "cleric", "paladin"], "mechanicalEffects": [] },
     { "id": "sending", "name": "Sending", "level": 3, "school": "divination", "castingTime": "Action", "range": "Unlimited", "components": { "verbal": true, "somatic": true, "material": "a short piece of fine copper wire" }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "wizard"], "mechanicalEffects": [] },
@@ -2930,6 +2930,46 @@
           "actions": [{ "kind": "AddDamage", "dice": "2d8", "damageType": "radiant" }]
         }
       ]
+    },
+    {
+      "id": "protection-acid-active",
+      "name": "Protection from Energy: Acid",
+      "description": "Resistance to Acid damage while the spell lasts. One of the five Protection from Energy variants picked by the caster at cast time. The resistance flows through the existing mitigateDamage pipeline (slice 95 ships the content only; GrantResistance with a specific damageType was already supported by the engine).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "GrantResistance", "damageType": "acid" }]
+    },
+    {
+      "id": "protection-cold-active",
+      "name": "Protection from Energy: Cold",
+      "description": "Resistance to Cold damage while the spell lasts.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "GrantResistance", "damageType": "cold" }]
+    },
+    {
+      "id": "protection-fire-active",
+      "name": "Protection from Energy: Fire",
+      "description": "Resistance to Fire damage while the spell lasts.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "GrantResistance", "damageType": "fire" }]
+    },
+    {
+      "id": "protection-lightning-active",
+      "name": "Protection from Energy: Lightning",
+      "description": "Resistance to Lightning damage while the spell lasts.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }]
+    },
+    {
+      "id": "protection-thunder-active",
+      "name": "Protection from Energy: Thunder",
+      "description": "Resistance to Thunder damage while the spell lasts.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [{ "kind": "GrantResistance", "damageType": "thunder" }]
     },
     {
       "id": "freedom-of-movement-active",

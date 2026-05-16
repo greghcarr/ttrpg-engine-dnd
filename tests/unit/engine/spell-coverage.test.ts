@@ -257,7 +257,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'nondetection': { kind: 'skip', reason: 'utility (anti-detect buff), narrative only' },
   'phantom-steed': { kind: 'summon' },
   'plant-growth': { kind: 'skip', reason: 'area difficult terrain + agricultural utility; area-effect mechanic not modeled' },
-  'protection-from-energy': { kind: 'skip', reason: 'resistance to chosen damage type; resistance-buff condition not modeled' },
+  'protection-from-energy': { kind: 'buff', conditionId: 'protection-fire-active', casterChoice: { kind: 'variant', value: 'fire' } },
   'remove-curse': { kind: 'skip', reason: 'removes the cursed condition; cursed condition itself not yet modeled' },
   'revivify': { kind: 'skip', reason: 'has dedicated engine.plan.resurrect (the resurrection planner handles revivify / raise-dead / reincarnate / resurrection / true-resurrection — not planCastSpell)' },
   'sending': { kind: 'skip', reason: 'utility (telepathic message), narrative only' },
