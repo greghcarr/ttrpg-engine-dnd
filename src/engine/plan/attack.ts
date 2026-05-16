@@ -252,17 +252,26 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     pendingChoices: state.pendingChoices,
   });
   const attackerVsTargetAdvantage = attackerEffects.advantageVsSource('attack', input.targetId);
+  // Generic attacker-side advantage on attacks (e.g. Invisible) and
+  // disadvantage on attacks (e.g. Blinded, Frightened, Poisoned,
+  // Prone, Restrained). Folded alongside target-side contributions
+  // so 2024 RAW advantage-cancellation applies symmetrically.
+  const attackerSelfAdvantage = attackerEffects.advantageFor('attack');
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers()
     || rangedInMelee
     || heavyForSmall
-    || attackerVsTargetAdvantage.disadvantage;
+    || attackerVsTargetAdvantage.disadvantage
+    || attackerSelfAdvantage.disadvantage;
   let advantage = input.advantage ?? 'none';
   // Reckless Attack: if the attacker activated it this turn (and the
   // attack qualifies), it contributes advantage just like the target's
   // grants-advantage path.
   const effectivelyGrantsAdvantage =
-    targetGrantsAdvantage || attackerRecklessAdvantage || attackerVsTargetAdvantage.advantage;
+    targetGrantsAdvantage
+    || attackerRecklessAdvantage
+    || attackerVsTargetAdvantage.advantage
+    || attackerSelfAdvantage.advantage;
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions
   // first, then resolve.
