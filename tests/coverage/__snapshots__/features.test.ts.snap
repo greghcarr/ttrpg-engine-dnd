@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 77,
-  "total": 172,
-  "wired": 95,
+  "stub": 76,
+  "total": 173,
+  "wired": 97,
 }
 `;
 
@@ -110,7 +110,8 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "paladin L10 aura-of-courage [wired]",
   "paladin L11 radiant-strike [stub]",
   "paladin L14 restoring-touch [stub]",
-  "paladin L18 aura-improvements [stub]",
+  "paladin L18 aura-of-courage [wired]",
+  "paladin L18 aura-of-protection [wired]",
   "ranger L1 favored-enemy [wired]",
   "ranger L1 weapon-mastery-ranger [wired]",
   "ranger L2 deft-explorer [wired]",
