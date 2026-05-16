@@ -64,8 +64,15 @@ import type { ULID } from '../ids-utils.js';
 // deferred decisions (level-up ASI / feat picks, subclass selection)
 // that persist between sessions. Cast-time choices are passed inline
 // with the intent and consumed at plan time.
+//
+// - `damageType` picks one of an allowed list of DamageType values
+//   (Chromatic Orb: acid / cold / fire / lightning / poison / thunder).
+// - `variant` picks a spell-defined string key from a set of variants,
+//   each of which routes to a different condition or effect (Enlarge /
+//   Reduce: 'enlarge' → enlarged-active, 'reduce' → reduced-active).
 export type CasterChoice =
-  | { readonly kind: 'damageType'; readonly value: DamageType };
+  | { readonly kind: 'damageType'; readonly value: DamageType }
+  | { readonly kind: 'variant'; readonly value: string };
 
 export interface CastSpellIntent {
   readonly type: 'CastSpell';
@@ -152,6 +159,43 @@ const rollCantripScaling = (
 };
 
 const halveDamage = (totalDamage: number): number => Math.floor(totalDamage / 2);
+
+// Resolves the buff conditionId, honoring caster choice when the
+// mechanic flags `casterChoosesVariant`. Throws on missing / wrong-kind
+// / unknown-key choices so misuse surfaces at plan time.
+const resolveBuffConditionId = (
+  mechanic: Extract<SpellMechanic, { kind: 'buff' }>,
+  intent: CastSpellIntent,
+  spellId: string,
+): string => {
+  if (mechanic.casterChoosesVariant !== undefined) {
+    if (mechanic.conditionId !== undefined) {
+      throw new Error(
+        `Spell ${spellId} buff mechanic sets both conditionId and casterChoosesVariant; pick exactly one`,
+      );
+    }
+    const choice = intent.casterChoice;
+    if (choice === undefined || choice.kind !== 'variant') {
+      throw new Error(
+        `Spell ${spellId} requires a casterChoice { kind: 'variant', value }; received ${choice?.kind ?? 'none'}`,
+      );
+    }
+    const match = mechanic.casterChoosesVariant.variants.find((v) => v.key === choice.value);
+    if (match === undefined) {
+      const keys = mechanic.casterChoosesVariant.variants.map((v) => v.key).join(', ');
+      throw new Error(
+        `Spell ${spellId}: variant '${choice.value}' not in allowed list [${keys}]`,
+      );
+    }
+    return match.conditionId;
+  }
+  if (mechanic.conditionId === undefined) {
+    throw new Error(
+      `Spell ${spellId} buff mechanic has neither conditionId nor casterChoosesVariant`,
+    );
+  }
+  return mechanic.conditionId;
+};
 
 // Resolves the damage type for an attack mechanic, honoring caster
 // choice when the mechanic flags `casterChoosesDamageType`. Throws on
@@ -565,6 +609,7 @@ const planBuffMechanic = (
   intent: CastSpellIntent,
   content: ResolvedContent,
   mechanic: Extract<SpellMechanic, { kind: 'buff' }>,
+  spell: Spell,
   declaredEventId: string,
   at: string,
 ): BuffOutcome => {
@@ -580,9 +625,10 @@ const planBuffMechanic = (
   // reducer's massive-damage threshold accounts for the buffed max.
   const events: Event[] = [];
   const conditionsApplied: AppliedConditionRef[] = [];
-  const hpMaxDelta = hpMaxBonusFromCondition(content, mechanic.conditionId);
+  const conditionId = resolveBuffConditionId(mechanic, intent, spell.id);
+  const hpMaxDelta = hpMaxBonusFromCondition(content, conditionId);
   for (const targetId of intent.targetIds) {
-    if (isImmuneToCondition({ state, content, targetId, conditionId: mechanic.conditionId })) {
+    if (isImmuneToCondition({ state, content, targetId, conditionId })) {
       continue;
     }
     const appliedConditionId = newAppliedConditionId();
@@ -591,7 +637,7 @@ const planBuffMechanic = (
       at,
       type: 'ConditionApplied',
       targetId,
-      conditionId: mechanic.conditionId,
+      conditionId,
       appliedConditionId,
       causedByEventId: declaredEventId as ULID,
       ...(hpMaxDelta !== 0 ? { hpMaxBonusDelta: hpMaxDelta } : {}),
@@ -599,7 +645,7 @@ const planBuffMechanic = (
     events.push(cond);
     conditionsApplied.push({
       targetId: targetId as ULID,
-      conditionId: mechanic.conditionId,
+      conditionId,
       appliedConditionId,
     });
   }
@@ -978,7 +1024,7 @@ export const planCastSpell = (
     } else if (mechanic.kind === 'auto-hit') {
       events.push(...planAutoHitMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     } else if (mechanic.kind === 'buff') {
-      const outcome = planBuffMechanic(state, intent, content, mechanic, declared.id, at);
+      const outcome = planBuffMechanic(state, intent, content, mechanic, spell, declared.id, at);
       events.push(...outcome.events);
       conditionsApplied.push(...outcome.conditionsApplied);
     } else if (mechanic.kind === 'remove-condition') {

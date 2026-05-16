@@ -34,7 +34,7 @@ type Expectation =
   | { kind: 'save' }
   | { kind: 'heal' }
   | { kind: 'auto-hit'; minDarts: number }
-  | { kind: 'buff'; conditionId: string }
+  | { kind: 'buff'; conditionId: string; casterChoice?: CasterChoice }
   | { kind: 'remove-condition'; seedConditionId: string }
   | { kind: 'hp-pool-knockout' }
   | { kind: 'summon' }
@@ -195,7 +195,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'dust-devil': { kind: 'skip', reason: 'summoned mobile area; area + summon mechanics not modeled' },
   'earthbind': { kind: 'save' },
   'enhance-ability': { kind: 'skip', reason: 'caster-chosen ability buff; ability-check-buff condition not modeled' },
-  'enlarge-reduce': { kind: 'skip', reason: 'caster-chosen variant (grow vs shrink); choice protocol + size condition not modeled' },
+  'enlarge-reduce': { kind: 'buff', conditionId: 'enlarged-active', casterChoice: { kind: 'variant', value: 'enlarge' } },
   'enthrall': { kind: 'skip', reason: 'WIS save against perception disadvantage on caster; perception-buff condition not modeled' },
   'find-steed': { kind: 'summon' },
   'find-traps': { kind: 'skip', reason: 'divination utility; detection mechanic not modeled' },
@@ -572,14 +572,16 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         ? Array.from({ length: expectation.minDarts }, () => t1.id)
         : [t1.id, t2.id];
 
+      const casterChoice =
+        (expectation.kind === 'attack' || expectation.kind === 'buff')
+          ? expectation.casterChoice
+          : undefined;
       const events = engine.plan.castSpell(campaign.state, {
         characterId: caster.id,
         spellId,
         slotLevel: spell.level,
         targetIds,
-        ...(expectation.kind === 'attack' && expectation.casterChoice !== undefined
-          ? { casterChoice: expectation.casterChoice }
-          : {}),
+        ...(casterChoice !== undefined ? { casterChoice } : {}),
       }).events as ReadonlyArray<Event>;
       const types = events.map((e) => e.type);
 

@@ -86,9 +86,28 @@ const SpellAutoHitMechanicSchema = z.object({
 // (Bless, Aid, etc.). The condition's effects supply the actual bonuses;
 // concentration spells track the applied conditions so they're cleared
 // when concentration ends.
+//
+// The condition is normally fixed (`conditionId`). Spells that let the
+// caster pick a variant at cast time (Enlarge/Reduce: enlarge or
+// reduce; Bestow Curse: one of four curse pools) omit `conditionId`
+// and set `casterChoosesVariant` listing each variant's `key` and the
+// `conditionId` it applies. Exactly one of the two must be set; the
+// planner validates at cast time.
 const SpellBuffMechanicSchema = z.object({
   kind: z.literal('buff'),
-  conditionId: z.string(),
+  conditionId: z.string().optional(),
+  casterChoosesVariant: z
+    .object({
+      variants: z
+        .array(
+          z.object({
+            key: z.string(),
+            conditionId: z.string(),
+          }),
+        )
+        .min(2),
+    })
+    .optional(),
 });
 
 // Strips one of a fixed list of conditions from each target (Lesser
