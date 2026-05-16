@@ -140,7 +140,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'entangle': { kind: 'skip', reason: 'aura-damage mechanic (STR save → restrained, no damage); fires via engine.plan.tickAura on enter / per-turn, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'expeditious-retreat': { kind: 'skip', reason: 'bonus-action speed buff, narrative only' },
   'false-life': { kind: 'temp-hp' },
-  'feather-fall': { kind: 'skip', reason: 'reaction, narrative only' },
+  'feather-fall': { kind: 'buff', conditionId: 'feather-falling-active' },
   'find-familiar': { kind: 'summon' },
   'fog-cloud': { kind: 'skip', reason: 'area obscurement, narrative only' },
   'goodberry': { kind: 'skip', reason: 'creates consumable items; item-creation mechanic not wired for spells' },

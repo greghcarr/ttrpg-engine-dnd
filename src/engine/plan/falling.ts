@@ -9,6 +9,8 @@ import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import type { ULID } from '../ids-utils.js';
 import type { Character } from '../../schemas/runtime/character.js';
+import type { ItemInstance } from '../../schemas/runtime/item-instance.js';
+import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
 
 const FALLING_FEET_PER_DIE = 10;
 const FALLING_DIE_AVERAGE = 3.5;
@@ -43,6 +45,15 @@ const monkLevel = (character: Character): number => {
   return monk?.level ?? 0;
 };
 
+const hasFallingProtection = (
+  character: Character,
+  content: ResolvedContent,
+  itemInstances: Readonly<Record<string, ItemInstance>>,
+): boolean => {
+  const effects = collectEffectsFromCharacter({ character, content, itemInstances });
+  return effects.some((e) => e.kind === 'GrantFallingProtection');
+};
+
 export const planFalling = (
   state: CampaignState,
   content: ResolvedContent,
@@ -53,6 +64,7 @@ export const planFalling = (
   if (intent.distanceFeet < 0) {
     throw new Error('Falling distance must be non-negative');
   }
+  if (hasFallingProtection(character, content, state.itemInstances)) return [];
   let rawDamage = expectedFallingDamage(intent.distanceFeet);
   if (rawDamage <= 0) return [];
 

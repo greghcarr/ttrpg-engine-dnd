@@ -364,6 +364,7 @@ export const applyEffectToBuilder = (
     case 'SetHPMaxFormula':
     case 'OfferChoice':
     case 'GrantAura':
+    case 'GrantFallingProtection':
     case 'Custom':
       return;
     default: {

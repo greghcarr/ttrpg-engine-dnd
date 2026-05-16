@@ -185,6 +185,12 @@ export type Effect =
   // self-effect (e.g. Aura of Courage also making the bearer Frightened-
   // immune) ships as a separate sibling effect on the same feature.
   | { kind: 'GrantAura'; auraId: string; rangeFeet: number; allyConditionId: string; description?: string }
+  // Negates fall damage entirely (Feather Fall, Monk Slow Fall at
+  // high tiers, similar). Distinct from damage-type immunity because
+  // falling isn't a damage type — it's a damage source. planFalling
+  // consults this when computing fall damage; presence zeroes the
+  // outgoing DamageApplied.
+  | { kind: 'GrantFallingProtection' }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -371,6 +377,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       description: z.string().optional(),
     }),
     z.object({
+      kind: z.literal('GrantFallingProtection'),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -411,5 +420,6 @@ export const EFFECT_KINDS = [
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
   'GrantAura',
+  'GrantFallingProtection',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

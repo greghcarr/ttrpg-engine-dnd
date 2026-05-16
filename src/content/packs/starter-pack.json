@@ -1639,7 +1639,7 @@
     { "id": "entangle", "name": "Entangle", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid"], "targeting": { "shape": "cube", "size": 20 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 20, "saveAbility": "STR", "halfOnSuccess": false, "conditionOnFail": "restrained" }] },
     { "id": "expeditious-retreat", "name": "Expeditious Retreat", "level": 1, "school": "transmutation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "false-life", "name": "False Life", "level": 1, "school": "necromancy", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a small amount of alcohol or distilled spirits" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "temp-hp", "amountDice": "1d4", "flatAmount": 4, "extraPerSlotLevel": 5 }] },
-    { "id": "feather-fall", "name": "Feather Fall", "level": 1, "school": "transmutation", "castingTime": "Reaction", "range": "60 feet", "components": { "verbal": true, "material": "a small feather or a piece of down" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "feather-fall", "name": "Feather Fall", "level": 1, "school": "transmutation", "castingTime": "Reaction", "range": "60 feet", "components": { "verbal": true, "material": "a small feather or a piece of down" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "feather-falling-active" }] },
     { "id": "find-familiar", "name": "Find Familiar", "level": 1, "school": "conjuration", "castingTime": "1 hour", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "10 gp worth of charcoal, incense, and herbs" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Familiar", "ac": 13, "hpBase": 10, "hpPerSlotAbove": 0, "baseSlotLevel": 1, "speedFeet": 30 }] },
     { "id": "fog-cloud", "name": "Fog Cloud", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [] },
     { "id": "goodberry", "name": "Goodberry", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a sprig of mistletoe" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
@@ -2472,6 +2472,16 @@
       "endsOn": [],
       "effects": [
         { "kind": "ModifySpeed", "mode": "fly", "op": "set", "value": 60 }
+      ]
+    },
+    {
+      "id": "feather-falling-active",
+      "name": "Feather Falling",
+      "description": "Falling damage is reduced to 0 (RAW: rate of descent slows to 60 ft/round, the creature lands on its feet, and takes no falling damage). The engine.plan.falling planner short-circuits to no events when this condition is present on the falling character.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantFallingProtection" }
       ]
     },
     {
