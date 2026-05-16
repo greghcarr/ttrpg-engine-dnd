@@ -129,7 +129,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'alarm': { kind: 'skip', reason: 'ritual alarm zone; no combat-event side' },
   'animal-friendship': { kind: 'skip', reason: 'charmed-beast-only variant; condition target restriction not modeled' },
   'chromatic-orb': { kind: 'attack', casterChoice: { kind: 'damageType', value: 'fire' } },
-  'command': { kind: 'skip', reason: 'per-word condition effects vary; not modeled generically' },
+  'command': { kind: 'save', casterChoice: { kind: 'variant', value: 'halt' } },
   'compelled-duel': { kind: 'skip', reason: 'movement-aversion rider on charm; rider primitive not modeled' },
   'comprehend-languages': { kind: 'skip', reason: 'utility ritual, narrative only' },
   'create-or-destroy-water': { kind: 'skip', reason: 'utility, narrative only' },

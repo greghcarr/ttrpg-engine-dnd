@@ -1627,7 +1627,7 @@
     { "id": "alarm", "name": "Alarm", "level": 1, "school": "abjuration", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a tiny bell and a piece of fine silver wire" }, "duration": "8 hours", "concentration": false, "ritual": true, "classes": ["ranger", "wizard"], "mechanicalEffects": [] },
     { "id": "animal-friendship", "name": "Animal Friendship", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a morsel of food" }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
     { "id": "chromatic-orb", "name": "Chromatic Orb", "level": 1, "school": "evocation", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a diamond worth 50+ gp" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "3d8", "extraDicePerSlotLevel": 1, "casterChoosesDamageType": { "allowed": ["acid", "cold", "fire", "lightning", "poison", "thunder"] } }] },
-    { "id": "command", "name": "Command", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "paladin"], "mechanicalEffects": [] },
+    { "id": "command", "name": "Command", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "paladin"], "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "casterChoosesVariant": { "variants": [{ "key": "approach", "conditionId": "commanded-approach-active" }, { "key": "drop", "conditionId": "commanded-drop-active" }, { "key": "flee", "conditionId": "commanded-flee-active" }, { "key": "grovel", "conditionId": "prone" }, { "key": "halt", "conditionId": "incapacitated" }] } }] },
     { "id": "compelled-duel", "name": "Compelled Duel", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [] },
     { "id": "comprehend-languages", "name": "Comprehend Languages", "level": 1, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a pinch of soot and salt" }, "duration": "1 hour", "concentration": false, "ritual": true, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "create-or-destroy-water", "name": "Create or Destroy Water", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a drop of water if creating, or a few grains of sand if destroying" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "druid"], "mechanicalEffects": [] },
@@ -2493,6 +2493,30 @@
       "effects": [
         { "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }
       ]
+    },
+    {
+      "id": "commanded-approach-active",
+      "name": "Commanded: Approach",
+      "description": "Compelled to move toward the caster by the shortest, most direct route on its next turn, ending its turn within 5 ft of the caster. Pure narrative on the engine side — movement compulsion isn't modeled; consumers enforce the path and end-turn-when-adjacent rule, then remove this condition at end of target's next turn.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "commanded-drop-active",
+      "name": "Commanded: Drop",
+      "description": "Compelled to drop whatever it's holding and end its turn on its next turn. Pure narrative on the engine side — equipment-drop isn't a state the engine models; consumers enforce the drop + end-turn behavior, then remove this condition.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "commanded-flee-active",
+      "name": "Commanded: Flee",
+      "description": "Compelled to spend its turn moving away from the caster by the fastest available means. Pure narrative on the engine side — movement compulsion isn't modeled; consumers enforce the flee path, then remove this condition at end of target's next turn.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "emotion-suppressed-active",
