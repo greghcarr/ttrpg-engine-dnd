@@ -39,6 +39,7 @@ import {
   planExpireSpellDurations,
   planTickAura,
   planTickMovementDamage,
+  planTickRecurring,
   planOpportunityAttack,
   planMove,
   planDash,
@@ -146,6 +147,7 @@ import {
   type ExpireSpellDurationsIntent,
   type TickAuraIntent,
   type TickMovementDamageIntent,
+  type TickRecurringIntent,
 } from './plan/index.js';
 import { newCampaignId } from '../ids.js';
 import { SCHEMA_VERSION } from '../version.js';
@@ -219,6 +221,7 @@ export interface Engine {
     ): PlanResult;
     tickAura(state: CampaignState, intent: Omit<TickAuraIntent, 'type'>): PlanResult;
     tickMovementDamage(state: CampaignState, intent: Omit<TickMovementDamageIntent, 'type'>): PlanResult;
+    tickRecurring(state: CampaignState, intent: Omit<TickRecurringIntent, 'type'>): PlanResult;
     move(state: CampaignState, intent: Omit<MoveIntent, 'type'>): PlanResult;
     dash(state: CampaignState, intent: Omit<DashIntent, 'type'>): PlanResult;
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
@@ -386,6 +389,14 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
       return {
         events: planTickMovementDamage(state, content, rng, {
           type: 'TickMovementDamage',
+          ...intent,
+        }),
+      };
+    },
+    tickRecurring(state, intent) {
+      return {
+        events: planTickRecurring(state, content, rng, {
+          type: 'TickRecurring',
           ...intent,
         }),
       };

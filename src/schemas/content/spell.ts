@@ -137,6 +137,30 @@ export const AURA_TRIGGERS = ['on-enter', 'on-turn-start', 'on-turn-end'] as con
 const AuraTriggerSchema = z.enum(AURA_TRIGGERS);
 export type AuraTrigger = z.infer<typeof AuraTriggerSchema>;
 
+// Recurring per-turn effect that the consumer ticks via
+// `engine.plan.tickRecurring({ casterId, targetId })` at the start
+// of each target's turn (or end of caster's, per the spell's RAW).
+// Used by Heroism (temp HP per turn while concentrating) and
+// similar effects. Cast-time emits ConcentrationStarted only; the
+// recurring grant fires on each tick.
+//
+// `effect` selects the per-tick event kind:
+// - 'temp-hp' emits TempHPGranted (Heroism)
+// - 'heal' emits Healed (Aura of Vitality)
+// - 'damage' emits DamageApplied with the named damageType
+//   (Phantasmal Force, Hex damage rider when re-shaped this way)
+//
+// `addCasterAbilityMod`, when set, adds the caster's named ability
+// modifier to the rolled / flat amount (Heroism: +CHA mod).
+const SpellRecurringMechanicSchema = z.object({
+  kind: z.literal('recurring'),
+  effect: z.enum(['temp-hp', 'heal', 'damage']),
+  amountDice: DiceExpressionSchema.optional(),
+  flatAmount: z.number().int().min(0).optional(),
+  addCasterAbilityMod: AbilityScoreSchema.optional(),
+  damageType: DamageTypeSchema.optional(),
+});
+
 // Per-foot-moved damage zone. The classic Spike Growth shape:
 // "creature that moves into or within the area takes 2d4 piercing
 // for every 5 ft it travels." No save, no concentration tick — the
@@ -212,6 +236,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellHPPoolKnockoutMechanicSchema,
   SpellAuraDamageMechanicSchema,
   SpellMovementDamageMechanicSchema,
+  SpellRecurringMechanicSchema,
   SpellSummonMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;

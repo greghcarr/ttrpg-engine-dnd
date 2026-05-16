@@ -434,6 +434,122 @@ export const planTickMovementDamage = (
   ];
 };
 
+export interface TickRecurringIntent {
+  readonly type: 'TickRecurring';
+  readonly casterId: string;
+  readonly targetId: string;
+  readonly at?: string;
+}
+
+/**
+ * One tick of a recurring spell effect against the named target.
+ * The consumer calls this at the start of each target's turn (or
+ * whichever cadence the spell's RAW specifies) while the caster's
+ * concentration on the spell holds. Heroism (temp HP at start of
+ * each turn) is the canonical example.
+ *
+ * Reads the caster's concentration effect, finds the spell's
+ * `recurring` SpellMechanic, rolls the per-tick amount (dice +
+ * flat + caster ability mod when configured), and emits the
+ * matching event:
+ *   - effect: 'temp-hp' → TempHPGranted
+ *   - effect: 'heal' → Healed
+ *   - effect: 'damage' → DamageApplied (with damageType)
+ */
+export const planTickRecurring = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: TickRecurringIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  if (!caster) throw new Error(`Unknown caster ${intent.casterId}`);
+  const effectId = caster.concentrationEffectId;
+  if (effectId === undefined) {
+    throw new Error('Caster has no active concentration');
+  }
+  const effect = state.effectInstances[effectId];
+  if (!effect) throw new Error('Caster concentration effect not found');
+  const spell = content.spells.get(effect.spellId);
+  if (!spell) throw new Error(`Spell ${effect.spellId} not found in content`);
+  const mechanic = spell.mechanicalEffects.find((m) => m.kind === 'recurring');
+  if (mechanic === undefined || mechanic.kind !== 'recurring') {
+    throw new Error(`Spell ${spell.id} has no recurring mechanic`);
+  }
+
+  const target = state.characters[intent.targetId];
+  if (!target) return [];
+
+  let rolled = 0;
+  if (mechanic.amountDice !== undefined) {
+    const parsed = parseDiceExpression(mechanic.amountDice);
+    let sum = parsed.modifier;
+    for (let i = 0; i < parsed.count; i += 1) {
+      sum += rollDie(parsed.die, rng);
+    }
+    rolled = sum;
+  }
+  const flat = mechanic.flatAmount ?? 0;
+  const abilityBonus =
+    mechanic.addCasterAbilityMod !== undefined
+      ? Math.floor((caster.abilityScores[mechanic.addCasterAbilityMod] - 10) / 2)
+      : 0;
+  const amount = Math.max(0, rolled + flat + abilityBonus);
+  if (amount <= 0) return [];
+
+  const at = intent.at ?? nowIso();
+  const causedByEventId = effect.startedAtEventId as ULID;
+
+  if (mechanic.effect === 'temp-hp') {
+    return [
+      {
+        id: newEventId() as ULID,
+        at,
+        type: 'TempHPGranted',
+        targetId: intent.targetId as ULID,
+        amount,
+        source: spell.id,
+        causedByEventId,
+      },
+    ];
+  }
+  if (mechanic.effect === 'heal') {
+    return [
+      {
+        id: newEventId() as ULID,
+        at,
+        type: 'Healed',
+        targetId: intent.targetId as ULID,
+        amount,
+        source: spell.id,
+        causedByEventId,
+      },
+    ];
+  }
+  // damage
+  if (mechanic.damageType === undefined) {
+    throw new Error(`Recurring damage mechanic on ${spell.id} missing damageType`);
+  }
+  const mitigated = mitigateDamage({
+    character: target,
+    itemInstances: state.itemInstances,
+    content,
+    rawComponents: [{ amount, type: mechanic.damageType }],
+  });
+  return [
+    {
+      id: newEventId() as ULID,
+      at,
+      type: 'DamageApplied',
+      targetId: intent.targetId as ULID,
+      components: mitigated,
+      causedByEventId,
+      sourceCharacterId: intent.casterId as ULID,
+      source: spell.id,
+    },
+  ];
+};
+
 const findCastingClassForSpell = (
   caster: Character,
   content: ResolvedContent,

@@ -146,7 +146,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'goodberry': { kind: 'skip', reason: 'creates consumable items; item-creation mechanic not wired for spells' },
   'grease': { kind: 'skip', reason: 'aura-damage mechanic (DEX save → prone, no damage); fires via engine.plan.tickAura on enter, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'hail-of-thorns': { kind: 'skip', reason: 'ranger smite with on-hit AoE rider; on-hit trigger system not modeled' },
-  'heroism': { kind: 'skip', reason: 'recurring temp-HP per turn + immune-to-fear; recurring effect + new condition needed' },
+  'heroism': { kind: 'buff', conditionId: 'heroic-active' },
   'hex': { kind: 'skip', reason: 'curse with on-hit +1d6 necrotic; on-hit trigger system not modeled' },
   'hunters-mark': { kind: 'skip', reason: 'has dedicated planHuntersMark (concentration mark, not planCastSpell)' },
   'jump': { kind: 'skip', reason: 'utility movement, narrative only' },

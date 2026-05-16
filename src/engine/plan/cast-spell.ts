@@ -949,6 +949,12 @@ export const planCastSpell = (
       // planTickMovementDamage, called by the consumer with the feet
       // moved through the zone. Same shape as aura-damage but invoked
       // on movement instead of per-turn ticks.
+    } else if (mechanic.kind === 'recurring') {
+      // Cast-time no-op: the per-turn effect fires later via
+      // planTickRecurring, called by the consumer at the start of
+      // each target's turn (or whichever cadence the spell's RAW
+      // specifies). Concentration tracking gates whether the
+      // recurring effect is still active.
     } else if (mechanic.kind === 'summon') {
       events.push(
         ...planSummonMechanic(intent, spell, mechanic, declared.id, at, concentrationEffectId),

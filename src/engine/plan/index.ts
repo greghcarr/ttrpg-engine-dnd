@@ -52,10 +52,12 @@ export {
   planExpireSpellDurations,
   planTickAura,
   planTickMovementDamage,
+  planTickRecurring,
   type CheckConcentrationIntent,
   type ExpireSpellDurationsIntent,
   type TickAuraIntent,
   type TickMovementDamageIntent,
+  type TickRecurringIntent,
 } from './concentration.js';
 export {
   planMove,

@@ -1645,7 +1645,7 @@
     { "id": "goodberry", "name": "Goodberry", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a sprig of mistletoe" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
     { "id": "grease", "name": "Grease", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of pork rind or butter" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["wizard"], "targeting": { "shape": "cube", "size": 10 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 10, "saveAbility": "DEX", "halfOnSuccess": false, "conditionOnFail": "prone" }] },
     { "id": "hail-of-thorns", "name": "Hail of Thorns", "level": 1, "school": "conjuration", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
-    { "id": "heroism", "name": "Heroism", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "paladin"], "mechanicalEffects": [] },
+    { "id": "heroism", "name": "Heroism", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "heroic-active" }, { "kind": "recurring", "effect": "temp-hp", "addCasterAbilityMod": "CHA" }] },
     { "id": "hex", "name": "Hex", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "the petrified eye of a newt" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [] },
     { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "jump", "name": "Jump", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a grasshopper's hind leg" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
@@ -2438,6 +2438,16 @@
       "id": "aura-of-courage-active",
       "name": "Aura of Courage Active",
       "description": "Frightened immunity granted by a nearby Paladin's L10+ Aura of Courage.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "heroic-active",
+      "name": "Heroic",
+      "description": "Immune to Frightened while concentrating on Heroism. The per-turn temp HP grant fires via engine.plan.tickRecurring at the start of each target's turn (not stored on this condition).",
       "stackable": false,
       "endsOn": [],
       "effects": [
