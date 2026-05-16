@@ -109,6 +109,49 @@ describe('aura-damage mechanic: condition + damage extensions', () => {
     expect(damage!.components.some((c) => c.type === 'slashing')).toBe(true);
   });
 
+  it('Hunger of Hadar fires only the trigger-matched mechanic per call', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+    const caster = buildCaster('hunger-of-hadar');
+    const target = buildTarget();
+    let campaign = engine.createCampaign({ name: 'hoh' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: caster } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    const castEvents = engine.plan.castSpell(campaign.state, {
+      characterId: caster.id,
+      spellId: 'hunger-of-hadar',
+      slotLevel: 3,
+      targetIds: [],
+    }).events;
+    campaign = commit(campaign, castEvents);
+
+    // on-enter: cold damage, no save
+    const onEnter = engine.plan.tickAura(campaign.state, {
+      casterId: caster.id,
+      targetIds: [target.id],
+      trigger: 'on-enter',
+    }).events;
+    const enterDamage = onEnter.find((e) => e.type === 'DamageApplied');
+    expect(enterDamage).toBeDefined();
+    expect(enterDamage!.components.some((c) => c.type === 'cold')).toBe(true);
+    expect(onEnter.find((e) => e.type === 'SaveRolled')).toBeUndefined();
+    expect(
+      onEnter.find((e) => e.type === 'DamageApplied' && e.components.some((c) => c.type === 'acid')),
+    ).toBeUndefined();
+
+    // on-turn-end: acid damage with DEX save
+    const onTurnEnd = engine.plan.tickAura(campaign.state, {
+      casterId: caster.id,
+      targetIds: [target.id],
+      trigger: 'on-turn-end',
+    }).events;
+    expect(onTurnEnd.find((e) => e.type === 'SaveRolled')).toBeDefined();
+    expect(
+      onTurnEnd.find((e) => e.type === 'DamageApplied' && e.components.some((c) => c.type === 'cold')),
+    ).toBeUndefined();
+  });
+
   it('Wall of Fire deals fire damage on tick (with optional half on success)', () => {
     let proven = false;
     for (let seed = 1; seed < 60 && !proven; seed += 1) {

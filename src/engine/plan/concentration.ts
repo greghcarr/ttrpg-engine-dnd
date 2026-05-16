@@ -15,6 +15,7 @@ import { isImmuneToCondition } from '../../derive/condition-immunity.js';
 import { D20_SIDES } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
+import type { AuraTrigger } from '../../schemas/content/spell.js';
 
 const CONCENTRATION_MIN_DC = 10;
 const CONCENTRATION_DC_DIVISOR = 2;
@@ -179,6 +180,14 @@ export interface TickAuraIntent {
   readonly type: 'TickAura';
   readonly casterId: string;
   readonly targetIds: ReadonlyArray<string>;
+  // Optional activation moment. Multi-component zones (Hunger of
+  // Hadar's cold-on-enter + acid-on-turn-end) tag each mechanic
+  // with a trigger; the planner fires only matching ones. Legacy
+  // mechanics (no trigger on the mechanic itself) fire on every
+  // tickAura call regardless. If the intent omits `trigger`, only
+  // legacy mechanics fire — triggered mechanics need an explicit
+  // intent.trigger to activate.
+  readonly trigger?: AuraTrigger;
   readonly at?: string;
 }
 
@@ -208,9 +217,21 @@ export const planTickAura = (
   if (!effect) throw new Error('Caster concentration effect not found');
   const spell = content.spells.get(effect.spellId);
   if (!spell) throw new Error(`Spell ${effect.spellId} not found in content`);
-  const aura = spell.mechanicalEffects.find((m) => m.kind === 'aura-damage');
-  if (aura === undefined || aura.kind !== 'aura-damage') {
-    throw new Error(`Spell ${spell.id} has no aura-damage mechanic`);
+  // Pick every aura-damage mechanic whose trigger matches the intent.
+  // Legacy mechanics (no trigger set) fire on every call. Triggered
+  // mechanics fire only when intent.trigger matches their own trigger
+  // — multi-component zones like Hunger of Hadar (cold on enter +
+  // acid on turn end) need the consumer to call tickAura twice with
+  // the right intent.trigger.
+  const auras = spell.mechanicalEffects.filter(
+    (m): m is Extract<typeof m, { kind: 'aura-damage' }> => {
+      if (m.kind !== 'aura-damage') return false;
+      if (m.trigger === undefined) return true;
+      return m.trigger === intent.trigger;
+    },
+  );
+  if (auras.length === 0) {
+    throw new Error(`Spell ${spell.id} has no aura-damage mechanic matching trigger`);
   }
 
   const slotLevel = effect.slotLevel ?? spell.level;
@@ -226,6 +247,7 @@ export const planTickAura = (
   });
 
   const events: Event[] = [];
+  for (const aura of auras) {
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
     if (!target) continue;
@@ -334,6 +356,7 @@ export const planTickAura = (
         });
       }
     }
+  }
   }
   return events;
 };

@@ -107,6 +107,18 @@ const SpellHPPoolKnockoutMechanicSchema = z.object({
 // - `conditionOnFail` set → applies the condition when the save
 //   fails (or unconditionally when no save). Gated by the target's
 //   existing condition immunities via `isImmuneToCondition`.
+// The optional `trigger` field tags a mechanic with a specific
+// activation moment so multi-component zones (Hunger of Hadar:
+// 2d6 cold on enter + 2d6 acid on turn end) can express both
+// components as sibling mechanics. The tickAura intent carries a
+// matching trigger; the planner fires only matching mechanics.
+// Mechanics without a trigger are "legacy" / unconstrained — they
+// fire on every tickAura call (preserving backward compat with
+// Spirit Guardians and the other single-component zones).
+export const AURA_TRIGGERS = ['on-enter', 'on-turn-start', 'on-turn-end'] as const;
+const AuraTriggerSchema = z.enum(AURA_TRIGGERS);
+export type AuraTrigger = z.infer<typeof AuraTriggerSchema>;
+
 const SpellAuraDamageMechanicSchema = z.object({
   kind: z.literal('aura-damage'),
   rangeFeet: z.number().int().min(0),
@@ -116,6 +128,7 @@ const SpellAuraDamageMechanicSchema = z.object({
   halfOnSuccess: z.boolean().default(true),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
   conditionOnFail: z.string().optional(),
+  trigger: AuraTriggerSchema.optional(),
 });
 
 // Creates a controllable companion ("summon") under the caster's

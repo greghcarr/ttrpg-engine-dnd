@@ -245,7 +245,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'gaseous-form': { kind: 'skip', reason: 'transformation utility; transformation handler not modeled for spells' },
   'glyph-of-warding': { kind: 'skip', reason: 'placed-trap with stored spell; trap mechanic not modeled' },
   'haste': { kind: 'skip', reason: 'multi-buff condition (extra action + speed + AC + DEX-save advantage); composite-buff condition not modeled' },
-  'hunger-of-hadar': { kind: 'skip', reason: 'area damage on enter and per-turn; area-effect + recurring-rider mechanics not modeled' },
+  'hunger-of-hadar': { kind: 'skip', reason: 'multi-component aura-damage (cold-on-enter no save + acid-on-turn-end with DEX save); fires via engine.plan.tickAura with per-call intent.trigger, not on cast' },
   'leomunds-tiny-hut': { kind: 'skip', reason: 'persistent shelter dome; area-effect mechanic not modeled' },
   'lightning-arrow': { kind: 'skip', reason: 'ranger on-hit rider that converts arrow damage; on-hit trigger system not modeled' },
   'magic-circle': { kind: 'skip', reason: 'persistent ward against creature types; type-conditional area-effect not modeled' },
