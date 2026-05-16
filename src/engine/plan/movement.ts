@@ -63,15 +63,24 @@ const findCombatant = (
   return { encounterId, combatant, isActive };
 };
 
-const characterWalkSpeed = (state: CampaignState, characterId: string): number => {
+const characterWalkSpeed = (
+  state: CampaignState,
+  content: ResolvedContent,
+  characterId: string,
+): number => {
   const character = state.characters[characterId];
   if (!character) return 30;
-  return getEffectiveSpeed(character);
+  return getEffectiveSpeed({
+    character,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
 };
 
 export const planMove = (
   state: CampaignState,
-  _content: ResolvedContent,
+  content: ResolvedContent,
   intent: MoveIntent,
 ): ReadonlyArray<Event> => {
   const { encounterId, combatant, isActive } = findCombatant(state, intent.combatantId);
@@ -146,7 +155,7 @@ export const planMove = (
   } else {
     distance = chebyshevDistance(combatant.position, intent.to);
   }
-  const baseSpeed = characterWalkSpeed(state, intent.combatantId);
+  const baseSpeed = characterWalkSpeed(state, content, intent.combatantId);
   if (baseSpeed === 0) {
     throw new Error(
       `${character?.name ?? intent.combatantId} cannot move (speed reduced to 0 by Restrained / Grappled)`,
