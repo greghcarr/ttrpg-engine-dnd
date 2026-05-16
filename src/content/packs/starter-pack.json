@@ -1396,16 +1396,16 @@
     { "id": "incendiary-cloud", "name": "Incendiary Cloud", "level": 8, "school": "conjuration", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "save", "ability": "DEX", "damageDice": "10d8", "damageType": "fire", "halfOnSuccess": true }] },
     { "id": "maddening-darkness", "name": "Maddening Darkness", "level": 8, "school": "evocation", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "material": "a drop of pitch mixed with a drop of mercury" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["warlock", "wizard"], "targeting": { "shape": "sphere", "size": 60 }, "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "damageDice": "8d8", "damageType": "psychic", "halfOnSuccess": true }] },
     { "id": "maze", "name": "Maze", "level": 8, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
-    { "id": "mind-blank", "name": "Mind Blank", "level": 8, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["bard", "wizard"], "mechanicalEffects": [] },
+    { "id": "mind-blank", "name": "Mind Blank", "level": 8, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["bard", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "mind-blanked-active" }] },
     { "id": "power-word-stun", "name": "Power Word Stun", "level": 8, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "sunburst", "name": "Sunburst", "level": 8, "school": "evocation", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true, "material": "fire and a piece of sunstone" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 60 }, "mechanicalEffects": [{ "kind": "save", "ability": "CON", "damageDice": "12d6", "damageType": "radiant", "halfOnSuccess": true }] },
     { "id": "telepathy", "name": "Telepathy", "level": 8, "school": "evocation", "castingTime": "Action", "range": "Unlimited", "components": { "verbal": true, "somatic": true, "material": "a pair of linked silver rings" }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["bard", "wizard"], "mechanicalEffects": [] },
     { "id": "tsunami", "name": "Tsunami", "level": 8, "school": "conjuration", "castingTime": "1 minute", "range": "Sight", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 6 rounds", "concentration": true, "ritual": false, "classes": ["druid"], "mechanicalEffects": [{ "kind": "save", "ability": "STR", "damageDice": "6d10", "damageType": "bludgeoning", "halfOnSuccess": true }] },
     { "id": "astral-projection", "name": "Astral Projection", "level": 9, "school": "necromancy", "castingTime": "1 hour", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "for each creature you affect with this spell, a jacinth worth 1,000+ GP and a silver bar worth 100+ GP, all of which the spell consumes" }, "duration": "Special", "concentration": false, "ritual": false, "classes": ["cleric", "warlock", "wizard"], "mechanicalEffects": [] },
-    { "id": "foresight", "name": "Foresight", "level": 9, "school": "divination", "castingTime": "1 minute", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a hummingbird feather" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["bard", "druid", "warlock", "wizard"], "mechanicalEffects": [] },
+    { "id": "foresight", "name": "Foresight", "level": 9, "school": "divination", "castingTime": "1 minute", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a hummingbird feather" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["bard", "druid", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "foresight-active" }] },
     { "id": "gate", "name": "Gate", "level": 9, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a diamond worth 5,000+ GP" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "imprisonment", "name": "Imprisonment", "level": 9, "school": "abjuration", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a vellum depiction of, or a carved statuette in the likeness of, the target and a special component that varies according to the version of the spell you choose, worth 500+ GP per HD of the target" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["warlock", "wizard"], "mechanicalEffects": [] },
-    { "id": "invulnerability", "name": "Invulnerability", "level": 9, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a small mithral cube worth 500+ GP, which the spell consumes" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
+    { "id": "invulnerability", "name": "Invulnerability", "level": 9, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a small mithral cube worth 500+ GP, which the spell consumes" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "invulnerable-active" }] },
     { "id": "mass-heal", "name": "Mass Heal", "level": 9, "school": "evocation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [{ "kind": "heal", "flatAmount": 70 }] },
     { "id": "mass-polymorph", "name": "Mass Polymorph", "level": 9, "school": "transmutation", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true, "material": "a caterpillar cocoon" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "meteor-swarm", "name": "Meteor Swarm", "level": 9, "school": "evocation", "castingTime": "Action", "range": "1 mile", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
@@ -3038,6 +3038,50 @@
         { "kind": "GrantConditionImmunity", "conditionId": "grappled" },
         { "kind": "GrantConditionImmunity", "conditionId": "restrained" },
         { "kind": "GrantConditionImmunity", "conditionId": "paralyzed" }
+      ]
+    },
+    {
+      "id": "foresight-active",
+      "name": "Foresight Active",
+      "description": "8-hour buff (Foresight spell): advantage on attack rolls, ability checks, and saving throws; attackers have disadvantage. The RAW 'can't be surprised' clause is consumer-side narrative metadata (surprise is initiative-order state, not a modeled condition).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CON" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "INT" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "WIS" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CHA" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "CON" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "INT" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "WIS" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "CHA" }, "mode": "advantage" },
+        { "kind": "ImposeDisadvantageOnAttackers" }
+      ]
+    },
+    {
+      "id": "mind-blanked-active",
+      "name": "Mind Blanked",
+      "description": "24-hour buff (Mind Blank spell): immune to Charmed and to psychic damage. The spell's additional RAW immunities (reading thoughts, magical scrying, emotion-detection) are narrative metadata; the engine doesn't model thought-reading or scrying detection.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantConditionImmunity", "conditionId": "charmed" },
+        { "kind": "GrantImmunity", "damageType": "psychic" }
+      ]
+    },
+    {
+      "id": "invulnerable-active",
+      "name": "Invulnerable",
+      "description": "Concentration up to 10 minutes (Invulnerability spell): caster takes no damage from any source.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantImmunity", "damageType": "all" }
       ]
     },
     {

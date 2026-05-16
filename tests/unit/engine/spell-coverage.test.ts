@@ -448,7 +448,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'glibness': { kind: 'skip', reason: 'utility (auto-success on CHA checks + lie detection immunity); narrative buff' },
   'holy-aura': { kind: 'skip', reason: 'aura with advantage on saves + disadvantage on attackers + blindness rider on fiends/undead; multi-effect aura not modeled' },
   'maze': { kind: 'skip', reason: 'banishes a target to a demiplane labyrinth; cross-plane single-target primitive not modeled' },
-  'mind-blank': { kind: 'skip', reason: 'broad immunity to mind-affecting effects + psychic damage; multi-type immunity primitive not modeled' },
+  'mind-blank': { kind: 'buff', conditionId: 'mind-blanked-active' },
   'power-word-stun': { kind: 'skip', reason: 'tiered HP-threshold stun (≤150 HP); HP-threshold effect not modeled' },
   'telepathy': { kind: 'skip', reason: 'long-range unlimited-distance bond utility; narrative only' },
   // PHB 2024 L9 spells with wired mechanics
@@ -457,10 +457,10 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'weird': { kind: 'save' },
   // PHB 2024 L9 spells shipped schema-only; see docs/starter-pack-gaps.md.
   'astral-projection': { kind: 'skip', reason: 'projects party to the Astral Plane; cross-plane travel primitive not modeled' },
-  'foresight': { kind: 'skip', reason: '8-hour buff: advantage on all rolls + disadvantage on attackers + no surprise; multi-effect buff not modeled' },
+  'foresight': { kind: 'buff', conditionId: 'foresight-active' },
   'gate': { kind: 'skip', reason: 'creates portal to another plane and can call a named being; cross-plane summon primitive not modeled' },
   'imprisonment': { kind: 'skip', reason: 'six variants of long-term imprisonment; multi-mode utility primitive not modeled' },
-  'invulnerability': { kind: 'skip', reason: 'caster takes no damage for the duration; total damage immunity primitive not modeled' },
+  'invulnerability': { kind: 'buff', conditionId: 'invulnerable-active' },
   'mass-polymorph': { kind: 'skip', reason: 'mass transformation; multi-target transformation primitive not modeled' },
   'meteor-swarm': { kind: 'skip', reason: 'four 40-ft spheres dealing 20d6 fire + 20d6 bludgeoning; multi-AoE multi-damage primitive not modeled' },
   'power-word-heal': { kind: 'skip', reason: 'full heal + remove charmed/frightened/paralyzed/stunned; healing surge + remove-multiple-conditions composite' },

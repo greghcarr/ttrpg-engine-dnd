@@ -65,6 +65,8 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *AddDamageToAttacker TriggerAction* (slice 100). Retaliation variant of AddDamage: dispatcher routes the resulting DamageApplied to `event.attackerId`. Crits don't double the retaliation dice per RAW. Fire Shield wires as a 2-variant buff (warm: cold resistance + fire retaliation; chill: fire resistance + cold retaliation).
 
+*Multi-effect buff content sweep* (slice 101). Three high-level buff spells wired through existing primitives, no engine change. Foresight (L9) ships as a 14-effect condition: per-ability SetAdvantage on each save / check plus SetAdvantage on attack plus ImposeDisadvantageOnAttackers; the RAW "can't be surprised" clause stays narrative since surprise is initiative-order state, not a modeled condition. Mind Blank (L8) ships as a 2-effect condition: GrantConditionImmunity charmed plus GrantImmunity psychic; the thought-reading / scrying-detection clauses stay narrative. Invulnerability (L9) ships as a 1-effect condition: GrantImmunity damageType `'all'`. Wired spell count goes from ~144 to ~147 (~252 schema-only remain).
+
 ### Fixed
 
 - **CI Typecheck unbroken** (slice 99). Three latent test-file type errors had been gating the CI Typecheck step for ~10 commits. `tests/transcript.ts`'s `formatEvent` switch was missing cases for `AbsorbElementsCast` (slice 91) and `TrapArmed` / `TrapTriggered` / `TrapExpired` (slice 94); two test files imported `DamageRolledEvent` from `combat.js` when it lives in `attack.js`. Vitest's esbuild let these slide; tsc didn't. No engine impact.
