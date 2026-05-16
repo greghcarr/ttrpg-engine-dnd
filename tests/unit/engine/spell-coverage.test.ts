@@ -125,7 +125,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'tashas-hideous-laughter': { kind: 'save' },
   // PHB 2024 L1 spells shipped schema-only (no mechanicalEffects yet).
   // Each line records why it's deferred so the gap is auditable.
-  'absorb-elements': { kind: 'skip', reason: 'reaction-cast with damage-absorption rider; reaction system not modeled' },
+  'absorb-elements': { kind: 'skip', reason: 'has dedicated engine.plan.absorbElements (reaction to a DamageApplied event of the matching type, not planCastSpell)' },
   'alarm': { kind: 'skip', reason: 'ritual alarm zone; no combat-event side' },
   'animal-friendship': { kind: 'skip', reason: 'charmed-beast-only variant; condition target restriction not modeled' },
   'chromatic-orb': { kind: 'attack', casterChoice: { kind: 'damageType', value: 'fire' } },

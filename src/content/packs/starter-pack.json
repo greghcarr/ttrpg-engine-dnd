@@ -2733,6 +2733,101 @@
       ]
     },
     {
+      "id": "absorb-elements-charged-acid-active",
+      "name": "Absorb Elements (Acid)",
+      "description": "Next melee weapon attack on the caster's next turn deals an extra 1d6 acid damage on hit; the condition is consumed after firing. RAW slot-level scaling (+1d6 per slot above 1st) isn't modeled — the dice are hardcoded as 1d6 in this condition.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "absorb-elements-acid-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "acid" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "absorb-elements-charged-cold-active",
+      "name": "Absorb Elements (Cold)",
+      "description": "Next melee weapon attack on the caster's next turn deals an extra 1d6 cold damage on hit; the condition is consumed after firing. Slot-level scaling not modeled (see acid variant).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "absorb-elements-cold-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "cold" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "absorb-elements-charged-fire-active",
+      "name": "Absorb Elements (Fire)",
+      "description": "Next melee weapon attack on the caster's next turn deals an extra 1d6 fire damage on hit; the condition is consumed after firing. Slot-level scaling not modeled (see acid variant).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "absorb-elements-fire-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "fire" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "absorb-elements-charged-lightning-active",
+      "name": "Absorb Elements (Lightning)",
+      "description": "Next melee weapon attack on the caster's next turn deals an extra 1d6 lightning damage on hit; the condition is consumed after firing. Slot-level scaling not modeled (see acid variant).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "absorb-elements-lightning-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "lightning" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
+      "id": "absorb-elements-charged-thunder-active",
+      "name": "Absorb Elements (Thunder)",
+      "description": "Next melee weapon attack on the caster's next turn deals an extra 1d6 thunder damage on hit; the condition is consumed after firing. Slot-level scaling not modeled (see acid variant).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "absorb-elements-thunder-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "thunder" }],
+          "consumeOnTrigger": true
+        }
+      ]
+    },
+    {
       "id": "spirit-shroud-cold-active",
       "name": "Spirit Shroud: Cold",
       "description": "Caster's weapon attacks deal +1d8 cold damage on hit. RAW gates this on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The 'target can't regain HP until start of caster's next turn' rider needs a heal-blocking primitive that doesn't exist yet.",

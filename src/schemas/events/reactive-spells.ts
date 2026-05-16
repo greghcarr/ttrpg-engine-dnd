@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { EventEnvelopeSchema } from './envelope.js';
-import { ULIDSchema } from '../primitives.js';
+import { DamageTypeSchema, ULIDSchema } from '../primitives.js';
 
 export const SpellCounteredEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('SpellCountered'),
@@ -34,6 +34,19 @@ export const ShieldCastEventSchema = EventEnvelopeSchema.extend({
   preventedHit: z.boolean(),
 });
 export type ShieldCastEvent = z.infer<typeof ShieldCastEventSchema>;
+
+export const AbsorbElementsCastEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('AbsorbElementsCast'),
+  casterId: ULIDSchema,
+  // The DamageApplied event id whose damage prompted the reaction.
+  triggeringDamageEventId: ULIDSchema,
+  damageType: DamageTypeSchema,
+  // The damage absorbed (refunded as a `Healed` event of the same
+  // amount). Surfaced here for transcript readability so a reader
+  // doesn't need to compute it from the Healed event amount.
+  halvedAmount: z.number().int().min(0),
+});
+export type AbsorbElementsCastEvent = z.infer<typeof AbsorbElementsCastEventSchema>;
 
 export const GuidanceUsedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('GuidanceUsed'),

@@ -409,6 +409,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // ('shielded'), and the consumer decides whether to commit the
         // damage chain based on the `preventedHit` flag.
         break;
+      case 'AbsorbElementsCast':
+        // Pure notification — the damage refund flows through `Healed`
+        // and the on-next-hit rider rides on a ConditionApplied for
+        // the matching element. This event surfaces the absorbed type
+        // + amount for transcript readability.
+        break;
       case 'GuidanceUsed':
         // Pure notification — the 'guided' condition is lifted by the
         // ConcentrationBroken(reason='used') that the planner emits

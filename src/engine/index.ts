@@ -67,6 +67,7 @@ import {
   planDispelMagic,
   planIdentify,
   planShield,
+  planAbsorbElements,
   planConsumeGuidance,
   planWeaponMastery,
   planForage,
@@ -90,6 +91,8 @@ import {
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
+  type AbsorbElementsIntent,
+  type AbsorbElementsOutcome,
   type ConsumeGuidanceIntent,
   type ConsumeGuidanceOutcome,
   type WeaponMasteryIntent,
@@ -250,6 +253,7 @@ export interface Engine {
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
+    absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
     consumeGuidance(
       state: CampaignState,
       intent: Omit<ConsumeGuidanceIntent, 'type'>,
@@ -481,6 +485,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     shield(state, intent) {
       return planShield(state, content, { type: 'Shield', ...intent });
+    },
+    absorbElements(state, intent) {
+      return planAbsorbElements(state, content, { type: 'AbsorbElements', ...intent });
     },
     consumeGuidance(state, intent) {
       return planConsumeGuidance(state, content, rng, {

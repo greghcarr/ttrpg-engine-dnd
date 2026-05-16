@@ -190,6 +190,31 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
 [
   {
     "effectsCount": 1,
+    "id": "absorb-elements-charged-acid-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "absorb-elements-charged-cold-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "absorb-elements-charged-fire-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "absorb-elements-charged-lightning-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "absorb-elements-charged-thunder-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "aid-buffed",
     "stackable": false,
   },

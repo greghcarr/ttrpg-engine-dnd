@@ -113,6 +113,7 @@ import {
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
   ShieldCastEventSchema,
+  AbsorbElementsCastEventSchema,
   GuidanceUsedEventSchema,
 } from './reactive-spells.js';
 import { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
@@ -248,6 +249,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
   ShieldCastEventSchema,
+  AbsorbElementsCastEventSchema,
   GuidanceUsedEventSchema,
   WeaponMasteryActivatedEventSchema,
   MountedEventSchema,
@@ -369,6 +371,7 @@ export const EVENT_TYPES = [
   'SpellDispelled',
   'ItemIdentified',
   'ShieldCast',
+  'AbsorbElementsCast',
   'GuidanceUsed',
   'WeaponMasteryActivated',
   'Mounted',
@@ -653,6 +656,7 @@ export {
   SpellDispelledEventSchema,
   ItemIdentifiedEventSchema,
   ShieldCastEventSchema,
+  AbsorbElementsCastEventSchema,
   GuidanceUsedEventSchema,
 } from './reactive-spells.js';
 export type {
@@ -660,6 +664,7 @@ export type {
   SpellDispelledEvent,
   ItemIdentifiedEvent,
   ShieldCastEvent,
+  AbsorbElementsCastEvent,
   GuidanceUsedEvent,
 } from './reactive-spells.js';
 export { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
