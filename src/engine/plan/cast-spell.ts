@@ -25,6 +25,7 @@ import type {
   ConcentrationStartedEvent,
 } from '../../schemas/events/concentration.js';
 import type { CompanionSummonedEvent } from '../../schemas/events/summons.js';
+import type { TrapArmedEvent } from '../../schemas/events/traps.js';
 import type { Spell, SpellMechanic } from '../../schemas/content/spell.js';
 import { cantripExtraDice } from '../../schemas/content/spell.js';
 import type { DamageType } from '../../schemas/primitives.js';
@@ -38,6 +39,7 @@ import {
   newCharacterId,
   newEffectInstanceId,
   newEventId,
+  newTrapId,
 } from '../../ids.js';
 import { computeSpellSaveDC, computeSpellAttackBonus } from '../../derive/spell-dc.js';
 import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
@@ -892,6 +894,92 @@ const planSummonMechanic = (
   return [event];
 };
 
+// Primes a trap by emitting a single TrapArmed event. No rolls at
+// cast time — damage is rolled at trigger time via planTriggerTrap.
+// The DC is pre-baked (caster's spell save DC, or the mechanic's
+// `fixedDC` when set), as is the damage type (caster-chosen via
+// `casterChoice.kind === 'damageType'` when allowed). Cordon of
+// Arrows is the fixed-DC / fixed-type case; Glyph of Warding's
+// Explosive Runes is the caster-DC / caster-chosen-type case.
+const planTrapMechanic = (
+  state: CampaignState,
+  content: ResolvedContent,
+  intent: CastSpellIntent,
+  spell: Spell,
+  mechanic: Extract<SpellMechanic, { kind: 'trap' }>,
+  declaredEventId: string,
+  at: string,
+  castingClassId: string,
+): Event[] => {
+  const damageType = resolveTrapDamageType(mechanic, intent, spell.id);
+
+  let dc = mechanic.fixedDC;
+  if (dc === undefined) {
+    const character = state.characters[intent.characterId];
+    if (!character) throw new Error(`Unknown character ${intent.characterId}`);
+    const dcResult = computeSpellSaveDC({
+      character,
+      itemInstances: state.itemInstances,
+      content,
+      classId: castingClassId,
+    });
+    dc = dcResult.total;
+  }
+
+  const trapId = newTrapId();
+  const event: TrapArmedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'TrapArmed',
+    trapId: trapId as ULID,
+    label: mechanic.label,
+    sourceCharacterId: intent.characterId as ULID,
+    sourceSpellId: spell.id,
+    payload: {
+      saveAbility: mechanic.saveAbility,
+      saveDC: dc,
+      damageDice: mechanic.damageDice,
+      damageType,
+      halfOnSuccess: mechanic.halfOnSuccess,
+    },
+    chargesRemaining: mechanic.charges,
+    causedByEventId: declaredEventId as ULID,
+  };
+  return [event];
+};
+
+const resolveTrapDamageType = (
+  mechanic: Extract<SpellMechanic, { kind: 'trap' }>,
+  intent: CastSpellIntent,
+  spellId: string,
+): DamageType => {
+  if (mechanic.casterChoosesDamageType !== undefined) {
+    if (mechanic.damageType !== undefined) {
+      throw new Error(
+        `Spell ${spellId} trap mechanic sets both damageType and casterChoosesDamageType; pick exactly one`,
+      );
+    }
+    const choice = intent.casterChoice;
+    if (choice === undefined || choice.kind !== 'damageType') {
+      throw new Error(
+        `Spell ${spellId} requires a casterChoice { kind: 'damageType', value }; received ${choice?.kind ?? 'none'}`,
+      );
+    }
+    if (!mechanic.casterChoosesDamageType.allowed.includes(choice.value)) {
+      throw new Error(
+        `Spell ${spellId}: damage type '${choice.value}' not in allowed list [${mechanic.casterChoosesDamageType.allowed.join(', ')}]`,
+      );
+    }
+    return choice.value;
+  }
+  if (mechanic.damageType === undefined) {
+    throw new Error(
+      `Spell ${spellId} trap mechanic has neither damageType nor casterChoosesDamageType`,
+    );
+  }
+  return mechanic.damageType;
+};
+
 export const planCastSpell = (
   state: CampaignState,
   content: ResolvedContent,
@@ -1094,6 +1182,10 @@ export const planCastSpell = (
       );
     } else if (mechanic.kind === 'temp-hp') {
       events.push(...planTempHPMechanic(rng, intent, spell, mechanic, declared.id, at));
+    } else if (mechanic.kind === 'trap') {
+      events.push(
+        ...planTrapMechanic(state, content, intent, spell, mechanic, declared.id, at, castingClassId),
+      );
     } else {
       events.push(...planHealMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     }

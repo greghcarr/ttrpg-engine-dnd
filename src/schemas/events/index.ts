@@ -166,6 +166,11 @@ import {
   CompanionSummonedEventSchema,
   CompanionDismissedEventSchema,
 } from './summons.js';
+import {
+  TrapArmedEventSchema,
+  TrapTriggeredEventSchema,
+  TrapExpiredEventSchema,
+} from './traps.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -282,6 +287,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   WishGrantedEventSchema,
   CompanionSummonedEventSchema,
   CompanionDismissedEventSchema,
+  TrapArmedEventSchema,
+  TrapTriggeredEventSchema,
+  TrapExpiredEventSchema,
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
@@ -402,6 +410,9 @@ export const EVENT_TYPES = [
   'PolymorphReverted',
   'SimulacrumCreated',
   'WishGranted',
+  'TrapArmed',
+  'TrapTriggered',
+  'TrapExpired',
   'CampaignSettingsChanged',
   'HeroPointGranted',
   'HeroPointSpent',
@@ -801,3 +812,16 @@ export type {
   CompanionSummonedEvent,
   CompanionDismissedEvent,
 } from './summons.js';
+export {
+  TrapArmedEventSchema,
+  TrapTriggeredEventSchema,
+  TrapExpiredEventSchema,
+  TRAP_EXPIRY_REASONS,
+  TrapExpiryReasonSchema,
+} from './traps.js';
+export type {
+  TrapArmedEvent,
+  TrapTriggeredEvent,
+  TrapExpiredEvent,
+  TrapExpiryReason,
+} from './traps.js';

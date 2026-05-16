@@ -15,6 +15,7 @@ import { VehicleSchema } from './vehicle.js';
 import { TravelLegSchema } from './travel.js';
 import { DowntimeLogEntrySchema } from './downtime.js';
 import { BastionSchema } from './bastion.js';
+import { TrapSchema } from './trap.js';
 import { CampaignSettingsSchema, defaultCampaignSettings } from './settings.js';
 
 export const CampaignStateSchema = z.object({
@@ -35,6 +36,7 @@ export const CampaignStateSchema = z.object({
   downtimeLog: z.array(DowntimeLogEntrySchema).default([]),
   toolProficienciesByCharacter: z.record(ULIDSchema, z.array(z.string())).default({}),
   bastions: z.record(ULIDSchema, BastionSchema).default({}),
+  traps: z.record(ULIDSchema, TrapSchema).default({}),
   settings: CampaignSettingsSchema.default(defaultCampaignSettings()),
   milestones: z
     .array(
@@ -84,6 +86,7 @@ export const emptyCampaignState = (): CampaignState => ({
   downtimeLog: [],
   toolProficienciesByCharacter: {},
   bastions: {},
+  traps: {},
   settings: defaultCampaignSettings(),
   milestones: [],
   inGameTime: { totalMinutes: 0 },

@@ -441,6 +441,7 @@ export type {
   WishIntent,
   WishOutcome,
   DismissCompanionIntent,
+  TriggerTrapIntent,
   GrantInitialHeroPointsIntent,
   SpendHeroPointIntent,
   SpendHeroPointOutcome,
@@ -545,6 +546,19 @@ export {
 export type {
   CompanionSummonedEvent,
   CompanionDismissedEvent,
+} from './schemas/events/index.js';
+export {
+  TrapArmedEventSchema,
+  TrapTriggeredEventSchema,
+  TrapExpiredEventSchema,
+  TRAP_EXPIRY_REASONS,
+  TrapExpiryReasonSchema,
+} from './schemas/events/index.js';
+export type {
+  TrapArmedEvent,
+  TrapTriggeredEvent,
+  TrapExpiredEvent,
+  TrapExpiryReason,
 } from './schemas/events/index.js';
 export {
   SpellCounteredEventSchema,

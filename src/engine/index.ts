@@ -84,6 +84,7 @@ import {
   planSimulacrum,
   planWish,
   planDismissCompanion,
+  planTriggerTrap,
   type GrappleIntent,
   type ShoveIntent,
   type HideIntent,
@@ -114,6 +115,7 @@ import {
   type WishIntent,
   type WishOutcome,
   type DismissCompanionIntent,
+  type TriggerTrapIntent,
   type RestIntent,
   type AttackIntent,
   type CleaveIntent,
@@ -284,6 +286,7 @@ export interface Engine {
       state: CampaignState,
       intent: Omit<DismissCompanionIntent, 'type'>,
     ): PlanResult;
+    triggerTrap(state: CampaignState, intent: Omit<TriggerTrapIntent, 'type'>): PlanResult;
   };
 
   derive: {
@@ -552,6 +555,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     dismissCompanion(state, intent) {
       return { events: planDismissCompanion(state, { type: 'DismissCompanion', ...intent }) };
+    },
+    triggerTrap(state, intent) {
+      return { events: planTriggerTrap(state, content, rng, { type: 'TriggerTrap', ...intent }) };
     },
   };
 

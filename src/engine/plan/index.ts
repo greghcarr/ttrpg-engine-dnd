@@ -170,3 +170,7 @@ export {
   planDismissCompanion,
   type DismissCompanionIntent,
 } from './dismiss-companion.js';
+export {
+  planTriggerTrap,
+  type TriggerTrapIntent,
+} from './trap.js';

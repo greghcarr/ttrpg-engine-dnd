@@ -259,6 +259,32 @@ const SpellSummonMechanicSchema = z.object({
   speedFeet: z.number().int().min(0).default(30),
 });
 
+// Primes a trap that fires later via `engine.plan.triggerTrap`. Used
+// by Glyph of Warding's Explosive Runes variant (1 charge, caster DC,
+// caster-chosen damage type) and Cordon of Arrows (4 charges, fixed
+// DC 13, piercing). At cast time the planner pre-bakes the DC and
+// damage type into a `TrapArmed` event; the trap lives in
+// `state.traps` until its charges are exhausted (`TrapExpired`).
+// `fixedDC`, when set, overrides the caster's spell save DC at arm
+// time (Cordon of Arrows is RAW DC 13 regardless of caster). Exactly
+// one of `damageType` / `casterChoosesDamageType` must be set; the
+// planner validates at cast time.
+const SpellTrapMechanicSchema = z.object({
+  kind: z.literal('trap'),
+  saveAbility: AbilityScoreSchema,
+  fixedDC: z.number().int().min(1).optional(),
+  damageDice: DiceExpressionSchema,
+  damageType: DamageTypeSchema.optional(),
+  casterChoosesDamageType: z
+    .object({
+      allowed: z.array(DamageTypeSchema).min(1),
+    })
+    .optional(),
+  halfOnSuccess: z.boolean().default(true),
+  charges: z.number().int().min(1),
+  label: z.string(),
+});
+
 export const SPELL_AREA_SHAPES = ['cone', 'cube', 'line', 'sphere', 'cylinder'] as const;
 export const SpellAreaShapeSchema = z.enum(SPELL_AREA_SHAPES);
 export type SpellAreaShape = z.infer<typeof SpellAreaShapeSchema>;
@@ -290,6 +316,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellMovementDamageMechanicSchema,
   SpellRecurringMechanicSchema,
   SpellSummonMechanicSchema,
+  SpellTrapMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;
 

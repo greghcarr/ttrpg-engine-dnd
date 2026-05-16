@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~139 wired with `mechanicalEffects` (~18 cantrips, ~30 L1, ~23 L2, ~19 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7, ~6 L8, ~3 L9) + 9 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~259 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
+| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~142 wired with `mechanicalEffects` (~18 cantrips, ~30 L1, ~24 L2, ~20 L3, ~13 L4, ~13 L5, ~10 L6, ~5 L7, ~6 L8, ~3 L9) + 9 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~257 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -47,7 +47,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### L2: 63 / 63 (full PHB list)
 
-**Wired (23):** aid, blindness-deafness, branding-smite (on-hit rider, one-shot), calm-emotions (caster-chosen save variant), crown-of-madness, enhance-ability (6-variant buff), enlarge-reduce (caster-chosen buff variant), find-steed (summon), flame-blade, heat-metal, hold-person (paralyzed + end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, summon-beast (summon), web.
+**Wired (24):** aid, blindness-deafness, branding-smite (on-hit rider, one-shot), calm-emotions (caster-chosen save variant), cordon-of-arrows (trap, 4 charges, fixed DC 13 piercing), crown-of-madness, enhance-ability (6-variant buff), enlarge-reduce (caster-chosen buff variant), find-steed (summon), flame-blade, heat-metal, hold-person (paralyzed + end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, summon-beast (summon), web.
 
 **Dedicated planner (1):** misty-step.
 
@@ -65,7 +65,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Aerial restraint condition** (knocks flying targets to ground): `earthbind`.
 - **Perception-buff condition**: `enthrall` (disadvantage on perception against caster).
 - **On-action trigger rider** (cast on willing creature who gains a one-time / per-action effect): `dragons-breath`.
-- **Trap mechanic** (placed delayed-effect area): `cordon-of-arrows`.
+- (Trap mechanic wired in slice 94 — Cordon of Arrows ships as a fixed-DC 13 / 1d6 piercing / 4-charge trap; see slice 94 row for primitive details.)
 - **Multi-target linked condition** (effect that ties two creatures together): `warding-bond`.
 - **Transformation handler** (shapeshift utility): `alter-self`.
 - **Push primitive** (move target via STR save with no damage): `gust-of-wind`.
@@ -73,7 +73,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### L3: 54 / 54 (full PHB list)
 
-**Wired (19):** animate-dead (summon), bestow-curse (caster-chosen 4-variant save; extra-damage variant wired in slice 88 via the target-side source-filtered rider, inactive-turn variant wired in slice 92 via the `recurringSave` condition field + `engine.plan.tickRecurringSave` — the other two are still narrative-only pending the directional-attack-disadvantage and nested-ability-sub-choice primitives), call-lightning, conjure-animals (summon), crusaders-mantle (aura buff), fear, fireball, hypnotic-pattern, lightning-bolt, mass-healing-word, phantom-steed (summon), sleet-storm, spirit-guardians, spirit-shroud (caster-chosen 3-variant buff; cold / necrotic / radiant +1d8 per hit), summon-fey (summon), summon-lesser-demons (summon), summon-shadowspawn (summon), summon-undead (summon), vampiric-touch.
+**Wired (20):** animate-dead (summon), bestow-curse (caster-chosen 4-variant save; extra-damage variant wired in slice 88 via the target-side source-filtered rider, inactive-turn variant wired in slice 92 via the `recurringSave` condition field + `engine.plan.tickRecurringSave` — the other two are still narrative-only pending the directional-attack-disadvantage and nested-ability-sub-choice primitives), call-lightning, conjure-animals (summon), crusaders-mantle (aura buff), fear, fireball, glyph-of-warding (Explosive Runes variant only: trap, 1 charge, caster-DC, caster-chosen damage type from acid / cold / fire / lightning / thunder, 5d8 DEX save half), hypnotic-pattern, lightning-bolt, mass-healing-word, phantom-steed (summon), sleet-storm, spirit-guardians, spirit-shroud (caster-chosen 3-variant buff; cold / necrotic / radiant +1d8 per hit), summon-fey (summon), summon-lesser-demons (summon), summon-shadowspawn (summon), summon-undead (summon), vampiric-touch.
 
 **Dedicated planner (3):** counterspell, dispel-magic, elemental-weapon.
 
@@ -89,7 +89,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Cursed condition** (a generic `cursed` condition that `remove-curse` could strip isn't modeled; Bestow Curse currently ships four narrative-only `cursed-X-active` markers, but Remove Curse doesn't know to strip them): `remove-curse`.
 - **Movement-mode condition**: `fly`.
 - **Transformation handler** (shapeshift utility): `gaseous-form`.
-- **Trap mechanic** (placed delayed-effect): `glyph-of-warding`.
+- (Glyph of Warding's Explosive Runes wired in slice 94 as a trap with caster-DC and caster-chosen damage type; see slice 94 row. The Spell Glyph variant — storing an arbitrary spell whose targets are resolved at trigger time — still ships schema-only since the trap payload only models save + damage today.)
 - **Resurrection mechanic**: `revivify`.
 - **Scrying mechanic** (remote sensor): `clairvoyance`.
 - **Multi-mechanic teleport** (matches Misty Step's dedicated-planner pattern; needs its own planner for teleport + area damage): `thunder-step`.
@@ -411,7 +411,7 @@ Each entry below is one engine primitive: a focused engine slice that, once land
 | **Type-conditional buff / ward** | ~3 (protection-from-evil-and-good, magic-circle) | Effects whose application depends on the affected creature's type. |
 | **Cursed condition** | 1 (remove-curse — needs a generic `cursed` marker that Bestow Curse's four `cursed-X-active` conditions would compose with; Remove Curse currently has no condition to strip). | Standard cursed condition + remove-condition counterpart. Bestow Curse's variants ship via the caster-choice primitive (slice 87) — slices 88 and 92 wired the on-hit-add-damage and recurring-save-with-action-consume primitives, biting mechanically for the extra-damage and inactive-turn variants. The remaining two variants (directional attack disadvantage and nested ability sub-choice) still need their own primitives. |
 | **Resistance-buff condition** | 1 (protection-from-energy), plus future wired smites | Damage-type resistance tied to a condition. |
-| **Trap mechanic** | ~2 (glyph-of-warding, cordon-of-arrows) | Placed delayed-effect that fires on trigger. |
+| **~~Trap mechanic~~** ✓ shipped (partial) | 2 wired (glyph-of-warding Explosive Runes variant, cordon-of-arrows). Glyph of Warding's Spell Glyph variant (store an arbitrary spell whose targets are resolved at trigger time) still ships schema-only. | Slice 94 adds `TrapSchema` (id, label, sourceCharacterId, sourceSpellId, payload, chargesRemaining) plus a `traps: Record<TrapId, Trap>` collection on `CampaignState`. Three events: `TrapArmed` (stamps into state.traps), `TrapTriggered` (decrements charges), `TrapExpired` (removes from state). A new `trap` SpellMechanic prime-arms the trap at cast time; it carries the save ability + damage dice + halfOnSuccess + charges + label, and either a fixed `damageType` (Cordon: piercing), a `casterChoosesDamageType` allowed list (Glyph: acid / cold / fire / lightning / thunder), and either a `fixedDC` (Cordon: 13) or the caster's spell save DC at arm time (Glyph). The DC and damage type are pre-baked into the TrapArmed event so the trap is self-contained at trigger time (Glyph's 1-hour cast / until-dispelled lifecycle means the caster's stats may change between arming and triggering). A new `engine.plan.triggerTrap({trapId, triggeringCharacterId})` planner rolls the save, deals damage (halved on success when halfOnSuccess, zero on success when not), and emits TrapTriggered + (when charges hit zero) TrapExpired. |
 | **Dedicated planner: Thunder Step** | 1 | Matches Misty Step's pattern but adds an area damage on the origin square. |
 | **~~Resurrection / death utility~~** ✓ shipped | All 5 spells route through `engine.plan.resurrect` (revivify, raise-dead, reincarnate, resurrection, true-resurrection) | The resurrection primitive (`CharacterResurrected` event, `applyCharacterResurrected` reducer, `planResurrect` planner) was already in the engine — slice 80 just retagged the SPELL_EXPECTATIONS so the spell-coverage test stops claiming they're deferred. The planner validates target is at 0 HP, requires the right minimum slot level per spell (3 / 5 / 5 / 7 / 9), consumes the slot, and emits CharacterResurrected with `hpAfter` (default 1) and optional `newSpeciesId` (for Reincarnate). Time-since-death gates (Revivify: 1 min; Raise Dead: 10 days; True Resurrection: 200 years) are consumer-side narrative state. |
 | **Scrying / divination utility** | 1 (clairvoyance) | Remote sensor primitive. |

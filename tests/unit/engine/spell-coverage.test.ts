@@ -39,6 +39,7 @@ type Expectation =
   | { kind: 'hp-pool-knockout' }
   | { kind: 'summon' }
   | { kind: 'temp-hp' }
+  | { kind: 'trap'; casterChoice?: CasterChoice }
   | { kind: 'skip'; reason: string };
 
 const SPELL_EXPECTATIONS: Record<string, Expectation> = {
@@ -187,7 +188,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'calm-emotions': { kind: 'save', casterChoice: { kind: 'variant', value: 'suppress' } },
   'cloud-of-daggers': { kind: 'skip', reason: 'aura-damage mechanic (no save, 4d4 slashing auto-damage); fires via engine.plan.tickAura per-turn / on-enter, not on cast' },
   'continual-flame': { kind: 'skip', reason: 'utility (creates flame); no combat-event side' },
-  'cordon-of-arrows': { kind: 'skip', reason: 'placed-trap area effect; trap mechanic not modeled' },
+  'cordon-of-arrows': { kind: 'trap' },
   'darkness': { kind: 'skip', reason: 'area obscurement, concentration; area mechanic + visibility-condition not modeled' },
   'darkvision': { kind: 'skip', reason: 'utility (grants darkvision); no combat-event side' },
   'detect-thoughts': { kind: 'skip', reason: 'divination utility; detection mechanic not modeled' },
@@ -245,7 +246,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'feign-death': { kind: 'skip', reason: 'utility (death simulation), narrative only' },
   'fly': { kind: 'buff', conditionId: 'flying-active' },
   'gaseous-form': { kind: 'skip', reason: 'transformation utility; transformation handler not modeled for spells' },
-  'glyph-of-warding': { kind: 'skip', reason: 'placed-trap with stored spell; trap mechanic not modeled' },
+  'glyph-of-warding': { kind: 'trap', casterChoice: { kind: 'damageType', value: 'fire' } },
   'haste': { kind: 'buff', conditionId: 'hasted-active' },
   'hunger-of-hadar': { kind: 'skip', reason: 'multi-component aura-damage (cold-on-enter no save + acid-on-turn-end with DEX save); fires via engine.plan.tickAura with per-call intent.trigger, not on cast' },
   'leomunds-tiny-hut': { kind: 'skip', reason: 'persistent shelter dome; area-effect mechanic not modeled' },
@@ -573,7 +574,10 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         : [t1.id, t2.id];
 
       const casterChoice =
-        (expectation.kind === 'attack' || expectation.kind === 'buff' || expectation.kind === 'save')
+        (expectation.kind === 'attack'
+          || expectation.kind === 'buff'
+          || expectation.kind === 'save'
+          || expectation.kind === 'trap')
           ? expectation.casterChoice
           : undefined;
       const events = engine.plan.castSpell(campaign.state, {
@@ -623,6 +627,10 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         }
         case 'temp-hp': {
           expect(types, 'expected TempHPGranted').toContain('TempHPGranted');
+          break;
+        }
+        case 'trap': {
+          expect(types, 'expected TrapArmed').toContain('TrapArmed');
           break;
         }
         case 'hp-pool-knockout': {

@@ -157,6 +157,11 @@ import {
   applyCompanionSummoned,
   applyCompanionDismissed,
 } from './reducers/summons.js';
+import {
+  applyTrapArmed,
+  applyTrapTriggered,
+  applyTrapExpired,
+} from './reducers/traps.js';
 import { invariant } from '../internal/invariants.js';
 
 export const apply = (state: CampaignState, event: Event): CampaignState =>
@@ -513,6 +518,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'CompanionDismissed':
         applyCompanionDismissed(draft, event);
+        break;
+      case 'TrapArmed':
+        applyTrapArmed(draft, event);
+        break;
+      case 'TrapTriggered':
+        applyTrapTriggered(draft, event);
+        break;
+      case 'TrapExpired':
+        applyTrapExpired(draft, event);
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);

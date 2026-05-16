@@ -155,7 +155,7 @@ describe('engine.plan.tickRecurringSave (Hold Person, onSuccess removeCondition)
       if (save?.success !== false) continue;
 
       const consumed = tickEvents.find(
-        (e): e is { type: string } =>
+        (e) =>
           typeof e === 'object' && e !== null && (e as { type?: string }).type === 'ActionEconomyConsumed',
       );
       expect(consumed).toBeUndefined();
