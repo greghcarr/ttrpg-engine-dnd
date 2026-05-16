@@ -119,6 +119,21 @@ export const AURA_TRIGGERS = ['on-enter', 'on-turn-start', 'on-turn-end'] as con
 const AuraTriggerSchema = z.enum(AURA_TRIGGERS);
 export type AuraTrigger = z.infer<typeof AuraTriggerSchema>;
 
+// Per-foot-moved damage zone. The classic Spike Growth shape:
+// "creature that moves into or within the area takes 2d4 piercing
+// for every 5 ft it travels." No save, no concentration tick — the
+// consumer detects movement through the zone and calls
+// `engine.plan.tickMovementDamage({ casterId, targetId, feetMoved })`,
+// which rolls `damageDicePerFiveFeet` * floor(feetMoved / 5) dice
+// and emits a single DamageApplied. Distinct from aura-damage's
+// per-tick semantics so the two stay legible.
+const SpellMovementDamageMechanicSchema = z.object({
+  kind: z.literal('movement-damage'),
+  rangeFeet: z.number().int().min(0),
+  damageDicePerFiveFeet: DiceExpressionSchema,
+  damageType: DamageTypeSchema,
+});
+
 const SpellAuraDamageMechanicSchema = z.object({
   kind: z.literal('aura-damage'),
   rangeFeet: z.number().int().min(0),
@@ -177,6 +192,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellRemoveConditionMechanicSchema,
   SpellHPPoolKnockoutMechanicSchema,
   SpellAuraDamageMechanicSchema,
+  SpellMovementDamageMechanicSchema,
   SpellSummonMechanicSchema,
 ]);
 export type SpellMechanic = z.infer<typeof SpellMechanicSchema>;

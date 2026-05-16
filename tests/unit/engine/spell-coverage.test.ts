@@ -216,7 +216,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'silence': { kind: 'skip', reason: 'area zone of silence; area-effect mechanic not modeled' },
   'skywrite': { kind: 'skip', reason: 'utility (writes in sky), narrative only' },
   'spider-climb': { kind: 'skip', reason: 'wall-walking utility; movement-mode condition not modeled' },
-  'spike-growth': { kind: 'skip', reason: 'area damage on movement; area-effect mechanic not modeled' },
+  'spike-growth': { kind: 'skip', reason: 'movement-damage mechanic (2d4 piercing per 5 ft moved through zone, no save); fires via engine.plan.tickMovementDamage, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'summon-beast': { kind: 'summon' },
   'warding-bond': { kind: 'skip', reason: 'damage-share + AC/save buff; multi-target linked condition not modeled' },
   'zone-of-truth': { kind: 'skip', reason: 'area + CHA save against deception; area-effect mechanic not modeled' },

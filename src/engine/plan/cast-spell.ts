@@ -887,6 +887,11 @@ export const planCastSpell = (
       // The aura's parameters are read from the spell content at tick
       // time; concentration tracking is enough to know which aura is
       // active.
+    } else if (mechanic.kind === 'movement-damage') {
+      // Cast-time no-op: damage is applied later via
+      // planTickMovementDamage, called by the consumer with the feet
+      // moved through the zone. Same shape as aura-damage but invoked
+      // on movement instead of per-turn ticks.
     } else if (mechanic.kind === 'summon') {
       events.push(
         ...planSummonMechanic(intent, spell, mechanic, declared.id, at, concentrationEffectId),

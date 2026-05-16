@@ -361,6 +361,79 @@ export const planTickAura = (
   return events;
 };
 
+export interface TickMovementDamageIntent {
+  readonly type: 'TickMovementDamage';
+  readonly casterId: string;
+  readonly targetId: string;
+  readonly feetMoved: number;
+  readonly at?: string;
+}
+
+/**
+ * Damage per 5 ft moved through a movement-damage zone (Spike
+ * Growth: 2d4 piercing per 5 ft). The consumer detects a creature
+ * moving through the zone and calls this with the total feet moved
+ * through the area; the planner rolls `damageDicePerFiveFeet` once
+ * per 5-ft increment (floored — 7 ft = 1 hit) and emits a single
+ * DamageApplied with the summed amount. No save; this is RAW
+ * auto-damage tied to traversal.
+ */
+export const planTickMovementDamage = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: TickMovementDamageIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  if (!caster) throw new Error(`Unknown caster ${intent.casterId}`);
+  const effectId = caster.concentrationEffectId;
+  if (effectId === undefined) {
+    throw new Error('Caster has no active concentration');
+  }
+  const effect = state.effectInstances[effectId];
+  if (!effect) throw new Error('Caster concentration effect not found');
+  const spell = content.spells.get(effect.spellId);
+  if (!spell) throw new Error(`Spell ${effect.spellId} not found in content`);
+  const mechanic = spell.mechanicalEffects.find((m) => m.kind === 'movement-damage');
+  if (mechanic === undefined || mechanic.kind !== 'movement-damage') {
+    throw new Error(`Spell ${spell.id} has no movement-damage mechanic`);
+  }
+
+  const target = state.characters[intent.targetId];
+  if (!target) return [];
+  const hits = Math.floor(intent.feetMoved / 5);
+  if (hits <= 0) return [];
+
+  const parsed = parseDiceExpression(mechanic.damageDicePerFiveFeet);
+  let rawDamage = parsed.modifier * hits;
+  for (let h = 0; h < hits; h += 1) {
+    for (let d = 0; d < parsed.count; d += 1) {
+      rawDamage += rollDie(parsed.die, rng);
+    }
+  }
+  if (rawDamage <= 0) return [];
+
+  const at = intent.at ?? nowIso();
+  const mitigated = mitigateDamage({
+    character: target,
+    itemInstances: state.itemInstances,
+    content,
+    rawComponents: [{ amount: rawDamage, type: mechanic.damageType }],
+  });
+  return [
+    {
+      id: newEventId() as ULID,
+      at,
+      type: 'DamageApplied',
+      targetId: intent.targetId as ULID,
+      components: mitigated,
+      causedByEventId: effect.startedAtEventId as ULID,
+      sourceCharacterId: intent.casterId as ULID,
+      source: spell.id,
+    },
+  ];
+};
+
 const findCastingClassForSpell = (
   caster: Character,
   content: ResolvedContent,
