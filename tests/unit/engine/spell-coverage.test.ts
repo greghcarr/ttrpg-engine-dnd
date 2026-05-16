@@ -37,6 +37,7 @@ type Expectation =
   | { kind: 'remove-condition'; seedConditionId: string }
   | { kind: 'hp-pool-knockout' }
   | { kind: 'summon' }
+  | { kind: 'temp-hp' }
   | { kind: 'skip'; reason: string };
 
 const SPELL_EXPECTATIONS: Record<string, Expectation> = {
@@ -138,7 +139,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'ensnaring-strike': { kind: 'skip', reason: 'ranger smite with on-hit save rider; on-hit trigger system not modeled' },
   'entangle': { kind: 'skip', reason: 'aura-damage mechanic (STR save → restrained, no damage); fires via engine.plan.tickAura on enter / per-turn, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'expeditious-retreat': { kind: 'skip', reason: 'bonus-action speed buff, narrative only' },
-  'false-life': { kind: 'skip', reason: 'self temp-HP; temp-HP-grant mechanic not wired for spells' },
+  'false-life': { kind: 'temp-hp' },
   'feather-fall': { kind: 'skip', reason: 'reaction, narrative only' },
   'find-familiar': { kind: 'summon' },
   'fog-cloud': { kind: 'skip', reason: 'area obscurement, narrative only' },
@@ -612,6 +613,10 @@ describe('spell coverage: each shipped spell emits the expected event kinds when
         }
         case 'summon': {
           expect(types, 'expected CompanionSummoned').toContain('CompanionSummoned');
+          break;
+        }
+        case 'temp-hp': {
+          expect(types, 'expected TempHPGranted').toContain('TempHPGranted');
           break;
         }
         case 'hp-pool-knockout': {

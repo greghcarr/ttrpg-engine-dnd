@@ -17,6 +17,7 @@ import type {
   ConditionAppliedEvent,
   ConditionRemovedEvent,
   HealedEvent,
+  TempHPGrantedEvent,
 } from '../../schemas/events/combat.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type {
@@ -384,6 +385,47 @@ const planSaveMechanic = (
     }
   }
   return { events, conditionsApplied };
+};
+
+const planTempHPMechanic = (
+  rng: RNG,
+  intent: CastSpellIntent,
+  spell: Spell,
+  mechanic: Extract<SpellMechanic, { kind: 'temp-hp' }>,
+  declaredEventId: string,
+  at: string,
+): Event[] => {
+  // False Life pattern: 1d4 + 4 temp HP at base, +5 per slot above
+  // 1st. Per RAW, temp HP doesn't stack — the reducer takes
+  // max(current, granted), so a stronger source overrides a weaker
+  // one and a weaker source is no-op.
+  const slotsAboveBase = Math.max(0, intent.slotLevel - spell.level);
+  const flat = (mechanic.flatAmount ?? 0) + (mechanic.extraPerSlotLevel ?? 0) * slotsAboveBase;
+  const events: Event[] = [];
+  for (const targetId of intent.targetIds) {
+    let rolled = 0;
+    if (mechanic.amountDice !== undefined) {
+      const parsed = parseDiceExpression(mechanic.amountDice);
+      let sum = parsed.modifier;
+      for (let i = 0; i < parsed.count; i += 1) {
+        sum += rollDie(parsed.die, rng);
+      }
+      rolled = sum;
+    }
+    const amount = Math.max(0, rolled + flat);
+    if (amount <= 0) continue;
+    const grant: TempHPGrantedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'TempHPGranted',
+      targetId: targetId as ULID,
+      amount,
+      source: spell.id,
+      causedByEventId: declaredEventId as ULID,
+    };
+    events.push(grant);
+  }
+  return events;
 };
 
 const planHealMechanic = (
@@ -896,6 +938,8 @@ export const planCastSpell = (
       events.push(
         ...planSummonMechanic(intent, spell, mechanic, declared.id, at, concentrationEffectId),
       );
+    } else if (mechanic.kind === 'temp-hp') {
+      events.push(...planTempHPMechanic(rng, intent, spell, mechanic, declared.id, at));
     } else {
       events.push(...planHealMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     }

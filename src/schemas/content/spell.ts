@@ -38,6 +38,19 @@ const SpellHealMechanicSchema = z.object({
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
 });
 
+// Temporary HP grant. Used by False Life (1d4 + 4 temp HP, +5 per
+// slot above 1st). Per RAW, temp HP doesn't stack — applying a new
+// grant takes the larger of the current temp pool and the new
+// amount. The reducer handles that (applyTempHPGranted). The planner
+// rolls the dice + flat + slot scaling once per target and emits
+// one TempHPGranted event each.
+const SpellTempHPMechanicSchema = z.object({
+  kind: z.literal('temp-hp'),
+  amountDice: DiceExpressionSchema.optional(),
+  flatAmount: z.number().int().min(0).optional(),
+  extraPerSlotLevel: z.number().int().min(0).optional(),
+});
+
 // No save, no attack roll — fires N independent darts at the targets, with
 // each target taking one dart's damage rolled separately. Used by Magic
 // Missile and similar auto-hit spells. The targetIds list is expected to
@@ -187,6 +200,7 @@ export const SpellMechanicSchema = z.discriminatedUnion('kind', [
   SpellAttackMechanicSchema,
   SpellSaveMechanicSchema,
   SpellHealMechanicSchema,
+  SpellTempHPMechanicSchema,
   SpellAutoHitMechanicSchema,
   SpellBuffMechanicSchema,
   SpellRemoveConditionMechanicSchema,
