@@ -148,7 +148,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'grease': { kind: 'skip', reason: 'aura-damage mechanic (DEX save → prone, no damage); fires via engine.plan.tickAura on enter, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'hail-of-thorns': { kind: 'skip', reason: 'ranger smite with on-hit AoE rider; on-hit trigger system not modeled' },
   'heroism': { kind: 'buff', conditionId: 'heroic-active' },
-  'hex': { kind: 'skip', reason: 'curse with on-hit +1d6 necrotic; on-hit trigger system not modeled' },
+  'hex': { kind: 'buff', conditionId: 'hexed-active' },
   'hunters-mark': { kind: 'skip', reason: 'has dedicated planHuntersMark (concentration mark, not planCastSpell)' },
   'jump': { kind: 'skip', reason: 'utility movement, narrative only' },
   'longstrider': { kind: 'skip', reason: 'speed buff, narrative only' },

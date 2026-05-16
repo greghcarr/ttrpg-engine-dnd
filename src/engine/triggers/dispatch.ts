@@ -8,6 +8,7 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { evaluatePredicate } from '../../effects/predicate.js';
 import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
+import type { AppliedCondition } from '../../schemas/runtime/character.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
 import type {
@@ -20,7 +21,19 @@ import type { TriggerFiredEvent } from '../../schemas/events/triggers.js';
 type OnEventEffect = Extract<Effect, { kind: 'OnEvent' }>;
 type AddDamageAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamage' }>;
 
-const buildEventFacts = (event: Event, characterId: string): Map<string, unknown> => {
+// When an OnEvent rider lives inside a condition that was applied by
+// some caster (Hex, Bestow Curse, etc.), the `appliedFrom` argument
+// supplies that AppliedCondition. The `event.attackerIsSource` fact
+// then resolves to true precisely when the event's attacker matches
+// the condition's `sourceCharacterId` — letting a predicate like
+// "targetIsSelf && hit && attackerIsSource" express "the warlock who
+// hexed me just hit me." Riders not living inside a sourced condition
+// (Holy Weapon, ambient class features) get `attackerIsSource: false`.
+const buildEventFacts = (
+  event: Event,
+  characterId: string,
+  appliedFrom: AppliedCondition | undefined,
+): Map<string, unknown> => {
   const facts = new Map<string, unknown>([['event.type', event.type]]);
   if (event.type === 'AttackRolled') {
     facts.set('event.attackerIsSelf', event.attackerId === characterId);
@@ -32,6 +45,11 @@ const buildEventFacts = (event: Event, characterId: string): Map<string, unknown
     facts.set(
       'event.attackerHasAllyAdjacentToTarget',
       event.attackerHasAllyAdjacentToTarget ?? false,
+    );
+    facts.set(
+      'event.attackerIsSource',
+      appliedFrom?.sourceCharacterId !== undefined
+        && event.attackerId === appliedFrom.sourceCharacterId,
     );
   } else if (event.type === 'DamageApplied') {
     facts.set('event.targetIsSelf', event.targetId === characterId);
@@ -210,6 +228,22 @@ export interface DispatchInput {
   readonly at: string;
 }
 
+// Locates the AppliedCondition (if any) that contributed the given
+// OnEvent effect, so dispatch can populate source-aware facts.
+// Returns undefined for OnEvent effects from feats / species / class
+// features (anything not flowing through `appliedConditions`).
+const findAppliedConditionForOnEvent = (
+  character: Character,
+  content: ResolvedContent,
+  onEventId: string | undefined,
+): AppliedCondition | undefined => {
+  if (onEventId === undefined) return undefined;
+  return character.appliedConditions.find((applied) => {
+    const def = content.conditions.get(applied.conditionId);
+    return def?.effects.some((e) => e.kind === 'OnEvent' && e.id === onEventId) === true;
+  });
+};
+
 export const dispatchTriggers = (input: DispatchInput): Event[] => {
   const { state, content, rng, event, at } = input;
   const emitted: Event[] = [];
@@ -225,7 +259,8 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
     for (const effect of effects) {
       if (effect.kind !== 'OnEvent') continue;
       if (effect.trigger.eventType !== event.type) continue;
-      const facts = buildEventFacts(event, characterId);
+      const appliedFrom = findAppliedConditionForOnEvent(character, content, effect.id);
+      const facts = buildEventFacts(event, characterId, appliedFrom);
       const filter = effect.trigger.filter as Predicate | undefined;
       if (filter !== undefined && !evaluatePredicate(filter, { facts })) continue;
       const triggerId = triggerIdOf(effect, characterId);

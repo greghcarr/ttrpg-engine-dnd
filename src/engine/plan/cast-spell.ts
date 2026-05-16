@@ -502,6 +502,7 @@ const planSaveMechanic = (
           targetId,
           conditionId: conditionOnFail,
           appliedConditionId,
+          sourceCharacterId: intent.characterId as ULID,
           causedByEventId: saveEvent.id,
         };
         events.push(cond);
@@ -674,6 +675,7 @@ const planBuffMechanic = (
       targetId,
       conditionId,
       appliedConditionId,
+      sourceCharacterId: intent.characterId as ULID,
       causedByEventId: declaredEventId as ULID,
       ...(hpMaxDelta !== 0 ? { hpMaxBonusDelta: hpMaxDelta } : {}),
     };

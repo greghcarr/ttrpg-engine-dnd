@@ -1646,7 +1646,7 @@
     { "id": "grease", "name": "Grease", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of pork rind or butter" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["wizard"], "targeting": { "shape": "cube", "size": 10 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 10, "saveAbility": "DEX", "halfOnSuccess": false, "conditionOnFail": "prone" }] },
     { "id": "hail-of-thorns", "name": "Hail of Thorns", "level": 1, "school": "conjuration", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "heroism", "name": "Heroism", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "heroic-active" }, { "kind": "recurring", "effect": "temp-hp", "addCasterAbilityMod": "CHA" }] },
-    { "id": "hex", "name": "Hex", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "the petrified eye of a newt" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [] },
+    { "id": "hex", "name": "Hex", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "the petrified eye of a newt" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "hexed-active" }] },
     { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "jump", "name": "Jump", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a grasshopper's hind leg" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [] },
@@ -2495,6 +2495,24 @@
       ]
     },
     {
+      "id": "hexed-active",
+      "name": "Hexed",
+      "description": "Whenever the hex caster hits the bearer with an attack, the bearer takes an extra 1d6 necrotic damage. RAW also gives the caster Disadvantage on one chosen ability check (nested sub-choice not modeled; consumer carries the ability name out-of-band). Concentration up to 1 hour. The damage rider fires via OnEvent + AddDamage with a target-side filter that matches `event.targetIsSelf && event.hit && event.attackerIsSource` — `attackerIsSource` is true when the AttackRolled's attacker matches this AppliedCondition's sourceCharacterId.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "hex-damage-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackerIsSource", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "necrotic" }]
+        }
+      ]
+    },
+    {
       "id": "cursed-ability-active",
       "name": "Cursed: Ability Score Disadvantage",
       "description": "The caster chose one ability score at cast time; while Cursed, the target has Disadvantage on ability checks and saves made with that ability. The chosen ability isn't represented in the condition itself (the engine's casterChoosesVariant primitive is flat; a nested sub-choice for the specific ability isn't modeled), so the consumer carries the ability name out-of-band and enforces the disadvantage on checks/saves.",
@@ -2521,10 +2539,20 @@
     {
       "id": "cursed-vulnerable-active",
       "name": "Cursed: Extra Damage",
-      "description": "While Cursed, the caster's attacks and spells deal an extra 1d8 Necrotic damage to the target. The on-hit-add-damage primitive with target-side condition lookup isn't modeled (same gap as Hex). The condition is the metadata that a future on-hit add-damage rider will read; today it's consumer-side.",
+      "description": "While Cursed, the caster's attacks deal an extra 1d8 Necrotic damage to the bearer. Wired via OnEvent + AddDamage with the same target-side, source-filtered shape as Hex (slice 88). The 'and spells' half of the RAW text isn't auto-wired — only AttackRolled events fire the rider; spell damage doesn't trigger an OnEvent of this shape today.",
       "stackable": false,
       "endsOn": [],
-      "effects": []
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "bestow-curse-extra-damage-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackerIsSource", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" }]
+        }
+      ]
     },
     {
       "id": "bears-endurance-active",
