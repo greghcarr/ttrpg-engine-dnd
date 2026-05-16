@@ -203,6 +203,9 @@ export const buildEffectStack = (input: BuildEffectStackInput): EffectAccumulato
       applyEffectToBuilder(effect, acc, {
         source: 'condition',
         formulaContext: conditionFormulaContext,
+        ...(applied.sourceCharacterId !== undefined
+          ? { sourceCharacterId: applied.sourceCharacterId }
+          : {}),
       });
     }
   }

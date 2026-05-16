@@ -309,7 +309,7 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
-    "effectsCount": 0,
+    "effectsCount": 1,
     "id": "cursed-attacks-active",
     "stackable": false,
   },

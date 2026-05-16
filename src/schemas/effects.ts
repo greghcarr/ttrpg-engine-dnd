@@ -122,6 +122,13 @@ export type Effect =
   | { kind: 'ModifySpeed'; mode: MovementMode; op: 'set' | 'add' | 'multiply'; value: number }
   | { kind: 'AddModifier'; target: ModifierTarget; value: number | Formula; condition?: Predicate }
   | { kind: 'SetAdvantage'; on: RollTarget; mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'; condition?: Predicate }
+  // Direction-filtered advantage: only applies when the roll's target
+  // (e.g. the attack's target creature) equals the bearing applied
+  // condition's `sourceCharacterId`. Used by Bestow Curse's "Disadvantage
+  // on attack rolls against the caster" variant. Has no effect when the
+  // bearing condition has no `sourceCharacterId` (the planner stamps
+  // this on spell-applied conditions since slice 88).
+  | { kind: 'SetAdvantageVsSource'; on: RollTarget; mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail' }
   | { kind: 'GrantResistance'; damageType: DamageType | 'all'; condition?: Predicate }
   | { kind: 'GrantImmunity'; damageType: DamageType | 'all' }
   | { kind: 'GrantVulnerability'; damageType: DamageType }
@@ -223,6 +230,11 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       on: RollTargetSchema,
       mode: z.enum(['advantage', 'disadvantage', 'auto-crit', 'auto-fail']),
       condition: PredicateSchema.optional(),
+    }),
+    z.object({
+      kind: z.literal('SetAdvantageVsSource'),
+      on: RollTargetSchema,
+      mode: z.enum(['advantage', 'disadvantage', 'auto-crit', 'auto-fail']),
     }),
     z.object({
       kind: z.literal('GrantResistance'),
@@ -395,6 +407,7 @@ export const EFFECT_KINDS = [
   'ModifySpeed',
   'AddModifier',
   'SetAdvantage',
+  'SetAdvantageVsSource',
   'GrantResistance',
   'GrantImmunity',
   'GrantVulnerability',

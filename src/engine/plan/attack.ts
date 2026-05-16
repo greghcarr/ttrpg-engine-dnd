@@ -240,13 +240,29 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
       return chebyshevDistance(attackerPos, otherPos) <= 5;
     });
   })();
+  // Attacker-side effect stack. Carries per-source advantage entries
+  // (Bestow Curse's `cursed-attacks-active` records a
+  // `SetAdvantageVsSource` keyed on the cursor's id; the attack
+  // planner consults the bucket with the current target's id below).
+  // Also reused later for the crit threshold.
+  const attackerEffects = buildEffectStack({
+    character: attacker,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const attackerVsTargetAdvantage = attackerEffects.advantageVsSource('attack', input.targetId);
   const targetImposesDisadvantage =
-    targetEffects.imposesDisadvantageOnAttackers() || rangedInMelee || heavyForSmall;
+    targetEffects.imposesDisadvantageOnAttackers()
+    || rangedInMelee
+    || heavyForSmall
+    || attackerVsTargetAdvantage.disadvantage;
   let advantage = input.advantage ?? 'none';
   // Reckless Attack: if the attacker activated it this turn (and the
   // attack qualifies), it contributes advantage just like the target's
   // grants-advantage path.
-  const effectivelyGrantsAdvantage = targetGrantsAdvantage || attackerRecklessAdvantage;
+  const effectivelyGrantsAdvantage =
+    targetGrantsAdvantage || attackerRecklessAdvantage || attackerVsTargetAdvantage.advantage;
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions
   // first, then resolve.
@@ -279,12 +295,6 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // Improved Critical / Superior Critical (and similar) lower the
   // crit threshold via ExpandCritRange. Default 20. A crit only
   // counts on a hit (a 19 that misses AC is just a miss).
-  const attackerEffects = buildEffectStack({
-    character: attacker,
-    content,
-    itemInstances: state.itemInstances,
-    pendingChoices: state.pendingChoices,
-  });
   const critThreshold = attackerEffects.critThreshold();
   const critical = hit && usedRoll >= critThreshold;
 

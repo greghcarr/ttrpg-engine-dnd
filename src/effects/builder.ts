@@ -63,6 +63,11 @@ export interface ResourceGrant {
 export class EffectAccumulator {
   private readonly modifiers = new Map<string, ModifierContribution[]>();
   private readonly advantages = new Map<string, AdvantageState>();
+  // Per-source advantage overrides indexed by `${rollKey}::${sourceCharacterId}`.
+  // Recorded by `SetAdvantageVsSource` effects (Bestow Curse's attack-
+  // disadvantage variant); queried by consumers that know the relevant
+  // counterparty id (the attack planner with the target's id).
+  private readonly advantagesVsSource = new Map<string, AdvantageState>();
   private readonly resistances = new Set<DamageType | 'all'>();
   private readonly immunities = new Set<DamageType | 'all'>();
   private readonly vulnerabilities = new Set<DamageType>();
@@ -95,6 +100,23 @@ export class EffectAccumulator {
     if (state === undefined) {
       state = emptyAdvantage();
       this.advantages.set(key, state);
+    }
+    if (mode === 'advantage') state.advantage = true;
+    else if (mode === 'disadvantage') state.disadvantage = true;
+    else if (mode === 'auto-crit') state.autoCrit = true;
+    else state.autoFail = true;
+  }
+
+  setAdvantageVsSource(
+    target: RollTarget,
+    sourceCharacterId: string,
+    mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail',
+  ): void {
+    const key = `${rollKey(target)}::${sourceCharacterId}`;
+    let state = this.advantagesVsSource.get(key);
+    if (state === undefined) {
+      state = emptyAdvantage();
+      this.advantagesVsSource.set(key, state);
     }
     if (mode === 'advantage') state.advantage = true;
     else if (mode === 'disadvantage') state.disadvantage = true;
@@ -148,6 +170,16 @@ export class EffectAccumulator {
 
   advantageFor(target: RollTarget): AdvantageState {
     return this.advantages.get(rollKey(target)) ?? emptyAdvantage();
+  }
+
+  // Per-counterparty advantage state. The bearer's effect stack records
+  // `SetAdvantageVsSource` entries keyed on the bearing applied
+  // condition's source; the consumer (typically the attack planner)
+  // queries this with the relevant counterparty id (the attack's
+  // target) and folds the result into the regular advantage resolution.
+  advantageVsSource(target: RollTarget, sourceCharacterId: string): AdvantageState {
+    const key = `${rollKey(target)}::${sourceCharacterId}`;
+    return this.advantagesVsSource.get(key) ?? emptyAdvantage();
   }
 
   // True when this character has any effect that grants attackers
@@ -269,6 +301,13 @@ export interface BuilderContext {
   // threaded through. Callers that only deal with numeric values can
   // omit it; Formula values then drop silently.
   readonly formulaContext?: FormulaContext;
+  // When this effect comes from an AppliedCondition with a stamped
+  // `sourceCharacterId`, threading it here lets per-source effect
+  // kinds (e.g. SetAdvantageVsSource) attribute their override to the
+  // right counterparty. Effects emitted without a bearing condition
+  // (class, species, item, feat) leave this undefined; per-source
+  // effects in those contexts drop silently.
+  readonly sourceCharacterId?: string;
 }
 
 export const applyEffectToBuilder = (
@@ -288,6 +327,11 @@ export const applyEffectToBuilder = (
     }
     case 'SetAdvantage':
       acc.setAdvantage(effect.on, effect.mode);
+      return;
+    case 'SetAdvantageVsSource':
+      if (ctx.sourceCharacterId !== undefined) {
+        acc.setAdvantageVsSource(effect.on, ctx.sourceCharacterId, effect.mode);
+      }
       return;
     case 'GrantResistance':
       acc.addResistance(effect.damageType);

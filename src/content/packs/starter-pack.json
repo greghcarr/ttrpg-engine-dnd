@@ -2523,10 +2523,12 @@
     {
       "id": "cursed-attacks-active",
       "name": "Cursed: Attack Disadvantage",
-      "description": "While Cursed, the target has Disadvantage on attack rolls against the caster. Not auto-applied because the engine doesn't model attacker-vs-specific-target relationships — a generic SetAdvantage on attack would be broader than RAW. Consumer enforces the directional disadvantage.",
+      "description": "While Cursed, the target has Disadvantage on attack rolls against the caster. Wired via the SetAdvantageVsSource effect (slice 96), which reads the bearing applied condition's `sourceCharacterId` and only contributes disadvantage to attack rolls whose target equals that source.",
       "stackable": false,
       "endsOn": [],
-      "effects": []
+      "effects": [
+        { "kind": "SetAdvantageVsSource", "on": "attack", "mode": "disadvantage" }
+      ]
     },
     {
       "id": "cursed-inert-active",
