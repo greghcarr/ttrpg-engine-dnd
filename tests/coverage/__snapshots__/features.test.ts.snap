@@ -214,6 +214,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "bears-endurance-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 7,
     "id": "blessed",
     "stackable": false,
@@ -231,6 +236,16 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "branding-smite-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "bulls-strength-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "cats-grace-active",
     "stackable": false,
   },
   {
@@ -275,6 +290,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 1,
+    "id": "eagles-splendor-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "earthbound-active",
     "stackable": false,
   },
@@ -311,6 +331,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "flying-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "foxs-cunning-active",
     "stackable": false,
   },
   {
@@ -366,6 +391,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "mage-armored",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "owls-wisdom-active",
     "stackable": false,
   },
   {

@@ -194,7 +194,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'dragons-breath': { kind: 'skip', reason: 'grants ally a breath-weapon reaction-style; on-action rider not modeled' },
   'dust-devil': { kind: 'skip', reason: 'summoned mobile area; area + summon mechanics not modeled' },
   'earthbind': { kind: 'save' },
-  'enhance-ability': { kind: 'skip', reason: 'caster-chosen ability buff; ability-check-buff condition not modeled' },
+  'enhance-ability': { kind: 'buff', conditionId: 'bears-endurance-active', casterChoice: { kind: 'variant', value: 'bears-endurance' } },
   'enlarge-reduce': { kind: 'buff', conditionId: 'enlarged-active', casterChoice: { kind: 'variant', value: 'enlarge' } },
   'enthrall': { kind: 'skip', reason: 'WIS save against perception disadvantage on caster; perception-buff condition not modeled' },
   'find-steed': { kind: 'summon' },
