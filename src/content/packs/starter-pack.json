@@ -1677,7 +1677,7 @@
     { "id": "arcane-lock", "name": "Arcane Lock", "level": 2, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "gold dust worth 25+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "augury", "name": "Augury", "level": 2, "school": "divination", "castingTime": "1 minute", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "specially marked sticks, bones, or cards worth 25+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "wizard"], "mechanicalEffects": [] },
     { "id": "barkskin", "name": "Barkskin", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a handful of oak bark" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
-    { "id": "blur", "name": "Blur", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "blur", "name": "Blur", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "blurred-active" }] },
     { "id": "branding-smite", "name": "Branding Smite", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "branding-smite-active" }] },
     { "id": "calm-emotions", "name": "Calm Emotions", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [] },
     { "id": "cloud-of-daggers", "name": "Cloud of Daggers", "level": 2, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a sliver of glass" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "targeting": { "shape": "cube", "size": 5 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 5, "damageDice": "4d4", "damageType": "slashing", "extraDicePerSlotLevel": 2 }] },
@@ -1705,7 +1705,7 @@
     { "id": "magic-weapon", "name": "Magic Weapon", "level": 2, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["paladin", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "mirror-image", "name": "Mirror Image", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "nystuls-magic-aura", "name": "Nystul's Magic Aura", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a small square of silk" }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
-    { "id": "pass-without-trace", "name": "Pass without Trace", "level": 2, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "ashes from a burned leaf of mistletoe and a sprig of spruce" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
+    { "id": "pass-without-trace", "name": "Pass without Trace", "level": 2, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "ashes from a burned leaf of mistletoe and a sprig of spruce" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "pass-without-trace-active" }] },
     { "id": "phantasmal-force", "name": "Phantasmal Force", "level": 2, "school": "illusion", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "ray-of-enfeeblement", "name": "Ray of Enfeeblement", "level": 2, "school": "necromancy", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "rope-trick", "name": "Rope Trick", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "powdered corn extract and a twisted loop of parchment" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "wizard"], "mechanicalEffects": [] },
@@ -1739,7 +1739,7 @@
     { "id": "fly", "name": "Fly", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a wing feather from any bird" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "gaseous-form", "name": "Gaseous Form", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a bit of gauze and a wisp of smoke" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "glyph-of-warding", "name": "Glyph of Warding", "level": 3, "school": "abjuration", "castingTime": "1 hour", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "incense and powdered diamond worth 200+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "wizard"], "mechanicalEffects": [] },
-    { "id": "haste", "name": "Haste", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a shaving of licorice root" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "haste", "name": "Haste", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a shaving of licorice root" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "hasted-active" }] },
     { "id": "hunger-of-hadar", "name": "Hunger of Hadar", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true, "material": "a pickled octopus tentacle" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["warlock"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "aura-damage", "trigger": "on-enter", "rangeFeet": 20, "damageDice": "2d6", "damageType": "cold" }, { "kind": "aura-damage", "trigger": "on-turn-end", "rangeFeet": 20, "saveAbility": "DEX", "damageDice": "2d6", "damageType": "acid", "halfOnSuccess": true }] },
     { "id": "leomunds-tiny-hut", "name": "Leomund's Tiny Hut", "level": 3, "school": "evocation", "castingTime": "1 minute", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a small crystal bead" }, "duration": "8 hours", "concentration": false, "ritual": true, "classes": ["bard", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [] },
     { "id": "lightning-arrow", "name": "Lightning Arrow", "level": 3, "school": "transmutation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
@@ -2442,6 +2442,39 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "hasted-active",
+      "name": "Hasted",
+      "description": "Walking speed doubled, +2 AC, advantage on DEX saves, one extra action that can be used to Attack (one weapon attack only), Dash, Disengage, Hide, or Use an Object.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "multiply", "value": 2 },
+        { "kind": "AddModifier", "target": "ac", "value": 2 },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" },
+        { "kind": "ModifyActionEconomy", "op": "extraAction", "count": 1 }
+      ]
+    },
+    {
+      "id": "blurred-active",
+      "name": "Blurred",
+      "description": "Attackers have disadvantage on attack rolls against the blurred creature (the spell's RAW exemption for blindsight / truesight / blindness isn't modeled).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ImposeDisadvantageOnAttackers" }
+      ]
+    },
+    {
+      "id": "pass-without-trace-active",
+      "name": "Pass without Trace Active",
+      "description": "+10 bonus to Stealth checks while the spell lasts. The 30-ft aura range is consumer-tracked; the caster lists allies in their cast intent and the buff applies to each.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "AddModifier", "target": { "kind": "skill", "skill": "stealth" }, "value": 10 }
       ]
     },
     {

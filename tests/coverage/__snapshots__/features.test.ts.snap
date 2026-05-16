@@ -220,6 +220,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 1,
+    "id": "blurred-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "branding-smite-active",
     "stackable": false,
   },
@@ -284,6 +289,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 4,
+    "id": "hasted-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 1,
     "id": "holy-weapon-active",
     "stackable": false,
@@ -306,6 +316,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 3,
     "id": "paralyzed",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "pass-without-trace-active",
     "stackable": false,
   },
   {
