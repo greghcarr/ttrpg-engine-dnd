@@ -72,6 +72,13 @@ export const RollTargetSchema: z.ZodType<RollTarget> = z.union([
 
 export type TriggerAction =
   | { kind: 'AddDamage'; dice: DiceExpression; damageType: DamageType }
+  // Retaliation variant of AddDamage: emits damage to the attacker of
+  // the triggering event instead of the target. Used by Fire Shield's
+  // "creature that hits you takes 2d8" rider; the same shape will fit
+  // Armor of Agathys (cold retaliation while temp HP > 0) once the
+  // bearer-state predicate to gate on temp HP exists. Only fires
+  // against AttackRolled triggers (the only event with an attackerId).
+  | { kind: 'AddDamageToAttacker'; dice: DiceExpression; damageType: DamageType }
   | { kind: 'Heal'; amount: number | Formula }
   | { kind: 'ApplyCondition'; conditionId: string; durationRounds?: number }
   | { kind: 'SpendResource'; resourceId: string; amount: number }
@@ -81,6 +88,11 @@ export type TriggerAction =
 export const TriggerActionSchema: z.ZodType<TriggerAction> = z.union([
   z.object({
     kind: z.literal('AddDamage'),
+    dice: DiceExpressionSchema,
+    damageType: DamageTypeSchema,
+  }),
+  z.object({
+    kind: z.literal('AddDamageToAttacker'),
     dice: DiceExpressionSchema,
     damageType: DamageTypeSchema,
   }),

@@ -1254,7 +1254,7 @@
     { "id": "elemental-bane", "name": "Elemental Bane", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "fabricate", "name": "Fabricate", "level": 4, "school": "transmutation", "castingTime": "10 minutes", "range": "120 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "faithful-hound", "name": "Mordenkainen's Faithful Hound", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a tiny silver whistle, a piece of bone, and a thread" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
-    { "id": "fire-shield", "name": "Fire Shield", "level": 4, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a bit of phosphorus or a firefly" }, "duration": "10 minutes", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "fire-shield", "name": "Fire Shield", "level": 4, "school": "evocation", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a bit of phosphorus or a firefly" }, "duration": "10 minutes", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "warm", "conditionId": "fire-shield-warm-active" }, { "key": "chill", "conditionId": "fire-shield-chill-active" }] } }] },
     { "id": "freedom-of-movement", "name": "Freedom of Movement", "level": 4, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a leather strap, bound around the arm or a similar appendage" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "druid", "ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "freedom-of-movement-active" }] },
     { "id": "giant-insect", "name": "Giant Insect", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["druid"], "mechanicalEffects": [] },
     { "id": "greater-invisibility", "name": "Greater Invisibility", "level": 4, "school": "illusion", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "invisible" }] },
@@ -2989,6 +2989,44 @@
       "stackable": false,
       "endsOn": [],
       "effects": [{ "kind": "BlockHealing" }]
+    },
+    {
+      "id": "fire-shield-warm-active",
+      "name": "Fire Shield: Warm",
+      "description": "Caster has Resistance to Cold damage, and any creature that hits caster with a weapon attack takes 2d8 fire damage. RAW gates the retaliation on 'within 5 ft of you' and 'melee attack' — neither is enforced today (the engine doesn't model the 5-ft gate consistently, and the dispatcher doesn't have an attackKind fact). The rider fires on every weapon hit to the bearer (broader than RAW). Picked at cast time when the caster chooses the 'warm' variant of Fire Shield.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantResistance", "damageType": "cold" },
+        {
+          "kind": "OnEvent",
+          "id": "fire-shield-warm-retaliation",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamageToAttacker", "dice": "2d8", "damageType": "fire" }]
+        }
+      ]
+    },
+    {
+      "id": "fire-shield-chill-active",
+      "name": "Fire Shield: Chill",
+      "description": "Caster has Resistance to Fire damage, and any creature that hits caster with a weapon attack takes 2d8 cold damage. Same RAW caveats as the warm variant (5-ft gate, melee gate both unmodeled). Picked at cast time when the caster chooses the 'chill' variant of Fire Shield.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantResistance", "damageType": "fire" },
+        {
+          "kind": "OnEvent",
+          "id": "fire-shield-chill-retaliation",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamageToAttacker", "dice": "2d8", "damageType": "cold" }]
+        }
+      ]
     },
     {
       "id": "freedom-of-movement-active",

@@ -304,7 +304,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'elemental-bane': { kind: 'skip', reason: 'CON save imposes vulnerability to chosen damage type + suppresses resistance; caster-chosen damage type + on-attack-output modifier not modeled' },
   'fabricate': { kind: 'skip', reason: '10-minute creation ritual; crafting / material-transformation primitive not modeled' },
   'faithful-hound': { kind: 'skip', reason: 'placed sentry that barks + attacks on intruders; alarm + delayed attack pattern not modeled' },
-  'fire-shield': { kind: 'skip', reason: 'self resistance buff + retaliation damage on attackers within 5ft; AddDamageToAttacker TriggerAction kind not modeled' },
+  'fire-shield': { kind: 'buff', conditionId: 'fire-shield-warm-active', casterChoice: { kind: 'variant', value: 'warm' } },
   'giant-insect': { kind: 'skip', reason: 'transforms ordinary insects into giant variants; transformation handler for non-self targets not modeled' },
   'guardian-of-faith': { kind: 'skip', reason: 'summoned guardian that radiates damage in a 10ft area; area-effect mechanic + delayed expiration not modeled' },
   'hallucinatory-terrain': { kind: 'skip', reason: 'large-area illusion; terrain primitive not modeled' },

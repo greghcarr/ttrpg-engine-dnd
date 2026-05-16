@@ -22,6 +22,7 @@ import type { TriggerFiredEvent } from '../../schemas/events/triggers.js';
 
 type OnEventEffect = Extract<Effect, { kind: 'OnEvent' }>;
 type AddDamageAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamage' }>;
+type AddDamageToAttackerAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamageToAttacker' }>;
 type ApplyConditionAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyCondition' }>;
 
 // When an OnEvent rider lives inside a condition that was applied by
@@ -137,6 +138,34 @@ const fireAddDamage = (
   return [damageApplied];
 };
 
+// Retaliation variant: damage goes to event.attackerId (Fire Shield,
+// Armor of Agathys). Crits on the triggering attack don't double the
+// retaliation dice — RAW says "takes 2d8" not "takes 2d8 doubled on a
+// crit against you", so we pass critical=false to rollAddDamage.
+const fireAddDamageToAttacker = (
+  action: AddDamageToAttackerAction,
+  event: Event,
+  rng: RNG,
+  causedByEventId: string,
+): Event[] => {
+  if (event.type !== 'AttackRolled') return [];
+  const { amount } = rollAddDamage(
+    { kind: 'AddDamage', dice: action.dice, damageType: action.damageType },
+    rng,
+    false,
+  );
+  if (amount <= 0) return [];
+  const damageApplied: DamageAppliedEvent = {
+    id: newEventId() as ULID,
+    at: event.at,
+    type: 'DamageApplied',
+    targetId: event.attackerId,
+    components: [{ amount, type: action.damageType }],
+    causedByEventId: causedByEventId as ULID,
+  };
+  return [damageApplied];
+};
+
 // Fires an ApplyCondition TriggerAction. Targets the event's target
 // creature (Spirit Shroud's hit rider: target of the attack that
 // triggered the rider). Stamps the bearer's id as `sourceCharacterId`
@@ -189,6 +218,8 @@ const fireTrigger = (
   for (const action of effect.actions) {
     if (action.kind === 'AddDamage') {
       events.push(...fireAddDamage(action, event, rng, triggerFired.id));
+    } else if (action.kind === 'AddDamageToAttacker') {
+      events.push(...fireAddDamageToAttacker(action, event, rng, triggerFired.id));
     } else if (action.kind === 'ApplyCondition') {
       events.push(...fireApplyCondition(action, event, character.id, triggerFired.id));
     }
