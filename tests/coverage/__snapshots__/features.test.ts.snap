@@ -269,6 +269,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "flying-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 3,
     "id": "freedom-of-movement-active",
     "stackable": false,
@@ -366,6 +371,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "shielded",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "spider-climbing-active",
     "stackable": false,
   },
   {
