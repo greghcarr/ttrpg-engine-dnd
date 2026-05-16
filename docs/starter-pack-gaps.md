@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 359 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 across L0–L7. Cantrips through L7 each ship every PHB 2024 entry. ~121 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L8–9 not yet in pack. |
+| Spells | 378 / ~378 | ~378 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 across L0–L8. Cantrips through L8 each ship every PHB 2024 entry. ~127 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7, ~6 L8) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L9 not yet in pack. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -157,7 +157,13 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 **Schema-only (19):** mostly long-range / cross-plane / illusion / utility — crown-of-stars (on-action rider), divine-word / power-word-pain (HP-threshold tier effect), dream-of-the-blue-veil / etherealness / plane-shift / teleport (cross-plane / long-range teleport), forcecage / whirlwind (area-confinement), mirage-arcane / project-image (illusion), mordenkainens-magnificent-mansion / sequester (extradimensional / time-pause), mordenkainens-sword (controllable construct), prismatic-spray (random-damage-table AoE), resurrection (full-resurrection primitive), reverse-gravity (physics primitive), simulacrum (dedicated planner exists), symbol (trap mechanic).
 
-### L8–L9: 0 / ~30
+### L8: 19 / ~19 (full PHB list)
+
+**Wired (6):** dominate-monster, feeblemind (INT save → stunned + 4d6 psychic, approximating the int/cha-score reduction), incendiary-cloud, maddening-darkness, sunburst, tsunami.
+
+**Schema-only (13):** the big-shape transformations and rituals — antimagic-field (magic suppression), antipathy-sympathy (type-conditional buff), clone (resurrection-on-death), demiplane / maze (extradimensional / single-target plane shift), control-weather (environment primitive), earthquake (multi-stage terrain area), holy-aura (multi-effect aura), mind-blank (multi-type immunity), power-word-stun (HP-threshold tier effect), animal-shapes (mass transformation), glibness / telepathy (narrative).
+
+### L9: 0 / ~12
 
 Not in pack.
 
