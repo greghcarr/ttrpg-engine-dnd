@@ -401,6 +401,32 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'wall-of-thorns': { kind: 'skip', reason: 'wall with on-entry damage + difficult terrain; area-wall primitive not modeled' },
   'wind-walk': { kind: 'skip', reason: 'mass cloud-travel transformation; multi-target transformation primitive not modeled' },
   'word-of-recall': { kind: 'skip', reason: 'instant teleport to a designated sanctuary; teleport-network primitive not modeled' },
+  // PHB 2024 L7 spells with wired mechanics
+  'conjure-celestial': { kind: 'summon' },
+  'delayed-blast-fireball': { kind: 'save' },
+  'finger-of-death': { kind: 'save' },
+  'fire-storm': { kind: 'save' },
+  'regenerate': { kind: 'heal' },
+  // PHB 2024 L7 spells shipped schema-only; see docs/starter-pack-gaps.md.
+  'crown-of-stars': { kind: 'skip', reason: 'orbiting motes of light that fire on bonus action; on-action attack rider not modeled' },
+  'divine-word': { kind: 'skip', reason: 'tiered effect by HP threshold (stunned / blinded / deafened / killed); HP-threshold effect not modeled' },
+  'dream-of-the-blue-veil': { kind: 'skip', reason: 'cross-world travel; planar travel primitive not modeled' },
+  'etherealness': { kind: 'skip', reason: 'enter the Ethereal Plane; cross-plane travel primitive not modeled' },
+  'forcecage': { kind: 'skip', reason: '20-ft cage of force; multi-target movement-restriction + saves-vs-teleport not modeled' },
+  'mirage-arcane': { kind: 'skip', reason: 'large-area illusion terrain; terrain + illusion primitive not modeled' },
+  'mordenkainens-magnificent-mansion': { kind: 'skip', reason: 'extradimensional dwelling utility; extradimensional space primitive not modeled' },
+  'mordenkainens-sword': { kind: 'skip', reason: 'controllable floating force-sword with bonus-action attacks; on-action attack primitive not modeled' },
+  'plane-shift': { kind: 'skip', reason: 'planar travel; cross-plane travel primitive not modeled' },
+  'power-word-pain': { kind: 'skip', reason: 'tiered effect by HP threshold (intense pain); HP-threshold effect not modeled' },
+  'prismatic-spray': { kind: 'skip', reason: 'random-damage-type cone with 8 effect rolls; multi-damage AoE + RNG-table primitive not modeled' },
+  'project-image': { kind: 'skip', reason: 'long-range illusion duplicate; illusion + sensor primitive not modeled' },
+  'resurrection': { kind: 'skip', reason: 'full-resurrection with no rejection; resurrection primitive not modeled' },
+  'reverse-gravity': { kind: 'skip', reason: 'inverts gravity in 50-ft cylinder; physics primitive not modeled' },
+  'sequester': { kind: 'skip', reason: 'time-stop / invisibility on target until trigger; trigger-resume primitive not modeled' },
+  'simulacrum': { kind: 'skip', reason: 'has dedicated engine.plan.simulacrum (not planCastSpell)' },
+  'symbol': { kind: 'skip', reason: 'placed glyph with caster-chosen trigger and effect; trap mechanic + choice not modeled' },
+  'teleport': { kind: 'skip', reason: 'long-range teleport with familiarity table; teleport-network primitive not modeled' },
+  'whirlwind': { kind: 'skip', reason: 'cylinder of wind with DEX save + restrained + lift; area-effect with multi-stage rider not modeled' },
 };
 
 const buildWizard = (preparedSpells: string[]): Character =>

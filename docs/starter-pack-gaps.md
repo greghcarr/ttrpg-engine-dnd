@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 335 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 / 46 / 38 across L0–L6. Cantrips, L1, L2, L3, L4, L5, and L6 each ship every PHB 2024 entry. ~116 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L7–9 not yet in pack. |
+| Spells | 359 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 across L0–L7. Cantrips through L7 each ship every PHB 2024 entry. ~121 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L8–9 not yet in pack. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -151,7 +151,13 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 **Schema-only (28):** the heavy clusters at L6 — transformations (`investiture-of-flame` / `ice` / `stone` / `wind`, `tashas-otherworldly-guise`, `tensers-transformation`, `wind-walk`), wards (`forbiddance`, `globe-of-invulnerability`, `guards-and-wards`), terrain walls (`blade-barrier`, `wall-of-ice`, `wall-of-thorns`), and ritual / DM-resolution (`contingency`, `find-the-path`, `magic-jar`, `move-earth`, `planar-ally`, `programmed-illusion`, `soul-cage`, `true-seeing`, `drawmijs-instant-summons`, `arcane-gate`, `create-undead`, `conjure-fey`, `ottos-irresistible-dance`, `word-of-recall`, `heroes-feast`). Each is one of the existing deferred primitives (area-wall, transformation handler, multi-effect ritual buff, etc.) the gaps table above already names.
 
-### L7–L9: 0 / ~54
+### L7: 24 / ~24 (full PHB list)
+
+**Wired (5):** conjure-celestial (summon), delayed-blast-fireball, finger-of-death, fire-storm, regenerate.
+
+**Schema-only (19):** mostly long-range / cross-plane / illusion / utility — crown-of-stars (on-action rider), divine-word / power-word-pain (HP-threshold tier effect), dream-of-the-blue-veil / etherealness / plane-shift / teleport (cross-plane / long-range teleport), forcecage / whirlwind (area-confinement), mirage-arcane / project-image (illusion), mordenkainens-magnificent-mansion / sequester (extradimensional / time-pause), mordenkainens-sword (controllable construct), prismatic-spray (random-damage-table AoE), resurrection (full-resurrection primitive), reverse-gravity (physics primitive), simulacrum (dedicated planner exists), symbol (trap mechanic).
+
+### L8–L9: 0 / ~30
 
 Not in pack.
 
