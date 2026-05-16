@@ -81,6 +81,15 @@ export type TriggerAction =
   | { kind: 'AddDamageToAttacker'; dice: DiceExpression; damageType: DamageType }
   | { kind: 'Heal'; amount: number | Formula }
   | { kind: 'ApplyCondition'; conditionId: string; durationRounds?: number }
+  // Retaliation variant of ApplyCondition: stamps the condition on
+  // the attacker of the triggering event instead of the target. Used
+  // by Holy Aura's RAW "fiend or undead that hits you is blinded
+  // until the spell ends" rider. Only fires against AttackRolled
+  // triggers (the only event with an attackerId). When `durationRounds`
+  // is omitted the condition sticks until consumer removes it; when
+  // set, slice 102's auto-expiry lifts it at the start of the bearer's
+  // turn in the target round.
+  | { kind: 'ApplyConditionToAttacker'; conditionId: string; durationRounds?: number }
   | { kind: 'SpendResource'; resourceId: string; amount: number }
   | { kind: 'ModifyDamageTaken'; amount: number | Formula; cap?: number }
   | { kind: 'EmitEvent'; eventType: string; payload?: unknown };
@@ -102,6 +111,11 @@ export const TriggerActionSchema: z.ZodType<TriggerAction> = z.union([
   }),
   z.object({
     kind: z.literal('ApplyCondition'),
+    conditionId: z.string(),
+    durationRounds: z.number().int().optional(),
+  }),
+  z.object({
+    kind: z.literal('ApplyConditionToAttacker'),
     conditionId: z.string(),
     durationRounds: z.number().int().optional(),
   }),

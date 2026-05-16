@@ -1,5 +1,7 @@
 import type { Effect, ModifierTarget, RollTarget } from '../schemas/effects.js';
 import type { AbilityScore, DamageType, Skill } from '../schemas/primitives.js';
+import type { Predicate } from '../schemas/predicate.js';
+import { evaluatePredicate } from './predicate.js';
 import { evaluateFormula, type FormulaContext } from './formula.js';
 
 const modifierKey = (target: ModifierTarget): string => {
@@ -198,16 +200,25 @@ export class EffectAccumulator {
 
   // Mirror of `grantsAdvantageToAttackers`: true when this character
   // has any effect that imposes disadvantage on incoming attacks
-  // (Dodge action's RAW effect, blur-style spells in future).
-  imposesDisadvantageOnAttackers(): boolean {
-    return this.disadvantageOnAttackersFlag;
+  // (Dodge action's RAW effect, Blur, etc.). Entries optionally carry
+  // a predicate (Protection from Evil and Good gates the disadvantage
+  // on the attacker's creature type — fiend / undead / etc.) which is
+  // evaluated against `attackerFacts` (`attackerCreatureType`, etc.)
+  // supplied by the caller. Entries with no predicate always apply.
+  imposesDisadvantageOnAttackers(
+    attackerFacts?: ReadonlyMap<string, unknown>,
+  ): boolean {
+    return this.disadvantageOnAttackersEntries.some((entry) => {
+      if (entry.predicate === undefined) return true;
+      return evaluatePredicate(entry.predicate, { facts: attackerFacts });
+    });
   }
 
-  markImposesDisadvantageOnAttackers(): void {
-    this.disadvantageOnAttackersFlag = true;
+  markImposesDisadvantageOnAttackers(predicate?: Predicate): void {
+    this.disadvantageOnAttackersEntries.push({ predicate });
   }
 
-  private disadvantageOnAttackersFlag = false;
+  private disadvantageOnAttackersEntries: Array<{ predicate?: Predicate }> = [];
 
   // True when any active effect on this character blocks them from
   // regaining hit points. Heal planners consult this and, when set,
@@ -413,7 +424,7 @@ export const applyEffectToBuilder = (
       acc.markGrantsAdvantageToAttackers();
       return;
     case 'ImposeDisadvantageOnAttackers':
-      acc.markImposesDisadvantageOnAttackers();
+      acc.markImposesDisadvantageOnAttackers(effect.condition);
       return;
     case 'GrantSense':
     case 'ModifySpeed':

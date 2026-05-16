@@ -1392,7 +1392,7 @@
     { "id": "earthquake", "name": "Earthquake", "level": 8, "school": "evocation", "castingTime": "Action", "range": "500 feet", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt, a piece of rock, and a lump of clay" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "sorcerer"], "targeting": { "shape": "cylinder", "size": 100 }, "mechanicalEffects": [] },
     { "id": "feeblemind", "name": "Feeblemind", "level": 8, "school": "enchantment", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true, "material": "a handful of clay, crystal, glass, or mineral spheres" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "druid", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "INT", "damageDice": "4d6", "damageType": "psychic", "halfOnSuccess": false, "conditionOnFail": "stunned" }] },
     { "id": "glibness", "name": "Glibness", "level": 8, "school": "transmutation", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "warlock"], "mechanicalEffects": [] },
-    { "id": "holy-aura", "name": "Holy Aura", "level": 8, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a tiny reliquary worth 1,000+ GP containing a sacred relic" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
+    { "id": "holy-aura", "name": "Holy Aura", "level": 8, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a tiny reliquary worth 1,000+ GP containing a sacred relic" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "holy-aura-active" }] },
     { "id": "incendiary-cloud", "name": "Incendiary Cloud", "level": 8, "school": "conjuration", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "save", "ability": "DEX", "damageDice": "10d8", "damageType": "fire", "halfOnSuccess": true }] },
     { "id": "maddening-darkness", "name": "Maddening Darkness", "level": 8, "school": "evocation", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "material": "a drop of pitch mixed with a drop of mercury" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["warlock", "wizard"], "targeting": { "shape": "sphere", "size": 60 }, "mechanicalEffects": [{ "kind": "save", "ability": "WIS", "damageDice": "8d8", "damageType": "psychic", "halfOnSuccess": true }] },
     { "id": "maze", "name": "Maze", "level": 8, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
@@ -1650,7 +1650,7 @@
     { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "jump", "name": "Jump", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a grasshopper's hind leg" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [] },
-    { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [] },
+    { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "protection-from-evil-and-good-active" }] },
     { "id": "purify-food-and-drink", "name": "Purify Food and Drink", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "paladin"], "mechanicalEffects": [] },
     { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
     { "id": "searing-smite", "name": "Searing Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "searing-smite-active" }] },
@@ -1743,7 +1743,7 @@
     { "id": "hunger-of-hadar", "name": "Hunger of Hadar", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "150 feet", "components": { "verbal": true, "somatic": true, "material": "a pickled octopus tentacle" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["warlock"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "aura-damage", "trigger": "on-enter", "rangeFeet": 20, "damageDice": "2d6", "damageType": "cold" }, { "kind": "aura-damage", "trigger": "on-turn-end", "rangeFeet": 20, "saveAbility": "DEX", "damageDice": "2d6", "damageType": "acid", "halfOnSuccess": true }] },
     { "id": "leomunds-tiny-hut", "name": "Leomund's Tiny Hut", "level": 3, "school": "evocation", "castingTime": "1 minute", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a small crystal bead" }, "duration": "8 hours", "concentration": false, "ritual": true, "classes": ["bard", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [] },
     { "id": "lightning-arrow", "name": "Lightning Arrow", "level": 3, "school": "transmutation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
-    { "id": "magic-circle", "name": "Magic Circle", "level": 3, "school": "abjuration", "castingTime": "1 minute", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron worth 100+ GP" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "targeting": { "shape": "cylinder", "size": 10 }, "mechanicalEffects": [] },
+    { "id": "magic-circle", "name": "Magic Circle", "level": 3, "school": "abjuration", "castingTime": "1 minute", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron worth 100+ GP" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "targeting": { "shape": "cylinder", "size": 10 }, "mechanicalEffects": [{ "kind": "buff", "conditionId": "magic-circle-active" }] },
     { "id": "major-image", "name": "Major Image", "level": 3, "school": "illusion", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "meld-into-stone", "name": "Meld into Stone", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "8 hours", "concentration": false, "ritual": true, "classes": ["cleric", "druid"], "mechanicalEffects": [] },
     { "id": "nondetection", "name": "Nondetection", "level": 3, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of diamond dust worth 25+ GP" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["bard", "ranger", "wizard"], "mechanicalEffects": [] },
@@ -3082,6 +3082,92 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantImmunity", "damageType": "all" }
+      ]
+    },
+    {
+      "id": "protection-from-evil-and-good-active",
+      "name": "Protection from Evil and Good",
+      "description": "Aberrations, celestials, elementals, fey, fiends, and undead have disadvantage on attack rolls against the bearer (Protection from Evil and Good spell). The disadvantage gate is enforced via a type-conditional ImposeDisadvantageOnAttackers whose predicate reads `attackerCreatureType` from facts the attack planner supplies. RAW also makes the bearer immune to charmed / frightened / possessed *from those same six types*; that source-gated condition-immunity portion isn't enforced today because GrantConditionImmunity has no source-predicate (a future slice). The shared range / duration distinction with Magic Circle lives on the spell entry, not the condition.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "ImposeDisadvantageOnAttackers",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Undead" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "magic-circle-active",
+      "name": "Magic Circle",
+      "description": "10-foot cylinder ward (Magic Circle spell): creatures of the warded type have disadvantage on attack rolls against creatures inside the circle. Shares the disadvantage shape with Protection from Evil and Good (same six creature types — aberration, celestial, elemental, fey, fiend, undead). RAW lets the caster name a single creature type at cast time; the engine doesn't model the caster choice yet, so the condition wards against all six (broader than RAW for non-fiend casts). The RAW positional constraint (only applies while the warded creature is inside the 10-foot cylinder) is consumer-territory.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "ImposeDisadvantageOnAttackers",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "attackerCreatureType", "value": "Undead" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "holy-aura-active",
+      "name": "Holy Aura",
+      "description": "Concentration up to 1 minute (Holy Aura spell): bearer has advantage on saving throws (universal), all attack rolls against the bearer have disadvantage (universal), and any Fiend or Undead that hits the bearer with a melee attack is blinded via an OnEvent rider gated on the attacker's creature type. RAW gates the blind on a failed CON save and on the attack being melee; neither gate is enforced today (the dispatcher doesn't have an attackKind fact, and ApplyCondition TriggerActions don't roll a save). The auto-expiry of the blinded condition rides slice 102's `durationRounds`-to-`expiresOnRound` plumbing.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CON" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "INT" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "WIS" }, "mode": "advantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CHA" }, "mode": "advantage" },
+        { "kind": "ImposeDisadvantageOnAttackers" },
+        {
+          "kind": "OnEvent",
+          "id": "holy-aura-blind-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": {
+              "kind": "all",
+              "terms": [
+                { "kind": "eq", "path": "event.targetIsSelf", "value": true },
+                { "kind": "eq", "path": "event.hit", "value": true },
+                {
+                  "kind": "any",
+                  "terms": [
+                    { "kind": "eq", "path": "event.attackerCreatureType", "value": "Fiend" },
+                    { "kind": "eq", "path": "event.attackerCreatureType", "value": "Undead" }
+                  ]
+                }
+              ]
+            }
+          },
+          "actions": [
+            { "kind": "ApplyConditionToAttacker", "conditionId": "blinded" }
+          ]
+        }
       ]
     },
     {

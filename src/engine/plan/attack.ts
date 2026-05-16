@@ -14,6 +14,7 @@ import { newEventId } from '../../ids.js';
 import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
+import { getCreatureType } from '../../derive/creature-type.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
@@ -257,8 +258,15 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // Prone, Restrained). Folded alongside target-side contributions
   // so 2024 RAW advantage-cancellation applies symmetrically.
   const attackerSelfAdvantage = attackerEffects.advantageFor('attack');
+  // Build a small facts map for type-conditional ImposeDisadvantage
+  // entries (Protection from Evil and Good gates the disadvantage on
+  // the attacker being aberration / celestial / elemental / fey /
+  // fiend / undead). Entries with no predicate apply unconditionally.
+  const attackerFacts = new Map<string, unknown>([
+    ['attackerCreatureType', getCreatureType(attacker, content)],
+  ]);
   const targetImposesDisadvantage =
-    targetEffects.imposesDisadvantageOnAttackers()
+    targetEffects.imposesDisadvantageOnAttackers(attackerFacts)
     || rangedInMelee
     || heavyForSmall
     || attackerVsTargetAdvantage.disadvantage

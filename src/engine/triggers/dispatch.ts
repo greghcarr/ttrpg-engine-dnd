@@ -8,6 +8,7 @@ import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { evaluatePredicate } from '../../effects/predicate.js';
 import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
+import { getCreatureType } from '../../derive/creature-type.js';
 import type { AppliedCondition } from '../../schemas/runtime/character.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
@@ -24,6 +25,7 @@ type OnEventEffect = Extract<Effect, { kind: 'OnEvent' }>;
 type AddDamageAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamage' }>;
 type AddDamageToAttackerAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamageToAttacker' }>;
 type ApplyConditionAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyCondition' }>;
+type ApplyConditionToAttackerAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyConditionToAttacker' }>;
 
 // When an OnEvent rider lives inside a condition that was applied by
 // some caster (Hex, Bestow Curse, etc.), the `appliedFrom` argument
@@ -37,6 +39,8 @@ const buildEventFacts = (
   event: Event,
   characterId: string,
   appliedFrom: AppliedCondition | undefined,
+  state: CampaignState,
+  content: ResolvedContent,
 ): Map<string, unknown> => {
   const facts = new Map<string, unknown>([['event.type', event.type]]);
   if (event.type === 'AttackRolled') {
@@ -55,6 +59,14 @@ const buildEventFacts = (
       appliedFrom?.sourceCharacterId !== undefined
         && event.attackerId === appliedFrom.sourceCharacterId,
     );
+    const attacker = state.characters[event.attackerId];
+    if (attacker !== undefined) {
+      facts.set('event.attackerCreatureType', getCreatureType(attacker, content));
+    }
+    const target = state.characters[event.targetId];
+    if (target !== undefined) {
+      facts.set('event.targetCreatureType', getCreatureType(target, content));
+    }
   } else if (event.type === 'DamageApplied') {
     facts.set('event.targetIsSelf', event.targetId === characterId);
   }
@@ -203,6 +215,39 @@ const fireApplyCondition = (
   return [applied];
 };
 
+// Retaliation variant of fireApplyCondition: targets the attacker
+// of the triggering AttackRolled event instead of the bearer's
+// attacker. Holy Aura's RAW "fiend / undead that hits you is
+// blinded until the spell ends" rides this shape. Stamps the
+// bearer's id as `sourceCharacterId` so slice 102's auto-expiry
+// can find it (when `durationRounds` is supplied). Only fires on
+// AttackRolled (the only event with an attackerId).
+const fireApplyConditionToAttacker = (
+  action: ApplyConditionToAttackerAction,
+  event: Event,
+  bearerId: string,
+  causedByEventId: string,
+  currentRound: number | undefined,
+): Event[] => {
+  if (event.type !== 'AttackRolled') return [];
+  const expiresOnRound =
+    action.durationRounds !== undefined && currentRound !== undefined
+      ? currentRound + action.durationRounds
+      : undefined;
+  const applied: ConditionAppliedEvent = {
+    id: newEventId() as ULID,
+    at: event.at,
+    type: 'ConditionApplied',
+    targetId: event.attackerId,
+    conditionId: action.conditionId,
+    appliedConditionId: newAppliedConditionId() as ULID,
+    sourceCharacterId: bearerId as ULID,
+    ...(expiresOnRound !== undefined ? { expiresOnRound } : {}),
+    causedByEventId: causedByEventId as ULID,
+  };
+  return [applied];
+};
+
 const fireTrigger = (
   effect: OnEventEffect,
   character: Character,
@@ -231,6 +276,10 @@ const fireTrigger = (
     } else if (action.kind === 'ApplyCondition') {
       events.push(
         ...fireApplyCondition(action, event, character.id, triggerFired.id, currentRound),
+      );
+    } else if (action.kind === 'ApplyConditionToAttacker') {
+      events.push(
+        ...fireApplyConditionToAttacker(action, event, character.id, triggerFired.id, currentRound),
       );
     }
   }
@@ -339,7 +388,7 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
       if (effect.kind !== 'OnEvent') continue;
       if (effect.trigger.eventType !== event.type) continue;
       const appliedFrom = findAppliedConditionForOnEvent(character, content, effect.id);
-      const facts = buildEventFacts(event, characterId, appliedFrom);
+      const facts = buildEventFacts(event, characterId, appliedFrom, state, content);
       const filter = effect.trigger.filter as Predicate | undefined;
       if (filter !== undefined && !evaluatePredicate(filter, { facts })) continue;
       const triggerId = triggerIdOf(effect, characterId);
