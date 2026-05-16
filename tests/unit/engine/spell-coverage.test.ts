@@ -183,7 +183,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'blur': { kind: 'skip', reason: 'imposes disadvantage on attacks against caster; attack-roll-buff condition not modeled' },
   'branding-smite': { kind: 'buff', conditionId: 'branding-smite-active' },
   'calm-emotions': { kind: 'skip', reason: 'caster-chosen variant (suppress charm/frighten vs make indifferent); choice protocol not modeled' },
-  'cloud-of-daggers': { kind: 'skip', reason: 'area damage on enter; area-effect spell mechanic not modeled' },
+  'cloud-of-daggers': { kind: 'skip', reason: 'aura-damage mechanic (no save, 4d4 slashing auto-damage); fires via engine.plan.tickAura per-turn / on-enter, not on cast' },
   'continual-flame': { kind: 'skip', reason: 'utility (creates flame); no combat-event side' },
   'cordon-of-arrows': { kind: 'skip', reason: 'placed-trap area effect; trap mechanic not modeled' },
   'darkness': { kind: 'skip', reason: 'area obscurement, concentration; area mechanic + visibility-condition not modeled' },

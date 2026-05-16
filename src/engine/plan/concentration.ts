@@ -229,30 +229,41 @@ export const planTickAura = (
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
     if (!target) continue;
-    const saveDerivation = computeSavingThrow({
-      character: target,
-      itemInstances: state.itemInstances,
-      content,
-      ability: aura.saveAbility,
-    });
-    const d20 = rollDie(D20_SIDES, rng);
-    const total = d20 + saveDerivation.total;
-    const success = total >= dcResult.total;
-    const saveEvent: SaveRolledEvent = {
-      id: newEventId() as ULID,
-      at,
-      type: 'SaveRolled',
-      targetId: targetId as ULID,
-      ability: aura.saveAbility,
-      dc: dcResult.total,
-      d20: [d20],
-      used: 'none',
-      bonus: saveDerivation.total,
-      total,
-      success,
-      breakdown: [...saveDerivation.breakdown],
-    };
-    events.push(saveEvent);
+
+    // Roll the save (if configured). No-save zones (Cloud of Daggers
+    // and similar auto-damage areas) skip the save block; damage and
+    // condition apply unconditionally per RAW.
+    let saveCausedById: ULID | undefined;
+    let saveSucceeded = false;
+    if (aura.saveAbility !== undefined) {
+      const saveDerivation = computeSavingThrow({
+        character: target,
+        itemInstances: state.itemInstances,
+        content,
+        ability: aura.saveAbility,
+      });
+      const d20 = rollDie(D20_SIDES, rng);
+      const total = d20 + saveDerivation.total;
+      saveSucceeded = total >= dcResult.total;
+      const saveEvent: SaveRolledEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'SaveRolled',
+        targetId: targetId as ULID,
+        ability: aura.saveAbility,
+        dc: dcResult.total,
+        d20: [d20],
+        used: 'none',
+        bonus: saveDerivation.total,
+        total,
+        success: saveSucceeded,
+        breakdown: [...saveDerivation.breakdown],
+      };
+      events.push(saveEvent);
+      saveCausedById = saveEvent.id;
+    }
+    const causedByEventId: ULID =
+      saveCausedById ?? (effect.startedAtEventId as ULID);
 
     // Roll the damage once per target (per-target rolling is the RAW
     // for per-turn aura ticks — Spirit Guardians says "the creature
@@ -268,7 +279,14 @@ export const planTickAura = (
         rawDamage += rollDie(parsed.die, rng);
       }
       const halfOnSuccess = aura.halfOnSuccess !== false;
-      const final = success && halfOnSuccess ? Math.floor(rawDamage / 2) : success ? 0 : rawDamage;
+      const noSave = aura.saveAbility === undefined;
+      const final = noSave
+        ? rawDamage
+        : saveSucceeded && halfOnSuccess
+          ? Math.floor(rawDamage / 2)
+          : saveSucceeded
+            ? 0
+            : rawDamage;
       if (final > 0) {
         const mitigated = mitigateDamage({
           character: target,
@@ -282,17 +300,22 @@ export const planTickAura = (
           type: 'DamageApplied',
           targetId: targetId as ULID,
           components: mitigated,
-          causedByEventId: saveEvent.id,
+          causedByEventId,
           sourceCharacterId: intent.casterId as ULID,
           source: spell.id,
         });
       }
     }
 
-    // On a failed save, apply the optional condition. Gated by the
-    // target's existing immunities so Aura of Courage's Frightened
-    // immunity (etc.) blocks the condition cleanly.
-    if (!success && aura.conditionOnFail !== undefined) {
+    // Apply the optional condition. When a save was rolled, the
+    // condition fires only on failure; when no save is rolled, the
+    // condition applies unconditionally. Gated by the target's
+    // existing immunities so Aura of Courage's Frightened immunity
+    // (etc.) blocks the condition cleanly.
+    const applyCondition =
+      aura.conditionOnFail !== undefined &&
+      (aura.saveAbility === undefined || !saveSucceeded);
+    if (applyCondition && aura.conditionOnFail !== undefined) {
       const immune = isImmuneToCondition({
         state,
         content,
@@ -307,7 +330,7 @@ export const planTickAura = (
           targetId: targetId as ULID,
           conditionId: aura.conditionOnFail,
           appliedConditionId: newAppliedConditionId(),
-          causedByEventId: saveEvent.id,
+          causedByEventId,
         });
       }
     }

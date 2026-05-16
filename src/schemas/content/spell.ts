@@ -90,22 +90,27 @@ const SpellHPPoolKnockoutMechanicSchema = z.object({
 // range. Cast-time emits ConcentrationStarted only — no save or
 // damage fires. The consumer calls `engine.plan.tickAura({ casterId,
 // targetIds })` at the appropriate moments (entering the area /
-// starting a turn in it, per RAW) and the engine rolls a save and
-// applies damage and/or a condition per target.
+// starting a turn in it, per RAW) and the engine rolls a save (if
+// configured) and applies damage and/or a condition per target.
 //
-// Used by Spirit Guardians (damage-only, 3d8 radiant or necrotic),
-// Stinking Cloud (condition-only, CON save vs `poisoned`),
-// Wall of Fire / Wall of Thorns / Wall of Ice / Blade Barrier
-// (damage + halfOnSuccess), and similar persistent area effects.
+// Used by Spirit Guardians (damage-only with save), Stinking Cloud
+// (condition-only with save), the Wall-of-X family (damage + half
+// on save), Entangle / Grease (condition-only with save), Cloud
+// of Daggers (auto-damage no save), and similar persistent area
+// effects.
 //
-// `damageDice` and `damageType` are optional so condition-only zones
-// (Stinking Cloud, Entangle) can omit them. `conditionOnFail` applies
-// a condition to creatures that fail the save (gated by the target's
-// existing condition immunities — see isImmuneToCondition).
+// Optionality matrix:
+// - `saveAbility` omitted → no save roll; damage / condition apply
+//   unconditionally (Cloud of Daggers: 4d4 slashing every turn).
+// - `damageDice` / `damageType` omitted → condition-only zone
+//   (Stinking Cloud, Entangle).
+// - `conditionOnFail` set → applies the condition when the save
+//   fails (or unconditionally when no save). Gated by the target's
+//   existing condition immunities via `isImmuneToCondition`.
 const SpellAuraDamageMechanicSchema = z.object({
   kind: z.literal('aura-damage'),
   rangeFeet: z.number().int().min(0),
-  saveAbility: AbilityScoreSchema,
+  saveAbility: AbilityScoreSchema.optional(),
   damageDice: DiceExpressionSchema.optional(),
   damageType: DamageTypeSchema.optional(),
   halfOnSuccess: z.boolean().default(true),

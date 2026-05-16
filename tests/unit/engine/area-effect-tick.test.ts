@@ -81,6 +81,34 @@ describe('aura-damage mechanic: condition + damage extensions', () => {
     expect(proven, 'no failed save observed in seed search').toBe(true);
   });
 
+  it('Cloud of Daggers deals slashing damage with no save (no SaveRolled event)', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+    const caster = buildCaster('cloud-of-daggers');
+    const target = buildTarget();
+    let campaign = engine.createCampaign({ name: 'cod' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: caster } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    const castEvents = engine.plan.castSpell(campaign.state, {
+      characterId: caster.id,
+      spellId: 'cloud-of-daggers',
+      slotLevel: 2,
+      targetIds: [],
+    }).events;
+    campaign = commit(campaign, castEvents);
+
+    const tickEvents = engine.plan.tickAura(campaign.state, {
+      casterId: caster.id,
+      targetIds: [target.id],
+    }).events;
+    const save = tickEvents.find((e) => e.type === 'SaveRolled');
+    expect(save, 'no-save mechanic should not roll a save').toBeUndefined();
+    const damage = tickEvents.find((e) => e.type === 'DamageApplied');
+    expect(damage).toBeDefined();
+    expect(damage!.components.some((c) => c.type === 'slashing')).toBe(true);
+  });
+
   it('Wall of Fire deals fire damage on tick (with optional half on success)', () => {
     let proven = false;
     for (let seed = 1; seed < 60 && !proven; seed += 1) {
