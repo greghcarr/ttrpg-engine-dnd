@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 378 / ~378 | ~378 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 across L0–L8. Cantrips through L8 each ship every PHB 2024 entry. ~127 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7, ~6 L8) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L9 not yet in pack. |
+| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~130 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5, ~10 L6, ~5 L7, ~6 L8, ~3 L9) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~270 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -163,7 +163,11 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 **Schema-only (13):** the big-shape transformations and rituals — antimagic-field (magic suppression), antipathy-sympathy (type-conditional buff), clone (resurrection-on-death), demiplane / maze (extradimensional / single-target plane shift), control-weather (environment primitive), earthquake (multi-stage terrain area), holy-aura (multi-effect aura), mind-blank (multi-type immunity), power-word-stun (HP-threshold tier effect), animal-shapes (mass transformation), glibness / telepathy (narrative).
 
-### L9: 0 / ~12
+### L9: 21 / ~21 (full PHB list)
+
+**Wired (3):** mass-heal (flat 70 HP — RAW is a 700-HP pool but the existing heal mechanic doesn't carry a pool; approximation per target), psychic-scream (INT save with 14d6 psychic + stunned on fail), weird (WIS save with 4d10 psychic area + frightened on fail).
+
+**Schema-only (18):** the legendary effects — astral-projection / gate (cross-plane), foresight (multi-effect buff), imprisonment (6-variant utility), invulnerability (total damage immunity), mass-polymorph (multi-target transformation), meteor-swarm (multi-AoE multi-damage), power-word-heal (full heal + multi-condition remove), power-word-kill (HP-threshold), prismatic-wall (multi-layer wall), ravenous-void (forced-movement AoE), shapechange (transformation handler), storm-of-vengeance (multi-stage area), time-ravage (multi-effect single-target), time-stop (turn-economy), true-polymorph + true-resurrection + wish (each with a dedicated planner already shipped: polymorph, future resurrection, wish).
 
 Not in pack.
 
