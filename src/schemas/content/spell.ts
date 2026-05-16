@@ -86,21 +86,31 @@ const SpellHPPoolKnockoutMechanicSchema = z.object({
   conditionId: z.string(),
 });
 
-// Concentration aura that ticks per-turn against creatures in range.
-// Cast-time emits ConcentrationStarted only — no save or damage fires.
-// The consumer calls `engine.plan.tickAura({ casterId, targetIds })` at
-// the appropriate moments (entering the area / starting a turn in it,
-// per RAW) and the engine rolls a save and applies damage per target.
-// Used by Spirit Guardians (3d8 radiant or necrotic) and similar
-// concentration auras.
+// Concentration aura that ticks per-trigger against creatures in
+// range. Cast-time emits ConcentrationStarted only — no save or
+// damage fires. The consumer calls `engine.plan.tickAura({ casterId,
+// targetIds })` at the appropriate moments (entering the area /
+// starting a turn in it, per RAW) and the engine rolls a save and
+// applies damage and/or a condition per target.
+//
+// Used by Spirit Guardians (damage-only, 3d8 radiant or necrotic),
+// Stinking Cloud (condition-only, CON save vs `poisoned`),
+// Wall of Fire / Wall of Thorns / Wall of Ice / Blade Barrier
+// (damage + halfOnSuccess), and similar persistent area effects.
+//
+// `damageDice` and `damageType` are optional so condition-only zones
+// (Stinking Cloud, Entangle) can omit them. `conditionOnFail` applies
+// a condition to creatures that fail the save (gated by the target's
+// existing condition immunities — see isImmuneToCondition).
 const SpellAuraDamageMechanicSchema = z.object({
   kind: z.literal('aura-damage'),
   rangeFeet: z.number().int().min(0),
   saveAbility: AbilityScoreSchema,
-  damageDice: DiceExpressionSchema,
-  damageType: DamageTypeSchema,
+  damageDice: DiceExpressionSchema.optional(),
+  damageType: DamageTypeSchema.optional(),
   halfOnSuccess: z.boolean().default(true),
   extraDicePerSlotLevel: z.number().int().min(0).optional(),
+  conditionOnFail: z.string().optional(),
 });
 
 // Creates a controllable companion ("summon") under the caster's

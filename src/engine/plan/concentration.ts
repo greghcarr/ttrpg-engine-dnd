@@ -7,10 +7,11 @@ import type { DamageComponent } from '../../schemas/events/combat.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
-import { newEventId } from '../../ids.js';
+import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { computeSpellSaveDC } from '../../derive/spell-dc.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { isImmuneToCondition } from '../../derive/condition-immunity.js';
 import { D20_SIDES } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
@@ -256,33 +257,60 @@ export const planTickAura = (
     // Roll the damage once per target (per-target rolling is the RAW
     // for per-turn aura ticks — Spirit Guardians says "the creature
     // takes 3d8 damage" not "the spell rolls 3d8 once for all
-    // creatures hit").
-    const extraDice = (aura.extraDicePerSlotLevel ?? 0) * slotsAboveBase;
-    const parsed = parseDiceExpression(aura.damageDice);
-    const dieCount = parsed.count + extraDice;
-    let rawDamage = parsed.modifier;
-    for (let i = 0; i < dieCount; i++) {
-      rawDamage += rollDie(parsed.die, rng);
+    // creatures hit"). Damage is optional: condition-only zones
+    // (Stinking Cloud, Entangle) skip this block.
+    if (aura.damageDice !== undefined && aura.damageType !== undefined) {
+      const extraDice = (aura.extraDicePerSlotLevel ?? 0) * slotsAboveBase;
+      const parsed = parseDiceExpression(aura.damageDice);
+      const dieCount = parsed.count + extraDice;
+      let rawDamage = parsed.modifier;
+      for (let i = 0; i < dieCount; i++) {
+        rawDamage += rollDie(parsed.die, rng);
+      }
+      const halfOnSuccess = aura.halfOnSuccess !== false;
+      const final = success && halfOnSuccess ? Math.floor(rawDamage / 2) : success ? 0 : rawDamage;
+      if (final > 0) {
+        const mitigated = mitigateDamage({
+          character: target,
+          itemInstances: state.itemInstances,
+          content,
+          rawComponents: [{ amount: final, type: aura.damageType }],
+        });
+        events.push({
+          id: newEventId() as ULID,
+          at,
+          type: 'DamageApplied',
+          targetId: targetId as ULID,
+          components: mitigated,
+          causedByEventId: saveEvent.id,
+          sourceCharacterId: intent.casterId as ULID,
+          source: spell.id,
+        });
+      }
     }
-    const halfOnSuccess = aura.halfOnSuccess !== false;
-    const final = success && halfOnSuccess ? Math.floor(rawDamage / 2) : success ? 0 : rawDamage;
-    if (final <= 0) continue;
-    const mitigated = mitigateDamage({
-      character: target,
-      itemInstances: state.itemInstances,
-      content,
-      rawComponents: [{ amount: final, type: aura.damageType }],
-    });
-    events.push({
-      id: newEventId() as ULID,
-      at,
-      type: 'DamageApplied',
-      targetId: targetId as ULID,
-      components: mitigated,
-      causedByEventId: saveEvent.id,
-      sourceCharacterId: intent.casterId as ULID,
-      source: spell.id,
-    });
+
+    // On a failed save, apply the optional condition. Gated by the
+    // target's existing immunities so Aura of Courage's Frightened
+    // immunity (etc.) blocks the condition cleanly.
+    if (!success && aura.conditionOnFail !== undefined) {
+      const immune = isImmuneToCondition({
+        state,
+        content,
+        targetId,
+        conditionId: aura.conditionOnFail,
+      });
+      if (!immune) {
+        events.push({
+          id: newEventId() as ULID,
+          at,
+          type: 'ConditionApplied',
+          targetId: targetId as ULID,
+          conditionId: aura.conditionOnFail,
+          appliedConditionId: newAppliedConditionId(),
+          causedByEventId: saveEvent.id,
+        });
+      }
+    }
   }
   return events;
 };

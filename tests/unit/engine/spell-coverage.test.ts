@@ -262,7 +262,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'speak-with-dead': { kind: 'skip', reason: 'utility (question corpse), narrative only' },
   'speak-with-plants': { kind: 'skip', reason: 'utility (talk to plants), narrative only' },
   'spirit-shroud': { kind: 'skip', reason: 'caster-chosen damage type + on-hit rider; on-hit trigger + caster-chosen variant not modeled' },
-  'stinking-cloud': { kind: 'skip', reason: 'area + per-turn CON save → incapacitated; area-effect + recurring-rider mechanics not modeled' },
+  'stinking-cloud': { kind: 'skip', reason: 'aura-damage mechanic (condition-only via conditionOnFail: poisoned); fires via engine.plan.tickAura per-turn, not on cast' },
   'summon-fey': { kind: 'summon' },
   'summon-lesser-demons': { kind: 'summon' },
   'summon-shadowspawn': { kind: 'summon' },
@@ -311,7 +311,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'secret-chest': { kind: 'skip', reason: 'extradimensional storage utility; ethereal-stash primitive not modeled' },
   'stone-shape': { kind: 'skip', reason: 'utility shaping of stone; terrain primitive not modeled' },
   'stoneskin': { kind: 'skip', reason: 'resistance to nonmagical B/P/S; resistance qualifier (magical-vs-nonmagical) not modeled' },
-  'wall-of-fire': { kind: 'skip', reason: '60-ft wall dealing damage on entry + at end of turn; area-effect mechanic with side-selectable damage not modeled' },
+  'wall-of-fire': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 5d8 fire, half on success); fires via engine.plan.tickAura per-turn, not on cast. RAW side-selectable damage isn\'t expressed.' },
   'watery-sphere': { kind: 'skip', reason: 'STR save sphere prison + movement; multi-target movement-restriction primitive not modeled' },
   // PHB 2024 L5 spells with wired mechanics
   'cloudkill': { kind: 'save' },
@@ -374,7 +374,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'sunbeam': { kind: 'save' },
   // PHB 2024 L6 spells shipped schema-only; see docs/starter-pack-gaps.md.
   'arcane-gate': { kind: 'skip', reason: 'two-portal teleport between linked points; portal primitive not modeled' },
-  'blade-barrier': { kind: 'skip', reason: 'wall of whirling blades dealing damage on entry; area-wall primitive not modeled' },
+  'blade-barrier': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 6d10 slashing); fires via engine.plan.tickAura per-turn, not on cast' },
   'conjure-fey': { kind: 'skip', reason: 'CR-6+ fey summon with subclass-flavored statblock; advanced summon primitive not modeled' },
   'contingency': { kind: 'skip', reason: 'pre-stored conditional spell; conditional-cast primitive not modeled' },
   'create-undead': { kind: 'skip', reason: 'creates ghoul / ghast servitors; undead-creation primitive not modeled' },
@@ -397,8 +397,8 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'tashas-otherworldly-guise': { kind: 'skip', reason: 'self transformation with fly + damage rider + AC override; multi-effect transformation primitive not modeled' },
   'tensers-transformation': { kind: 'skip', reason: 'self-buff transformation granting weapon proficiencies + temp HP + extra damage; multi-effect transformation primitive not modeled' },
   'true-seeing': { kind: 'skip', reason: 'truesight 120 ft + sees illusions / ethereal / shapechangers; multi-effect detection primitive not modeled' },
-  'wall-of-ice': { kind: 'skip', reason: 'wall with on-entry damage + persistent terrain; area-wall primitive not modeled' },
-  'wall-of-thorns': { kind: 'skip', reason: 'wall with on-entry damage + difficult terrain; area-wall primitive not modeled' },
+  'wall-of-ice': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 10d6 cold, half on success); fires via engine.plan.tickAura per-turn, not on cast. RAW persistent terrain block-passage isn\'t expressed.' },
+  'wall-of-thorns': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 7d8 piercing, half on success); fires via engine.plan.tickAura per-turn, not on cast. RAW difficult-terrain side-effect isn\'t expressed.' },
   'wind-walk': { kind: 'skip', reason: 'mass cloud-travel transformation; multi-target transformation primitive not modeled' },
   'word-of-recall': { kind: 'skip', reason: 'instant teleport to a designated sanctuary; teleport-network primitive not modeled' },
   // PHB 2024 L7 spells with wired mechanics
