@@ -25,6 +25,11 @@ export interface ComputeSaveInput {
   readonly content: ResolvedContent;
   readonly ability: AbilityScore;
   readonly pendingChoices?: Readonly<Record<string, import('../schemas/runtime/pending-choice.js').PendingChoice>>;
+  // Optional: when provided, source-relative formulas on the
+  // target's applied conditions (Aura of Protection's +CHA-mod-of-
+  // source, etc.) resolve via the linked source character. Omitting
+  // it makes those formulas evaluate to 0.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 const isSaveProficient = (character: Character, ability: AbilityScore, content: ResolvedContent): boolean => {

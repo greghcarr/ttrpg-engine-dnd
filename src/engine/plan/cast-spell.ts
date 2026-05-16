@@ -287,6 +287,7 @@ const planSaveMechanic = (
       itemInstances: state.itemInstances,
       content,
       ability: mechanic.ability,
+      characters: state.characters,
     });
     const d20 = rollDie(D20_SIDES, rng);
     const total = d20 + saveDerivation.total;

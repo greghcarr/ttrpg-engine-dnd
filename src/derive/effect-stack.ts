@@ -4,6 +4,9 @@ import type { PendingChoice } from '../schemas/runtime/pending-choice.js';
 import type { Effect } from '../schemas/effects.js';
 import type { ResolvedContent } from '../content/pack.js';
 import { EffectAccumulator, applyEffectToBuilder } from '../effects/builder.js';
+import type { FormulaContext } from '../effects/formula.js';
+import { computeTotalLevel } from '../schemas/runtime/character.js';
+import { proficiencyBonus } from './ability.js';
 
 const collectResolvedChoiceEffects = (
   character: Character,
@@ -107,7 +110,28 @@ export interface BuildEffectStackInput {
   readonly content: ResolvedContent;
   readonly itemInstances: Readonly<Record<string, ItemInstance>>;
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
+  // Optional: when provided, condition effects with an
+  // `AppliedCondition.sourceCharacterId` link resolve source-relative
+  // formulas (e.g., `sourceAbilityMod` for Aura of Protection's
+  // +CHA-mod-to-saves) by looking up the source's stats here.
+  // Callers that don't care about source-relative formulas can omit
+  // this; those formulas evaluate to 0 in their absence.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
+
+const buildFormulaContext = (character: Character): FormulaContext => {
+  const totalLevel = computeTotalLevel(character);
+  const classLevels = new Map<string, number>();
+  for (const enrollment of character.classes) {
+    classLevels.set(enrollment.classId, enrollment.level);
+  }
+  return {
+    abilityScores: character.abilityScores,
+    proficiencyBonus: proficiencyBonus(totalLevel),
+    classLevels,
+    totalLevel,
+  };
+};
 
 export const collectEffectsFromCharacter = (input: BuildEffectStackInput): Effect[] => {
   const { character, content, itemInstances, pendingChoices } = input;
@@ -127,38 +151,65 @@ export const collectEffectsFromCharacter = (input: BuildEffectStackInput): Effec
 };
 
 export const buildEffectStack = (input: BuildEffectStackInput): EffectAccumulator => {
-  const { character, content, itemInstances, pendingChoices } = input;
+  const { character, content, itemInstances, pendingChoices, characters } = input;
   const acc = new EffectAccumulator();
+  const targetFormulaContext = buildFormulaContext(character);
 
   const species = content.species.get(character.speciesId);
   if (species) {
     for (const effect of species.traits) {
-      applyEffectToBuilder(effect, acc, { source: `species:${species.id}` });
+      applyEffectToBuilder(effect, acc, {
+        source: `species:${species.id}`,
+        formulaContext: targetFormulaContext,
+      });
     }
   }
 
   const background = content.backgrounds.get(character.backgroundId);
   if (background) {
     for (const effect of background.traits) {
-      applyEffectToBuilder(effect, acc, { source: `background:${background.id}` });
+      applyEffectToBuilder(effect, acc, {
+        source: `background:${background.id}`,
+        formulaContext: targetFormulaContext,
+      });
     }
   }
 
   for (const effect of collectClassEffects(character, content)) {
-    applyEffectToBuilder(effect, acc, { source: 'class' });
+    applyEffectToBuilder(effect, acc, { source: 'class', formulaContext: targetFormulaContext });
   }
   for (const effect of collectFeatEffects(character, content)) {
-    applyEffectToBuilder(effect, acc, { source: 'feat' });
+    applyEffectToBuilder(effect, acc, { source: 'feat', formulaContext: targetFormulaContext });
   }
   for (const effect of collectItemEffects(character, itemInstances, content)) {
-    applyEffectToBuilder(effect, acc, { source: 'item' });
+    applyEffectToBuilder(effect, acc, { source: 'item', formulaContext: targetFormulaContext });
   }
-  for (const effect of collectConditionEffects(character, content)) {
-    applyEffectToBuilder(effect, acc, { source: 'condition' });
+
+  // Conditions get per-applied-condition handling so that formula
+  // evaluation can read the source character's stats (Aura of
+  // Protection's +CHA-mod-of-source, etc.) when AppliedCondition
+  // carries a `sourceCharacterId` link.
+  for (const applied of character.appliedConditions) {
+    const condition = content.conditions.get(applied.conditionId);
+    if (condition === undefined) continue;
+    const sourceCharacter =
+      applied.sourceCharacterId !== undefined && characters !== undefined
+        ? characters[applied.sourceCharacterId]
+        : undefined;
+    const conditionFormulaContext: FormulaContext = sourceCharacter !== undefined
+      ? { ...targetFormulaContext, source: { abilityScores: sourceCharacter.abilityScores } }
+      : targetFormulaContext;
+    for (const effect of condition.effects) {
+      applyEffectToBuilder(effect, acc, {
+        source: 'condition',
+        formulaContext: conditionFormulaContext,
+      });
+    }
   }
+
   if (pendingChoices) {
     for (const effect of collectResolvedChoiceEffects(character, pendingChoices)) {
-      applyEffectToBuilder(effect, acc, { source: 'choice' });
+      applyEffectToBuilder(effect, acc, { source: 'choice', formulaContext: targetFormulaContext });
     }
   }
 

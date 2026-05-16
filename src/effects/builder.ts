@@ -1,5 +1,6 @@
 import type { Effect, ModifierTarget, RollTarget } from '../schemas/effects.js';
 import type { AbilityScore, DamageType, Skill } from '../schemas/primitives.js';
+import { evaluateFormula, type FormulaContext } from './formula.js';
 
 const modifierKey = (target: ModifierTarget): string => {
   if (typeof target === 'string') return target;
@@ -251,6 +252,13 @@ export class EffectAccumulator {
 
 export interface BuilderContext {
   readonly source: string;
+  // When provided, Formula values inside an AddModifier (and similar
+  // effects that accept Formula) are evaluated to numbers as the
+  // effect is folded into the accumulator. Auras and source-relative
+  // modifiers (e.g., +CHA-mod-of-source to ally saves) need this
+  // threaded through. Callers that only deal with numeric values can
+  // omit it; Formula values then drop silently.
+  readonly formulaContext?: FormulaContext;
 }
 
 export const applyEffectToBuilder = (
@@ -262,6 +270,9 @@ export const applyEffectToBuilder = (
     case 'AddModifier': {
       if (typeof effect.value === 'number') {
         acc.addModifier(effect.target, effect.value, ctx.source);
+      } else if (ctx.formulaContext !== undefined) {
+        const value = evaluateFormula(effect.value, ctx.formulaContext);
+        acc.addModifier(effect.target, value, ctx.source);
       }
       return;
     }

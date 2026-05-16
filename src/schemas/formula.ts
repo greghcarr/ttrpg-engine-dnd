@@ -16,6 +16,16 @@ const AbilityModNodeSchema = z.object({
   ability: AbilityScoreSchema,
 });
 
+// Resolves to the ability modifier of the *source* character of the
+// effect this formula is attached to (e.g., an aura condition's
+// AddModifier reading the aura source's CHA mod). The link is via
+// AppliedCondition.sourceCharacterId at the runtime layer; this
+// formula kind evaluates to 0 if no source character is in scope.
+const SourceAbilityModNodeSchema = z.object({
+  kind: z.literal('sourceAbilityMod'),
+  ability: AbilityScoreSchema,
+});
+
 const ProfBonusNodeSchema = z.object({
   kind: z.literal('profBonus'),
 });
@@ -71,6 +81,7 @@ export type Formula =
   | z.infer<typeof ConstNodeSchema>
   | z.infer<typeof AbilityNodeSchema>
   | z.infer<typeof AbilityModNodeSchema>
+  | z.infer<typeof SourceAbilityModNodeSchema>
   | z.infer<typeof ProfBonusNodeSchema>
   | z.infer<typeof LevelNodeSchema>
   | z.infer<typeof ClassColumnNodeSchema>
@@ -87,6 +98,7 @@ export const FormulaSchema: z.ZodType<Formula> = z.lazy(() =>
     ConstNodeSchema,
     AbilityNodeSchema,
     AbilityModNodeSchema,
+    SourceAbilityModNodeSchema,
     ProfBonusNodeSchema,
     LevelNodeSchema,
     ClassColumnNodeSchema,

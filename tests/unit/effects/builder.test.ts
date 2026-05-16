@@ -19,7 +19,7 @@ describe('EffectAccumulator', () => {
     expect(acc.modifierBreakdown('ac')).toHaveLength(2);
   });
 
-  it('AddModifier with formula is not yet supported numerically (no contribution)', () => {
+  it('AddModifier with a formula drops silently when no formulaContext is provided', () => {
     const acc = new EffectAccumulator();
     applyEffectToBuilder(
       {
@@ -31,6 +31,53 @@ describe('EffectAccumulator', () => {
       { source: 'formula-source' },
     );
     expect(acc.modifierSum('ac')).toBe(0);
+  });
+
+  it('AddModifier with a formula evaluates when formulaContext is supplied', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'AddModifier',
+        target: 'ac',
+        value: { kind: 'const', value: 5 },
+      } satisfies Effect,
+      acc,
+      {
+        source: 'formula-source',
+        formulaContext: {
+          abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+          proficiencyBonus: 2,
+          classLevels: new Map(),
+          totalLevel: 1,
+        },
+      },
+    );
+    expect(acc.modifierSum('ac')).toBe(5);
+  });
+
+  it('sourceAbilityMod resolves against the formulaContext source character', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'AddModifier',
+        target: { kind: 'save', ability: 'WIS' },
+        value: { kind: 'sourceAbilityMod', ability: 'CHA' },
+      } satisfies Effect,
+      acc,
+      {
+        source: 'aura-source',
+        formulaContext: {
+          abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+          proficiencyBonus: 2,
+          classLevels: new Map(),
+          totalLevel: 1,
+          source: {
+            abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 18 },
+          },
+        },
+      },
+    );
+    expect(acc.modifierSum({ kind: 'save', ability: 'WIS' })).toBe(4);
   });
 
   it('SetAdvantage records advantage state', () => {

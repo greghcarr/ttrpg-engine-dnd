@@ -354,7 +354,7 @@
         "3": { "proficiencyBonus": 2, "features": [{ "id": "channel-divinity-paladin", "name": "Channel Divinity", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 2, "recharge": "shortRest" }] }], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-paladin", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "faithful-steed", "name": "Faithful Steed", "effects": [] }], "columns": {} },
-        "6": { "proficiencyBonus": 3, "features": [{ "id": "aura-of-protection", "name": "Aura of Protection", "effects": [] }], "columns": {} },
+        "6": { "proficiencyBonus": 3, "features": [{ "id": "aura-of-protection", "name": "Aura of Protection", "effects": [{ "kind": "GrantAura", "auraId": "aura-of-protection", "rangeFeet": 10, "allyConditionId": "aura-of-protection-active", "description": "You and allies within 10 ft add your CHA modifier (min +1) to saving throws." }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "STR" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "DEX" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "CON" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] } }] }], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "abjure-foes", "name": "Abjure Foes", "effects": [] }], "columns": {} },
@@ -2255,6 +2255,21 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "aura-of-protection-active",
+      "name": "Aura of Protection Active",
+      "description": "CHA-modifier bonus to all saves (min +1) granted by a nearby Paladin's L6+ Aura of Protection. The bonus reads the source Paladin's CHA score via the AppliedCondition sourceCharacterId link.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "STR" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "DEX" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CON" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } },
+        { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "sourceAbilityMod", "ability": "CHA" }] } }
       ]
     },
     {

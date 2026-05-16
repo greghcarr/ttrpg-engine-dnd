@@ -8,6 +8,14 @@ export interface FormulaContext {
   readonly classLevels: ReadonlyMap<string, number>;
   readonly classColumns?: ReadonlyMap<string, ReadonlyMap<string, number>>;
   readonly totalLevel: number;
+  // Stats of the *source* character of the effect this formula is
+  // attached to. Populated by the effect-stack builder when an
+  // AppliedCondition carries a `sourceCharacterId` link (auras,
+  // Bless-from-X, etc.). The `sourceAbilityMod` formula kind reads
+  // from this; absence evaluates to 0.
+  readonly source?: {
+    readonly abilityScores: Readonly<Record<AbilityScore, number>>;
+  };
 }
 
 export const abilityModifier = (score: number): number => Math.floor((score - 10) / 2);
@@ -26,6 +34,9 @@ export const evaluateFormula = (formula: Formula, ctx: FormulaContext): number =
       return ctx.abilityScores[formula.ability];
     case 'abilityMod':
       return abilityModifier(ctx.abilityScores[formula.ability]);
+    case 'sourceAbilityMod':
+      if (ctx.source === undefined) return 0;
+      return abilityModifier(ctx.source.abilityScores[formula.ability]);
     case 'profBonus':
       return ctx.proficiencyBonus;
     case 'level': {
