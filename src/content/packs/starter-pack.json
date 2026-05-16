@@ -1756,7 +1756,7 @@
     { "id": "slow", "name": "Slow", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true, "material": "a drop of molasses" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "targeting": { "shape": "cube", "size": 40 }, "mechanicalEffects": [] },
     { "id": "speak-with-dead", "name": "Speak with Dead", "level": 3, "school": "necromancy", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true, "material": "burning incense" }, "duration": "10 minutes", "concentration": false, "ritual": false, "classes": ["bard", "cleric"], "mechanicalEffects": [] },
     { "id": "speak-with-plants", "name": "Speak with Plants", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "10 minutes", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger"], "targeting": { "shape": "sphere", "size": 30 }, "mechanicalEffects": [] },
-    { "id": "spirit-shroud", "name": "Spirit Shroud", "level": 3, "school": "necromancy", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [] },
+    { "id": "spirit-shroud", "name": "Spirit Shroud", "level": 3, "school": "necromancy", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "targeting": { "shape": "sphere", "size": 10 }, "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "cold", "conditionId": "spirit-shroud-cold-active" }, { "key": "necrotic", "conditionId": "spirit-shroud-necrotic-active" }, { "key": "radiant", "conditionId": "spirit-shroud-radiant-active" }] } }] },
     { "id": "stinking-cloud", "name": "Stinking Cloud", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a rotten egg or several skunk cabbage leaves" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 20, "saveAbility": "CON", "halfOnSuccess": false, "conditionOnFail": "poisoned" }] },
     { "id": "summon-fey", "name": "Summon Fey", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a gilded flower worth 300+ GP" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Fey Spirit", "ac": 12, "hpBase": 30, "hpPerSlotAbove": 10, "baseSlotLevel": 3, "speedFeet": 40 }] },
     { "id": "summon-lesser-demons", "name": "Summon Lesser Demons", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a vial of blood from a humanoid killed within the past 24 hours" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Lesser Demon", "ac": 13, "hpBase": 18, "hpPerSlotAbove": 5, "baseSlotLevel": 3, "speedFeet": 30 }] },
@@ -2730,6 +2730,60 @@
       "endsOn": [],
       "effects": [
         { "kind": "AddModifier", "target": { "kind": "skill", "skill": "stealth" }, "value": 10 }
+      ]
+    },
+    {
+      "id": "spirit-shroud-cold-active",
+      "name": "Spirit Shroud: Cold",
+      "description": "Caster's weapon attacks deal +1d8 cold damage on hit. RAW gates this on the target being within 10 ft of the caster — not modeled, the rider fires on every hit (broader than RAW). Slot-level scaling (+1d8 per slot above 3rd, up to +7d8 at slot 9) isn't baked into the condition definition. The 'target can't regain HP until start of caster's next turn' rider needs a heal-blocking primitive that doesn't exist yet.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "spirit-shroud-cold-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "cold" }]
+        }
+      ]
+    },
+    {
+      "id": "spirit-shroud-necrotic-active",
+      "name": "Spirit Shroud: Necrotic",
+      "description": "Caster's weapon attacks deal +1d8 necrotic damage on hit. Same shape as the cold variant — RAW range gate, slot-level scaling, and heal-blocking rider all unmodeled (see cold variant description).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "spirit-shroud-necrotic-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" }]
+        }
+      ]
+    },
+    {
+      "id": "spirit-shroud-radiant-active",
+      "name": "Spirit Shroud: Radiant",
+      "description": "Caster's weapon attacks deal +1d8 radiant damage on hit. Same shape as the cold variant — RAW range gate, slot-level scaling, and heal-blocking rider all unmodeled (see cold variant description).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "spirit-shroud-radiant-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "radiant" }]
+        }
       ]
     },
     {

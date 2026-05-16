@@ -484,6 +484,21 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "spirit-shroud-cold-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "spirit-shroud-necrotic-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "spirit-shroud-radiant-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 2,
     "id": "stunned",
     "stackable": false,

@@ -263,7 +263,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'slow': { kind: 'skip', reason: 'area + multi-effect WIS save (speed half + no reactions + delayed action); composite area condition not modeled' },
   'speak-with-dead': { kind: 'skip', reason: 'utility (question corpse), narrative only' },
   'speak-with-plants': { kind: 'skip', reason: 'utility (talk to plants), narrative only' },
-  'spirit-shroud': { kind: 'skip', reason: 'caster-chosen damage type + on-hit rider; on-hit trigger + caster-chosen variant not modeled' },
+  'spirit-shroud': { kind: 'buff', conditionId: 'spirit-shroud-cold-active', casterChoice: { kind: 'variant', value: 'cold' } },
   'stinking-cloud': { kind: 'skip', reason: 'aura-damage mechanic (condition-only via conditionOnFail: poisoned); fires via engine.plan.tickAura per-turn, not on cast' },
   'summon-fey': { kind: 'summon' },
   'summon-lesser-demons': { kind: 'summon' },
