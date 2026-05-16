@@ -1654,7 +1654,7 @@
     { "id": "purify-food-and-drink", "name": "Purify Food and Drink", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "paladin"], "mechanicalEffects": [] },
     { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
     { "id": "searing-smite", "name": "Searing Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "searing-smite-active" }] },
-    { "id": "shield-of-faith", "name": "Shield of Faith", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a small parchment with a bit of holy text" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [] },
+    { "id": "shield-of-faith", "name": "Shield of Faith", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a small parchment with a bit of holy text" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "shield-of-faith-active" }] },
     { "id": "silent-image", "name": "Silent Image", "level": 1, "school": "illusion", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "speak-with-animals", "name": "Speak with Animals", "level": 1, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "10 minutes", "concentration": false, "ritual": true, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
     { "id": "thunderous-smite", "name": "Thunderous Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "thunderous-smite-active" }] },
@@ -1676,7 +1676,7 @@
     { "id": "animal-messenger", "name": "Animal Messenger", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a morsel of food" }, "duration": "24 hours", "concentration": false, "ritual": true, "classes": ["bard", "druid", "ranger"], "mechanicalEffects": [] },
     { "id": "arcane-lock", "name": "Arcane Lock", "level": 2, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "gold dust worth 25+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "augury", "name": "Augury", "level": 2, "school": "divination", "castingTime": "1 minute", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "specially marked sticks, bones, or cards worth 25+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "wizard"], "mechanicalEffects": [] },
-    { "id": "barkskin", "name": "Barkskin", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a handful of oak bark" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
+    { "id": "barkskin", "name": "Barkskin", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a handful of oak bark" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "barkskin-active" }] },
     { "id": "blur", "name": "Blur", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "blurred-active" }] },
     { "id": "branding-smite", "name": "Branding Smite", "level": 2, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "branding-smite-active" }] },
     { "id": "calm-emotions", "name": "Calm Emotions", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "cleric"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [] },
@@ -2442,6 +2442,26 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantConditionImmunity", "conditionId": "frightened" }
+      ]
+    },
+    {
+      "id": "shield-of-faith-active",
+      "name": "Shielded by Faith",
+      "description": "+2 bonus to AC while concentration on Shield of Faith holds.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "AddModifier", "target": "ac", "value": 2 }
+      ]
+    },
+    {
+      "id": "barkskin-active",
+      "name": "Bark-Skinned",
+      "description": "AC can't be lower than 17 regardless of armor (the floor bumps natural AC if it would otherwise be lower).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetACFloor", "value": 17 }
       ]
     },
     {

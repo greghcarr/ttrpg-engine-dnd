@@ -97,8 +97,27 @@ export interface ComputeACInput {
   readonly pendingChoices?: Readonly<Record<string, import('../schemas/runtime/pending-choice.js').PendingChoice>>;
 }
 
+// Bump the natural AC up to the floor when an effect (Barkskin etc.)
+// supplies one. The breakdown gains a "floor:<source>" entry showing
+// the delta so the natural computation stays visible. If natural AC
+// already meets or exceeds the floor, nothing changes.
+const applyACFloor = (
+  natural: { total: number; breakdown: ACBreakdownEntry[] },
+  floor: { value: number; source: string } | undefined,
+): ACResult => {
+  if (floor === undefined || natural.total >= floor.value) {
+    return { total: natural.total, breakdown: natural.breakdown };
+  }
+  const delta = floor.value - natural.total;
+  return {
+    total: floor.value,
+    breakdown: [...natural.breakdown, { source: `floor:${floor.source}`, value: delta }],
+  };
+};
+
 export const computeAC = (input: ComputeACInput): ACResult => {
   const effects = buildEffectStack(input);
+  const floor = effects.effectiveACFloor();
 
   // A flat `armorClass` on the character takes precedence over equipment
   // and effect-based overrides. It's used by creatures whose AC comes
@@ -114,7 +133,7 @@ export const computeAC = (input: ComputeACInput): ACResult => {
       breakdown.push({ source: 'modifier', value: modifierBonus });
     }
     const total = breakdown.reduce((acc, entry) => acc + entry.value, 0);
-    return { total, breakdown };
+    return applyACFloor({ total, breakdown }, floor);
   }
 
   const armorInstanceId = input.character.equipped.armor;
@@ -133,5 +152,5 @@ export const computeAC = (input: ComputeACInput): ACResult => {
   }
 
   const total = breakdown.reduce((acc, entry) => acc + entry.value, 0);
-  return { total, breakdown };
+  return applyACFloor({ total, breakdown }, floor);
 };

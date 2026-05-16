@@ -68,6 +68,7 @@ export class EffectAccumulator {
   private readonly vulnerabilities = new Set<DamageType>();
   private readonly conditionImmunities = new Set<string>();
   private readonly acOverrides: ACOverride[] = [];
+  private readonly acFloors: { value: number; source: string }[] = [];
   private readonly resourceGrants: ResourceGrant[] = [];
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
@@ -115,6 +116,9 @@ export class EffectAccumulator {
   }
   addACOverride(override: ACOverride): void {
     this.acOverrides.push(override);
+  }
+  addACFloor(value: number, source: string): void {
+    this.acFloors.push({ value, source });
   }
   addResourceGrant(grant: ResourceGrant): void {
     this.resourceGrants.push(grant);
@@ -189,6 +193,12 @@ export class EffectAccumulator {
     if (this.acOverrides.length === 0) return undefined;
     return this.acOverrides.reduce((best, current) =>
       current.priority > best.priority ? current : best,
+    );
+  }
+  effectiveACFloor(): { value: number; source: string } | undefined {
+    if (this.acFloors.length === 0) return undefined;
+    return this.acFloors.reduce((best, current) =>
+      current.value > best.value ? current : best,
     );
   }
   resources(): ReadonlyArray<ResourceGrant> {
@@ -299,6 +309,9 @@ export const applyEffectToBuilder = (
         priority: effect.priority ?? 0,
         source: ctx.source,
       });
+      return;
+    case 'SetACFloor':
+      acc.addACFloor(effect.value, ctx.source);
       return;
     case 'GrantResource':
       if (typeof effect.max === 'number') {

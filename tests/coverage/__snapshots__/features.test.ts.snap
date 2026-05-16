@@ -209,6 +209,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 1,
+    "id": "barkskin-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 7,
     "id": "blessed",
     "stackable": false,
@@ -351,6 +356,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "searing-smite-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "shield-of-faith-active",
     "stackable": false,
   },
   {

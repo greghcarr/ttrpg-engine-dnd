@@ -127,6 +127,14 @@ export type Effect =
   | { kind: 'GrantVulnerability'; damageType: DamageType }
   | { kind: 'GrantConditionImmunity'; conditionId: string }
   | { kind: 'OverrideACFormula'; base: number | 'dex' | 'con' | 'wis'; abilityModifiers: AbilityScore[]; dexCap?: number; priority?: number }
+  // Sets a floor on the target's AC: after the natural AC is computed
+  // from armor + DEX + modifiers, the result is bumped up to `value`
+  // if it would otherwise be lower. Used by Barkskin (AC can't be
+  // lower than 17 regardless of armor) and similar "minimum AC"
+  // effects. Multiple floors fold to the highest. Distinct from
+  // OverrideACFormula (which replaces the formula entirely and only
+  // applies when unarmored).
+  | { kind: 'SetACFloor'; value: number }
   | { kind: 'GrantResource'; resourceId: string; max: number | Formula; recharge: Recharge; diceSize?: number }
   | { kind: 'GrantSpellSlots'; level: SpellLevel; count: number; source: 'full' | 'half' | 'third' | 'pact' }
   | { kind: 'GrantSpell'; spellId: string; preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest'; spellcastingAbility?: AbilityScore }
@@ -233,6 +241,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       abilityModifiers: z.array(AbilityScoreSchema),
       dexCap: z.number().optional(),
       priority: z.number().int().optional(),
+    }),
+    z.object({
+      kind: z.literal('SetACFloor'),
+      value: z.number().int().min(1),
     }),
     z.object({
       kind: z.literal('GrantResource'),
@@ -379,6 +391,7 @@ export const EFFECT_KINDS = [
   'GrantVulnerability',
   'GrantConditionImmunity',
   'OverrideACFormula',
+  'SetACFloor',
   'GrantResource',
   'GrantSpellSlots',
   'GrantSpell',
