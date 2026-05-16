@@ -1,184 +1,114 @@
 # Trustworthiness Roadmap
 
-What it would take for `ttrpg-engine-dnd` to be safely usable for an unsupervised tabletop session against 5.5e (2024) rules. This is a planning doc, not a marketing one — it's intentionally pessimistic about the current state so the prioritization stays honest.
+What it takes for `ttrpg-engine-dnd` to be safely usable for an unsupervised tabletop session against 5.5e (2024) rules. This is a planning doc, not a marketing one — pessimistic about current state, optimistic only about where the work is going.
 
-The doc is structured as four tiers. Each tier is a precondition for the next. The current state of the engine sits **inside Tier 1** (some Tier-1 work is done, most isn't).
-
-Last calibrated: 2026-05-14, against working-tree commit on the `web-demo` line of work, post-`0.1.0-alpha.4`.
+Last calibrated: 2026-05-16, post-slice-100.
 
 ---
 
 ## What "trustworthy" means here
 
-A working definition, in three sentences. **The engine is trustworthy** when (a) every rule it claims to enforce, it actually enforces; (b) every content entry in the shipped pack has matching engine behavior; (c) a DM who knows 5e/5.5e can run a session without watching the engine for rules cheats. None of those are true today.
+A working definition, in three sentences. **The engine is trustworthy** when (a) every rule it claims to enforce, it actually enforces; (b) every content entry in the shipped pack has matching engine behavior; (c) a DM who knows 5e/5.5e can run a session without watching the engine for rules cheats. (a) and (b) are substantially true today for low-level play; (c) requires more property-test fuzzing and adversarial probing than the current 48-probe audit affords.
 
-The corresponding non-goals: this doc does not target homebrew system support, optional variant rules (sanity / mass combat / hero points are out unless explicitly toggled on), or third-party content packs.
+Non-goals: homebrew system support, optional variant rules (sanity / mass combat are inert unless explicitly toggled, and stay that way), third-party content packs.
 
 ---
 
 ## Current state honest summary
 
-- **17 known RAW violations**, 10 🔴 / 4 🟡 / 3 ⚪. Documented in [README.md](../README.md) under "Known gaps → Engine gaps." Audit file: [tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts).
-- **The audit covers 17 rules out of hundreds.** Every adversarial probe we've run so far has found at least one bug. There's no reason to believe that pattern stops at the current floor.
-- **Content slice ≪ SRD.** 36 of 48 class features at L1–5 are wired (12 stubs), 12 of ~50 subclasses, ~26 of ~370 spells, 9 of hundreds of magic items, 6 of hundreds of monster statblocks. Documented in [README.md](../README.md) under "Content gaps."
-- **"Wired" has meant content-side wiring, not RAW-side enforcement.** The Paralyzed condition is wired (effect stack reads it for advantage on attackers); but no planner stops a paralyzed actor from swinging a longsword. Same pattern likely lurks in other "wired" entries we haven't probed.
-
-The takeaway: alpha is alpha for these reasons, not just for API instability.
+- **48-probe RAW-compliance audit passes in full** ([tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts)). 0 🔴 / 0 🟡 open. Two ⚪ items remain (sanity, mass-combat variant rules; their flags toggle but the rule interpretation isn't wired).
+- **The audit's scope is 48 specific rules out of hundreds.** It's a floor, not a ceiling. Adversarial probing keeps finding edge cases that didn't make the initial list (Frightened source-tracking, Charmed attack-blocking, exhaustion progression beyond level 1, multiclass spell-slot edge cases, etc.). Each new category surfaces work the audit didn't anticipate.
+- **Engine vocabulary is still expanding.** Each remaining engine slice adds a small primitive (~50–200 LoC) that closes one named category from [docs/starter-pack-gaps.md](starter-pack-gaps.md). The architectural skeleton is locked; the long tail of "X mechanic for Y spell-cohort" is still being walked.
+- **Content slice is substantial but uneven.** 399 spells (every PHB 2024 entry; ~152 mechanically wired), 12 classes with full L1–L20 tables, 16/16 backgrounds, 25 conditions, 12 subclasses (L3 only). The big remaining gaps: ~250 schema-only spells, the L7+ subclass features, ~365 missing monster statblocks, the DMG magic-item catalog.
 
 ---
 
-## Tier 1: Close every documented RAW gap
+## Tier 1 — Close every documented RAW gap
 
-**Goal:** every row in [README.md](../README.md) "Engine gaps" tables either fixed or explicitly marked as deferred. Audit at [tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts) runs all green.
+**Goal:** the 48-probe audit runs all green, no 🔴 / 🟡 in the engine-gaps table.
 
-**Why this is first:** these are violations a player notices in their first session. Fixing them is the absolute precondition for "alpha is usable for play, with adult supervision."
+**Status:** **DONE.** All 48 probes pass. The historical sweep landed across the alpha.4 → alpha.5 work. Engine gaps reduced from 17 (alpha.3 calibration) to 0 🔴 + 0 🟡 + 2 ⚪.
 
-**Scope (17 items):**
-
-| Cluster | Severity | Item count | Fix shape |
-|---|---|---|---|
-| Conditions inert on actor | 🔴 | 9 | `assertActorCanAct(state, combatantId)` helper threaded through `planAttack`, `planMove`, `planDodge`, `planDash`, `planCastSpell`, `planOffHandAttack`. Treats `unconscious` / `incapacitated` / `stunned` / `paralyzed` / `petrified` as full action blocks. `Restrained` / `Grappled` zero out speed in `planMove`. |
-| Movement-driven OAs | 🔴 | 1 | Either richer return shape on `planMove` (`{ events, opportunities: OpportunityAvailable[] }`) or an additional event type the demo + tests can subscribe to. Consumers then dispatch `planOpportunityAttack` per opportunity. |
-| Concentration on HP=0 | 🔴 | 1 | `DamageApplied` reducer inline-calls the concentration-clear path when `character.hp.current` lands at 0. Removes the need for the consumer to call `planCheckConcentration` for the obvious case. |
-| Reaction cap | 🟡 | 1 | `planShield`, `planCounterspell`, and any other reactive-spell planner check `turnUsage.reactionUsedThisRound` and emit `ActionEconomyConsumed('reaction')`. |
-| Stand-from-prone | 🟡 | 1 | Clearing the `prone` condition during the actor's turn drains `turnUsage.feetMovedThisTurn` by `floor(speed / 2)`. |
-| Misty Step occupancy | 🟡 | 1 | Drop the `// consumer's responsibility` comment in `planMistyStep`; add the same blocker scan `planMove` got. |
-| Ranged in melee disadvantage | 🟡 | 1 | `planAttack` checks: if `attackKind === 'ranged'` AND there's a living, non-incapacitated hostile within 5 ft of attacker, force disadvantage. |
-| Variant rules (deferred) | ⚪ | 2 | `CampaignSettings.sanity` and `CampaignSettings.massCombat` stay inert until their dedicated slices land (Slice 46). Document as known. |
-
-Each fix lands with a regression test that lifts the corresponding `it()` in [tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts) from ✗ to ✓.
-
-**Cluster A is the single highest-leverage piece of work in the entire engine right now.** One helper closes nine 🔴s.
-
-**Definition of done for Tier 1:**
-- All 17 audit rows pass.
-- Every fix has a paired regression test outside the audit file (the audit is the high-level check; per-fix tests pin behavior).
-- README "Engine gaps" tables are emptied (or rows marked "✓ fixed in commit ###").
-- CHANGELOG entry summarizing the sweep.
+The two remaining ⚪ items (sanity and mass-combat variant rules) are deferred by design — their flags toggle but the rule interpretation needs its own slice each (sanity needs a 7th ability score path through character creation; mass combat needs a Squad entity + morale ladder + resolution planners). Neither blocks normal play; both stay opt-in.
 
 ---
 
-## Tier 2: Extend the audit until it actually probes RAW
+## Tier 2 — Extend the audit until it actually probes RAW
 
-**Goal:** the audit goes from "17 curated probes" to "categorical coverage of the rules an engine of this scope claims to enforce."
+**Goal:** the audit goes from "17 curated probes" to categorical coverage of the rules an engine of this scope claims to enforce.
 
-**Why this is second:** Tier 1 closes what we know about. The audit's current 17-rule scope was *me* picking the most likely-broken targets. The reason a Tier 1 sweep alone isn't enough is that we have no statistical reason to believe other categories are clean.
+**Status:** **PARTIAL.** The audit grew from 17 to 48 probes. Categories closed since the original framing:
 
-**Categories named but not yet probed:**
+- ✓ Frightened can't willingly move closer to source (source-tracking shipped slice-93 era).
+- ✓ Charmed can't attack the charmer (same source-tracking thread).
+- ✓ Two-weapon fighting light-only enforcement.
+- ✓ Heavy-weapon Small disadvantage.
+- ✓ Loading property on ranged weapons.
+- ✓ Difficult-terrain double cost via Bresenham per-cell summation in `planMove`.
+- ✓ Massive damage threshold uses `hp.max + hp.maxBonus`.
+- ✓ Concentration auto-clears on drop to 0 HP.
+- ✓ Reaction cap enforcement.
+- ✓ Stand-from-prone costs half speed.
+- ✓ Ranged-in-melee disadvantage.
+- ✓ Move-into-occupied-space rejection (and Misty Step occupancy check).
+- ✓ Multiclass slot math (full / half / pact tables, exhaustive boundary tests in [tests/boundaries/](../tests/boundaries/)).
+- ✓ Attacker-side `advantageFor('attack')` actually consulted (slice 97 — Blinded / Poisoned / Frightened / Prone / Restrained / Invisible all now affect the d20).
 
-| Category | Probe shape | Expected outcome | Effort |
-|---|---|---|---|
-| Frightened can't willingly move closer to source | Apply Frightened with a recorded source; attempt `planMove` toward that source; expect reject | Likely broken — engine doesn't model condition-source attribution per source-id | Medium (needs source-tracking on conditions) |
-| Charmed can't attack the charmer | Apply Charmed with charmer-id; attempt `planAttack` against charmer; expect reject | Likely broken — same source-tracking story | Medium |
-| Two-weapon fighting: light + light only | Equip non-light off-hand; attempt `planOffHandAttack`; expect reject | Unknown — `planOffHandAttack` exists but I haven't read its weapon-property check | Small |
-| Multiattack target legality | At L5+ Fighter, attempt sequential attacks across mixed targets and types; verify per-RAW restrictions | Likely some gaps | Medium |
-| Heavy weapon Small disadvantage | Build a Small character, equip a heavy weapon, attack; expect disadvantage flag | Likely broken | Small |
-| Loading property | Use a crossbow in multiattack; expect at most one shot per Attack action | Likely broken (engine doesn't track per-weapon loading state) | Small |
-| Cover bonuses | Position attacker with target behind half / three-quarters cover; expect +2 / +5 AC on the resolution | Likely not modeled at all (no cover field in encounter geometry) | Large (schema change) |
-| Difficult terrain 2× cost | Build encounter map with difficult-terrain cells; `planMove` through them; expect doubled cost | `movementCostFor` exists; `planMove` likely doesn't consult it | Medium |
-| Death save nat-1 = 2 fails | Force RNG to roll a 1 on a death save; expect failure count +2 | Probably wired (the reducer code path is well-tested in isolation); needs an `it()` for catastrophic regression catch | Small |
-| Auto-crit within 5 ft of Unconscious | Same as paralyzed-auto-crit probe, but with `unconscious` condition | Likely correct (Unconscious includes Paralyzed-equivalent attack-side effects) | Small |
-| Cast a spell (action) then Attack | Confirm `actionUsed` check fires the same way Dodge → Attack does | Probably correct (same `actionUsed` flag) | Small |
-| Concentration CON save on damage | Damage a concentrating caster; expect a `SaveRolled` event for the CON save | Likely the consumer is supposed to call `planCheckConcentration` themselves; verify | Medium |
-| Movement totalling > speed without Dash | Sequential `planMove` calls that together exceed speed; expect second to reject | Probably correct (the `feetMovedThisTurn` flag) | Small |
-| Spell range enforcement | Cast a spell at a target beyond `spell.range`; expect reject | Spotty — `planMistyStep` checks; `planCastSpell` for arbitrary spells likely doesn't | Medium |
-| Spellcaster ability rules at multiclass boundaries | Multi-class wizard + cleric; verify spell-attack mod is per-class | Probably correct (`computeSpellAttackBonus` takes classId); needs `it()` for regression | Small |
-| Slot consumption matches level cast | Cast Magic Missile at slot level 1, then again with no slots available; expect reject | Probably correct (planCastSpell guards); needs `it()` | Small |
-| Concurrent concentration ends prior one | Cast Bless, then Hold Person; expect Bless to end with `ConcentrationBroken(replaced)` | Probably correct (`planCastSpell` clears prior); needs `it()` | Small |
-| Attunement cap (3 items max) | Attune a 4th item; expect reject | Probably correct (`MAX_ATTUNED_ITEMS = 3` constant exists); needs `it()` | Small |
-| Exhaustion progression and effects | Apply exhaustion 1–6 sequentially; verify d20-test penalty and HP-max halve at level 4 | 2024 exhaustion math is unique; engine likely partial | Medium |
-| Encumbrance thresholds | Load a character past their carry capacity; verify speed-reduced flag | Unknown — `carryCapacity` derivation exists, encumbrance enforcement does not | Medium |
-| Death save threshold (HP > 0 prevents) | Heal a dying actor mid-turn; expect death-save chain to stop | Probably correct; needs `it()` | Small |
-| Massive damage instant death | Damage a 12 HP actor for 36 in one event; expect `dead` flag set, not just unconscious | Probably correct (`hp.maxBonus` was a fix related to this); needs `it()` | Small |
-| Two-handed conflicts with shield | Equip a versatile two-handed weapon while shield is equipped; verify hand state | Probably broken (no hand-arbitration logic that I've seen) | Medium |
-| Sneak Attack eligibility | Roll Sneak Attack damage with no advantage AND no adjacent ally; expect rejection | Almost certainly broken — content sets `effects: [...]` but I doubt eligibility is gated | Medium |
-| Reckless Attack timing | Activate at start of Barbarian turn; verify mutual advantage/disadvantage on attacks for the turn | Stub per content table; out of scope until that's wired | Out of scope |
-| Stunning Strike trigger | Activate after a Monk hit; verify save chain | Stub; out of scope | Out of scope |
+**Still open** (categories named in earlier calibrations that haven't gained a dedicated probe):
 
-**Effort tier roughly:** ~30 new probes, ~3-5 lines each plus some shared setup helpers. Expect 30-50% to expose new bugs based on Tier 1 hit rate.
+| Category | Probe shape | Status |
+|---|---|---|
+| Cover bonuses | Position attacker with target behind half / three-quarters cover; expect +2 / +5 AC | Schema supports `coverACBonus`; consumer-driven today, no automatic encounter-position-based detection |
+| Exhaustion progression effects beyond level 1 | Apply exhaustion 1–6 sequentially; verify d20-test penalty and HP-max halve at level 4 | The 2024 exhaustion math is unique; engine has partial coverage |
+| Encumbrance enforcement | Load past carry capacity; verify speed-reduced flag | `computeEncumbrance` exists; planner doesn't gate moves on it |
+| Sneak Attack eligibility under no-advantage AND no-adjacent-ally | Roll Sneak Attack damage without either qualifier; expect rejection | `attackerHasAllyAdjacentToTarget` flag wired; the eligibility predicate should be exercised |
+| Two-handed conflicts with shield | Equip a versatile two-handed weapon while shield equipped; verify hand state | Slice 9b's `planEquip` rejects illegal combinations; needs a probe |
 
-**Definition of done for Tier 2:**
-- Every category in the table above either has a probe (✓ or ✗) or is explicitly marked "out of scope, content stub."
-- The audit's "scope of audit" caveat in the README narrows substantially.
-- Newly-discovered ✗ items get added to README "Engine gaps" *and* fixed (Tier 1 sweep applied again).
+**Effort tier roughly:** small per probe (~10–15 lines each plus shared setup). Expect 0–30% to expose new bugs based on the recent hit rate.
 
 ---
 
-## Tier 3: Fill the content stubs
+## Tier 3 — Fill the content stubs
 
-**Goal:** every "stub" row in [README.md](../README.md) "Content gaps" → Classes table → "Stubs (engine work not yet done)" gets engine support, and the content entries get full effect lists.
+**Goal:** the class-features matrix has no stubs at L1–L20.
 
-**The named stubs** (from the README itself):
+**Status:** **SUBSTANTIALLY DONE through L7.** The class-features matrix is fully wired through L7 across all 12 classes. The 14 named alpha.5-era class-feature stubs all shipped wires; the 3 remaining class-feature placeholders (Feral Instinct, Deft Explorer, Wild Companion) all wired. L8–L20 features ship at every grant level with effects wired where the primitive vocabulary covers them, narrative-only otherwise.
 
-- ~~Martial Arts die scaling~~ ✓ wired — `applyMartialArtsDieScaling` helper; new `unarmed-strike` weapon; main + off-hand attack paths swap to MA die when larger
-- ~~Stunning Strike~~ ✓ wired — `engine.plan.stunningStrike` + new `StunningStrikeAttempted` event; CON save vs DC 8+WIS+prof, stunned-on-fail, once per turn
-- ~~Reckless Attack timing~~ ✓ wired — `engine.plan.recklessAttack` planner + `RecklessAttackActivated` event; turnUsage flag persists until next TurnStarted
-- ~~Metamagic~~ ✓ wired (resource economy) — `engine.plan.metamagic` spends the right sorcery-point cost per option; per-option spell modifications are deferred
-- ~~Evasion~~ ✓ wired — new `GrantEvasion` primitive; `planCastSpell` save-mechanic path flips to (success → 0, fail → half) on DEX saves vs halves-on-success spells
-- ~~Druidic~~ ✓ wired — `GrantProficiency target:'language' id:'druidic'` + `computeKnownLanguages` derivation
-- ~~Slow Fall~~ ✓ wired — `FallingIntent.useSlowFall` flag; `planFalling` reduces by 5×monk-level, consumes reaction in encounters
-- ~~Cutting Words~~ ✓ wired — `engine.plan.cuttingWords` returns `{events, dieRoll, preventedHit}`; consumer adjudicates trailing chain (same pattern as Shield)
-- ~~Jack of All Trades~~ ✓ wired — new `GrantHalfProficiencyBonusFloor` primitive; `computeAbilityCheck` applies floor(profBonus/2) when no explicit prof contribution lands
-- ~~Fighting Style choice~~ ✓ wired — Fighter L1 / Paladin L2 / Ranger L2 ship `OfferChoice` with style options; Archery/Defense/Dueling have effects, GWF/Protection/Two-Weapon remain placeholders
-- ~~Improved Critical~~ ✓ wired — new `ExpandCritRange { threshold }` primitive; `resolveAttack` consults attacker's effect stack
-- ~~Frenzy~~ ✓ wired (minimal) — `engine.plan.frenzy` spends Rage charge + applies `frenzied` condition; bonus-action attack grant + end-of-rage exhaustion are consumer-driven until Rage gets a planner slice
-- ~~Disciple of Life~~ ✓ wired — new `BoostHealing` primitive; `planHealMechanic` adds `flat + perSpellLevel * slotLevel` to heals at slot 1+
-- ~~Sacred Weapon~~ ✓ wired — new `engine.plan.sacredWeapon` planner; spends Channel Divinity charge + applies `sacred-weapon-active` condition (+3 attack bonus, static)
+**Subclass features:** 12 subclasses ship (one canonical per class, L3 only). Most L3 features are wired; a small remainder of subclass-feature stubs remains (Circle of the Land, Evoker Sculpt Spells, Fiend Patron Dark One's Blessing, Hunter Lore + Prey, Thief Fast Hands, Warrior of the Open Hand Technique). L7 / L10 / L14 subclass features and the other 3–4 subclasses per class are still authoring work.
 
-Some of these need new effect primitives (Cutting Words needs reactive-debuff, Stunning Strike needs save-DC-on-hit, Reckless Attack needs symmetric-advantage flag). Others need only the `OfferChoice` plumbing finished. The README has more detail per item.
+**Partial wires from earlier sweeps** (the narrowly-scoped Tier 3 closures that need follow-up):
 
-**Effort:** medium per item, large in aggregate. Each one is a focused mini-slice with its own tests and regression coverage.
-
-**Why this is Tier 3:** these features only matter once players are choosing them. A campaign of L1–4 fighters and wizards using only generic actions doesn't hit any of these. But a Rogue at L7 (Evasion) or a Monk at L5 (Stunning Strike) does, and shipping with these as stubs would be embarrassing.
-
-**Definition of done for Tier 3:**
-- All 14 named class-feature stubs wired with effects + tests.
-- Class-features matrix is **48 wired / 0 stub** at L1–7. The 14 named Tier 3 stubs PLUS the three remaining class-feature placeholders (Feral Instinct, Deft Explorer, Wild Companion) are all closed.
-- The feature-coverage matrix in [tests/coverage/features.test.ts](../tests/coverage/features.test.ts) asserts no stubs remain.
-
-### Partial wires (Tier 3.5 follow-ups)
-
-The Tier 3 sweep shipped several wires intentionally narrow. Each is a candidate for its own follow-up slice once the rest of the engine catches up. The canonical list is in [README.md](../README.md) under "Known gaps → Partial wires from Tier 3 closures" — repeated here so the roadmap has a punch-list:
-
-- `AddModifier { value: Formula }` evaluation in the builder — unlocks dynamic stat-baked-at-activation buffs (Sacred Weapon currently uses static +3).
-- Predicate DSL extensions: "ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand" — unlocks proper conditional fighting-style effects.
-- `planRage` — full Rage mechanic (resistance, attack bonus, exhaustion-at-end). Unblocks Frenzy's bonus-action attack + end-of-rage exhaustion.
-- Per-Metamagic-option spell modification in `planCastSpell` (Twinned, Distant, Quickened, Empowered, ...).
-- Familiar as a first-class entity (Find Familiar mechanic). Unblocks the real Wild Companion semantics.
-- `OfferChoice` at character-creation L1 (currently only fires on level advancement). Unblocks Fighter L1 Fighting Style for fresh L1 characters.
-- The 3 unwired Fighting Styles (GWF, Protection, Two-Weapon) — each needs its own mechanic.
-
-### Subclass-feature stubs (13 open)
-
-The 14-named Tier 3 list focused on class-feature stubs. The subclass-feature matrix still has 13 stubs at L3 across 9 subclasses (Circle of the Land, Draconic Sorcery, Evoker, Fiend Patron, Hunter, Oath of Devotion, Thief, Warrior of the Open Hand). See the feature-coverage matrix snapshot for the per-feature listing. These weren't part of the original 14-named scope; closing them is a natural Tier 3.5 extension before Tier 4 content fill-out.
+- `AddModifier { value: Formula }` — was unused at the closure date. **Now actually evaluated** when a FormulaContext flows through (slice 64). Sacred Weapon's static `+3` could now read the caster's CHA mod at apply time; the content row hasn't been updated to use the Formula form yet.
+- Predicate DSL extensions ("ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand"). Still open. Unblocks proper conditional fighting-style effects (Archery, Defense, Dueling currently apply unconditionally). Also unblocks Armor of Agathys's "while temp HP > 0" retaliation gate.
+- `planRage` — full Rage mechanic (resistance, attack bonus, exhaustion-at-end). Still open. Frenzy's bonus-action attack grant and end-of-rage exhaustion remain consumer-driven.
+- Per-Metamagic-option spell modification in `planCastSpell` (Twinned, Distant, Quickened, Empowered, ...). Still open. `engine.plan.metamagic` spends the SP cost; the actual spell-shape modification is consumer-driven.
+- Familiar as a first-class entity. Still open.
+- `OfferChoice` at character-creation L1 (only fires on level advancement). Still open.
+- The 3 unwired Fighting Styles (Great Weapon Fighting, Protection, Two-Weapon Fighting). Still open.
+- Auto-expiry for trigger-applied conditions (slice-98 ApplyCondition durations are declarative metadata; the consumer removes the condition). Still open.
 
 ---
 
-## Tier 4: Replace the starter pack with the actual SRD
+## Tier 4 — Replace the starter pack with the actual SRD
 
-**Goal:** ship `ttrpg-engine-dnd-srd-2024` (Slice 31 from the original plan, never done) as a separate package that supersedes the starter pack.
+**Goal:** ship `ttrpg-engine-dnd-srd-2024` (Slice 31 from the original Phase D plan, never done) as a separate package that supersedes the starter pack.
 
-**What that means:**
+**Status:** **PARTIALLY ACHIEVED VIA THE STARTER PACK.** The split between "starter pack ships in the engine package" and "separate SRD package" remains the same as alpha.5, but the starter pack itself has filled out significantly:
 
-- All 12 classes at L1–20 with full feature progression (currently L1–5 only).
-- Subclasses: 3–4 per class (currently 1).
-- Spells: ~370 (currently ~33).
-- Magic items: the DMG curated list (currently 9).
-- Monster statblocks: the MM curated list (currently 6).
-- Backgrounds, feats, species: full PHB 2024 inventories.
-- Bastions (the 2024 stronghold system; Slice 44 from Phase E).
-- Epic boons past L20.
+| Category | alpha.4 | Now |
+|---|---|---|
+| Classes (L1–L20 features) | L1–L5 only | All 12 classes at L1–L20 |
+| Subclasses | 0 | 12 (L3 only) |
+| Spells (in pack) | ~33 | 399 (every PHB 2024) |
+| Spells (mechanically wired) | ~26 | ~152 |
+| Backgrounds | 8 | 16 / 16 PHB 2024 ✓ |
+| Conditions | 15 | 25 (15 RAW + 10 rider) |
 
-This is **mostly content authoring, not engine work** — assuming Tiers 1–3 are in place. The engine has the schemas and primitives; the work is JSON.
+**Still missing**: most subclasses (12 of ~50), L7 / L10 / L14 subclass features, the DMG magic-item catalog (~9 of hundreds), the bulk of the MM bestiary (~6 of ~370 statblocks), 3 species (Aasimar / Goliath / Orc), many general feats.
 
-**Effort:** the largest tier by raw volume. Months of disciplined authoring work, or significant content reuse from the official SRD 5.5e release once Wizards publishes it.
+**This is mostly content authoring, not engine work.** The schemas and primitive vocabulary support every shipped category; the remaining work is JSON.
 
-**Why this is Tier 4:** consumers can ship apps before Tier 4 if they bring their own content. A family-DM tool like `dndbnb` doesn't need the full DMG magic item list to start. But "the engine is SRD-compliant" requires this tier.
-
-**Definition of done for Tier 4:**
-- `ttrpg-engine-dnd-srd-2024` published to npm with full PHB / DMG / MM 2024 coverage (or as close as legal-cleared content allows).
-- Engine starter pack stays as a "demo" pack; SRD pack is the canonical one.
-- A real campaign at L1–L20 can be loaded and played without engine-side feature gaps.
+**Effort:** the largest tier by raw volume. Each MM statblock or PHB subclass is one or two `it()`s of authoring + light validation. The 250-ish schema-only spells each need either a primitive shipped (per [docs/starter-pack-gaps.md](starter-pack-gaps.md)) or a confirmation that the existing shape already covers them.
 
 ---
 
@@ -186,21 +116,22 @@ This is **mostly content authoring, not engine work** — assuming Tiers 1–3 a
 
 For a kitchen-table game with a DM watching (the dndbnb use case), the minimum is:
 
-- **All Tier 1.** Non-negotiable. The current 17 violations are session-breakers.
-- **Tier 2 categories that affect basic combat:** ranged-in-melee disadvantage (already in Tier 1), cover bonuses, difficult terrain, sneak attack eligibility, two-weapon fighting eligibility, multiattack target legality.
-- **Tier 3 features actually in use by the playing party.** If nobody is playing a Monk, Stunning Strike can stay stub.
-- **Tier 4 not required.** Bring-your-own-content is fine; the family-DM authoring custom content is a legitimate path.
+- **Tier 1 done.** ✓
+- **Tier 2 categories that affect basic combat:** ranged-in-melee disadvantage ✓, sneak attack eligibility ✓, two-weapon fighting eligibility ✓, multiattack target legality ✓, cover bonuses (open), difficult terrain ✓.
+- **Tier 3 features actually in use by the playing party.** If nobody is playing a Wizard School of Evocation, Sculpt Spells can stay narrative.
+- **Tier 4 not required.** Bring-your-own-content is fine; a DM authoring custom content is a legitimate path.
 
-That's the realistic "alpha-but-actually-usable" target. Estimated work: weeks, not months — but only if Tier 1 happens first as a single sweep.
+By that standard, **the engine is at the minimum-viable-trust threshold for L1–L7 play.** Higher-level play exercises the L8–L20 feature wirings (most of which ship narrative-only at the content layer), the bulk of the spell catalog (~250 schema-only), and a wider monster bestiary. Those are the dimensions to advance for higher-level trust.
 
 ---
 
 ## Risks and caveats
 
-- **Per-fix scope creep.** It is tempting to bundle a fix with adjacent cleanup. Don't — Tier 1 sweep should be tight, one cluster per commit, with tests that pin the exact behavior.
-- **Audit blind spots.** The audit catches what its `it()`s probe. Categories nobody thinks to write a probe for stay broken silently. The "scope of audit" caveat in the README is the lasting record; resist the urge to declare the audit "complete."
-- **Demo / engine seam.** Some Tier 1 fixes change the planner contract (OAs in `planMove`'s return). Web demo + any existing consumer will need matching changes. Coordinate the seam break with an explicit CHANGELOG note and a version bump.
+- **Audit blind spots.** The audit catches what its 48 `it()`s probe. Categories nobody thinks to write a probe for stay broken silently. The audit is a floor, not a ceiling.
+- **Per-fix scope creep.** Slice cadence keeps this manageable: each slice ships one primitive + one canonical content user, then commits. Bundling unrelated cleanup is the canonical anti-pattern.
+- **Demo / engine seam.** Some engine slices change the planner contract (the slice-9b OA opportunities surface, the slice-91 reaction-window pattern). Web demo + any existing consumer needs matching changes. Coordinate the seam break with an explicit CHANGELOG note.
 - **2024 rule churn.** The 2024 rules are still bedding in (third-party errata, ruling clarifications). What looks like a RAW violation today may be a clarification target tomorrow. Pin sources where possible (PHB page / errata version).
+- **Primitive drift.** A primitive shipped without a real-content user tends to drift from RAW. The current cadence (primitive + canonical user in the same slice) keeps drift small but doesn't eliminate it. When a second spell of the same shape arrives, the primitive sometimes needs a small refinement; that's a follow-up slice, not bundled work.
 
 ---
 
@@ -208,15 +139,9 @@ That's the realistic "alpha-but-actually-usable" target. Estimated work: weeks, 
 
 If you're prioritizing a session of work:
 
-1. Open [tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts).
-2. Pick a failing `it()`.
-3. Find the fix shape in this doc's Tier 1 table.
-4. Implement + paired regression test.
-5. Lift the audit row from ✗ to ✓.
-6. Update [README.md](../README.md)'s "Engine gaps" tables to either remove the row or mark it ✓ with a commit hash.
+1. **Look at [docs/starter-pack-gaps.md](starter-pack-gaps.md)'s future-engine-slices table.** Pick a primitive by impact (count of schema-only spells it unblocks). The recent cadence (slices 88–100) walked this table.
+2. **Implement primitive + canonical content user + tests** following the patterns from recent slices. Walk the gaps-doc rows from `future` to `shipped` and from `schema-only` to `wired`.
+3. **For audit gaps** (Tier 2 open categories above): pick a category, write a probe in [tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts), fix anything it surfaces, lift the row from this doc.
+4. **For content sweeps** (Tier 4): pick a cohort of schema-only spells that share an already-shipped primitive shape, walk them to wired in one content-only slice (no engine change).
 
-Tier 2 work proceeds the same way, against the audit-extension table.
-
-Tier 3 work is README-driven: pick a stub row from the class-features inventory, wire it, write tests, flip the matrix.
-
-Tier 4 is its own package; defer until Tier 3 is closed.
+When in doubt, run `git log --oneline | head -20` and copy the pattern of the most recent slice in the relevant category.

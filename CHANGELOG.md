@@ -2,6 +2,77 @@
 
 Notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The bump policy and pre-release roadmap are documented in [VERSIONING.md](VERSIONING.md).
 
+## Unreleased
+
+The post-alpha.5 stretch: 53 slices of vocabulary expansion. Slices 48–100, working through both content fill-out and engine primitives. The architectural skeleton is untouched. `SCHEMA_VERSION` unchanged; every new event shape and effect kind is additive. Test count grew from 1009 to 1289 across 173 files (+280 / +34); all replay-equivalence and RNG-capture invariants still hold.
+
+The session cadence settled into a "primitive + canonical content user" shape: each slice adds a focused engine primitive (~50–200 LoC) and the first one or two RAW spells / features that exercise it, walking those entries from schema-only to wired in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+
+### Added
+
+**Spell catalog completion** (10 sub-slices): every PHB 2024 spell now ships in the starter pack across L0–L9 (399 total, up from ~33). Per-level: 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21. Mechanically-wired count grew from ~26 to ~152.
+
+**Class-feature fill-out** (14 sub-slices): all 12 classes ship full L1–L20 feature tables. The class-feature matrix is fully wired through L7 across all classes; later tiers ship features at every grant level with effects wired where the primitive vocabulary covers them. Slices also wired specific subclass features: Cleric Blessed Strikes (Divine Strike at L7+), Paladin Aura Improvements (L18).
+
+**Engine primitives** (~35 sub-slices). Grouped by category:
+
+*Summon system* (slice 48). New `CompanionSummoned` / `CompanionDismissed` events plus a `summon` `SpellMechanic` kind carrying inline statblock (name, AC, hpBase, hpPerSlotAbove, baseSlotLevel, speedFeet). Companions land as `kind: 'creature'` Characters with a `summonSource` pointer to controller / spell / slot / effect. Concentration auto-dismiss via `clearConcentrationEffect`. 11 spells wired across the summon family (find-familiar, unseen-servant, find-steed, summon-beast, animate-dead, conjure-animals, phantom-steed, summon-fey / lesser-demons / shadowspawn / undead, and others).
+
+*On-hit trigger system* (slice 61). New `consumeOnTrigger: boolean` field on `OnEvent` effects (one-shot riders lift their parent condition after firing). Smite cohort wired: divine-favor, searing-smite, wrathful-smite, thunderous-smite, branding-smite.
+
+*Aura primitive* (slice 63) plus *source-relative formulas* (slice 64). New `GrantAura { auraId, rangeFeet, allyConditionId }` effect: discoverable metadata for consumers (dndbnb / VTTs) to project a condition onto in-range allies; the engine doesn't auto-project (position is consumer territory). The `sourceAbilityMod` Formula kind plus the threading needed to evaluate Formula values inside `AddModifier` effects: `EffectAccumulator` now folds Formula values into numeric modifiers when a `FormulaContext` is provided. Paladin Aura of Protection (L6, +CHA-mod-of-source to ally saves), Aura of Courage (L10, Frightened immunity), Crusader's Mantle (L3 spell) all wire.
+
+*Condition-immunity gate* (slice 66). New `isImmuneToCondition(state, content, targetId, conditionId)` derive helper consulted by the spell planner's save (`conditionOnFail`) and buff branches before staging `ConditionApplied` events. Aura of Courage now actually blocks Frightened.
+
+*Area-effect via aura-damage* (slices 68 / 70 / 71 / 72). The `aura-damage` SpellMechanic was extended four times: optional damage + conditionOnFail (slice 68); optional saveAbility (slice 70 — Cloud of Daggers no-save zone); `trigger` tag for multi-component zones (slice 71 — Hunger of Hadar's 2d6 cold on enter + 2d6 acid on turn end). A sibling `movement-damage` mechanic (slice 72) for per-foot-moved damage (Spike Growth) with a dedicated `engine.plan.tickMovementDamage` planner. 12 zone spells wired.
+
+*Composite-buff confirmation* (slice 73, content). Conditions can carry multiple effects in their `effects` array. Haste, blur, pass-without-trace ship as composite-buff conditions with no engine change.
+
+*AC-buff condition* (slice 74). New `SetACFloor { value }` effect kind, `acFloors` collector on EffectAccumulator, floor check in `computeAC` that bumps the natural total. Shield of Faith and Barkskin wire.
+
+*Temp-HP grant primitive* (slice 75). New `temp-hp` SpellMechanic kind plus a planner that rolls dice + flat + slot-scaling and emits `TempHPGranted`. False Life wires.
+
+*Item-buff primitive* (slices 76 / 90). New `ItemInstance.temporaryBuff` (attackBonus, damageBonus, sourceEffectInstanceId, source) plus `ItemBuffApplied` / `ItemBuffRemoved` events and reducers. `engine.plan.magicWeapon` drives Magic Weapon. Slice 90 extended the shape with `extraDamageDice` + `extraDamageType` for Elemental Weapon's per-hit elemental rider; the attack planner rolls the extra dice on hit (doubled on crit) and emits a second damage component. `clearConcentrationEffect` walks item instances and strips any buff tagged with the dropped effect's id.
+
+*Movement-mode retrofit* (slice 77). `getEffectiveSpeed` retrofitted so `ModifySpeed` entries actually affect the engine's move planner. Fly + Spider Climb wire as buff conditions. Retrofits also Fast Movement, Unarmored Movement, Roving, Haste, and the Grappled/Restrained/Paralyzed/Petrified/Unconscious zero-speed conditions.
+
+*Push primitive* (slice 78). New `CreaturePushed` informational event (engine doesn't model positions; consumer applies the position change). Save mechanic gains optional `pushedFeetOnFail`. Gust of Wind + Earthbind wire.
+
+*Recurring-rider primitive* (slice 79). New `recurring` SpellMechanic kind (effect: temp-hp / heal / damage, optional dice / flat / addCasterAbilityMod / damageType). New `engine.plan.tickRecurring({casterId, targetId})` planner. Heroism wires the two-part shape (cast-time buff + per-tick TempHPGranted).
+
+*Falling-protection primitive* (slice 81). New `GrantFallingProtection` Effect kind. `engine.plan.falling` short-circuits to no events when present. Feather Fall wires as a buff that lasts 1 minute.
+
+*Caster-chosen options at cast time* (slices 82–87). New `CasterChoice` discriminated union on `CastSpellIntent` (`{kind: 'damageType', value}` and `{kind: 'variant', value}`). Three primitive variants:
+  - `casterChoosesDamageType: { allowed: DamageType[] }` on attack mechanics (Chromatic Orb).
+  - `casterChoosesVariant: { variants: [{ key, conditionId }] }` on buff mechanics (Enlarge/Reduce) and save mechanics (Calm Emotions).
+  - Command (5-variant save), Enhance Ability (6-variant buff), Bestow Curse (4-variant save) all wire as pure data on top of the primitives. All four of Bestow Curse's variants are subsequently wired by later slices (88 extra-damage, 92 inactive-turn, 96 attack-disadvantage); the ability-disadvantage variant remains narrative-only pending a nested-sub-choice primitive.
+
+*Target-side source-filtered on-hit rider* (slice 88). `AppliedCondition` provenance threaded through `dispatchTriggers`; new `event.attackerIsSource` fact lets a target-side rider filter on "the creature attacking me is this condition's source." Hex's recurring on-hit rider wires; Bestow Curse's extra-damage variant retrofits.
+
+*Spirit Shroud variants* (slice 89). Caster-chosen 3-variant buff (cold / necrotic / radiant). Each variant carries an OnEvent rider that adds +1d8 of the chosen damage type on the caster's weapon hits.
+
+*Dedicated reaction planner pattern* (slice 91). New `engine.plan.absorbElements({casterId, slotLevel, damageType, triggeringDamageEventId, halvedAmount})`. Compensating Healed event for the absorbed half (event-sourcing-friendly: doesn't mutate the triggering DamageApplied). Per-element charged condition (`absorb-elements-charged-acid-active` and four siblings) with `consumeOnTrigger` OnEvent rider for the on-next-hit elemental damage rider.
+
+*Recurring-save primitive* (slices 92 / 93). New `recurringSave` field on `ConditionSchema` (ability + trigger + onFail + onSuccess). `engine.plan.tickRecurringSave({targetId, conditionId})` rolls a save against the source caster's spell DC. `onFail: 'consumeAction'` wires Bestow Curse's inactive-turn variant. `onSuccess: 'removeCondition'` wires Hold Person, Hold Monster, Tasha's Hideous Laughter, Confusion (the RAW "spell ends on the target" branch).
+
+*Trap mechanic* (slice 94). New `TrapSchema` runtime collection on `CampaignState` (id, label, sourceCharacterId, sourceSpellId, payload, chargesRemaining). Three events: `TrapArmed` (stamps into state.traps), `TrapTriggered` (decrements charges), `TrapExpired` (removes from state, with chargesExhausted / dispelled / duration reasons). New `trap` SpellMechanic; new `engine.plan.triggerTrap({trapId, triggeringCharacterId})`. Glyph of Warding (Explosive Runes variant) + Cordon of Arrows wire.
+
+*Resistance-buff confirmation* (slice 95, content). The engine already supported per-element `GrantResistance`; Protection from Energy ships as a 5-variant buff. No engine change.
+
+*Directional attack disadvantage* (slice 96) plus *generic attacker-side advantage wiring* (slice 97). New `SetAdvantageVsSource` Effect kind: filters on the roll's target equaling the bearing applied condition's `sourceCharacterId`. BuilderContext gains an optional `sourceCharacterId`. EffectAccumulator gains `setAdvantageVsSource` / `advantageVsSource`. Attack planner consults `attackerEffects.advantageVsSource('attack', targetId)`. Bestow Curse's attack-disadvantage variant wires. Slice 97 closes a latent bug: the existing six conditions (blinded, frightened, poisoned, prone, restrained giving disadvantage, invisible giving advantage) already carried `SetAdvantage on:'attack'` effects but the attack planner never consulted `attackerEffects.advantageFor('attack')`. Now it does.
+
+*Heal-blocking primitive* + *ApplyCondition TriggerAction dispatch* (slice 98). New `BlockHealing` Effect kind, accumulator query, and `isHealingBlocked` derive helper. `planHealMechanic` consults the helper; when blocked, emits Healed with `amount: 0` and `(blocked)` annotation in `source`. ApplyCondition TriggerAction handler added to `fireTrigger` (previously only AddDamage was wired). Spirit Shroud's three variants gain a second TriggerAction applying `healing-blocked-active` to hit targets.
+
+*AddDamageToAttacker TriggerAction* (slice 100). Retaliation variant of AddDamage: dispatcher routes the resulting DamageApplied to `event.attackerId`. Crits don't double the retaliation dice per RAW. Fire Shield wires as a 2-variant buff (warm: cold resistance + fire retaliation; chill: fire resistance + cold retaliation).
+
+### Fixed
+
+- **CI Typecheck unbroken** (slice 99). Three latent test-file type errors had been gating the CI Typecheck step for ~10 commits. `tests/transcript.ts`'s `formatEvent` switch was missing cases for `AbsorbElementsCast` (slice 91) and `TrapArmed` / `TrapTriggered` / `TrapExpired` (slice 94); two test files imported `DamageRolledEvent` from `combat.js` when it lives in `attack.js`. Vitest's esbuild let these slide; tsc didn't. No engine impact.
+
+### Changed
+
+- **gaps doc as the canonical content-coverage surface**. [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) became the per-spell catalog of "wired vs schema-only" and the per-primitive future-slice queue. Every slice walks the relevant rows from `future` to `shipped` and from `schema-only` to `wired`.
+
 ## 0.1.0-alpha.5 - 2026-05-14
 
 The fifth pre-alpha. Headlined by a 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) and the engine fixes that close every probe (0 failing, 0 skipped), plus a Tier 3 content-stub sweep that took the class-features matrix from 36 wired / 12 stub to **48 wired / 0 stub** at L1–7. The pre-release closes with a Claude-optimization documentation pass + a bug-hunting test sweep (boundary sweeps, multi-class property generator, random spell-cast sequences, content-pack validator fuzzing). Test count grew from 698 to 1009 (311 new tests across 32 new files), all on top of the unchanged architectural invariants. `SCHEMA_VERSION` unchanged: new event shapes (`OpportunityAvailable`, `WeaponLoaded`, `RecklessAttackActivated`, `StunningStrikeAttempted`) and new optional fields (`sourceCharacterId` on conditions, `attackerHasAllyAdjacentToTarget` on `AttackRolled`, `loadedWeaponsFiredThisTurn` + `recklessAttackActive` + `stunningStrikeUsedThisTurn` on combatant turn usage) are all additive; `DerivedCharacter.knownLanguages` and the new `ExpandCritRange` / `GrantHalfProficiencyBonusFloor` / `BoostHealing` / `GrantEvasion` effect primitives are additive.

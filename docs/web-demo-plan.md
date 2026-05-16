@@ -1,20 +1,8 @@
 # Web Demo Plan — `ttrpg-engine-dnd`
 
-A browser-based test harness for the engine, deployed to GitHub Pages from this repo. Single-page app, plain TypeScript + Vite, no UI framework. Two modes in v1; more later if usage justifies them.
+A browser-based test harness for the engine, deployed to GitHub Pages. Single-page app, plain TypeScript + Vite, no UI framework.
 
-This doc is the source of truth for the demo's scope and architecture. If something here turns out to be wrong during implementation, update this doc before changing course.
-
----
-
-## Prerequisites status (2026-05-14)
-
-All engine-side prerequisites are now resolved on `0.1.0-alpha.3` (published to npm under both the `alpha` and `latest` tags):
-
-- `engine.plan.dodge` ships — Dodge action emits `ActionEconomyConsumed('action')` + `ConditionApplied('dodged')`. The `dodged` condition carries `ImposeDisadvantageOnAttackers` (new effect primitive) and advantage on DEX saves. Attack planner consults both target-side flags and applies 2024 advantage/disadvantage cancellation.
-- `import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack'` is a real subpath export. The build emits a separate `~127 KB / ~16 KB-gzipped` chunk for the starter pack content, so the demo can `await import('ttrpg-engine-dnd/starter-pack')` and keep the initial JS payload small.
-- npm install: `npm install ttrpg-engine-dnd@alpha` (or just `@latest`; both point at `0.1.0-alpha.3` today).
-
-What's *not* yet done and would be discovered mid-scaffold without this note: see **Implementation notes** at the end.
+**Status**: v1 shipped. The Combat Sandbox, Event Inspector, Rules Lab, Scenario Gallery, and Map Panel all run live at https://greghcarr.github.io/ttrpg-engine-dnd/. The active reference for running and extending the demo lives in [web/README.md](../web/README.md). This doc preserves the design rationale and non-goals for future contributors deciding whether to add a new mode.
 
 ---
 

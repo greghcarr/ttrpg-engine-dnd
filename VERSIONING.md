@@ -126,9 +126,11 @@ Concrete next bumps:
 
 | Version | When | What |
 |---|---|---|
-| **0.1.0-alpha.0** | 2026-05-12 (current) | First publishable alpha. Phases A through E complete. |
-| **0.1.0-alpha.1+** | as needed | Bug fixes, doc improvements, starter-pack content additions while gathering early feedback. Nothing API-breaking. |
-| **0.2.0-alpha.0** | only if needed | Breaking API change discovered during validation, OR substantial new features that warrant their own alpha cycle (e.g., a full Phase E content fill-out across all subclasses). Pre-1.0 escape hatch. |
+| **0.1.0-alpha.0** | 2026-05-12 | First publishable alpha. Phases A through E complete (Slices 1–46). |
+| **0.1.0-alpha.5** | 2026-05-14 (current published) | Tier 3 content-stub sweep; class-feature matrix to 48 wired / 0 stub at L1–7; 48-probe RAW-compliance audit; 1009 tests. |
+| **0.1.0-alpha.6** | when ready | Post-alpha.5 vocabulary expansion (slices 48–100). Spell catalog complete (399 spells, ~152 wired), class features filled out L1–L20 across all 12 classes, ~35 engine-primitive slices. Test count 1289. See [CHANGELOG.md](CHANGELOG.md). |
+| **0.1.0-alpha.7+** | as needed | Continued primitive + canonical-user vocabulary expansion. Nothing API-breaking. |
+| **0.2.0-alpha.0** | only if needed | Breaking API change discovered during validation, OR substantial new features that warrant their own alpha cycle. Pre-1.0 escape hatch. |
 | **0.1.0-beta.0** | when an external consumer ships | First validated alpha promotes to beta. See [Promotion criteria](#promotion-criteria). |
 | **0.1.0-rc.0** | 4 weeks of stable beta | API frozen, bug-fix tickets only. |
 | **1.0.0** | 2 weeks of stable rc | First stable release. API stability promised within the 1.x line. |

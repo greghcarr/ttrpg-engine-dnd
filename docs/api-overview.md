@@ -17,77 +17,113 @@ Returns an `Engine` with five namespaces:
 - `engine.plan.*`: planners that consume RNG and return events to commit. See [planners](#planners).
 - `engine.derive.*`: pure derivations that read state and return typed results. See [derivations](#derivations).
 
+Also exported: `engine.do(campaign, intent)` (dispatches on `intent.type` to the right planner and commits in one call), `engine.content` (the resolved content pack), `engine.schemaVersion`, `engine.rng`.
+
 ## Planners
 
-Every planner returns `{ events: Event[] }` with the resolution chain baked in (dice rolls included). `apply()` is RNG-free.
-
-**Resting & resources**: `shortRest`, `longRest`, `rest` (generic).
-
-**Combat**: `attack`, `cleave`, `opportunityAttack`, `actionSurge`, `offHandAttack`, `multiattack`, `falling`.
+Every planner returns `{ events: Event[] }` (or `{ events, ...outcome }` for the handful that surface a derived bool / id / d4 alongside the chain). RNG-consuming planners bake the dice rolls into the resolution events; `apply()` is RNG-free.
 
 **Encounter lifecycle**: `createEncounter`, `rollInitiative`, `startEncounter`, `beginFirstTurn`, `advanceTurn`, `endEncounter`.
 
+**Combat (attack-side)**: `attack`, `cleave`, `opportunityAttack`, `actionSurge`, `offHandAttack`, `multiattack`, `falling`. Plus mastery-specific `weaponMastery({mastery, ...})`.
+
+**Combat (defense-side)**: `dodge`, `shield`, `absorbElements`, `consumeGuidance`, `cuttingWords`. Each is a dedicated reaction planner that the consumer calls after observing the trigger event.
+
+**Class-specific actions**: `sacredWeapon` (Paladin Devotion), `recklessAttack` (Barbarian), `stunningStrike` (Monk), `frenzy` (Barbarian Berserker), `metamagic` (Sorcerer), `wildCompanion` (Druid).
+
 **Movement**: `move`, `dash`, `disengage`, `mistyStep`.
 
-**Spellcasting**: `castSpell`, `checkConcentration`, `expireSpellDurations`, `tickAura`, `consumeGuidance`, `counterspell`, `dispelMagic`, `identify`, `shield`.
+**Spellcasting (cast-time)**: `castSpell` (the general dispatcher), `magicWeapon`, `elementalWeapon`, `counterspell`, `dispelMagic`, `identify`.
+
+**Spellcasting (tick / trigger)**: `checkConcentration`, `expireSpellDurations`, `tickAura`, `tickMovementDamage`, `tickRecurring`, `tickRecurringSave`, `triggerTrap`. Consumers call these at the appropriate moments (per-turn ticks, on-movement, on-trigger).
+
+**Summons**: `dismissCompanion`. Summoning happens via `castSpell` against a `summon` SpellMechanic (find-familiar, find-steed, the summon-X family); the planner emits `CompanionSummoned`.
 
 **Transformations**: `polymorph`, `wildShape`, `simulacrum`, `wish`.
 
-**Travel & exploration (Slice 25)**: `forage`, `navigationCheck`, `forcedMarch`.
+**Resurrection**: `resurrect({characterId, spellId, via})`. Supports `via: 'spell-slot' | 'scroll' | 'special'` so scroll consumption and special revivals can skip caster validation.
 
-**Variant rules**: `grantInitialHeroPoints`, `spendHeroPoint` (require `CampaignSettings.heroPoints: true`).
+**Resting & resources**: `shortRest`, `longRest`, `rest` (generic dispatcher on rest kind).
+
+**Inventory**: `equip` (enforces two-handed-vs-shield arbitration before stamping `ItemEquipped`).
+
+**Contested actions**: `grapple`, `shove`, `hide`.
+
+**Travel & exploration**: `forage`, `navigationCheck`, `forcedMarch`.
+
+**NPC mechanics**: `moraleCheck`, `reactionRoll`.
+
+**Variant rules**: `grantInitialHeroPoints`, `spendHeroPoint` (both require `CampaignSettings.heroPoints: true`).
 
 **Checks & saves**: `save`, `abilityCheck`.
 
 **Progression**: `levelUp`, `resolveChoice`.
 
-**Contested actions (Slice 21)**: `grapple`, `shove`, `hide`.
-
-**Weapon mastery (Slice 23)**: `weaponMastery({mastery, attackerId, targetId, weaponInstanceId})`.
-
-
-**NPC mechanics (Slice 26)**: `moraleCheck`, `reactionRoll`.
-
 ## Derivations
 
-All read-only.
+All read-only and pure. Memoized per `CampaignState.version`.
 
-- `character(state, id)` → `DerivedCharacter` (totalLevel, proficiency bonus, ability modifiers, HP, `hpMaxBonus` / `effectiveHpMax` from effect stack, AC, saves, spell slots, pending choices).
+- `character(state, id)` → `DerivedCharacter` (totalLevel, proficiency bonus, ability modifiers, HP, `hpMaxBonus` / `effectiveHpMax`, AC, saves, spell slots, pending choices, known languages).
 - `ac(state, id)`, `savingThrow(state, id, ability)`, `attackBonus(state, id, weaponInstanceId)`.
 - `spellSaveDC(state, id, classId)`, `spellAttackBonus(state, id, classId)`, `spellSlots(state, id)`.
 - `abilityModifier(score)`, `proficiencyBonus(level)`: pure helpers.
 
-Stand-alone derivations also exported: `computeAbilityCheck`, `computePassiveScore`, `computeAC`, `buildEffectStack`, plus terrain helpers `terrainAt`, `movementCostFor`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect`.
+Stand-alone derivations also exported from the public barrel:
+
+- Damage / heal / immunity: `mitigateDamage`, `isImmuneToCondition`, `isHealingBlocked`.
+- Effect-stack composition: `buildEffectStack` (returns an `EffectAccumulator` with `advantageFor`, `advantageVsSource`, `hasResistance`, `hasImmunity`, `flatDamageReductionFor`, `critThreshold`, `hasHealingBlocked`, ...).
+- Spatial / movement: `terrainAt`, `movementCostFor`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect`, `getEffectiveSpeed`.
+- Capacity: `computeCarryingCapacity`, `computeEncumbrance`.
+- Ability checks: `computeAbilityCheck`, `computePassiveScore`.
 
 ## Events
 
-Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.
+Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list (~118 event types) is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.
 
-Categories:
+Grouped by category:
 
-- **Combat**: `DamageApplied`, `Healed`, `TempHPGranted`, `ConditionApplied/Removed`, `DeathSaveRolled`, `Stabilized`, `ExhaustionChanged`, `AttackRolled`, `DamageRolled`, `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed`, `ConcentrationStarted/Broken`, `TriggerFired`, `ActionEconomyConsumed`, `CombatantMoved`, `Dashed`, `Disengaged`, `SaveRolled`, `AbilityCheckRolled`.
-- **Spellcasting (reactive)**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`, `GuidanceUsed`.
+- **Combat**: `DamageApplied`, `Healed`, `TempHPGranted`, `HPMaxBonusChanged`, `ConditionApplied`, `ConditionRemoved`, `CreaturePushed`, `DeathSaveRolled`, `Stabilized`, `ExhaustionChanged`, `AttackRolled`, `DamageRolled`, `WeaponLoaded`, `SaveRolled`, `AbilityCheckRolled`.
+- **Spellcasting**: `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed`, `ConcentrationStarted`, `ConcentrationBroken`, `TriggerFired`.
+- **Reactive spells**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`, `AbsorbElementsCast`, `GuidanceUsed`.
+- **Action economy**: `ActionEconomyConsumed`, `RecklessAttackActivated`, `StunningStrikeAttempted`.
 - **Weapon mastery**: `WeaponMasteryActivated`.
-- **Encounter**: `EncounterCreated/Started/Ended`, `InitiativeRolled`, `TurnStarted/Ended`, `RoundEnded`.
-- **Resting**: `ShortRestStarted/Ended`, `LongRestStarted/Ended`, `HitDieSpent`, `ResourceSpent/Restored`.
-- **Progression**: `CharacterCreated`, `LevelUpResolved`, `ChoiceRequired/Resolved`, `XPAwarded`, `MilestoneAwarded`.
-- **Inventory**: `ItemAcquired/Equipped/Unequipped/Attuned/Unattuned`, `ItemChargeConsumed`, `ItemRecharged`, `SentientItemConflict`.
-- **Party & treasure**: `PartyCreated`, `PartyMembersChanged`, `CurrencyAcquired/Spent`, `ItemDepositedToParty/WithdrawnFromParty`.
-- **Sessions & journal**: `SessionStarted/Ended`, `JournalEntryAdded`, `InGameTimeAdvanced`.
+- **Encounter**: `EncounterCreated`, `EncounterStarted`, `EncounterEnded`, `InitiativeRolled`, `TurnStarted`, `TurnEnded`, `RoundEnded`.
+- **Resting**: `ShortRestStarted`, `ShortRestEnded`, `LongRestStarted`, `LongRestEnded`, `HitDieSpent`, `ResourceSpent`, `ResourceRestored`.
+- **Progression**: `CharacterCreated`, `LevelUpResolved`, `ChoiceRequired`, `ChoiceResolved`, `XPAwarded`, `MilestoneAwarded`.
+- **Inventory**: `ItemAcquired`, `ItemEquipped`, `ItemUnequipped`, `ItemAttuned`, `ItemUnattuned`, `ItemBuffApplied`, `ItemBuffRemoved`, `ItemChargeConsumed`, `ItemRecharged`, `SentientItemConflict`.
+- **Movement**: `CombatantMoved`, `Dashed`, `Disengaged`, `OpportunityAvailable`.
+- **Party & treasure**: `PartyCreated`, `PartyMembersChanged`, `CurrencyAcquired`, `CurrencySpent`, `ItemDepositedToParty`, `ItemWithdrawnFromParty`.
+- **Sessions & journal**: `SessionStarted`, `SessionEnded`, `JournalEntryAdded`, `InGameTimeAdvanced`.
 - **Locations & terrain**: `LocationCreated`, `DoorAdded`, `DoorStateChanged`, `CharacterLocationChanged`.
-- **Quests**: `QuestStarted`, `ObjectiveProgressed/Completed/Failed`, `QuestCompleted/Failed/Abandoned`, `QuestRewardClaimed`.
+- **Quests**: `QuestStarted`, `ObjectiveProgressed`, `ObjectiveCompleted`, `ObjectiveFailed`, `QuestCompleted`, `QuestFailed`, `QuestAbandoned`, `QuestRewardClaimed`.
 - **Travel**: `TravelLegCompleted`, `NavigationCheckRolled`, `ForagedFor`.
 - **NPC mechanics**: `AttitudeChanged`, `MoraleCheckRolled`, `MoraleBroken`.
 - **Downtime**: `DowntimeActivityResolved`.
 - **Mounts & vehicles**: `Mounted`, `Dismounted`, `VehicleAcquired`, `VehicleBoarded`, `VehicleDeparted`, `VehicleDamaged`, `VehicleRepaired`.
-- **Resurrection & transformation**: `CharacterResurrected`, `PolymorphApplied/Reverted`, `SimulacrumCreated`, `WishGranted`.
+- **Resurrection & transformation**: `CharacterResurrected`, `PolymorphApplied`, `PolymorphReverted`, `SimulacrumCreated`, `WishGranted`.
+- **Summons**: `CompanionSummoned`, `CompanionDismissed`.
+- **Traps**: `TrapArmed`, `TrapTriggered`, `TrapExpired`.
+- **Bastions**: `BastionFounded`, `BastionFacilityAdded`, `BastionHirelingAdded`, `BastionTurnTaken`, `BastionDamaged`, `BastionLevelChanged`.
+- **Variant rules**: `CampaignSettingsChanged`, `HeroPointGranted`, `HeroPointSpent`.
 
 ## Schemas
 
 Every shape is a Zod schema (parse at boundaries, types via `z.infer`):
 
-- Content: `ContentPackSchema`, `SpeciesSchema`, `BackgroundSchema`, `FeatSchema`, `ClassSchema`, `SubclassSchema`, `ClassFeatureSchema`, `SpellSchema`, `ConditionSchema`, `ItemDefinitionSchema` (and its variants `WeaponSchema`, `ArmorSchema`, `ToolSchema`, `MagicItemSchema`, `ConsumableSchema`, `GearSchema`), `MonsterStatblockSchema`.
-- Runtime: `CharacterSchema`, `ItemInstanceSchema`, `EncounterSchema`, `EffectInstanceSchema`, `PartySchema`, `SessionSchema`, `JournalEntrySchema`, `LocationSchema`, `DoorSchema`, `LocationMapSchema`, `QuestSchema`, `QuestObjectiveSchema`, `VehicleSchema`, `CampaignStateSchema`.
+- Content: `ContentPackSchema`, `SpeciesSchema`, `BackgroundSchema`, `FeatSchema`, `ClassSchema`, `SubclassSchema`, `ClassFeatureSchema`, `SpellSchema`, `ConditionSchema` (carrying optional `recurringSave` metadata), `ItemDefinitionSchema` (with `WeaponSchema`, `ArmorSchema`, `ToolSchema`, `MagicItemSchema`, `ConsumableSchema`, `GearSchema` variants), `MonsterStatblockSchema`.
+- Runtime: `CharacterSchema`, `ItemInstanceSchema` (carrying optional `temporaryBuff`), `EncounterSchema`, `EffectInstanceSchema`, `PartySchema`, `SessionSchema`, `JournalEntrySchema`, `LocationSchema`, `DoorSchema`, `LocationMapSchema`, `QuestSchema`, `QuestObjectiveSchema`, `VehicleSchema`, `BastionSchema`, `TrapSchema`, `CampaignStateSchema`.
+
+## Effect primitives
+
+The fixed vocabulary the engine reads to compute character state. About 30 kinds — see `EFFECT_KINDS` in [src/schemas/effects.ts](../src/schemas/effects.ts) for the canonical list. Highlights:
+
+- Stats: `AddModifier`, `SetAdvantage`, `SetAdvantageVsSource`, `SetACFloor`, `OverrideACFormula`, `ModifySpeed`, `GrantSense`, `GrantProficiency`, `GrantWeaponMastery`.
+- Damage / heal: `GrantResistance`, `GrantImmunity`, `GrantVulnerability`, `FlatDamageReduction`, `BlockHealing`, `BoostHealing`, `GrantEvasion`.
+- Conditions / immunities: `GrantConditionImmunity`.
+- Resources / slots: `GrantResource`, `RecoverResource`, `GrantSpellSlots`, `GrantSpell`, `ExpandSpellList`.
+- Action economy: `ModifyActionEconomy`.
+- Triggers: `OnEvent` (with `AddDamage`, `AddDamageToAttacker`, `Heal`, `ApplyCondition`, `SpendResource`, `ModifyDamageTaken`, `EmitEvent` TriggerActions).
+- Misc: `ExpandCritRange`, `GrantHalfProficiencyBonusFloor`, `ImposeDisadvantageOnAttackers`, `GrantAdvantageToAttackers`, `GrantAura`, `GrantFallingProtection`, `OfferChoice`, `SetHPMaxFormula`, `CustomEffect` (code-handler escape hatch).
 
 ## Content packs
 
@@ -97,7 +133,7 @@ const resolved = resolveContent([pack1, pack2]);
 const issues = validateCrossReferences(resolved);
 ```
 
-`loadStarterPack()` returns the bundled starter pack. `STARTER_PACK_RAW` exposes the underlying object if you need to inspect or extend it.
+`loadStarterPack()` returns the bundled starter pack. `STARTER_PACK_RAW` exposes the underlying object if you need to inspect or extend it. `import('ttrpg-engine-dnd/starter-pack')` is a real subpath so browser consumers can code-split the starter content off the main bundle.
 
 ## RNG
 
@@ -109,8 +145,12 @@ import { defaultRNG, seededRNG, throwOnCallRNG } from 'ttrpg-engine-dnd';
 
 ## IDs
 
-Branded string types per kind. Factories: `newCharacterId`, `newCreatureId`, `newPartyId`, `newEncounterId`, `newCampaignId`, `newSessionId`, `newLocationId`, `newQuestId`, `newJournalEntryId`, `newEventId`, `newChoiceId`, `newEffectInstanceId`, `newAppliedConditionId`, `newItemInstanceId`. Brand casts: `asCharacterId`, `asSpeciesId`, etc.
+Branded string types per kind. Factories: `newCharacterId`, `newCreatureId`, `newPartyId`, `newEncounterId`, `newCampaignId`, `newSessionId`, `newLocationId`, `newQuestId`, `newJournalEntryId`, `newEventId`, `newChoiceId`, `newEffectInstanceId`, `newAppliedConditionId`, `newItemInstanceId`, `newTrapId`. Brand casts: `asCharacterId`, `asSpeciesId`, etc.
 
 ## Migrations
 
-`migrate(json) → CampaignState` walks the on-disk version forward.
+`migrate(json) → CampaignState` walks the on-disk version forward. `SCHEMA_VERSION` lives in [src/version.ts](../src/version.ts); migrations live in [src/migrations/](../src/migrations/) and run automatically on `loadCampaign(json)`.
+
+## Conveniences
+
+`serializeCampaign(c)` writes a JSON string with id + name + schemaVersion + events only; state is omitted because `loadCampaign(json)` replays the events to reconstruct it. `createPC({name, speciesId, backgroundId, classId, hpMax, ...})` returns a `Character` with sensible defaults; caller emits the `CharacterCreated` event themselves to add to a campaign. `performIntent(campaign, intent)` is the engine.do convenience (same dispatcher as `engine.do`).

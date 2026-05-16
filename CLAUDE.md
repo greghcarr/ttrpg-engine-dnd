@@ -6,22 +6,21 @@ A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). 
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E are complete (Slices 1-46). Only Phase F (Slice 47, optional ttrpg-engine-core extraction) remains.
+This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 (slices 48–100) has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
 
 ## Library-quality bar (internal working note)
 
 Hold the engine to a library-quality standard: TypeScript strict mode, deterministic replay, plan/commit RNG capture, 80%+ coverage on engine/derive/effects, golden transcripts on every behavior change. Do not advertise this framing on public-facing surfaces (README, package.json, repo description). The work should speak through the code and tests; quality labels in marketing copy are noise. See [feedback memory](../../../.claude/projects/-Users-greghcarr-Documents-Visual-Studio-Code-dndbnb/memory/feedback_no_quality_self_label_public.md) for the reasoning.
 
-## Known gaps (track in README roadmap, work through in order)
+## Known gaps (canonical list lives in README)
 
-The engine architecture is locked and proven. The remaining work falls into four buckets:
+The engine architecture is locked. Original Phase A–E combat / state / adoption work all shipped at alpha.5. Remaining work falls into three categories:
 
-1. **Combat mechanics still missing** (Phase C in the roadmap). Grapple/shove/hide, Counterspell/Dispel, full Weapon Mastery wiring, mounted combat, travel, NPCs as first-class, downtime, magic item charges, resurrection variants, Wild Shape / Polymorph / Wish handlers.
-2. **State schemas still missing** (Phase B remainder). Locations + maps + LOS; quests + objectives + milestone XP.
-3. **Adoption surface** (Phase D). Without these, the library is useful only to its author: starter SRD content pack, examples directory, getting-started doc, `engine.do()` convenience, persistence helpers, derivation memoization, npm publish, content-pack validator with good error messages.
-4. **Content fill-out** (Phase E). The big data load: 12 classes × all subclasses × 1-20 progression, ~370 spells, all species/backgrounds/feats, magic items, monster statblocks, bastions, epic boons, variant rules.
+1. **Engine vocabulary** — focused primitives that each unblock a cohort of currently schema-only content. ~15–25 still on the catalog at [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) under "Future engine slices."
+2. **Content authoring** — most of what's left. The bulk of the MM bestiary (~365 statblocks), most subclasses (~38), the long tail of schema-only spells (~247), the DMG magic-item catalog. None requires engine work, just JSON. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the catalog.
+3. **Phase F** (optional) — `ttrpg-engine-core` extraction. Unstarted. Only do this if multi-system support becomes a real goal.
 
-When working in this repo, assume any of these gaps may be the next slice the user picks. Don't pre-implement them; deliver each as its own slice with its own golden test.
+When working in this repo, the slice cadence is "primitive + canonical user": one focused primitive plus the first one or two RAW spells / features that exercise it. See recent slices (88–100) for the pattern.
 
 ## System-agnostic core seam (forward-looking)
 
@@ -59,7 +58,7 @@ The seam doesn't need to be perfect today, just clean enough that Slice 47 is a 
 
 - **Event-sourced.** State changes are events. `apply(state, event) -> state` is pure.
 - **Plan/commit split.** `engine.plan(state, intent)` is the only place RNG is consumed; resolution events carry baked rolls. `apply()` never touches RNG. Replays read baked rolls.
-- **Effect primitives.** Features are described via a fixed vocabulary of about 25 primitives. Wild Shape, Polymorph, Wish and similar drop to code handlers (the `CustomEffect` escape hatch).
+- **Effect primitives.** Features are described via a fixed vocabulary of about 30 primitives. Wild Shape, Polymorph, Wish and similar drop to code handlers (the `CustomEffect` escape hatch). Canonical list: `EFFECT_KINDS` in [src/schemas/effects.ts](src/schemas/effects.ts).
 - **Branded IDs + ULIDs.** Per-kind branded string types (`CharacterId`, `SpellId`, `ItemDefinitionId` versus `ItemInstanceId`, etc.) backed by ULIDs.
 - **Normalized state.** Entities live in `Record<Id, Entity>` maps under `CampaignState`, not nested arrays.
 - **Immer internally, immutable externally.** `apply()` uses Immer for clean reducers; output is frozen.

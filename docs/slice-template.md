@@ -6,18 +6,19 @@ For the project-wide slice workflow (event-first, reducer, planner, tests), see 
 
 ## Pre-flight (every slice)
 
-1. Read the README roadmap entry for the slice; confirm scope.
-2. Find the closest prior analogous slice; skim its commit and tests for the pattern.
+1. Read the relevant entry in [docs/starter-pack-gaps.md](starter-pack-gaps.md) (the per-primitive future-slice queue + per-spell wired catalog) to confirm scope and pick the canonical content user.
+2. Find the closest prior analogous slice via `git log --oneline | head -40`; skim its commit and tests for the pattern. Recent slices (88–100) are the most representative.
 3. Decide which of the three shapes below applies. If two apply, do them as two slices.
 
 ## Definition of done (every slice)
 
 - Full test suite green (`npm test`).
-- `npm run typecheck` clean.
+- `npm run typecheck` clean (CI also gates this).
 - Replay-equivalence holds on every new golden scenario.
 - New events round-trip through `formatTranscript` (a case in [tests/transcript.ts](../tests/transcript.ts) for each new event type).
-- CHANGELOG entry.
-- README roadmap entry updated (strikethrough completed line, add follow-ups under "Partial wires" if anything is left unwired).
+- CHANGELOG entry under `## Unreleased`.
+- [docs/starter-pack-gaps.md](starter-pack-gaps.md) updated: future-engine-slices row marked shipped if a primitive landed; per-level spell sections walked from `schema-only` to `wired` for the canonical content user(s); "Coverage at a glance" totals refreshed.
+- Pre-commit Uncle Bob review: clean code / externalities / regressions / tests / Uncle Bob check.
 
 ---
 
@@ -101,5 +102,5 @@ A pure function over `CampaignState` (plus content) that doesn't emit events.
 ### Gotchas
 
 - Derivations read the effect stack via `buildEffectStack({character, content, itemInstances, pendingChoices})`. Don't reach into `appliedConditions` directly; the effect stack composes condition + species + background + class + feat effects.
-- Memoization is opt-in via the helpers in [src/derive/memo.ts](../src/derive/memo.ts); only memoize derivations that are called many times per turn (AC, attack bonus, action economy budget).
+- Memoization lives inside `createEngine` in [src/engine/index.ts](../src/engine/index.ts) (a `memo` Map keyed on `CampaignState.version`). Adding a new derivation to the memoized surface means adding a method on `engine.derive.*` and wrapping its body with the `memoize()` helper. Only memoize derivations that are called many times per turn (AC, attack bonus, action economy budget). One-off queries can stay non-memoized.
 - Derivations must not throw on missing optional fields; return a sensible default and let validation happen at boundaries.

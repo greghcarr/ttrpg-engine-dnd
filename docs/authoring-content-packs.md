@@ -249,18 +249,23 @@ Subclass features dedupe by id the same way class features do.
 | `targeting` | `{ shape, size }` | no | AoE shape; `shape` is `cone`/`cube`/`line`/`sphere`/`cylinder` |
 | `mechanicalEffects` | `SpellMechanic[]` | no, default `[]` | See below |
 
-`SpellMechanic` is a discriminated union by `kind`. The starter pack uses eight kinds:
+`SpellMechanic` is a discriminated union by `kind`. The starter pack uses thirteen kinds:
 
 | `kind` | Use | Fields |
 |---|---|---|
-| `attack` | A spell attack roll (Eldritch Blast, Fire Bolt) | `damageDice`, `damageType`, `extraDicePerSlotLevel?`, `cantripScalingDice?` |
-| `save` | A saving throw — may or may not deal damage, may apply a condition | `ability`, `damageDice?`, `damageType?`, `halfOnSuccess?`, `conditionOnFail?`, `extraDicePerSlotLevel?`, `cantripScalingDice?` |
+| `attack` | A spell attack roll (Eldritch Blast, Fire Bolt). `damageType` can be replaced by `casterChoosesDamageType: { allowed: DamageType[] }` so the caster picks at cast time (Chromatic Orb). | `damageDice`, `damageType?` or `casterChoosesDamageType?`, `extraDicePerSlotLevel?`, `cantripScalingDice?` |
+| `save` | A saving throw — may or may not deal damage, may apply a condition. Optional `casterChoosesVariant: { variants: [{key, conditionId}] }` lets the caster pick which condition lands (Calm Emotions, Command, Bestow Curse). Optional `pushedFeetOnFail` emits `CreaturePushed` (Gust of Wind). | `ability`, `damageDice?`, `damageType?`, `halfOnSuccess?`, `conditionOnFail?` or `casterChoosesVariant?`, `pushedFeetOnFail?`, `extraDicePerSlotLevel?`, `cantripScalingDice?` |
 | `heal` | Healing a target | `amountDice?`, `flatAmount?`, `extraDicePerSlotLevel?` (at least one of `amountDice` / `flatAmount`) |
+| `temp-hp` | Grant temporary HP (False Life). RAW max-not-additive semantics. | `amountDice?`, `flatAmount?`, `extraPerSlotLevel?` |
 | `auto-hit` | N darts, no save / no roll (Magic Missile) | `damageDicePerDart`, `damageType`, `dartsAtBaseSlot`, `extraDartsPerSlotLevel` |
-| `buff` | Apply a condition with no save (Bless, Mage Armor) | `conditionId` |
+| `buff` | Apply a condition with no save (Bless, Mage Armor). Optional `casterChoosesVariant` for spells where the caster picks at cast time (Enlarge/Reduce, Enhance Ability, Spirit Shroud, Protection from Energy, Fire Shield). | `conditionId?` or `casterChoosesVariant?` |
 | `remove-condition` | Strip the first matching condition from each target (Lesser Restoration) | `eligibleConditionIds` (min 1) |
 | `hp-pool-knockout` | Roll a dice pool; walk targets in ascending-HP order and apply `conditionId` until the pool runs out (Sleep). Targets already carrying the condition are skipped. | `poolDice`, `extraPoolDicePerSlotLevel?`, `conditionId` |
-| `aura-damage` | Concentration aura (Spirit Guardians). Cast-time emits only `ConcentrationStarted`; damage fires later via `engine.plan.tickAura({ casterId, targetIds })`, which the consumer calls per turn for each creature in range. Each tick rolls a save and applies damage independently per target. | `rangeFeet`, `saveAbility`, `damageDice`, `damageType`, `halfOnSuccess?` (default true), `extraDicePerSlotLevel?` |
+| `aura-damage` | Concentration aura (Spirit Guardians, Cloud of Daggers, Hunger of Hadar, Wall of X). Cast-time emits only `ConcentrationStarted`; damage / condition fires later via `engine.plan.tickAura({casterId, targetIds, trigger?})`. Optionality matrix: omit `saveAbility` for no-save (Cloud of Daggers); omit `damageDice` / `damageType` for condition-only (Entangle); omit `conditionOnFail` for damage-only. Optional `trigger` tag (`on-enter` / `on-turn-start` / `on-turn-end`) gates multi-component zones. | `rangeFeet`, `saveAbility?`, `damageDice?`, `damageType?`, `halfOnSuccess?`, `conditionOnFail?`, `trigger?`, `extraDicePerSlotLevel?` |
+| `movement-damage` | Per-foot-moved damage zone (Spike Growth). Consumer detects movement and calls `engine.plan.tickMovementDamage({casterId, targetId, feetMoved})`. Distinct from `aura-damage` so per-tick vs per-traversal semantics stay legible. | `rangeFeet`, `damageDicePerFiveFeet`, `damageType` |
+| `recurring` | Per-turn effect while concentrating (Heroism). Consumer calls `engine.plan.tickRecurring({casterId, targetId})` at the start of each target's turn. `effect` is `temp-hp` / `heal` / `damage`. | `effect`, `amountDice?`, `flatAmount?`, `addCasterAbilityMod?`, `damageType?` |
+| `summon` | Creates a controlled companion (find-familiar, summon-X family, find-steed, animate-dead, phantom-steed, etc.). Emits `CompanionSummoned`; the reducer instantiates a Character with `summonSource` pointing to controller / spell / slot / effect. HP scales by slot level. Concentration auto-dismiss. | `name`, `ac`, `hpBase`, `hpPerSlotAbove?`, `baseSlotLevel`, `speedFeet?` |
+| `trap` | Primes a placed trap (Glyph of Warding, Cordon of Arrows). Cast-time emits `TrapArmed`; the consumer detects the trigger condition and calls `engine.plan.triggerTrap({trapId, triggeringCharacterId})`. DC pre-baked from caster's spell save DC at arm time (or `fixedDC`). `damageType` can be `casterChoosesDamageType` (Glyph: caster picks from a list at cast). | `saveAbility`, `damageDice`, `damageType?` or `casterChoosesDamageType?`, `halfOnSuccess?`, `charges`, `label`, `fixedDC?` |
 
 A spell can have multiple `mechanicalEffects` entries — for instance a spell that both damages and applies a condition would have two `save` entries (or one `save` with both `damageDice` and `conditionOnFail`).
 
@@ -391,6 +396,13 @@ Valid `target` values: `'ac'`, `'attack'`, `'damage'`, `'initiative'`, `'spellAt
 
 **`GrantAdvantageToAttackers`** — when present on the *target's* effect stack, attackers gain advantage. Used by Faerie Fire's condition and the Restrained status. The attack planner consults the target's stack for this, not the attacker's.
 
+**`ImposeDisadvantageOnAttackers`** — mirror of `GrantAdvantageToAttackers`: attacks against the bearer roll with disadvantage. Used by the Dodge action's `dodged` condition.
+
+**`SetAdvantageVsSource`** — direction-filtered advantage. Only applies when the roll's target equals the bearing applied condition's `sourceCharacterId`. Used by Bestow Curse's "Disadvantage on attack rolls against the caster" variant. No effect when the bearing condition has no `sourceCharacterId`.
+```json
+{ "kind": "SetAdvantageVsSource", "on": "attack", "mode": "disadvantage" }
+```
+
 ### Resistance / immunity / vulnerability
 
 ```json
@@ -409,6 +421,11 @@ Valid `target` values: `'ac'`, `'attack'`, `'damage'`, `'initiative'`, `'spellAt
 { "kind": "OverrideACFormula", "base": 10, "abilityModifiers": ["DEX", "CON"] }
 ```
 Used by Unarmored Defense (Barbarian: base 10, DEX + CON), Monk (DEX + WIS), Draconic Sorcerer (13 + DEX), and Mage Armor (13 + DEX). `base` can be a number or `'dex'`/`'con'`/`'wis'`.
+
+**`SetACFloor`** — bumps the natural AC up to `value` if it would otherwise be lower. Used by Barkskin (AC can't be lower than 17 regardless of armor). Multiple floors fold to the highest. Distinct from `OverrideACFormula` (which replaces the formula entirely and only applies unarmored).
+```json
+{ "kind": "SetACFloor", "value": 17 }
+```
 
 ### Movement and senses
 
@@ -469,7 +486,7 @@ Used by Unarmored Defense (Barbarian: base 10, DEX + CON), Monk (DEX + WIS), Dra
 }
 ```
 
-`oncePer` (`'turn'`, `'round'`, `'shortRest'`, `'longRest'`) limits firing cadence. Actions can be `AddDamage`, `Heal`, `ApplyCondition`, `SpendResource`, `ModifyDamageTaken`, or `EmitEvent`. The `filter` is a recursive Predicate (`all`, `any`, `eq`, etc.) over event facts.
+`oncePer` (`'turn'`, `'round'`, `'shortRest'`, `'longRest'`) limits firing cadence. Optional `consumeOnTrigger: true` lifts the parent condition after firing (one-shot smite-style riders). Actions can be `AddDamage` (damages event.targetId), `AddDamageToAttacker` (damages event.attackerId; Fire Shield, Armor of Agathys), `Heal`, `ApplyCondition` (stamps a condition on event.targetId; Spirit Shroud's heal-block), `SpendResource`, `ModifyDamageTaken`, or `EmitEvent`. The `filter` is a recursive Predicate (`all`, `any`, `eq`, etc.) over event facts. Available facts on `AttackRolled` include `event.attackerIsSelf`, `event.targetIsSelf`, `event.hit`, `event.critical`, `event.used`, `event.weaponInstanceId`, `event.attackerHasAllyAdjacentToTarget`, `event.attackerIsSource` (true when the attacker matches the bearing applied condition's source).
 
 ### Proficiencies
 
@@ -502,6 +519,41 @@ Used by Unarmored Defense (Barbarian: base 10, DEX + CON), Monk (DEX + WIS), Dra
 ```json
 { "kind": "FlatDamageReduction", "damageTypes": ["bludgeoning", "piercing", "slashing"], "amount": 3 }
 { "kind": "SetHPMaxFormula", "formula": { "kind": "add", "left": { "kind": "constant", "value": 5 }, "right": { "kind": "abilityMod", "ability": "CON" } } }
+```
+
+**`BlockHealing`** — bearer cannot regain hit points. `planHealMechanic` consults the effect stack and, when set, emits Healed with amount=0 plus a `(blocked)` annotation in the event's `source` field. Used by Spirit Shroud's `healing-blocked-active`.
+```json
+{ "kind": "BlockHealing" }
+```
+
+**`BoostHealing`** — additive boost to outgoing heals when the caster has this effect. Used by Disciple of Life.
+```json
+{ "kind": "BoostHealing", "flat": 2, "perSpellLevel": 1 }
+```
+
+**`GrantEvasion`** — flips the DEX-save half-on-success path to (success → 0, fail → half). Used by Rogue L7 and Monk L7.
+```json
+{ "kind": "GrantEvasion" }
+```
+
+**`GrantFallingProtection`** — short-circuits `engine.plan.falling` to no damage events while present. Used by Feather Fall's `feather-falling-active` condition.
+```json
+{ "kind": "GrantFallingProtection" }
+```
+
+**`ExpandCritRange`** — lowers the natural-d20 threshold at which the attacker's weapon attacks crit. Default 20; Improved Critical sets 19. Multiple sources fold to the lowest.
+```json
+{ "kind": "ExpandCritRange", "threshold": 19 }
+```
+
+**`GrantHalfProficiencyBonusFloor`** — adds `floor(profBonus / 2)` to ability checks when no explicit proficiency contribution applies. Used by Bard Jack of All Trades.
+```json
+{ "kind": "GrantHalfProficiencyBonusFloor" }
+```
+
+**`GrantAura`** — declarative metadata for consumers to project a condition onto in-range allies. The engine doesn't auto-project (position is consumer territory). Used by paladin Aura of Protection / Courage, and the Crusader's Mantle spell.
+```json
+{ "kind": "GrantAura", "auraId": "aura-of-protection", "rangeFeet": 10, "allyConditionId": "aura-of-protection-blessed" }
 ```
 
 ### Custom

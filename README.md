@@ -86,23 +86,18 @@ Pick the doc that matches what you want:
 
 ## Status
 
-**Alpha.** Architecturally complete; mechanically partial. 1009 tests across 139 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
+**Alpha.** Architecturally complete and content-substantial. 1289 tests across 173 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
 
-Beyond the architecture, here's the honest split:
+The high-level state:
 
-- **Fully wired** (engine + content for the slice ships and works): Phases A and B in their entirety. In Phase C: grapple/shove/hide, the reactive trio (Counterspell / Dispel Magic / Identify), mounts and vehicles, NPC reactions and morale, downtime, magic-item charges, and resurrection. In Phase D: examples, docs, public API conveniences, memoization, npm publish, content validator. In Phase E: Bastions, epic boons.
-- **Partially wired** (machinery exists, scope is narrower than the slice title implies):
-  - Weapon Mastery (Slice 23): all nine masteries land. Sap / Vex / Topple / Push / Graze / Slow run via `planWeaponMastery`; Cleave / Nick / Flex are sequencing concerns wired into the attack pipeline (Flex switches the damage die at use time, Nick converts the bonus-action off-hand attack into a once-per-turn freebie, Cleave runs via `engine.plan.cleave`).
-  - Travel (Slice 25): per-leg events and the forced-march CON-save loop (`engine.plan.forcedMarch`) both ship.
-  - Transformations (Slice 30): `engine.plan.polymorph`, `engine.plan.wildShape`, `engine.plan.simulacrum`, and `engine.plan.wish` all land. The 12-hour Simulacrum cast time is the consumer's responsibility (advance the in-game clock around the call); the engine validates everything else (slot, materials, "one Simulacrum per source creature").
-  - Starter content pack (Slice 31): the 12 classes ship with 1-20 level tables and spellcasting blocks, but most levels carry empty `features: []` arrays (Rogue Sneak Attack scales; Action Surge, Rage, Channel Divinity, Wild Shape forms, Ki, Bardic Inspiration, Stunning Strike, Extra Attack, etc. don't, at the content layer). No subclasses ship.
-  - Spells: 399 spells in the pack (every PHB 2024 entry across L0–L9: 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21). ~137 are mechanically wired (130 via `mechanicalEffects`, 7 via dedicated planners). The remaining ~262 ship schema-only and are blocked on named engine primitives — area-effect, sensor / scrying, terrain shaping, multi-effect transformation, resurrection, HP-threshold tier effects, multi-damage AoE, etc. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the per-spell catalog and the backlog of remaining engine primitives.
-  - Variant rules (Slice 46): `grittyRest` (rest events stamp the right durations) and `heroPoints` (`engine.plan.grantInitialHeroPoints` / `engine.plan.spendHeroPoint`) both ship. `sanity` and `massCombat` still toggle but the engine doesn't yet enforce their mechanics (own slices, see Known gaps).
-- **Known gaps**: see the dedicated [Known gaps](#known-gaps) section below for the canonical list — engine (2 ⚪ variant-rule items, no 🔴/🟡), content (inventory), and test infrastructure (3 items) — all in one place.
+- **Engine architecture**: locked. ~30 effect primitives, plus the `CustomEffect` escape hatch. The trigger dispatcher, plan/commit split, replay equivalence, RNG capture, branded IDs, schema versioning, content-pack loader + validator all ship.
+- **Engine vocabulary**: still growing. Each remaining engine slice adds a focused primitive (target-side rider, trap, recurring save, directional advantage, heal-block, retaliation damage, etc.) that unblocks a cohort of currently schema-only content. About 15–25 such primitives remain on the catalog in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+- **Content**: 399 spells (every PHB 2024 entry, ~152 mechanically wired); 12 classes with 1–20 level tables fully populated (slices through L20 across all 12); 12 subclasses (one canonical per class, L3 only); 16 of 16 PHB 2024 backgrounds (complete); 25 conditions (all 15 RAW plus 10 mechanic-rider variants); ~33 feats; 9 magic items; 6 monster statblocks.
+- **Variant rules**: `grittyRest` and `heroPoints` enforce. `sanity` and `massCombat` still toggle but don't enforce (separate slices, ⚪ in Known gaps).
 
-**What this means for use**: the engine is solid for "create a character, run combat, do a session." For a multi-week campaign with rich class features past level 1, full spell coverage, subclasses, and rule-variant table-style play, you'll be authoring content packs and possibly extending the engine yourself. The roadmap below tracks exactly what each slice ships.
+**What this means for use**: the engine is solid for "create a character, run combat, do a session." For a campaign that exercises the long tail of PHB spells, the missing subclasses, or the bulk of MM monsters, you'll be authoring content packs alongside the starter pack. See the per-category breakdown below and [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the canonical inventory.
 
-Phase F (`ttrpg-engine-core` extraction) is explicitly optional; it remains the only fully un-attempted slice.
+Phase F (`ttrpg-engine-core` extraction) is explicitly optional; it remains the only fully un-attempted slice in the original Phase A–F roadmap.
 
 ## Known gaps
 
@@ -125,19 +120,20 @@ Two opt-in variant-rule toggles. Both have campaign-state plumbing (the boolean 
 | `CampaignSettings.sanity` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't track a sanity score on Character or expose a Sanity ability. A real 2024 sanity-rule wiring needs a 7th ability score path through character creation, derivations, and saves — too large a change to bundle here. |
 | `CampaignSettings.massCombat` is inert | ⚪ | 46 | The flag toggles, but the engine doesn't yet have a `Squad` entity, morale ladder, or mass-combat resolution planners. Whole-system addition; future slice. |
 
-#### Partial wires from Tier 3 closures (⚪)
+#### Targeted engine vocabulary still on the menu (⚪)
 
-The Tier 3 content-stub sweep closed all 14 named class-feature stubs + the 3 remaining class-feature placeholders, taking the class-features matrix to **48 wired / 0 stub** at L1–7. Several of those closures shipped intentionally narrow wires; each is a candidate for its own follow-up slice.
+The architectural skeleton is locked. What's left is a long tail of focused primitives — each ~50–200 LoC, each unblocking a cohort of currently schema-only content. The full inventory lives in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) under "Future engine slices"; below are the categories most likely to bite a real campaign:
 
 | Gap | Severity | What's wired | What's missing |
 |---|---|---|---|
-| `AddModifier { value: Formula }` is unused | ⚪ | Effect schema accepts `number \| Formula`; the builder reads only numeric values. | Sacred Weapon ships a static `+3` attack bonus (representing a typical Paladin CHA mod). Closing this gap lets buffs read the actor's CHA mod at apply time — and unlocks dynamic-value buffs more generally. |
-| Predicate DSL coverage | ⚪ | `eq` / `hasProperty` / `hasCondition` / `damageType` / `all` / `any` / `not` / `always` / `never`. | No predicates for "ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand". Fighting Style effects (Archery +2 attack, Defense +1 AC, Dueling +2 damage) apply unconditionally as a result. |
+| Predicate DSL coverage | ⚪ | `eq` / `hasProperty` / `hasCondition` / `damageType` / `all` / `any` / `not` / `always` / `never`. | No predicates for "ranged attack" / "while wearing armor" / "one-handed weapon, no off-hand" / "bearer's temp HP > 0". Fighting Style effects (Archery +2 attack, Defense +1 AC, Dueling +2 damage) apply unconditionally as a result; Armor of Agathys's "while temp HP > 0" retaliation gate can't ship until this lands. |
 | Rage planner | ⚪ | Barbarian L1 grants the `rage` resource; Frenzy spends one charge + applies a `frenzied` condition (+2 damage). | No `planRage` to install Rage's actual effects (damage resistance to physical, attack-bonus on STR melee, exhaustion-at-end, advantage on STR checks while raging, duration tracking). Frenzy's bonus-action attack grant is consumer-driven. |
 | Per-Metamagic-option spell modification | ⚪ | `engine.plan.metamagic({ option })` spends the right sorcery-point cost (1/2/3 SP per RAW). | Spell modification (Twinned target doubling, Distant range doubling, Quickened bonus-action timing, Empowered damage reroll, etc.) is consumer-driven. Each option's effect on `planCastSpell` is a future slice. |
 | Familiar as a first-class entity | ⚪ | Druid Wild Companion spends a Wild Shape charge. | No Familiar entity / Find Familiar spell mechanic. Summoning a familiar is consumer-driven (`CharacterCreated` for the creature). |
 | `OfferChoice` at L1 doesn't auto-fire | ⚪ | `planLevelUp` emits `ChoiceRequired` on level advancement. | Fresh L1 characters (built via `CharacterCreated` rather than leveled up to L1) don't receive their L1 `OfferChoice` grants. Fighter L1 Fighting Style is affected; Paladin/Ranger Fighting Style work because they're gained on L1→L2. |
 | 3 of 6 Fighting Styles are placeholders | ⚪ | Archery, Defense, Dueling have effects (unconditional approximations). | Great Weapon Fighting (reroll 1s/2s on damage dice), Protection (reactive impose-disadvantage on attacks against allies), Two-Weapon Fighting (add ability mod to off-hand damage) ship as `effects: []`. Each is its own mechanic. |
+| Auto-expiry for trigger-applied conditions | ⚪ | `ApplyCondition` TriggerAction (slice 98) stamps conditions on triggered targets with a declarative `durationRounds` field. | Engine doesn't decrement the duration on turn-start; consumer (DM, dndbnb) removes the condition manually. Spirit Shroud's heal-block is the canonical user. Closing this lets a number of other "until start of caster's next turn" riders ship. |
+| Spell Glyph variant of Glyph of Warding | ⚪ | Explosive Runes variant ships via the trap primitive (slice 94). | The Spell Glyph variant stores an arbitrary spell whose targets resolve at trigger time. The trap payload only models save + damage today; storing a spell is a bigger change. |
 
 ### Content gaps
 
@@ -145,16 +141,16 @@ The starter pack is intentionally a slice, not the full 2024 catalogs. This tabl
 
 | Category | Shipped | RAW total (approx) | Severity | Notes |
 |---|---|---|---|---|
-| Classes (table scaffolding) | 12 of 12 | 12 | 🟡 | Tables ship 1-20. Class-feature wire status (per the coverage matrix): **48 wired / 0 stub** at L1-7. Wired highlights: Sneak Attack scaling all 10 odd levels, Second Wind / Action Surge / Extra Attack, Rage resource, Bardic Inspiration + Expertise (Insight/Persuasion) + Font of Inspiration + Jack of All Trades, Channel Divinity, Wild Shape, Druidic, Monk's Martial Arts die scaling / Focus / Unarmored Defense / Extra Attack / Slow Fall, Hunter's Mark + Weapon Mastery grant, Innate Sorcery / Font of Magic / Sorcerous Restoration, Lay on Hands, Arcane Recovery, Barbarian Unarmored Defense + Danger Sense. All 14 named Tier 3 content stubs (per [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md)) plus the three remaining class-feature entries (Feral Instinct, Deft Explorer, Wild Companion) now have effects and engine support. The class-feature matrix is fully wired through L7. The next remaining stubs live at the subclass-feature L3 layer (11 entries across 9 subclasses). |
-| Subclasses | 12 (1 per class, L3 only) | ~50+ | 🟡 | One canonical PHB-2024 subclass per class lands at L3 — the gating level. The L3 features are a mix of wired (Draconic Resilience AC, Thief Second-Story climb speed, College of Lore proficiencies + Cutting Words, Champion Remarkable Athlete + Improved Critical, Oath of Devotion Sacred Weapon, Life Domain Disciple of Life, Path of the Berserker Frenzy) and **13 remaining content-stubs** (Circle of the Land's cantrip + Land's Aid, Draconic Resilience HP + Draconic Spells, Evoker's Evocation Savant + Sculpt Spells, Fiend Patron's Dark One's Blessing + Fiend Spells, Hunter's Lore + Hunter's Prey, Oath of Devotion Spells, Thief Fast Hands, Warrior of the Open Hand Technique). L7 / L10 / L14 feature grants and the other 3-4 subclasses per class are still consumer territory. |
-| Spells | 399 (~137 fully wired) | 399 (PHB 2024 complete) | 🟢 | Every PHB 2024 spell ships in the pack across L0–L9 (34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21). ~130 are wired via `mechanicalEffects` plus 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~262 ship schema-only and each names the specific engine primitive blocking it — area-effect, sensor / scrying, terrain shaping, multi-effect transformation, resurrection, HP-threshold tier effects, multi-damage AoE, etc. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the per-spell catalog and which primitive each deferred spell waits on. |
+| Classes (table scaffolding) | 12 of 12 | 12 | 🟡 | All 12 classes carry full L1–L20 tables populated with features. The remaining content gaps are subclass progression (L7 / L10 / L14 features per subclass) and a handful of narrowly-deferred Tier 3 stubs (per [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md)). The class-feature matrix is **fully wired through L7** across all 12 classes; later tiers ship features at every grant level with effects wired where the primitive vocabulary covers them, narrative-only otherwise. |
+| Subclasses | 12 (1 per class, L3 only) | ~50+ | 🟡 | One canonical PHB-2024 subclass per class lands at L3 (the gating level). The L3 features are a mix of fully wired (Draconic Resilience AC, Thief Second-Story climb speed, College of Lore proficiencies + Cutting Words, Champion Remarkable Athlete + Improved Critical, Oath of Devotion Sacred Weapon, Life Domain Disciple of Life, Path of the Berserker Frenzy, Cleric Blessed Strikes / Divine Strike) and a small remainder of content-stubs (Circle of the Land's cantrip + Land's Aid, Evoker's Sculpt Spells, Fiend Patron's Dark One's Blessing, Hunter's Lore + Hunter's Prey, Thief Fast Hands, Warrior of the Open Hand Technique). L7 / L10 / L14 feature grants and the other 3–4 subclasses per class are still consumer territory. |
+| Spells | 399 (~152 fully wired) | 399 (PHB 2024 complete) | 🟢 | Every PHB 2024 spell ships in the pack across L0–L9 (34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21). ~143 wired via `mechanicalEffects` plus 9 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~247 ship schema-only and each names the specific engine primitive blocking it. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the per-spell catalog and which primitive each deferred spell waits on. |
 | Magic items | 9 | hundreds (DMG) | 🟡 | Bag of Holding, Wand of Magic Missiles, Cloak of Protection, etc. through legendary Deck of Many Things. Most DMG items missing. |
-| Monster statblocks | 6 | hundreds (MM) | 🟡 | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. Most MM creatures missing. |
-| Species | 7 | ~10 in PHB 2024 | ⚪ | Human, Elf, Dwarf, Halfling, Tiefling, Dragonborn, Gnome. Missing: Aasimar, Goliath, Orc, others. |
-| Backgrounds | 19 (16 PHB 2024 + 3 legacy) | 16 in PHB 2024 | ✓ | All 16 PHB 2024 backgrounds ship (Acolyte, Artisan, Charlatan, Criminal, Entertainer, Farmer, Guard, Guide, Hermit, Merchant, Noble, Sage, Sailor, Scribe, Soldier, Wayfarer) with the correct 2024 ability options, skill / tool proficiencies, and origin feat. Three legacy 2014 names (Folk Hero, Guild Artisan, Outlander) are kept alongside for existing-character compatibility. |
-| Feats | ~25 + Healer/Musician/Tavern Brawler stubs | ~50+ in PHB 2024 | ⚪ | Origin feats now cover the 16-background set; general feats and all 6 Fighting Styles ship. Many general feats still missing. Healer / Musician / Tavern Brawler are catalogued (so backgrounds can name them) but their effect bodies are stubs. |
-| Weapons / armors / tools / gear | ~36 weapons + 13 armors + 5 tools + 7 gear | full PHB chapter | 🟡 | All 33 PHB 2024 weapons (simple + martial) plus their 9 masteries ship, including the prior gap (Club, Javelin, Light Hammer, Sickle, Dart, Shortbow, Sling, Battleaxe, Flail, Glaive, Halberd, Lance, Maul, Morningstar, Pike, Scimitar, Trident, War Pick, Whip, Blowgun, Hand / Heavy Crossbow). All 13 PHB armors (Padded + Hide added). Tools and adventuring gear are still partial. |
-| Conditions | 15 of 15 | 15 | ✓ | Complete (this is what makes the table look honest). |
+| Monster statblocks | 6 | ~370 (MM) | 🟡 | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. Most MM creatures missing. The single largest content gap by raw count. |
+| Species | 7 | ~10 in PHB 2024 | ⚪ | Human, Elf, Dwarf, Halfling, Tiefling, Dragonborn, Gnome. Missing: Aasimar, Goliath, Orc. |
+| Backgrounds | 19 (16 PHB 2024 + 3 legacy) | 16 in PHB 2024 | ✓ | All 16 PHB 2024 backgrounds ship with the correct 2024 ability options, skill / tool proficiencies, and origin feat. Three legacy 2014 names (Folk Hero, Guild Artisan, Outlander) are kept alongside for existing-character compatibility. |
+| Feats | ~33 (12 origin / 6 general / 6 fighting style / 9 epic boon) | ~50+ in PHB 2024 | ⚪ | Origin feats cover the 16-background set; general feats and all 6 Fighting Styles ship. Many general feats still missing. Healer / Musician / Tavern Brawler are catalogued (so backgrounds can name them) but their effect bodies are stubs. |
+| Weapons / armors / tools / gear | ~36 weapons + 13 armors + 5 tools + 7 gear | full PHB chapter | 🟡 | All 33 PHB 2024 weapons (simple + martial) plus their 9 masteries ship. All 13 PHB armors. Tools and adventuring gear are still partial. |
+| Conditions | 25 (15 RAW + 10 rider) | 15 RAW | ✓ | All 15 RAW conditions plus 10 mechanic-rider conditions the engine uses (`blessed`, `baned`, `held-paralyzed-active`, `cursed-attacks-active`, `fire-shield-warm-active`, `healing-blocked-active`, etc.). |
 | Epic boons | 9 | ~16 in DMG 2024 | ⚪ | About half of the published list. |
 | Separate `ttrpg-engine-dnd-srd-2024` package | not built | — | 🟡 | Phase D Slice 31's deeper intent — extracting an SRD-derived pack as its own published package — was never done. The starter pack stands in. |
 
@@ -166,7 +162,7 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1009 tests across 139 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)) and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1289 tests across 173 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)) and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
 
 #### Property-test generator coverage
 
@@ -269,6 +265,40 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 ### Phase F: Core extraction (1 slice, optional, future)
 
 - **Slice 47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `ttrpg-engine-dnd` (this package) becomes the 5.5e adapter on top of the core. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once this package is mature.
+
+### Post-alpha.5: vocabulary expansion (slices 48–100, ongoing)
+
+After the original Phase A–E roadmap completed at alpha.5, work shifted to a "primitive + canonical content user" cadence: each slice adds a small targeted Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content, plus the first one or two RAW spells / features that exercise it. Slices land one per session; the architectural skeleton remains untouched.
+
+Grouped by theme:
+
+- **Spell catalog completion** (10 slices). Every PHB 2024 spell now ships in the pack across L0–L9 (399 total). Coverage went from ~33 to 399 spells; mechanically wired count went from ~26 to ~152.
+- **Class features fill-out** (14 slices). All 12 classes have L1–L20 features populated, plus targeted subclass wirings (Cleric Blessed Strikes, Paladin Aura Improvements, etc.). The class-feature matrix is fully wired through L7.
+- **Engine primitives** (~35 slices). New Effect kinds, TriggerAction variants, and planners. Highlights:
+  - Summon system (slice 48): `CompanionSummoned` / `CompanionDismissed` events, summon SpellMechanic with inline statblock, slot-level HP scaling. 11 spells wired.
+  - On-hit trigger primitive (slice 61) + smite cohort: divine-favor, searing-smite, wrathful-smite, thunderous-smite, branding-smite.
+  - Aura primitive (slice 63) + source-relative formulas (slice 64): paladin Aura of Protection, Crusader's Mantle.
+  - Condition-immunity gate (slice 66) in the spell pipeline.
+  - Area-effect via aura-damage (slices 68 / 70 / 71): 12 zone spells wired.
+  - AC-buff (slice 74): Shield of Faith + Barkskin.
+  - Temp-HP grant (slice 75): False Life.
+  - Item-buff via `ItemInstance.temporaryBuff` (slices 76 / 90): Magic Weapon, Elemental Weapon.
+  - `getEffectiveSpeed` retrofit (slice 77): movement-mode conditions (fly, spider-climb) now affect the engine's move planner.
+  - Push primitive (slice 78): Gust of Wind, Earthbind.
+  - Recurring-rider (slice 79): Heroism temp-HP per turn.
+  - Falling-protection buff (slice 81): Feather Fall.
+  - Caster-chosen options at cast time (slices 82–87): Chromatic Orb, Enlarge/Reduce, Calm Emotions, Command, Enhance Ability, Bestow Curse.
+  - Target-side source-filtered on-hit rider (slice 88): Hex, Bestow Curse extra-damage variant.
+  - Spirit Shroud variants (slice 89): cold / necrotic / radiant.
+  - Dedicated reaction planner (slice 91): Absorb Elements.
+  - Recurring-save primitive (slices 92 / 93): Bestow Curse inactive-turn, Hold Person, Hold Monster, Hideous Laughter, Confusion.
+  - Trap mechanic (slice 94): Glyph of Warding (Explosive Runes), Cordon of Arrows.
+  - Resistance-buff condition (slice 95): Protection from Energy 5-variant buff.
+  - Directional attack disadvantage (slice 96) + generic attacker-side advantage wiring (slice 97): Bestow Curse attack variant; Blinded / Poisoned / Frightened / Prone / Restrained / Invisible now actually affect the d20.
+  - Heal-blocking primitive + ApplyCondition dispatch (slice 98): Spirit Shroud heal-block.
+  - AddDamageToAttacker TriggerAction (slice 100): Fire Shield.
+
+Each slice ships its primitive plus a canonical content user, a unit test, a content test, and a gaps-doc walk from schema-only to wired. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the per-spell catalog plus the future-slice queue of primitives still on the menu.
 
 ### What "perfect" cannot mean
 
