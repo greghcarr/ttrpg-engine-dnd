@@ -13,7 +13,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 251 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 across L0–L4. Cantrips, L1, L2, L3, and L4 each ship every PHB 2024 entry. ~93 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L5+ not in pack. |
+| Spells | 297 / ~370 | ~370 | 34 / 60 / 63 / 54 / 40 / 46 across L0–L5. Cantrips, L1, L2, L3, L4, and L5 each ship every PHB 2024 entry. ~106 wired with `mechanicalEffects` (~18 cantrips, ~26 L1, ~20 L2, ~17 L3, ~12 L4, ~13 L5) + 7 dedicated planners (counterspell, dispel-magic, identify, misty-step, shield, hunters-mark, polymorph). L6–9 not yet in pack. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
 | Conditions | 25 / 15 | 15 (RAW) | All 15 RAW conditions plus 10 mechanic-rider conditions used by the engine. |
@@ -122,7 +122,30 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Resistance qualifier (magical-vs-nonmagical)**: `stoneskin` — half damage from nonmagical B/P/S only.
 - **Extradimensional storage**: `secret-chest`.
 
-### L5–L9: 0 / ~140
+### L5: 46 / ~46 (full PHB list)
+
+**Wired (13):** cloudkill, cone-of-cold, conjure-elemental (summon), contagion, dominate-person, greater-restoration (remove-condition: charmed / petrified / paralyzed / stunned / poisoned / blinded / deafened), hold-monster, holy-weapon (concentration buff with +2d8 radiant OnEvent rider on weapon hits), insect-plague, mass-cure-wounds, summon-celestial (summon), summon-draconic-spirit (summon), synaptic-static.
+
+**Schema-only (33):** grouped by the engine primitive each one needs.
+
+- **Area-effect spell mechanic** (often with multi-damage-type or terrain interplay): `flame-strike` (fire + radiant), `destructive-wave` (thunder + radiant or necrotic + condition), `wall-of-force`, `wall-of-light`, `wall-of-stone`, `passwall`, `hallow`.
+- **Sensor / scrying primitive**: `scrying`.
+- **DM-resolution rituals**: `commune`, `commune-with-nature`, `contact-other-plane`, `legend-lore`, `dream`, `modify-memory`.
+- **Long-duration compulsion**: `geas` (30-day forced compulsion with recurring psychic damage on disobedience).
+- **Resurrection / death-reversal**: `raise-dead`, `reincarnate`.
+- **Illusion primitive**: `mislead`, `seeming`.
+- **Terrain primitive**: `creation`, `passwall` (also area), `wall-of-stone` (also area).
+- **Multi-target weapon planner**: `steel-wind-strike` (teleport to 5 targets, melee strike each).
+- **On-action attack rider**: `swift-quiver` (bonus-action extra ammo attacks).
+- **Cross-plane summon**: `planar-binding`.
+- **Teleport-network primitive**: `teleportation-circle`, `tree-stride`, `far-step` (recurring per-bonus-action teleport).
+- **Sapience-grant primitive**: `awaken`.
+- **Controllable spell-construct (action menu)**: `bigbys-hand`, `animate-objects`.
+- **Multi-mode buff**: `dispel-evil-and-good`, `circle-of-power` (conditional aura sub-effect).
+- **Forced movement (contested)**: `telekinesis`.
+- **Domination semantics distinct from charmed**: `rarys-telepathic-bond` (utility, narrative only).
+
+### L6–L9: 0 / ~92
 
 Not in pack.
 
