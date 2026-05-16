@@ -44,6 +44,7 @@ import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
+import { isImmuneToCondition } from '../../derive/condition-immunity.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { assertActorCanAct } from './_actor-state.js';
 import { parseSpellDurationMinutes } from '../../internal/spell-duration.js';
@@ -356,22 +357,30 @@ const planSaveMechanic = (
       }
     }
     if (!success && mechanic.conditionOnFail !== undefined) {
-      const appliedConditionId = newAppliedConditionId();
-      const cond: ConditionAppliedEvent = {
-        id: newEventId() as ULID,
-        at,
-        type: 'ConditionApplied',
+      const immune = isImmuneToCondition({
+        state,
+        content,
         targetId,
         conditionId: mechanic.conditionOnFail,
-        appliedConditionId,
-        causedByEventId: saveEvent.id,
-      };
-      events.push(cond);
-      conditionsApplied.push({
-        targetId: targetId as ULID,
-        conditionId: mechanic.conditionOnFail,
-        appliedConditionId,
       });
+      if (!immune) {
+        const appliedConditionId = newAppliedConditionId();
+        const cond: ConditionAppliedEvent = {
+          id: newEventId() as ULID,
+          at,
+          type: 'ConditionApplied',
+          targetId,
+          conditionId: mechanic.conditionOnFail,
+          appliedConditionId,
+          causedByEventId: saveEvent.id,
+        };
+        events.push(cond);
+        conditionsApplied.push({
+          targetId: targetId as ULID,
+          conditionId: mechanic.conditionOnFail,
+          appliedConditionId,
+        });
+      }
     }
   }
   return { events, conditionsApplied };
@@ -445,6 +454,7 @@ const hpMaxBonusFromCondition = (
 };
 
 const planBuffMechanic = (
+  state: CampaignState,
   intent: CastSpellIntent,
   content: ResolvedContent,
   mechanic: Extract<SpellMechanic, { kind: 'buff' }>,
@@ -465,6 +475,9 @@ const planBuffMechanic = (
   const conditionsApplied: AppliedConditionRef[] = [];
   const hpMaxDelta = hpMaxBonusFromCondition(content, mechanic.conditionId);
   for (const targetId of intent.targetIds) {
+    if (isImmuneToCondition({ state, content, targetId, conditionId: mechanic.conditionId })) {
+      continue;
+    }
     const appliedConditionId = newAppliedConditionId();
     const cond: ConditionAppliedEvent = {
       id: newEventId() as ULID,
@@ -858,7 +871,7 @@ export const planCastSpell = (
     } else if (mechanic.kind === 'auto-hit') {
       events.push(...planAutoHitMechanic(state, content, rng, intent, spell, mechanic, declared.id, at));
     } else if (mechanic.kind === 'buff') {
-      const outcome = planBuffMechanic(intent, content, mechanic, declared.id, at);
+      const outcome = planBuffMechanic(state, intent, content, mechanic, declared.id, at);
       events.push(...outcome.events);
       conditionsApplied.push(...outcome.conditionsApplied);
     } else if (mechanic.kind === 'remove-condition') {
