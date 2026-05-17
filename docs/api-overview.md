@@ -78,6 +78,8 @@ Several helpers are intentionally engine-internal (used by planners, not on the 
 
 `EffectAccumulator.modifierSum(target, facts?)` and `modifierBreakdown(target, facts?)` (slice 115) accept caller-supplied facts so `AddModifier` entries with a `condition?: Predicate` are evaluated at sum time. `computeAttackBonus` populates `event.attackKind` from the weapon definition (slice 115); `computeAC` populates `bearer.wearingArmor` (slice 116). Predicate-less contributions continue to apply unconditionally.
 
+Predicate DSL kinds (slice 122 additions): `eq` / `gt` / `gte` for value comparisons, `hasProperty` / `hasCondition` / `damageType` for context queries, `self` / `always` / `never` for trivial cases, and `all` / `any` / `not` for composition. Numeric kinds (`gt`, `gte`) return false on missing or non-numeric values. Facts populated by the trigger dispatcher include `event.attackerIsSelf`, `event.targetIsSelf`, `event.hit`, `event.critical`, `event.weaponInstanceId`, `event.attackerIsSource`, `event.targetIsSource`, `event.attackerCreatureType`, `event.targetCreatureType`, and `bearer.tempHp` (slice 122).
+
 ## Events
 
 Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list (~120 event types) is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.
