@@ -207,7 +207,10 @@ exports[`feature-coverage matrix: feats > wired feats catalog is stable 1`] = `
 
 exports[`feature-coverage matrix: magic items > magic-item wire and charge state is stable 1`] = `
 {
-  "wiredIds": [],
+  "wiredIds": [
+    "goggles-of-night",
+    "ring-of-swimming",
+  ],
   "withChargesIds": [
     "wand-of-magic-missiles",
   ],

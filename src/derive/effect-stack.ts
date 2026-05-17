@@ -79,19 +79,39 @@ const collectFeatEffects = (character: Character, content: ResolvedContent): Eff
   return effects;
 };
 
+// Slice 132: magic-item passive effects project to the wearer's
+// effect stack. Two paths:
+//   - Attuned items (in `character.equipped.attuned`) always project,
+//     same as before.
+//   - Items in `character.inventory` that are magic and do NOT
+//     require attunement also project (RAW: a Bag of Holding works
+//     by being carried; a Cloak of Protection only works when
+//     attuned). Items requiring attunement that are in inventory
+//     but not attuned project nothing.
+// Dedupe by instance id so an attuned item that's also in inventory
+// doesn't get its effects folded twice.
 const collectItemEffects = (
   character: Character,
   itemInstances: Readonly<Record<string, ItemInstance>>,
   content: ResolvedContent,
 ): Effect[] => {
   const effects: Effect[] = [];
-  for (const instanceId of character.equipped.attuned) {
+  const seen = new Set<string>();
+  const fold = (instanceId: string, requireNonAttunement: boolean): void => {
+    if (seen.has(instanceId)) return;
     const inst = itemInstances[instanceId];
-    if (!inst) continue;
+    if (!inst) return;
     const def = content.items.get(inst.definitionId);
-    if (def && def.itemKind === 'magic') {
-      effects.push(...def.effects);
-    }
+    if (def === undefined || def.itemKind !== 'magic') return;
+    if (requireNonAttunement && def.requiresAttunement) return;
+    seen.add(instanceId);
+    effects.push(...def.effects);
+  };
+  for (const instanceId of character.equipped.attuned) {
+    fold(instanceId, false);
+  }
+  for (const instanceId of character.inventory) {
+    fold(instanceId, true);
   }
   return effects;
 };
