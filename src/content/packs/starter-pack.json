@@ -2096,7 +2096,7 @@
       "cr": 0.25,
       "xp": 50,
       "proficiencyBonus": 2,
-      "senses": { "passivePerception": 13 },
+      "senses": { "passivePerceptionOverride": 13 },
       "languages": []
     },
     {
@@ -2145,7 +2145,7 @@
       "savingThrows": { "DEX": 4, "CON": 9, "WIS": 4, "CHA": 8 },
       "skills": { "perception": 8, "stealth": 4 },
       "damageImmunities": ["fire"],
-      "senses": { "blindsight": 30, "darkvision": 120, "passivePerception": 18 },
+      "senses": { "blindsight": 30, "darkvision": 120, "passivePerceptionOverride": 18 },
       "cr": 10,
       "xp": 5900,
       "proficiencyBonus": 4,
