@@ -2136,7 +2136,15 @@
     { "id": "ring-of-evasion", "itemKind": "magic", "name": "Ring of Evasion", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
     { "id": "ring-of-animal-influence", "itemKind": "magic", "name": "Ring of Animal Influence", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
     { "id": "ring-of-shooting-stars", "itemKind": "magic", "name": "Ring of Shooting Stars", "rarity": "very-rare", "requiresAttunement": true, "charges": { "max": 6, "recharge": "dawn" }, "effects": [] },
-    { "id": "ring-of-spell-turning", "itemKind": "magic", "name": "Ring of Spell Turning", "rarity": "legendary", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] }
+    { "id": "ring-of-spell-turning", "itemKind": "magic", "name": "Ring of Spell Turning", "rarity": "legendary", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "wand-of-fear", "itemKind": "magic", "name": "Wand of Fear", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
+    { "id": "wand-of-lightning-bolts", "itemKind": "magic", "name": "Wand of Lightning Bolts", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
+    { "id": "wand-of-paralysis", "itemKind": "magic", "name": "Wand of Paralysis", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
+    { "id": "wand-of-polymorph", "itemKind": "magic", "name": "Wand of Polymorph", "rarity": "very-rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
+    { "id": "wand-of-binding", "itemKind": "magic", "name": "Wand of Binding", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
+    { "id": "wand-of-enemy-detection", "itemKind": "magic", "name": "Wand of Enemy Detection", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "wand-of-secrets", "itemKind": "magic", "name": "Wand of Secrets", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "wand-of-pyrotechnics", "itemKind": "magic", "name": "Wand of Pyrotechnics", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] }
   ],
   "monsters": [
     {
