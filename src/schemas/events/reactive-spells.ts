@@ -48,6 +48,21 @@ export const AbsorbElementsCastEventSchema = EventEnvelopeSchema.extend({
 });
 export type AbsorbElementsCastEvent = z.infer<typeof AbsorbElementsCastEventSchema>;
 
+// Record-only event surfaced by `planSanctuaryWardSave` when an
+// attacker fails their WIS save against a Sanctuary-warded creature.
+// The consumer reads this to know the declared attack must be
+// redirected or dropped per RAW (the attack roll never happens).
+// Mirrors the Counterspell / Shield "reaction outcome record"
+// pattern: the SaveRolled event captures the roll; this event marks
+// the outcome for the transcript and the consumer's branching.
+export const SanctuaryProtectedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('SanctuaryProtected'),
+  attackerId: ULIDSchema,
+  wardedCharacterId: ULIDSchema,
+  triggeringSaveEventId: ULIDSchema,
+});
+export type SanctuaryProtectedEvent = z.infer<typeof SanctuaryProtectedEventSchema>;
+
 export const GuidanceUsedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('GuidanceUsed'),
   targetId: ULIDSchema,

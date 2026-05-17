@@ -1652,7 +1652,7 @@
     { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "longstrider-active" }] },
     { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "protection-from-evil-and-good-active" }] },
     { "id": "purify-food-and-drink", "name": "Purify Food and Drink", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "paladin"], "mechanicalEffects": [] },
-    { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
+    { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "sanctuary-active" }] },
     { "id": "searing-smite", "name": "Searing Smite", "level": 1, "school": "evocation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "searing-smite-active" }] },
     { "id": "shield-of-faith", "name": "Shield of Faith", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a small parchment with a bit of holy text" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "shield-of-faith-active" }] },
     { "id": "silent-image", "name": "Silent Image", "level": 1, "school": "illusion", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
@@ -3122,6 +3122,25 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantSense", "sense": "darkvision", "range": 60 }
+      ]
+    },
+    {
+      "id": "sanctuary-active",
+      "name": "Sanctuary",
+      "description": "Up to 1 minute (Sanctuary spell): any creature that targets the warded creature with an attack roll or a harmful spell must first make a WIS save against the caster's spell DC. The consumer rolls the attacker's save via `engine.plan.sanctuaryWardSave({ attackerId, wardedCharacterId })` before invoking the attack planner; on a failed save the planner emits a `SanctuaryProtected` event and the consumer drops the attack. The spell ends when the bearer makes an attack roll (modeled here via an OnEvent rider with consumeOnTrigger). RAW also ends the spell when the bearer casts a harmful spell or deals damage to another creature; those vectors aren't modeled today (the dispatcher has no `castDeclared-with-hostile-target` or `dealtDamage` fact).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "sanctuary-bearer-attacks-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "eq", "path": "event.attackerIsSelf", "value": true }
+          },
+          "actions": [],
+          "consumeOnTrigger": true
+        }
       ]
     },
     {

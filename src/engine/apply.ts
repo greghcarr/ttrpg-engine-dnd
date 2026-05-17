@@ -420,6 +420,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // the matching element. This event surfaces the absorbed type
         // + amount for transcript readability.
         break;
+      case 'SanctuaryProtected':
+        // Pure notification — the SaveRolled event already captures
+        // the d20 + DC + outcome; this event marks the failed-save
+        // case for the transcript and for the consumer's branching
+        // (consumer redirects or drops the attack).
+        break;
       case 'GuidanceUsed':
         // Pure notification — the 'guided' condition is lifted by the
         // ConcentrationBroken(reason='used') that the planner emits

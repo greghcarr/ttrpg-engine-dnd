@@ -155,7 +155,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'longstrider': { kind: 'buff', conditionId: 'longstrider-active' },
   'protection-from-evil-and-good': { kind: 'buff', conditionId: 'protection-from-evil-and-good-active' },
   'purify-food-and-drink': { kind: 'skip', reason: 'utility ritual, narrative only' },
-  'sanctuary': { kind: 'skip', reason: 'reaction-aversion via WIS save; reaction system not modeled' },
+  'sanctuary': { kind: 'buff', conditionId: 'sanctuary-active' },
   'searing-smite': { kind: 'buff', conditionId: 'searing-smite-active' },
   'shield-of-faith': { kind: 'buff', conditionId: 'shield-of-faith-active' },
   'silent-image': { kind: 'skip', reason: 'illusion concentration, narrative only' },

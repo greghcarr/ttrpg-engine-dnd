@@ -69,6 +69,7 @@ import {
   planIdentify,
   planShield,
   planAbsorbElements,
+  planSanctuaryWardSave,
   planConsumeGuidance,
   planWeaponMastery,
   planForage,
@@ -95,6 +96,8 @@ import {
   type ShieldOutcome,
   type AbsorbElementsIntent,
   type AbsorbElementsOutcome,
+  type SanctuaryWardSaveIntent,
+  type SanctuaryWardSaveOutcome,
   type ConsumeGuidanceIntent,
   type ConsumeGuidanceOutcome,
   type WeaponMasteryIntent,
@@ -259,6 +262,10 @@ export interface Engine {
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
+    sanctuaryWardSave(
+      state: CampaignState,
+      intent: Omit<SanctuaryWardSaveIntent, 'type'>,
+    ): SanctuaryWardSaveOutcome;
     consumeGuidance(
       state: CampaignState,
       intent: Omit<ConsumeGuidanceIntent, 'type'>,
@@ -502,6 +509,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     absorbElements(state, intent) {
       return planAbsorbElements(state, content, { type: 'AbsorbElements', ...intent });
+    },
+    sanctuaryWardSave(state, intent) {
+      return planSanctuaryWardSave(state, content, rng, {
+        type: 'SanctuaryWardSave',
+        ...intent,
+      });
     },
     consumeGuidance(state, intent) {
       return planConsumeGuidance(state, content, rng, {

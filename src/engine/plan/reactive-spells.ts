@@ -20,8 +20,11 @@ import type {
   ItemIdentifiedEvent,
   ShieldCastEvent,
   AbsorbElementsCastEvent,
+  SanctuaryProtectedEvent,
   GuidanceUsedEvent,
 } from '../../schemas/events/reactive-spells.js';
+import type { Character } from '../../schemas/runtime/character.js';
+import { computeSavingThrow } from '../../derive/save.js';
 import type { ConditionAppliedEvent, HealedEvent } from '../../schemas/events/combat.js';
 import type { DamageType } from '../../schemas/primitives.js';
 import type { ConcentrationBrokenEvent } from '../../schemas/events/concentration.js';
@@ -584,4 +587,163 @@ export const planConsumeGuidance = (
     reason: 'used',
   } satisfies ConcentrationBrokenEvent);
   return { events, d4 };
+};
+
+const SANCTUARY_CONDITION_ID = 'sanctuary-active';
+
+const findPrimarySpellcastingClass = (
+  character: Character,
+  content: ResolvedContent,
+): string | undefined => {
+  for (const enrollment of character.classes) {
+    const cls = content.classes.get(enrollment.classId);
+    if (cls?.spellcasting !== undefined) return enrollment.classId;
+  }
+  return undefined;
+};
+
+export interface SanctuaryWardSaveIntent {
+  readonly type: 'SanctuaryWardSave';
+  // The creature that is about to attack the warded creature. Rolls
+  // a WIS save against the sanctuary caster's spell DC.
+  readonly attackerId: string;
+  // The creature that is protected by Sanctuary. Must currently carry
+  // the `sanctuary-active` condition, and that condition's
+  // `sourceCharacterId` must point at a character with a spellcasting
+  // class.
+  readonly wardedCharacterId: string;
+  // Optional override of the caster's spellcasting class id for DC
+  // computation. Defaults to the caster's first class that has a
+  // `spellcasting` entry.
+  readonly castingClassId?: string;
+  readonly at?: string;
+}
+
+export interface SanctuaryWardSaveOutcome {
+  readonly events: ReadonlyArray<Event>;
+  // True when the attacker failed the WIS save: per RAW the attack is
+  // averted and the consumer must redirect or drop it. Surfaced on the
+  // outcome (alongside SaveRolled in `events`) so the consumer can
+  // branch without re-parsing the event list.
+  readonly prevented: boolean;
+}
+
+/**
+ * RAW 2024 PHB Sanctuary: until the spell ends, any creature who
+ * targets the warded creature with an attack roll or a harmful spell
+ * must first make a Wisdom save against the caster's spell DC. On a
+ * failed save the attacker loses the action (must redirect or drop
+ * the attack). Pre-attack target-selection rider — different shape
+ * from Counterspell / Shield / Absorb Elements (which are bearer-side
+ * reactions); here the save is rolled on the *attacker's* side.
+ *
+ * The planner doesn't itself cancel the downstream attack — the
+ * engine has no `AttackTargeted` pre-event. Instead the consumer
+ * calls this planner before invoking `planAttack`; on a failed save
+ * the `SanctuaryProtected` event records the outcome and the
+ * consumer is responsible for not proceeding with the attack roll.
+ *
+ * The "spell ends if the warded creature attacks / casts a harmful
+ * spell / deals damage" clause rides on an OnEvent rider on the
+ * `sanctuary-active` condition (AttackRolled with attackerIsSelf,
+ * consumeOnTrigger). Only the AttackRolled vector is wired today;
+ * the harmful-spell / damage-deal cases are not modeled (the engine
+ * has no SpellCast-with-hostile-intent fact today).
+ */
+export const planSanctuaryWardSave = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: SanctuaryWardSaveIntent,
+): SanctuaryWardSaveOutcome => {
+  const attacker = state.characters[intent.attackerId];
+  invariant(attacker !== undefined, `Attacker ${intent.attackerId} not found`);
+  const warded = state.characters[intent.wardedCharacterId];
+  invariant(warded !== undefined, `Warded character ${intent.wardedCharacterId} not found`);
+
+  const sanctuary = warded.appliedConditions.find(
+    (c) => c.conditionId === SANCTUARY_CONDITION_ID,
+  );
+  if (sanctuary === undefined) {
+    throw new Error(`${warded.name} is not warded by Sanctuary`);
+  }
+  if (sanctuary.sourceCharacterId === undefined) {
+    throw new Error('Sanctuary applied condition is missing sourceCharacterId');
+  }
+  const caster = state.characters[sanctuary.sourceCharacterId];
+  invariant(
+    caster !== undefined,
+    `Sanctuary caster ${sanctuary.sourceCharacterId} not found in state`,
+  );
+  const castingClassId =
+    intent.castingClassId ?? findPrimarySpellcastingClass(caster, content);
+  if (castingClassId === undefined) {
+    throw new Error(`Sanctuary caster ${caster.name} has no spellcasting class`);
+  }
+
+  const at = intent.at ?? nowIso();
+  const dcResult = computeSpellSaveDC({
+    character: caster,
+    itemInstances: state.itemInstances,
+    content,
+    pendingChoices: state.pendingChoices,
+    classId: castingClassId,
+    characters: state.characters,
+  });
+  const dc = dcResult.total;
+
+  const saveDerivation = computeSavingThrow({
+    character: attacker,
+    itemInstances: state.itemInstances,
+    content,
+    ability: 'WIS',
+    pendingChoices: state.pendingChoices,
+    characters: state.characters,
+  });
+  const useAdv: 'advantage' | 'disadvantage' | 'none' = saveDerivation.hasAdvantage
+    ? saveDerivation.hasDisadvantage
+      ? 'none'
+      : 'advantage'
+    : saveDerivation.hasDisadvantage
+      ? 'disadvantage'
+      : 'none';
+  const firstRoll = rollDie(D20_SIDES, rng);
+  let d20s: number[] = [firstRoll];
+  let d20 = firstRoll;
+  if (useAdv !== 'none') {
+    const second = rollDie(D20_SIDES, rng);
+    d20s = [firstRoll, second];
+    d20 = useAdv === 'advantage' ? Math.max(firstRoll, second) : Math.min(firstRoll, second);
+  }
+  const total = d20 + saveDerivation.total;
+  const success = total >= dc;
+
+  const saveEvent: SaveRolledEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SaveRolled',
+    targetId: intent.attackerId as ULID,
+    ability: 'WIS',
+    dc,
+    d20: d20s,
+    used: useAdv,
+    bonus: saveDerivation.total,
+    total,
+    success,
+    breakdown: [...saveDerivation.breakdown],
+  };
+
+  if (success) {
+    return { events: [saveEvent], prevented: false };
+  }
+
+  const protectedEvent: SanctuaryProtectedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SanctuaryProtected',
+    attackerId: intent.attackerId as ULID,
+    wardedCharacterId: intent.wardedCharacterId as ULID,
+    triggeringSaveEventId: saveEvent.id,
+  };
+  return { events: [saveEvent, protectedEvent], prevented: true };
 };
