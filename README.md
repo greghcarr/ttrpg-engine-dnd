@@ -94,20 +94,20 @@ Engine and pack content tracked separately: the architecture is locked; what gro
 
 | Category | Progress | Notes |
 |---|---|---|
-| **Full (achievable) SRD-compliance** | 🟨 `████████████░░░░░░░░` ~60% | Weighted across the rows below: engine + primitives heavy weight (currently high), content rows lower. SRD 5.2's narrower content scope (vs full PHB / DMG / MM) is what makes the number reachable; the long content tail (DMG items, MM bestiary) is the floor on how fast this moves. |
-| Engine architecture | 🟩 `████████████████████` 100% | event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, dispatcher: all locked |
-| Effect-primitive vocabulary | 🟨 `█████████████░░░░░░░` ~65% | ~31 primitives wired (+ `PreventFatalDamage` from slice 111); per-modifier predicate gates now honored (slices 115/116/117). 15–25 still on the menu in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) |
-| Classes (1–20 tables) | 🟩 `████████████████████` 100% | 12/12 scaffolded; features fully wired through L7, partial L8–L20 |
-| Subclasses | 🟧 `█████░░░░░░░░░░░░░░░` 24% | 12/~50; one canonical per class at L3 only |
-| Species | 🟨 `██████████████░░░░░░` 70% | 7/10 PHB 2024 (Aasimar, Goliath, Orc deferred) |
-| Backgrounds | 🟩 `████████████████████` 100% | 16/16 PHB 2024 |
-| Feats | 🟨 `█████████████░░░░░░░` 66% | ~33/~50 (origin + general + fighting style + epic boon) |
-| Spells (shipped) | 🟩 `████████████████████` 100% | 399/399 PHB 2024 across L0–L9 |
-| Spells (mechanically wired) | 🟧 `████████░░░░░░░░░░░░` 41% | ~157/399; remainder names the engine primitive each blocks on |
-| Conditions | 🟩 `████████████████████` 100% | 15/15 RAW + 23 mechanic-rider variants the engine emits |
-| Magic items | 🟥 `█░░░░░░░░░░░░░░░░░░░` ~5% | 9 items across rarity tiers; bulk of DMG catalog deferred |
-| Monsters | 🟥 `░░░░░░░░░░░░░░░░░░░░` ~2% | 6/~370 MM statblocks (single largest content gap by count) |
-| Variant rules enforced | 🟨 `██████████░░░░░░░░░░` 50% | `grittyRest` + `heroPoints` enforce; `sanity` + `massCombat` toggle but don't yet enforce |
+| **Full (achievable) SRD-compliance** | `████████████░░░░░░░░` 🟨 ~60% | Weighted across the rows below: engine + primitives heavy weight (currently high), content rows lower. SRD 5.2's narrower content scope (vs full PHB / DMG / MM) is what makes the number reachable; the long content tail (DMG items, MM bestiary) is the floor on how fast this moves. |
+| Engine architecture | `████████████████████` 🟩 100% | event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, dispatcher: all locked |
+| Effect-primitive vocabulary | `█████████████░░░░░░░` 🟨 ~65% | ~31 primitives wired (+ `PreventFatalDamage` from slice 111); per-modifier predicate gates now honored (slices 115/116/117). 15–25 still on the menu in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) |
+| Classes (1–20 tables) | `████████████████████` 🟩 100% | 12/12 scaffolded; features fully wired through L7, partial L8–L20 |
+| Subclasses | `█████░░░░░░░░░░░░░░░` 🟧 24% | 12/~50; one canonical per class at L3 only |
+| Species | `██████████████░░░░░░` 🟨 70% | 7/10 PHB 2024 (Aasimar, Goliath, Orc deferred) |
+| Backgrounds | `████████████████████` 🟩 100% | 16/16 PHB 2024 |
+| Feats | `█████████████░░░░░░░` 🟨 66% | ~33/~50 (origin + general + fighting style + epic boon) |
+| Spells (shipped) | `████████████████████` 🟩 100% | 399/399 PHB 2024 across L0–L9 |
+| Spells (mechanically wired) | `████████░░░░░░░░░░░░` 🟧 41% | ~157/399; remainder names the engine primitive each blocks on |
+| Conditions | `████████████████████` 🟩 100% | 15/15 RAW + 23 mechanic-rider variants the engine emits |
+| Magic items | `█░░░░░░░░░░░░░░░░░░░` 🟥 ~5% | 9 items across rarity tiers; bulk of DMG catalog deferred |
+| Monsters | `░░░░░░░░░░░░░░░░░░░░` 🟥 ~2% | 6/~370 MM statblocks (single largest content gap by count) |
+| Variant rules enforced | `██████████░░░░░░░░░░` 🟨 50% | `grittyRest` + `heroPoints` enforce; `sanity` + `massCombat` toggle but don't yet enforce |
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a campaign that exercises the long tail of PHB spells, the missing subclasses, or the bulk of MM monsters, you'll be authoring content packs alongside the starter pack. See the per-category breakdown below and [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the canonical inventory.
 
