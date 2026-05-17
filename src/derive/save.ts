@@ -42,12 +42,28 @@ const isSaveProficient = (character: Character, ability: AbilityScore, content: 
 
 export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   const breakdown: SaveBreakdownEntry[] = [];
-  const abilityMod = abilityModifier(input.character.abilityScores[input.ability]);
-  breakdown.push({ source: `${input.ability}-mod`, value: abilityMod });
 
-  const totalLevel = computeTotalLevel(input.character);
-  if (isSaveProficient(input.character, input.ability, input.content)) {
-    breakdown.push({ source: 'proficiency', value: proficiencyBonus(totalLevel) });
+  // Slice 130: when the character is a creature with a statblock that
+  // lists this ability's save bonus, RAW says the listed number is the
+  // baked total (already includes ability mod and proficiency per the
+  // 2024 MM presentation). Use it as a single breakdown entry and
+  // skip the ability-mod + class-proficiency reconstruction. Effects,
+  // exhaustion, and advantage still layer on top.
+  const statblock = input.character.statblockId !== undefined
+    ? input.content.monsters.get(input.character.statblockId)
+    : undefined;
+  const monsterSaveBonus = statblock?.savingThrows?.[input.ability];
+
+  if (monsterSaveBonus !== undefined) {
+    breakdown.push({ source: `monster:${statblock!.id}:save`, value: monsterSaveBonus });
+  } else {
+    const abilityMod = abilityModifier(input.character.abilityScores[input.ability]);
+    breakdown.push({ source: `${input.ability}-mod`, value: abilityMod });
+
+    const totalLevel = computeTotalLevel(input.character);
+    if (isSaveProficient(input.character, input.ability, input.content)) {
+      breakdown.push({ source: 'proficiency', value: proficiencyBonus(totalLevel) });
+    }
   }
 
   const effects = buildEffectStack(input);
