@@ -420,9 +420,7 @@ Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd leve
 
 **Alyx** reverts (voluntary).
 
-Item acquired: Bite (Young Red Dragon).
-
-Item acquired: Claw (Young Red Dragon).
+Item acquired: Rend (Young Red Dragon).
 
 **Stoneheart, the Young Red** appears (young-red-dragon, 178/178 HP).
 
@@ -498,21 +496,21 @@ _(Stoneheart, the Young Red consumes action)_
 
 **Stoneheart, the Young Red** attacks **Alyx**: d20(19) + 10 = 29 vs AC 15 -> hit.
 
-Damage rolled: 2d10=[4,10]+6 piercing.
+Damage rolled: 2d6=[3,6]+6 slashing.
 
-**Alyx** takes 20 damage (20 piercing). (HP 19 -> -1)
+**Alyx** takes 15 damage (15 slashing). (HP 19 -> 4)
 
 **Stoneheart, the Young Red** attacks **Alyx**: d20(11) + 10 = 21 vs AC 15 -> hit.
 
 Damage rolled: 2d6=[6,4]+6 slashing.
 
-**Alyx** takes 16 damage (16 slashing). (HP -1 -> -17)
+**Alyx** takes 16 damage (16 slashing). (HP 4 -> -12)
 
 **Stoneheart, the Young Red** attacks **Alyx**: d20(11) + 10 = 21 vs AC 15 -> hit.
 
 Damage rolled: 2d6=[6,5]+6 slashing.
 
-**Alyx** takes 17 damage (17 slashing). (HP -17 -> -34)
+**Alyx** takes 17 damage (17 slashing). (HP -12 -> -29)
 
 End of Stoneheart, the Young Red's turn.
 
@@ -524,7 +522,7 @@ _(Brother Cassius consumes bonusAction)_
 
 Slot consumed: 1st-level.
 
-**Alyx** healed 2 from healing-word. (HP -34 -> 2)
+**Alyx** healed 2 from healing-word. (HP -29 -> 2)
 
 _(Brother Cassius consumes action)_
 

@@ -1719,13 +1719,13 @@
       "mastery": "Sap"
     },
     {
-      "id": "dragon-bite",
+      "id": "young-red-dragon-rend",
       "itemKind": "weapon",
-      "name": "Bite (Young Red Dragon)",
+      "name": "Rend (Young Red Dragon)",
       "category": "martial",
       "attackKind": "melee",
-      "damageType": "piercing",
-      "damageDice": "2d10",
+      "damageType": "slashing",
+      "damageDice": "2d6",
       "properties": []
     },
     {
@@ -1747,16 +1747,6 @@
       "damageType": "bludgeoning",
       "damageDice": "2d8",
       "properties": ["two-handed"]
-    },
-    {
-      "id": "dragon-claw",
-      "itemKind": "weapon",
-      "name": "Claw (Young Red Dragon)",
-      "category": "martial",
-      "attackKind": "melee",
-      "damageType": "slashing",
-      "damageDice": "2d6",
-      "properties": []
     },
     {
       "id": "rapier",

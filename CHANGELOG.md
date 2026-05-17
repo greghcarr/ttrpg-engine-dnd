@@ -291,6 +291,22 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *Illusion-interaction primitive: Silent Image + Major Image + Investigate action* (slice 137). New `Illusion` runtime entity (`state.illusions: Record<IllusionId, Illusion>`) modeled on the slice-94 Trap / slice-135 Sensor pattern: id + label + free-text location + `kind: 'visual' \| 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + a baked `investigationDC` (the caster's spell save DC at cast time) + `disbelievedBy: CharacterId[]` set. Three new event types (`IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`) drive the lifecycle; reducers in [src/engine/reducers/illusion.ts](src/engine/reducers/illusion.ts). Four planners in [src/engine/plan/illusion.ts](src/engine/plan/illusion.ts): `planSilentImage` (1st-level visual), `planMajorImage` (3rd-level audiovisual), `planInvestigateIllusion` (a creature spends an action to Study the illusion, rolls INT (Investigation) against the baked DC, success adds them to `disbelievedBy`), `planDismissIllusion` (caster ends spell voluntarily). `clearConcentrationEffect` sweeps illusions linked to a dropped concentration via `sourceEffectInstanceId`, mirroring the slice-135 sensor sweep. The engine surfaces the disbelief set but doesn't itself act on it; consumers / DMs decide what disbelieving creatures see and do. RAW edge cases not modeled this slice: the caster's bonus-action move (Silent Image) and action-recolour (Major Image) of the illusion's shape (a consumer can re-emit IllusionCreated with new label / location until a future schema extension lets the planner mutate the existing entity). Twelve tests cover both cast paths, both Investigate outcomes, the unknown-spell rejection, voluntary dismiss, concentration-drop cleanup, and the multi-creature belief state (two investigators on the same illusion track independently).
 
+*SRD 5.2.1 content drift: Young Red Dragon Rend attack* (slice 166). Replaces the 2014-style separate Bite (2d10 piercing) + Claw (2d6 slashing) weapon items with a single Rend (2d6 slashing) per SRD 5.2.1's Multiattack pattern (`The dragon makes three Rend attacks` instead of `bite + claw + claw`).
+
+Pack changes:
+- Removed `dragon-bite` and `dragon-claw` weapon items (2014 carryovers).
+- Added `young-red-dragon-rend` weapon item (2d6 slashing, matching the Young Red Dragon SRD 5.2.1 entry).
+
+Test changes:
+- `tests/golden/showcase.test.ts` Stoneheart dragon's multiattack switched from `{ bite x 1, claws x 2 }` to `{ rend x 3 }`.
+- Showcase transcript auto-refreshed: the Item Acquired line consolidates, attack rolls and damage formulas update to slashing 2d6, and the downstream HP echoes shift accordingly.
+
+What's still deferred:
+- The Rend attack's fire damage rider (1d6 fire per SRD: "Hit: 13 (2d6 + 6) Slashing damage plus 3 (1d6) Fire damage"). Pack weapon schema models a single damage type per weapon; the elemental rider would need an `extraDamage` field or per-monster action shape. Same gap as the old bite (2014 PHB Young Red Dragon bite also had a 1d6 fire rider that the pack never modeled).
+- The other 9 chromatic dragons (4 Young + 5 Adult variants) also use Rend in SRD 5.2.1 with their own damage dice (Young White 2d4+4, Young Black 2d6+4, Adult Red 1d10+8, etc.). Each would need its own Rend weapon variant if consumers want a wired multiattack. Pack-level dragon multiattack stays `null` (consumers configure attacks locally, same as in showcase).
+
+Suite green (1452 passed, 197 skipped).
+
 *Test fixture audit: refresh stale fixture data to SRD 5.2.1* (slice 165). Audit pass over `tests/fixtures/` and `tests/golden/showcase.test.ts` looking for hardcoded SRD-content values that drifted from the post-slice-141-163 pack data. Findings + fixes:
 
 - `tests/fixtures/index.ts` `buildOgre` HP default: 59 → 68 (2014 → SRD 5.2.1).

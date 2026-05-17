@@ -227,8 +227,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
     const goblinBClub = makeItemInstance('handaxe');
     const goblinShamanQuarterstaff = makeItemInstance('quarterstaff');
     const ogreClub = makeItemInstance('ogre-greatclub');
-    const dragonBite = makeItemInstance('dragon-bite');
-    const dragonClaws = makeItemInstance('dragon-claw');
+    const dragonRend = makeItemInstance('young-red-dragon-rend');
     const mainQuestId = newJournalEntryId();
     const obj1 = newJournalEntryId();
     const obj2 = newJournalEntryId();
@@ -1296,17 +1295,15 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       featsTaken: ['savage-attacker'],
       speedFeet: 40,
       multiattack: {
-        name: 'Bite + Claw + Claw',
+        name: 'Rend x 3',
         attacks: [
-          { weaponInstanceId: dragonBite.id, count: 1 },
-          { weaponInstanceId: dragonClaws.id, count: 2 },
+          { weaponInstanceId: dragonRend.id, count: 3 },
         ],
       },
     });
 
     campaign = commit(campaign, [
-      evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: dragonBite }),
-      evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: dragonClaws }),
+      evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: dragonRend }),
       evt<CharacterCreatedEvent>({ type: 'CharacterCreated', snapshot: dragon }),
     ]);
 
