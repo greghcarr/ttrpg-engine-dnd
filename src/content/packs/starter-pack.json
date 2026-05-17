@@ -1996,7 +1996,15 @@
     { "id": "periapt-of-wound-closure", "itemKind": "magic", "name": "Periapt of Wound Closure", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-swimming", "itemKind": "magic", "name": "Ring of Swimming", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
-    { "id": "hat-of-disguise", "itemKind": "magic", "name": "Hat of Disguise", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
+    { "id": "hat-of-disguise", "itemKind": "magic", "name": "Hat of Disguise", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "headband-of-intellect", "itemKind": "magic", "name": "Headband of Intellect", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "boots-of-striding-and-springing", "itemKind": "magic", "name": "Boots of Striding and Springing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "cloak-of-the-bat", "itemKind": "magic", "name": "Cloak of the Bat", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "helm-of-telepathy", "itemKind": "magic", "name": "Helm of Telepathy", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "necklace-of-adaptation", "itemKind": "magic", "name": "Necklace of Adaptation", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "decanter-of-endless-water", "itemKind": "magic", "name": "Decanter of Endless Water", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "belt-of-hill-giant-strength", "itemKind": "magic", "name": "Belt of Hill Giant Strength", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "sending-stones", "itemKind": "magic", "name": "Sending Stones", "rarity": "uncommon", "requiresAttunement": false, "effects": [] }
   ],
   "monsters": [
     {

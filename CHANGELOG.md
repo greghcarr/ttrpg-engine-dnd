@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 1.2**
+
+8 more wondrous items added to the starter pack: Headband of Intellect, Boots of Striding and Springing, Cloak of the Bat, Helm of Telepathy, Necklace of Adaptation, Decanter of Endless Water, Belt of Hill Giant Strength, Sending Stones. Six uncommon + two rare (Cloak of the Bat, Belt of Hill Giant Strength). All ship as `itemKind: 'magic'` with `effects: []`, snapshot-clean under the slice-126 narrowing. The "Deferred mechanical wiring" subsection in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) gained five new primitive entries (ability-score override, speed-floor + jump-multiplier, environment-conditional flight, environmental immunity, paired-item linkage) covering the batch's RAW shapes. Magic-item count bumped from 17 to 25.
+
 **Content authoring: items batch 1.1**
 
 8 uncommon wondrous items added to the starter pack: Goggles of Night, Cloak of Elvenkind, Slippers of Spider Climbing, Brooch of Shielding, Periapt of Wound Closure, Ring of Swimming, Eyes of the Eagle, Hat of Disguise. All ship as `itemKind: 'magic'` with `effects: []` (schema-only, matching the existing wondrous-item pattern); the engine primitives each would eventually need are catalogued in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) under "Deferred mechanical wiring." Magic-item count in the gaps doc bumped from 9 to 17.
