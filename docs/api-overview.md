@@ -31,11 +31,13 @@ Every planner returns `{ events: Event[] }` (or `{ events, ...outcome }` for the
 
 **Class-specific actions**: `sacredWeapon` (Paladin Devotion), `recklessAttack` (Barbarian), `stunningStrike` (Monk), `frenzy` (Barbarian Berserker), `metamagic` (Sorcerer), `wildCompanion` (Druid).
 
-**Movement**: `move`, `dash`, `disengage`, `mistyStep`.
+**Movement**: `move`, `dash`, `disengage`, `mistyStep`, `thunderStep` (slice 128: action, teleport caster + one willing ally within 5 ft up to 90 ft, AoE 3d10 thunder on origin with CON save half, +1d10 per slot above 3rd).
 
-**Spellcasting (cast-time)**: `castSpell` (the general dispatcher), `magicWeapon`, `elementalWeapon`, `counterspell`, `dispelMagic`, `identify`.
+**Spellcasting (cast-time)**: `castSpell` (the general dispatcher), `magicWeapon`, `elementalWeapon`, `counterspell`, `dispelMagic`, `identify`, `removeCurse` (slice 134: strips every condition tagged `category: 'curse'` on the touched target), `silentImage` + `majorImage` (slice 137: places an Illusion entity; consumers use `investigateIllusion` to roll Investigation against the baked DC), `clairvoyance` + `scrying` (slices 135 + 136: places a remote Sensor entity bound to caster concentration; Scrying composes the same primitive with a target WIS save), `arcaneEye` (slice 138: places a mobile Sensor with darkvision 30).
 
 **Spellcasting (tick / trigger)**: `checkConcentration`, `expireSpellDurations`, `tickAura`, `tickMovementDamage`, `tickRecurring`, `tickRecurringSave`, `triggerTrap`. Consumers call these at the appropriate moments (per-turn ticks, on-movement, on-trigger).
+
+**Sensors & illusions**: `switchSensorMode` (toggles sight / hearing on a sensor; caster action), `moveSensor` (updates a mobile sensor's free-text location; caster bonus action; rejects non-mobile sensors and ownership mismatches), `removeSensor` (voluntary spell end), `investigateIllusion` (a creature spends an action to Study an illusion; rolls Investigation against the baked DC; success adds the investigator to `disbelievedBy`), `dismissIllusion` (voluntary spell end). `clearConcentrationEffect` automatically sweeps sensors and illusions linked to a dropped concentration via `sourceEffectInstanceId`.
 
 **Summons**: `dismissCompanion`. Summoning happens via `castSpell` against a `summon` SpellMechanic (find-familiar, find-steed, the summon-X family); the planner emits `CompanionSummoned`.
 
@@ -74,7 +76,7 @@ Stand-alone derivations also exported from the public barrel:
 - Spatial / movement: `terrainAt`, `movementCostFor`, `movementCostAt`, `chebyshevDistanceFeet`, `isInRangeFeet`, `hasLineOfSight`, `hasLineOfEffect`.
 - Ability checks: `computeAbilityCheck`, `computePassiveScore`.
 
-Several helpers are intentionally engine-internal (used by planners, not on the public barrel): `mitigateDamage`, `isImmuneToCondition`, `isHealingBlocked`, `getCreatureType`, `getEffectiveSpeed`, `computeCarryingCapacity`, `computeEncumbrance`, `interceptFatalDamage` (slice 111: planner-side fatal-damage clamp + bearing-condition consume), `isMagicWeaponAttack` (slice 112: weapon-magicality detector reading `temporaryBuff` and `itemKind`). Consumers compose these effects through the planner / event surface instead. `mitigateDamage` accepts a `characters?: Record<string, Character>` field (slice 105) for source-relative formula evaluation and a `sourceIsMagical?: boolean` (slice 112) for the resistance qualifier; every primary damage emitter populates both. The trigger dispatcher (slice 113) infers magicality per rider via `isRiderMagical` (spell-sourced via `sourceEffectInstanceId.spellId` → magical; AttackRolled rider with weaponInstanceId inherits from weapon; otherwise non-magical).
+Several helpers are intentionally engine-internal (used by planners, not on the public barrel): `mitigateDamage`, `isImmuneToCondition`, `isHealingBlocked`, `getCreatureType`, `getEffectiveSpeed`, `computeCarryingCapacity`, `computeEncumbrance`, `interceptFatalDamage` (slice 111: planner-side fatal-damage clamp + bearing-condition consume), `isMagicWeaponAttack` (slice 112: weapon-magicality detector reading `temporaryBuff` and `itemKind`). Consumers compose these effects through the planner / event surface instead. `mitigateDamage` accepts a `characters?: Record<string, Character>` field (slice 105) for source-relative formula evaluation and a `sourceIsMagical?: boolean` (slice 112) for the resistance qualifier; every primary damage emitter populates both. `computeSavingThrow` accepts the same `sourceIsMagical?: boolean` (slice 131) for the Magic Resistance advantage fold; cast-spell, trap, recurring-save, and reactive-spells planners pass `true` (slice 133). The trigger dispatcher (slice 113) infers magicality per rider via `isRiderMagical` (spell-sourced via `sourceEffectInstanceId.spellId` → magical; AttackRolled rider with weaponInstanceId inherits from weapon; otherwise non-magical).
 
 `EffectAccumulator.modifierSum(target, facts?)` and `modifierBreakdown(target, facts?)` (slice 115) accept caller-supplied facts so `AddModifier` entries with a `condition?: Predicate` are evaluated at sum time. `computeAttackBonus` populates `event.attackKind` from the weapon definition (slice 115); `computeAC` populates `bearer.wearingArmor` (slice 116). Predicate-less contributions continue to apply unconditionally.
 
@@ -82,7 +84,7 @@ Predicate DSL kinds (slice 122 additions): `eq` / `gt` / `gte` for value compari
 
 ## Events
 
-Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list (~120 event types) is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.
+Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list (~130 event types) is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.
 
 Grouped by category:
 
@@ -90,6 +92,8 @@ Grouped by category:
 - **Spellcasting**: `SpellCastDeclared`, `SpellSlotConsumed`, `PactSlotConsumed`, `ConcentrationStarted`, `ConcentrationBroken`, `TriggerFired`.
 - **Reactive spells**: `SpellCountered`, `SpellDispelled`, `ItemIdentified`, `ShieldCast`, `AbsorbElementsCast`, `SanctuaryProtected`, `ProtectionUsed`, `GuidanceUsed`.
 - **Mirror Image** (slice 124): `MirrorImageDeflected` — emitted by `planAttack` / `planOffHandAttack` when an incoming attack is redirected to a Mirror Image duplicate. Reducer decrements the bearer's `mirror-image-active` AppliedCondition.level when `duplicateHit` is true; planner follows up with `ConditionRemoved` at level 0.
+- **Sensors** (slices 135, 138): `RemoteSensorPlaced`, `RemoteSensorModeChanged`, `RemoteSensorRemoved`, `RemoteSensorMoved`. Drive the Sensor entity lifecycle for Clairvoyance, Scrying, and Arcane Eye. Sensor records carry id + label + free-text location + casterId + sourceSpellId + sourceEffectInstanceId + sight/hearing mode + optional `mobile` and `darkvisionRange`.
+- **Illusions** (slice 137): `IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`. Drive the Illusion entity lifecycle for Silent Image and Major Image. Illusion records carry id + label + free-text location + `kind: 'visual' | 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + baked `investigationDC` + `disbelievedBy: CharacterId[]`.
 - **Action economy**: `ActionEconomyConsumed`, `RecklessAttackActivated`, `StunningStrikeAttempted`.
 - **Weapon mastery**: `WeaponMasteryActivated`.
 - **Encounter**: `EncounterCreated`, `EncounterStarted`, `EncounterEnded`, `InitiativeRolled`, `TurnStarted`, `TurnEnded`, `RoundEnded`.
@@ -115,15 +119,15 @@ Grouped by category:
 
 Every shape is a Zod schema (parse at boundaries, types via `z.infer`):
 
-- Content: `ContentPackSchema`, `SpeciesSchema`, `BackgroundSchema`, `FeatSchema`, `ClassSchema`, `SubclassSchema`, `ClassFeatureSchema`, `SpellSchema`, `ConditionSchema` (carrying optional `recurringSave` + `autoExpiry` metadata), `ItemDefinitionSchema` (with `WeaponSchema`, `ArmorSchema`, `ToolSchema`, `MagicItemSchema`, `ConsumableSchema`, `GearSchema` variants), `MonsterStatblockSchema`.
-- Runtime: `CharacterSchema`, `ItemInstanceSchema` (carrying optional `temporaryBuff`), `EncounterSchema`, `EffectInstanceSchema`, `PartySchema`, `SessionSchema`, `JournalEntrySchema`, `LocationSchema`, `DoorSchema`, `LocationMapSchema`, `QuestSchema`, `QuestObjectiveSchema`, `VehicleSchema`, `BastionSchema`, `TrapSchema`, `CampaignStateSchema`.
+- Content: `ContentPackSchema`, `SpeciesSchema`, `BackgroundSchema`, `FeatSchema`, `ClassSchema`, `SubclassSchema`, `ClassFeatureSchema`, `SpellSchema`, `ConditionSchema` (carrying optional `recurringSave` + `autoExpiry` metadata, plus `category: 'curse' | 'disease' | 'poison'` since slice 134 so dedicated removal planners can strip in bulk), `ItemDefinitionSchema` (with `WeaponSchema`, `ArmorSchema`, `ToolSchema`, `MagicItemSchema`, `ConsumableSchema`, `GearSchema` variants), `MonsterStatblockSchema`.
+- Runtime: `CharacterSchema`, `ItemInstanceSchema` (carrying optional `temporaryBuff`), `EncounterSchema`, `EffectInstanceSchema`, `PartySchema`, `SessionSchema`, `JournalEntrySchema`, `LocationSchema`, `DoorSchema`, `LocationMapSchema`, `QuestSchema`, `QuestObjectiveSchema`, `VehicleSchema`, `BastionSchema`, `TrapSchema`, `SensorSchema` (slice 135 + 138: id + label + free-text location + casterId + sourceSpellId + sourceEffectInstanceId + mode + optional mobile + optional darkvisionRange), `IllusionSchema` (slice 137: id + label + free-text location + visual/audiovisual kind + casterId + sourceSpellId + sourceEffectInstanceId + investigationDC + disbelievedBy), `CampaignStateSchema`.
 
 ## Effect primitives
 
-The fixed vocabulary the engine reads to compute character state. About 30 kinds — see `EFFECT_KINDS` in [src/schemas/effects.ts](../src/schemas/effects.ts) for the canonical list. Highlights:
+The fixed vocabulary the engine reads to compute character state. ~40 kinds; see `EFFECT_KINDS` in [src/schemas/effects.ts](../src/schemas/effects.ts) for the canonical list. Highlights:
 
 - Stats: `AddModifier` (carries optional `condition?: Predicate` honored at modifier-sum time since slice 115 — Archery's ranged-only +2, Defense's wearing-armor +1, future Fighting Style gates), `SetAdvantage`, `SetAdvantageVsSource`, `SetACFloor`, `OverrideACFormula`, `ModifySpeed`, `GrantSense`, `GrantProficiency`, `GrantWeaponMastery`.
-- Damage / heal: `GrantResistance` (carries optional `qualifier: 'nonmagical' | 'magical'` since slice 112 — Stoneskin's SRD shape, the common monster "resistance to B/P/S from nonmagical attacks" pattern), `GrantImmunity`, `GrantVulnerability`, `FlatDamageReduction`, `BlockHealing`, `BoostHealing`, `GrantEvasion`, `PreventFatalDamage` (slice 111: marker that triggers `interceptFatalDamage` planner-side when incoming damage would drop the bearer's HP to 0; Death Ward's canonical user).
+- Damage / heal: `GrantResistance` (carries optional `qualifier: 'nonmagical' | 'magical'` since slice 112: Stoneskin's SRD shape, the common monster "resistance to B/P/S from nonmagical attacks" pattern), `GrantImmunity`, `GrantVulnerability`, `FlatDamageReduction`, `BlockHealing`, `BoostHealing`, `GrantEvasion`, `PreventFatalDamage` (slice 111: marker that triggers `interceptFatalDamage` planner-side when incoming damage would drop the bearer's HP to 0; Death Ward's canonical user), `GrantMagicResistance` (slice 131: marker; `computeSavingThrow` contributes advantage when both the marker and the save's `sourceIsMagical: true` are set; the canonical Imp / Quasit / future-CR-5+-MM-creature trait).
 - Conditions / immunities: `GrantConditionImmunity` (carries optional `condition?: Predicate` for source-gated immunity arms like Protection from Evil and Good).
 - Resources / slots: `GrantResource`, `RecoverResource`, `GrantSpellSlots`, `GrantSpell`, `ExpandSpellList`.
 - Action economy: `ModifyActionEconomy`.
@@ -150,7 +154,7 @@ import { defaultRNG, seededRNG, throwOnCallRNG } from 'ttrpg-engine-dnd';
 
 ## IDs
 
-Branded string types per kind. Factories: `newCharacterId`, `newCreatureId`, `newPartyId`, `newEncounterId`, `newCampaignId`, `newSessionId`, `newLocationId`, `newQuestId`, `newJournalEntryId`, `newEventId`, `newChoiceId`, `newEffectInstanceId`, `newAppliedConditionId`, `newItemInstanceId`, `newTrapId`. Brand casts: `asCharacterId`, `asSpeciesId`, etc.
+Branded string types per kind. Factories: `newCharacterId`, `newCreatureId`, `newPartyId`, `newEncounterId`, `newCampaignId`, `newSessionId`, `newLocationId`, `newQuestId`, `newJournalEntryId`, `newEventId`, `newChoiceId`, `newEffectInstanceId`, `newAppliedConditionId`, `newItemInstanceId`, `newTrapId`, `newSensorId`, `newIllusionId`. Brand casts: `asCharacterId`, `asSpeciesId`, etc.
 
 ## Migrations
 

@@ -86,7 +86,7 @@ Pick the doc that matches what you want:
 
 ## Status
 
-**Alpha.** Architecturally complete and content-substantial. 1289 tests across 173 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
+**Alpha.** Architecturally complete and content-substantial. 1471 tests across 203 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
 
 ### Coverage at a glance
 
@@ -176,7 +176,7 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1289 tests across 173 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)) and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1471 tests across 203 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)) and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
 
 #### Property-test generator coverage
 

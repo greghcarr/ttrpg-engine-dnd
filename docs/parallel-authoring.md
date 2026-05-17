@@ -20,7 +20,7 @@ npm install
 npx vitest run
 ```
 
-`npm install` is required because `node_modules` is gitignored and per-worktree. Confirm the suite is green (194 files, ~1391 tests as of slice 128) before starting Claude in the new window.
+`npm install` is required because `node_modules` is gitignored and per-worktree. Confirm the suite is green (203 files, ~1471 tests as of slice 139) before starting Claude in the new window.
 
 For subsequent batches, after merging batch N back to `main`, branch off again from inside the worktree. `main` is already checked out in the primary worktree, so you can't `git checkout main` here. Branch directly off the freshly-fetched remote tip instead: `git fetch origin && git checkout -b content/authoring-batch-2 origin/main`. Or reuse the same branch name if you removed the worktree at cleanup.
 
