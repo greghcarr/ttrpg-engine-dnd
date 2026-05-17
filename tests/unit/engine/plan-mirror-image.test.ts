@@ -211,4 +211,66 @@ describe('Mirror Image', () => {
     }
     throw new Error('no seed produced a deflection-success + duplicate-hit at 1 duplicate');
   });
+
+  it('dispatches attacker-side triggers on a deflected attack (slice 125)', () => {
+    // Set up: the attacker carries `studied-target-active` sourced to
+    // the bearer. The condition's consume-on-trigger OnEvent rider
+    // should fire on the next AttackRolled where the attacker is self
+    // and the target is the source — including a Mirror-Image-deflected
+    // one, since the deflected AttackRolled still names the bearer as
+    // targetId. The slice-125 fix routes the deflected AttackRolled
+    // through dispatchTriggers, so the rider fires and emits a
+    // ConditionRemoved for `studied-target-active`.
+    for (let seed = 1; seed < 200; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const longsword = makeItemInstance('longsword');
+      const wizard = buildWizard();
+      const fighter = buildAttacker(longsword.id);
+      let campaign: Campaign = engine.createCampaign({ name: `mi-trigger-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: fighter } satisfies CharacterCreatedEvent,
+      ]);
+      const ward: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: wizard.id,
+        conditionId: 'mirror-image-active',
+        appliedConditionId: newAppliedConditionId(),
+        level: 3,
+      };
+      const studied: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: fighter.id,
+        conditionId: 'studied-target-active',
+        appliedConditionId: newAppliedConditionId(),
+        sourceCharacterId: wizard.id,
+      };
+      campaign = commit(campaign, [ward, studied]);
+
+      const events = engine.plan.attack(campaign.state, {
+        attackerId: fighter.id,
+        targetId: wizard.id,
+        weaponInstanceId: longsword.id,
+      }).events;
+      const deflected = events.find(
+        (e): e is MirrorImageDeflectedEvent =>
+          (e as { type?: string }).type === 'MirrorImageDeflected',
+      );
+      if (deflected === undefined) continue;
+      const studiedRemoved = events.find(
+        (e): e is ConditionRemovedEvent =>
+          (e as { type?: string }).type === 'ConditionRemoved'
+          && (e as ConditionRemovedEvent).conditionId === 'studied-target-active'
+          && (e as ConditionRemovedEvent).targetId === fighter.id,
+      );
+      expect(studiedRemoved).toBeDefined();
+      return;
+    }
+    throw new Error('no seed produced a deflection-success for the trigger-dispatch test');
+  });
 });

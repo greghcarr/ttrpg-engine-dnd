@@ -70,14 +70,16 @@ const buildBuffExtraDamageRoll = (
 // d20 doesn't meet the duplicate-pool threshold; callers fall back
 // to the normal attack flow.
 //
-// Deferred: the deflected AttackRolled doesn't run `dispatchTriggers`.
-// Bearer-side hit-gated riders (AoA, Fire Shield) wouldn't fire
-// anyway (hit:false). Attacker-side on-miss riders (e.g., Studied
-// Attacks' consume-on-attack-vs-source) would fire RAW-correctly on
-// a real miss but are skipped here — a contrived edge case (attacker
-// studying a Mirror-Image-warded bearer). Wire trigger dispatch in
-// a follow-up if it ever matters.
+// Slice 125: dispatchTriggers runs on the deflected AttackRolled.
+// Bearer-side hit-gated riders (AoA, Fire Shield) still don't fire
+// because the event carries hit:false, but attacker-side on-miss
+// riders (Studied Attacks' consume-on-attack-vs-source, future
+// similar) get a chance to fire as RAW expects: the attacker rolled
+// an attack against the bearer, the bearer's defenses just absorbed
+// it via an illusion.
 export interface DeflectedAttackInput {
+  readonly state: CampaignState;
+  readonly content: ResolvedContent;
   readonly attackerId: ULID;
   readonly bearerId: ULID;
   readonly weaponInstanceId: ULID;
@@ -148,7 +150,20 @@ export const tryBuildDeflectedAttack = (
       ? { causedByEventId: input.causedByEventId }
       : {}),
   };
-  const events: Event[] = [attackRolled, deflected];
+  // Slice 125: dispatch triggers on the deflected AttackRolled so
+  // attacker-side on-miss riders (Studied Attacks' consume-on-attack-
+  // vs-source, future similar) fire as RAW expects. The bearer-side
+  // hit-gated riders (AoA, Fire Shield) won't fire because the event
+  // carries hit:false.
+  const stateAfterAttack = applyAll(input.state, [attackRolled]);
+  const attackTriggers = dispatchTriggers({
+    state: stateAfterAttack,
+    content: input.content,
+    rng: input.rng,
+    event: attackRolled,
+    at: input.at,
+  });
+  const events: Event[] = [attackRolled, ...attackTriggers, deflected];
   if (duplicateHit && duplicatesAfter === 0) {
     const removed: ConditionRemovedEvent = {
       id: newEventId() as ULID,
@@ -415,6 +430,8 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const mirrorImage = findMirrorImage(target);
   if (mirrorImage !== undefined) {
     const deflectedEvents = tryBuildDeflectedAttack({
+      state,
+      content,
       attackerId: input.attackerId,
       bearerId: input.targetId,
       weaponInstanceId: input.weaponInstanceId,

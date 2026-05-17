@@ -127,6 +127,8 @@ export const planOffHandAttack = (
   const mirrorImage = findMirrorImage(target);
   if (mirrorImage !== undefined) {
     const deflectedEvents = tryBuildDeflectedAttack({
+      state,
+      content,
       attackerId: intent.attackerId,
       bearerId: intent.targetId,
       weaponInstanceId: intent.weaponInstanceId,
