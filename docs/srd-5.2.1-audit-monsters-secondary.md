@@ -62,23 +62,33 @@ SRD size is "Large". Pack ships "Medium". Spells that select by size will mis-ta
 ### Passive perception derivation (81 entries)
 Most "senses.passivePerceptionOverride" diffs are pack omissions where the SRD lists an explicit number. Many of these are derivable from WIS modifier + perception skill (the engine derives PP this way when the override is absent). They become real drifts only when the underlying skill / WIS values would yield a wrong derivation, which is the case for the ~39 monsters that also have skill drift.
 
-## Why this isn't fixed in slice 154
+## Initiative outcome
 
-Combined fix surface is ~270 individual field-level edits across 101 monsters. Several edits per monster, varying shapes (add/remove/replace), with engine implications that require validation per affected monster. Fitting that into a single reviewable commit isn't practical. This audit documents the gap and queues remediation as follow-up slices.
+Audit fixes shipped across slices 155 through 163 (the slice-160 test-perf change is unrelated):
 
-## Suggested follow-up slices
+| Slice | Scope | Status |
+|---|---|---|
+| 155 | Wolf + Young Red Dragon `passivePerception` → `passivePerceptionOverride` schema-rename bugs | **done** |
+| 156 | Type / size drift: Goblin Warrior → Fey, Stirge → Monstrosity, Invisible Stalker → Large | **done** |
+| 157 | Saving throw proficiency refresh on 28 monsters | **done** |
+| 158 | Skill proficiency refresh on 28 monsters | **done** |
+| 159 | Senses refresh on 81 monsters | **done** |
+| 161 | Speed refresh on 17 monsters | **done** |
+| 162 | Damage resistance / immunity / vulnerability + condition immunity refresh on 23 monsters | **done** |
+| 163 | Remove obsolete `qualifier: 'nonmagical'` GrantResistance traits from 23 monsters | **done** |
 
-| Slice | Scope |
-|---|---|
-| 155 | Field-name bugs (Wolf + Young Red Dragon `passivePerception` → `passivePerceptionOverride`). Trivial. |
-| 156 | Type / size drift fixes: Goblin Warrior → Fey, Stirge → Monstrosity, Invisible Stalker → Large. |
-| 157 to 159 | Saving throw proficiency refresh in batches (45 diffs across ~30 monsters). Highest engine impact. |
-| 160 to 161 | Skill proficiency + senses refresh batches. |
-| 162 | Speed drift batch (20 entries). |
-| 163 | Damage R / I / V + condition immunity batch. |
-| 164 | Doc refresh: update README + content-attribution + this audit doc to mark complete. |
+**Final audit state: 110 of 111 monsters match SRD 5.2.1 exactly on all audited fields.**
 
-The exact slice grouping is a judgment call at execution time; the queue above is one workable shape.
+The single outstanding diff is the **Young White Dragon INT save**: SRD's INT save column shows "2" without sign while the corresponding INT mod is "−2". The math is consistent with neither no-proficiency (would expect "−2") nor proficiency-applied (would expect "+1" at the CR-6 PB of +3); the parsed value of +2 makes neither save = mod nor save = mod + PB. Treating this as an SRD source typo where the leading dash was dropped, the pack intentionally omits INT save proficiency for Young White Dragon. If WotC errata clarifies, this can be revisited.
+
+## What this audit didn't cover
+
+The script verified the structural fields. It did not verify:
+
+- **Action / trait / reaction / bonus action / legendary action text bodies**. The narrative wording on each monster's special abilities was not compared. The pack's existing `actions: [...]` arrays are mechanical encodings of the SRD text; per-action verification is content-authoring work that would benefit from a different review approach (read each entry's text against the SRD).
+- **Magic Resistance / Magic Weapons / other trait shapes** beyond `GrantResistance`. The audit checked the `damageResistances`/`damageImmunities` arrays and the `qualifier: 'nonmagical'` GrantResistance trait shape specifically; other trait entries (e.g. monsters with `GrantMagicResistance`) were not cross-referenced against SRD.
+
+These could each be a future audit slice if needed.
 
 ## Re-running the audit
 
