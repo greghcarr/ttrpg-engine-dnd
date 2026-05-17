@@ -2032,7 +2032,13 @@
     { "id": "marvelous-pigments", "itemKind": "magic", "name": "Marvelous Pigments", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
     { "id": "apparatus-of-the-crab", "itemKind": "magic", "name": "Apparatus of the Crab", "rarity": "legendary", "requiresAttunement": false, "effects": [] },
     { "id": "bag-of-beans", "itemKind": "magic", "name": "Bag of Beans", "rarity": "rare", "requiresAttunement": false, "effects": [] },
-    { "id": "quaals-feather-token-anchor", "itemKind": "magic", "name": "Quaal's Feather Token, Anchor", "rarity": "rare", "requiresAttunement": false, "effects": [] }
+    { "id": "quaals-feather-token-anchor", "itemKind": "magic", "name": "Quaal's Feather Token, Anchor", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "pearl-of-power", "itemKind": "magic", "name": "Pearl of Power", "rarity": "uncommon", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
+    { "id": "pipes-of-haunting", "itemKind": "magic", "name": "Pipes of Haunting", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d4+1" }, "effects": [] },
+    { "id": "wind-fan", "itemKind": "magic", "name": "Wind Fan", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
+    { "id": "circlet-of-blasting", "itemKind": "magic", "name": "Circlet of Blasting", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
+    { "id": "gem-of-brightness", "itemKind": "magic", "name": "Gem of Brightness", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 50, "recharge": "never" }, "effects": [] },
+    { "id": "driftglobe", "itemKind": "magic", "name": "Driftglobe", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] }
   ],
   "monsters": [
     {

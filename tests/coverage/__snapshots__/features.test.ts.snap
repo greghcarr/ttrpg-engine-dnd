@@ -209,7 +209,13 @@ exports[`feature-coverage matrix: magic items > magic-item wire and charge state
 {
   "wiredIds": [],
   "withChargesIds": [
+    "circlet-of-blasting",
+    "driftglobe",
+    "gem-of-brightness",
+    "pearl-of-power",
+    "pipes-of-haunting",
     "wand-of-magic-missiles",
+    "wind-fan",
   ],
 }
 `;
