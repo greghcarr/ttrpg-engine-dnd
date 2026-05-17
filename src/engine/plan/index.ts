@@ -123,6 +123,16 @@ export {
   type ScryingOutcome,
 } from './sensor.js';
 export {
+  planSilentImage,
+  planMajorImage,
+  planInvestigateIllusion,
+  planDismissIllusion,
+  type SilentImageIntent,
+  type MajorImageIntent,
+  type InvestigateIllusionIntent,
+  type DismissIllusionIntent,
+} from './illusion.js';
+export {
   planCounterspell,
   planDispelMagic,
   planRemoveCurse,

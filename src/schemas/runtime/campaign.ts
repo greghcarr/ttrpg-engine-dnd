@@ -17,6 +17,7 @@ import { DowntimeLogEntrySchema } from './downtime.js';
 import { BastionSchema } from './bastion.js';
 import { TrapSchema } from './trap.js';
 import { SensorSchema } from './sensor.js';
+import { IllusionSchema } from './illusion.js';
 import { CampaignSettingsSchema, defaultCampaignSettings } from './settings.js';
 
 export const CampaignStateSchema = z.object({
@@ -39,6 +40,7 @@ export const CampaignStateSchema = z.object({
   bastions: z.record(ULIDSchema, BastionSchema).default({}),
   traps: z.record(ULIDSchema, TrapSchema).default({}),
   sensors: z.record(ULIDSchema, SensorSchema).default({}),
+  illusions: z.record(ULIDSchema, IllusionSchema).default({}),
   settings: CampaignSettingsSchema.default(defaultCampaignSettings()),
   milestones: z
     .array(
@@ -90,6 +92,7 @@ export const emptyCampaignState = (): CampaignState => ({
   bastions: {},
   traps: {},
   sensors: {},
+  illusions: {},
   settings: defaultCampaignSettings(),
   milestones: [],
   inGameTime: { totalMinutes: 0 },

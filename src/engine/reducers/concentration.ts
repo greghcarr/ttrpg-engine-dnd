@@ -127,6 +127,14 @@ export const clearConcentrationEffect = (
       delete state.sensors[sensorId];
     }
   }
+  // Slice 137: sweep illusions (Silent Image, Major Image, future
+  // illusion spells) linked to this concentration.
+  for (const illusionId of Object.keys(state.illusions)) {
+    const illusion = state.illusions[illusionId];
+    if (illusion?.sourceEffectInstanceId === effectInstanceId) {
+      delete state.illusions[illusionId];
+    }
+  }
   delete state.effectInstances[effectInstanceId];
 };
 

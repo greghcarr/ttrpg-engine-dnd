@@ -113,6 +113,11 @@ import {
   applyRemoteSensorModeChanged,
   applyRemoteSensorRemoved,
 } from './reducers/sensor.js';
+import {
+  applyIllusionCreated,
+  applyIllusionInvestigated,
+  applyIllusionDismissed,
+} from './reducers/illusion.js';
 import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
 import {
   applyMounted,
@@ -557,6 +562,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'RemoteSensorRemoved':
         applyRemoteSensorRemoved(draft, event);
+        break;
+      case 'IllusionCreated':
+        applyIllusionCreated(draft, event);
+        break;
+      case 'IllusionInvestigated':
+        applyIllusionInvestigated(draft, event);
+        break;
+      case 'IllusionDismissed':
+        applyIllusionDismissed(draft, event);
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);

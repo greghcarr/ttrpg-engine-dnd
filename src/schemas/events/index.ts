@@ -178,6 +178,11 @@ import {
   RemoteSensorModeChangedEventSchema,
   RemoteSensorRemovedEventSchema,
 } from './sensors.js';
+import {
+  IllusionCreatedEventSchema,
+  IllusionInvestigatedEventSchema,
+  IllusionDismissedEventSchema,
+} from './illusions.js';
 import { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
@@ -303,6 +308,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   RemoteSensorPlacedEventSchema,
   RemoteSensorModeChangedEventSchema,
   RemoteSensorRemovedEventSchema,
+  IllusionCreatedEventSchema,
+  IllusionInvestigatedEventSchema,
+  IllusionDismissedEventSchema,
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
@@ -432,6 +440,9 @@ export const EVENT_TYPES = [
   'RemoteSensorPlaced',
   'RemoteSensorModeChanged',
   'RemoteSensorRemoved',
+  'IllusionCreated',
+  'IllusionInvestigated',
+  'IllusionDismissed',
   'CampaignSettingsChanged',
   'HeroPointGranted',
   'HeroPointSpent',
@@ -862,5 +873,18 @@ export type {
   RemoteSensorRemovedEvent,
   SensorRemovalReason,
 } from './sensors.js';
+export {
+  IllusionCreatedEventSchema,
+  IllusionInvestigatedEventSchema,
+  IllusionDismissedEventSchema,
+  ILLUSION_DISMISSAL_REASONS,
+  IllusionDismissalReasonSchema,
+} from './illusions.js';
+export type {
+  IllusionCreatedEvent,
+  IllusionInvestigatedEvent,
+  IllusionDismissedEvent,
+  IllusionDismissalReason,
+} from './illusions.js';
 export { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 export type { MirrorImageDeflectedEvent } from './mirror-image.js';

@@ -72,6 +72,10 @@ import {
   planSwitchSensorMode,
   planRemoveSensor,
   planScrying,
+  planSilentImage,
+  planMajorImage,
+  planInvestigateIllusion,
+  planDismissIllusion,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -104,6 +108,10 @@ import {
   type RemoveSensorIntent,
   type ScryingIntent,
   type ScryingOutcome,
+  type SilentImageIntent,
+  type MajorImageIntent,
+  type InvestigateIllusionIntent,
+  type DismissIllusionIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
@@ -281,6 +289,10 @@ export interface Engine {
     switchSensorMode(state: CampaignState, intent: Omit<SwitchSensorModeIntent, 'type'>): PlanResult;
     removeSensor(state: CampaignState, intent: Omit<RemoveSensorIntent, 'type'>): PlanResult;
     scrying(state: CampaignState, intent: Omit<ScryingIntent, 'type'>): ScryingOutcome;
+    silentImage(state: CampaignState, intent: Omit<SilentImageIntent, 'type'>): PlanResult;
+    majorImage(state: CampaignState, intent: Omit<MajorImageIntent, 'type'>): PlanResult;
+    investigateIllusion(state: CampaignState, intent: Omit<InvestigateIllusionIntent, 'type'>): PlanResult;
+    dismissIllusion(state: CampaignState, intent: Omit<DismissIllusionIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
@@ -544,6 +556,18 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     scrying(state, intent) {
       return planScrying(state, content, rng, { type: 'Scrying', ...intent });
+    },
+    silentImage(state, intent) {
+      return { events: planSilentImage(state, content, rng, { type: 'SilentImage', ...intent }) };
+    },
+    majorImage(state, intent) {
+      return { events: planMajorImage(state, content, rng, { type: 'MajorImage', ...intent }) };
+    },
+    investigateIllusion(state, intent) {
+      return { events: planInvestigateIllusion(state, content, rng, { type: 'InvestigateIllusion', ...intent }) };
+    },
+    dismissIllusion(state, intent) {
+      return { events: planDismissIllusion(state, content, rng, { type: 'DismissIllusion', ...intent }) };
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };

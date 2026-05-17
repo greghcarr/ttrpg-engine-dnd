@@ -653,6 +653,18 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     case 'RemoteSensorRemoved': {
       return `Sensor closes (${event.reason}).`;
     }
+    case 'IllusionCreated': {
+      const who = characterName(stateBefore, event.casterId);
+      return `**${who}** conjures ${event.label} (${event.kind} illusion) at ${event.location}.`;
+    }
+    case 'IllusionInvestigated': {
+      const who = characterName(stateBefore, event.investigatorId);
+      const outcome = event.success ? 'sees through' : 'is fooled by';
+      return `**${who}** ${outcome} the illusion (Investigation ${event.total} vs DC ${event.dc}).`;
+    }
+    case 'IllusionDismissed': {
+      return `Illusion fades (${event.reason}).`;
+    }
   }
 };
 
