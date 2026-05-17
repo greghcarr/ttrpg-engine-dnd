@@ -871,12 +871,27 @@ exports[`feature-coverage matrix: magic items > charges + effect-bearing magic i
   {
     "effectsCount": 0,
     "hasCharges": false,
+    "id": "brooch-of-shielding",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "cloak-of-elvenkind",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
     "id": "cloak-of-protection",
   },
   {
     "effectsCount": 0,
     "hasCharges": false,
     "id": "deck-of-many-things",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "eyes-of-the-eagle",
   },
   {
     "effectsCount": 0,
@@ -891,7 +906,32 @@ exports[`feature-coverage matrix: magic items > charges + effect-bearing magic i
   {
     "effectsCount": 0,
     "hasCharges": false,
+    "id": "goggles-of-night",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "hat-of-disguise",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "periapt-of-wound-closure",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
     "id": "ring-of-protection",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "ring-of-swimming",
+  },
+  {
+    "effectsCount": 0,
+    "hasCharges": false,
+    "id": "slippers-of-spider-climbing",
   },
   {
     "effectsCount": 0,

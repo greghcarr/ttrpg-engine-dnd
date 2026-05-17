@@ -350,9 +350,21 @@ Even within the L3 row, several subclass features ship as content stubs (the nam
 - **Weapons (40):** Every PHB 2024 simple + martial weapon plus tagged mastery (`vex`, `topple`, `sap`, `nick`, `push`, `slow`, `cleave`, `graze`, `flex`). Weapon catalogue is complete.
 - **Armor + shields (13):** Every PHB 2024 armor entry.
 - **Tools + mundane gear (~15):** Thieves' tools, smith's tools, herbalism kit, lute, torch, rope, backpack, rations, waterskin, bedroll, tinderbox.
-- **Magic items (9):** Bag of Holding, Cloak of Protection, Boots of Elvenkind, Wand of Magic Missiles, Ring of Protection, Amulet of Health, Gauntlets of Ogre Power, plus three potions (Healing, Greater Healing, Superior Healing).
+- **Magic items (17):** Bag of Holding, Cloak of Protection, Boots of Elvenkind, Wand of Magic Missiles, Ring of Protection, Amulet of Health, Gauntlets of Ogre Power, Flametongue Longsword, Deck of Many Things, plus the items-batch-1.1 wondrous set (Goggles of Night, Cloak of Elvenkind, Slippers of Spider Climbing, Brooch of Shielding, Periapt of Wound Closure, Ring of Swimming, Eyes of the Eagle, Hat of Disguise).
+- **Consumables (3):** Potion of Healing, Potion of Greater Healing, Potion of Superior Healing.
 
 The DMG is hundreds of items long; this pack ships a representative slice. Magic item charges are tracked via the engine's `resources` shape; only Wand of Magic Missiles currently exercises that.
+
+### Deferred mechanical wiring (current pack)
+
+Every magic item except Wand of Magic Missiles ships with `effects: []` today. Each entry below names the engine primitive that would walk the item from schema-only to wired. Items grouped by the primitive they share.
+
+- **Conditional advantage / disadvantage grant** (no primitive yet): Cloak of Elvenkind (advantage on Stealth checks vs creatures relying on sight; disadvantage on enemy Perception checks to spot the wearer), Eyes of the Eagle (advantage on sight-based Perception). Needs a per-skill-roll context that can swing a check from another creature's perspective; the existing `SetAdvantage` shape is bearer-side only.
+- **Passive sense grant**: Goggles of Night (darkvision 60 ft). Needs a `GrantSense { kind: 'darkvision' \| 'blindsight' \| 'tremorsense' \| 'truesight', rangeFeet }` effect kind plus a `getSenses(state, content, characterId)` derive helper.
+- **Passive movement-mode grant**: Slippers of Spider Climbing (climb speed equal to walking speed), Ring of Swimming (swim speed 40 ft). The `ModifySpeed { mode: 'climb' \| 'swim', op: 'set' }` primitive already exists (slice 77); these wire as soon as they're authored as passive `effects` entries on the magic item. Currently deferred because magic-item passive effects aren't projected to the wearer; needs an "equipped magic item effects fold into the wearer's effect stack" pass on the derive layer.
+- **Resistance + targeted spell-immunity**: Brooch of Shielding (resistance to force, immunity to magic missile). Force-resistance wires via `GrantResistance { damageType: 'force' }` once magic-item effects project. The magic-missile-specific immunity needs a "spell-id immunity" gate the engine doesn't carry yet (closest neighbour is `GrantConditionImmunity`).
+- **Self-stabilization + healing maximization**: Periapt of Wound Closure (auto-stable at 0 HP; max die on Hit Die spend). The auto-stable arm needs a death-save replacement primitive (closely related to Death Ward but applies at 0 HP, not on the killing blow). The max-die arm needs a Hit Die spend resolver to consult a "maximize" flag.
+- **At-will spell-from-item**: Hat of Disguise (cast Disguise Self at will, no slot or components). Needs an `ItemSpellGrant { spellId, atWill?: boolean, chargesPerUse?: number }` effect kind plus a planner that consumes item charges (or skips when `atWill`) instead of the wearer's spell slots.
 
 ## Monsters
 
