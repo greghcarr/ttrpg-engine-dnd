@@ -2004,7 +2004,13 @@
     { "id": "necklace-of-adaptation", "itemKind": "magic", "name": "Necklace of Adaptation", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "decanter-of-endless-water", "itemKind": "magic", "name": "Decanter of Endless Water", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "belt-of-hill-giant-strength", "itemKind": "magic", "name": "Belt of Hill Giant Strength", "rarity": "rare", "requiresAttunement": true, "effects": [] },
-    { "id": "sending-stones", "itemKind": "magic", "name": "Sending Stones", "rarity": "uncommon", "requiresAttunement": false, "effects": [] }
+    { "id": "sending-stones", "itemKind": "magic", "name": "Sending Stones", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "potion-of-climbing", "itemKind": "consumable", "name": "Potion of Climbing", "onConsume": [], "description": "Grants a climb speed equal to walking speed for 1 hour. Stacks with similar effects only by extending duration." },
+    { "id": "potion-of-animal-friendship", "itemKind": "consumable", "name": "Potion of Animal Friendship", "onConsume": [], "description": "Cast Animal Friendship (save DC 13) for 1 hour when consumed." },
+    { "id": "potion-of-growth", "itemKind": "consumable", "name": "Potion of Growth", "onConsume": [], "description": "Enlarge effect (as the Enlarge/Reduce spell, enlarge option) for 1d4 hours when consumed." },
+    { "id": "potion-of-heroism", "itemKind": "consumable", "name": "Potion of Heroism", "onConsume": [], "description": "Grants 10 temporary hit points and the effects of Bless (no concentration required) for 1 hour." },
+    { "id": "potion-of-mind-reading", "itemKind": "consumable", "name": "Potion of Mind Reading", "onConsume": [], "description": "Cast Detect Thoughts (save DC 13) for 10 minutes when consumed." },
+    { "id": "potion-of-resistance", "itemKind": "consumable", "name": "Potion of Resistance", "onConsume": [], "description": "Resistance to one damage type (acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder) chosen at consume time, for 1 hour." }
   ],
   "monsters": [
     {

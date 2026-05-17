@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 1.3**
+
+6 consumable potions added to the starter pack: Potion of Climbing, Potion of Animal Friendship, Potion of Growth, Potion of Heroism, Potion of Mind Reading, Potion of Resistance. All ship as `itemKind: 'consumable'` with `onConsume: []` and a narrative `description` field, matching the existing three healing potions; the consume-side effect resolver that would walk `onConsume` and emit events is documented as a deferred primitive in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md). The Deferred-wiring subsection gained a single new bullet covering all six potions plus the variant shapes each one needs (durational-condition-from-consume, item-spell-grant routed through consume, durational enlarge buff, temp-HP composed with a Bless-shaped condition, and caster-choice-at-consume-time for the damage-type pick). Consumable count bumped from 3 to 9.
+
 **Content authoring: items batch 1.2**
 
 8 more wondrous items added to the starter pack: Headband of Intellect, Boots of Striding and Springing, Cloak of the Bat, Helm of Telepathy, Necklace of Adaptation, Decanter of Endless Water, Belt of Hill Giant Strength, Sending Stones. Six uncommon + two rare (Cloak of the Bat, Belt of Hill Giant Strength). All ship as `itemKind: 'magic'` with `effects: []`, snapshot-clean under the slice-126 narrowing. The "Deferred mechanical wiring" subsection in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) gained five new primitive entries (ability-score override, speed-floor + jump-multiplier, environment-conditional flight, environmental immunity, paired-item linkage) covering the batch's RAW shapes. Magic-item count bumped from 17 to 25.
