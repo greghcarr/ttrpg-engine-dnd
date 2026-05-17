@@ -1988,7 +1988,15 @@
     { "id": "crossbow-hand", "itemKind": "weapon", "name": "Hand Crossbow", "category": "martial", "attackKind": "ranged", "damageType": "piercing", "damageDice": "1d6", "properties": ["ammunition", "light", "loading"], "mastery": "Vex", "rangeNormal": 30, "rangeLong": 120, "weight": 3, "cost": { "amount": 75, "currency": "gp" } },
     { "id": "crossbow-heavy", "itemKind": "weapon", "name": "Heavy Crossbow", "category": "martial", "attackKind": "ranged", "damageType": "piercing", "damageDice": "1d10", "properties": ["ammunition", "heavy", "loading", "two-handed"], "mastery": "Push", "rangeNormal": 100, "rangeLong": 400, "weight": 18, "cost": { "amount": 50, "currency": "gp" } },
     { "id": "padded-armor", "itemKind": "armor", "name": "Padded Armor", "category": "light", "baseAC": 11, "stealthDisadvantage": true, "weight": 8, "cost": { "amount": 5, "currency": "gp" } },
-    { "id": "hide-armor", "itemKind": "armor", "name": "Hide Armor", "category": "medium", "baseAC": 12, "dexCap": 2, "stealthDisadvantage": false, "weight": 12, "cost": { "amount": 10, "currency": "gp" } }
+    { "id": "hide-armor", "itemKind": "armor", "name": "Hide Armor", "category": "medium", "baseAC": 12, "dexCap": 2, "stealthDisadvantage": false, "weight": 12, "cost": { "amount": 10, "currency": "gp" } },
+    { "id": "goggles-of-night", "itemKind": "magic", "name": "Goggles of Night", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "cloak-of-elvenkind", "itemKind": "magic", "name": "Cloak of Elvenkind", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "slippers-of-spider-climbing", "itemKind": "magic", "name": "Slippers of Spider Climbing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "brooch-of-shielding", "itemKind": "magic", "name": "Brooch of Shielding", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "periapt-of-wound-closure", "itemKind": "magic", "name": "Periapt of Wound Closure", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-swimming", "itemKind": "magic", "name": "Ring of Swimming", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "hat-of-disguise", "itemKind": "magic", "name": "Hat of Disguise", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {

@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 1.1**
+
+8 uncommon wondrous items added to the starter pack: Goggles of Night, Cloak of Elvenkind, Slippers of Spider Climbing, Brooch of Shielding, Periapt of Wound Closure, Ring of Swimming, Eyes of the Eagle, Hat of Disguise. All ship as `itemKind: 'magic'` with `effects: []` (schema-only, matching the existing wondrous-item pattern); the engine primitives each would eventually need are catalogued in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) under "Deferred mechanical wiring." Magic-item count in the gaps doc bumped from 9 to 17.
+
 The post-alpha.5 stretch: 75 slices. Slices 48–122 mix vocabulary expansion with infrastructure hygiene. The architectural skeleton is untouched. `SCHEMA_VERSION` unchanged; every new event shape and effect kind is additive. Test count grew from 1009 to 1371 across 192 files (+362 / +53); all replay-equivalence and RNG-capture invariants still hold.
 
 The session cadence settled into a "primitive + canonical content user" shape: each slice adds a focused engine primitive (~50–200 LoC) and the first one or two RAW spells / features that exercise it, walking those entries from schema-only to wired in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
