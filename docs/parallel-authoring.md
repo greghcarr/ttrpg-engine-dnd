@@ -47,7 +47,7 @@ Forbidden:
 - All of `src/engine/`, `src/derive/`, `src/schemas/`, `tests/`. If a content entry needs a schema field that doesn't exist, document the deferral in the gaps doc and skip the entry; do not extend the schema.
 - `README.md` — the engine session owns it; coverage-count edits there happen at merge time.
 - `CLAUDE.md` and the auto-memory directory.
-- `tests/coverage/__snapshots__/features.test.ts.snap` — for pure monster/item additions this snapshot shouldn't move. If it does, stop and surface the diff; do not refresh with `-u` until coordinated with the engine session.
+- `tests/coverage/__snapshots__/features.test.ts.snap` — slice 126 narrowed the per-id catalog snapshots to wired-only entries, so pure stub additions (monsters, items with `effects: []` and no charges) don't move this snapshot. If it does move, stop and surface the diff; do not refresh with `-u` until coordinated with the engine session.
 
 ## Starter prompt for the content session
 
@@ -67,7 +67,7 @@ Forbidden:
 - All of `src/engine/`, `src/derive/`, `src/schemas/`, `tests/`. If a content entry needs a schema field that doesn't exist, document the deferral in the gaps doc and skip the entry; do not extend the schema.
 - `README.md` — the engine session owns it; coverage-count edits there happen at merge time.
 - `CLAUDE.md` and any auto-memory files.
-- `tests/coverage/__snapshots__/features.test.ts.snap` — for pure monster/item additions this snapshot shouldn't move. If it does, stop and surface the diff rather than refreshing with `-u`.
+- `tests/coverage/__snapshots__/features.test.ts.snap` — slice 126 narrowed the per-id catalog snapshots to wired-only entries, so pure stub additions don't move this snapshot. If it does move, stop and surface the diff rather than refreshing with `-u`.
 
 Slice cadence (same as engine sessions):
 1. Pick a batch by reading [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) Monsters / Items sections and the existing entries in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json).
@@ -99,7 +99,7 @@ To start: read the gaps doc's Monsters and Items sections, then propose a starti
 - `git log main` from either worktree shows the other's commits in real time. Use this to confirm the engine session hasn't landed something that affects the content session's footprint (e.g., a schema change to monster entries).
 - JSON conflicts on `starter-pack.json` are rare in practice because the two sessions target disjoint top-level arrays.
 - Doc conflicts on `CHANGELOG.md` and `docs/starter-pack-gaps.md` are the most common friction. Resolve by keeping both blocks; both sessions add new content rather than modifying shared text.
-- The `features.test.ts` snapshot moves when a condition is added (engine) or rarely when a magic item that defines a condition lands (content). Only one session should `-u` at a time; the other re-runs the suite after merge to absorb the new baseline.
+- The `features.test.ts` snapshot moves when an engine slice wires a new effect-bearing condition / feature / feat, or when a magic item gains effects or charges. Pure stub content additions don't move it (slice 126 narrowed the per-id catalogs to wired-only). When it does move, only one session should `-u` at a time; the other re-runs the suite after merge to absorb the new baseline.
 - If the engine session changes `package.json` dependencies, the content worktree needs its own `npm install`.
 
 ## Cleanup when the content branch wraps

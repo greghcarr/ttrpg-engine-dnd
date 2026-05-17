@@ -1,29 +1,35 @@
 // Layer 8 (feature-coverage matrix, per the testing standard in
-// CLAUDE.md). Enumerates every notable 5.5e feature in the starter
-// content pack and asserts the shape it ships with (effects-bearing
-// vs name-only stub), plus a smoke check that effects-bearing entries
-// actually parse and produce derivations / events when triggered.
+// CLAUDE.md). Enumerates the 5.5e features in the starter content
+// pack and asserts which ones ship "wired" (effects-bearing).
 //
-// The matrix doubles as an audit: changes to the content pack — new
-// features added, existing features changed from data-driven to
-// code-driven (or back) — fail the snapshot and force the diff into
-// the PR. Use `npx vitest -u tests/coverage/features.test.ts` to
-// accept intentional changes.
+// Slice 126 narrowed each per-id catalog snapshot to wired entries
+// only. Pure stub additions (a feature / condition / feat / magic
+// item with `effects: []` and no other engine consumption) no
+// longer trip the snapshot — they're content authoring, not
+// engineering work, and the JSON diff in the PR is already the
+// audit trail.
 //
-// The matrix is keyed by category:
-//   - Class features (the `features: [...]` arrays in every level entry)
-//   - Weapon masteries (the 9 PHB 2024 masteries)
-//   - Conditions
-//   - Feats (origin + general + fighting-style + epic-boon)
-//   - Magic items (the entries with effects[])
+// What the snapshots catch:
+//   - A wired entry disappeared (removed or renamed)
+//   - A previously-stub entry became wired (engineering wired a
+//     new mechanic that deserves review)
+//   - A previously-wired entry became stub (engineering removed a
+//     wire — sometimes legitimate, always worth surfacing)
 //
-// `wired` means: ships with effects[] populated; the engine
-// derivations / triggers read them. `stub` means: content has an entry
-// (name, level placement) but no effects array — usually because
-// expressing the feature requires engine work the project hasn't done
-// yet (Stunning Strike trigger, Reckless Attack advantage timing, etc.).
-// `stub` entries fail this test if they suddenly grow an effects array
-// — that's a PR-worthy change.
+// What the snapshots intentionally do NOT catch:
+//   - Pure stub additions (new content with effects: [])
+//   - Pure stub removals (rarely a regression; the PR diff catches
+//     it if it is)
+//
+// One nuance: planner-driven conditions (mirror-image-active, ones
+// where the engine handles the mechanic in code rather than via
+// the effects array) ship with `effects: []` and therefore classify
+// as "stub" here. That's intentional — those wires are exercised
+// by the planner's own dedicated tests; this snapshot doesn't
+// duplicate the audit.
+//
+// `npx vitest -u tests/coverage/features.test.ts` to accept
+// intentional changes.
 
 import { describe, expect, it } from 'vitest';
 import { loadStarterPack } from '../../src/content/packs/starter.js';
@@ -33,15 +39,13 @@ import { WEAPON_MASTERIES } from '../../src/schemas/primitives.js';
 const PACK = loadStarterPack();
 const CONTENT = resolveContent([PACK]);
 
-type WireStatus = 'wired' | 'stub';
-
-const categorize = (effectsCount: number): WireStatus => (effectsCount > 0 ? 'wired' : 'stub');
+const isWired = (effectsCount: number): boolean => effectsCount > 0;
 
 interface ClassFeatureRow {
   readonly classId: string;
   readonly level: number;
   readonly featureId: string;
-  readonly status: WireStatus;
+  readonly wired: boolean;
 }
 
 const buildClassFeatureMatrix = (): ClassFeatureRow[] => {
@@ -55,7 +59,7 @@ const buildClassFeatureMatrix = (): ClassFeatureRow[] => {
           classId: cls.id,
           level,
           featureId: feature.id,
-          status: categorize((feature.effects ?? []).length),
+          wired: isWired((feature.effects ?? []).length),
         });
       }
     }
@@ -71,14 +75,11 @@ const buildClassFeatureMatrix = (): ClassFeatureRow[] => {
 describe('feature-coverage matrix: class features', () => {
   const matrix = buildClassFeatureMatrix();
 
-  it('every named class feature parses (id + level + status snapshot)', () => {
-    expect(matrix.map((r) => `${r.classId} L${r.level} ${r.featureId} [${r.status}]`)).toMatchSnapshot();
-  });
-
-  it('counts: wired vs stub split is stable', () => {
-    const wired = matrix.filter((r) => r.status === 'wired').length;
-    const stub = matrix.filter((r) => r.status === 'stub').length;
-    expect({ wired, stub, total: matrix.length }).toMatchSnapshot();
+  it('wired class features catalog is stable', () => {
+    const wired = matrix
+      .filter((r) => r.wired)
+      .map((r) => `${r.classId} L${r.level} ${r.featureId}`);
+    expect(wired).toMatchSnapshot();
   });
 
   it('Rogue Sneak Attack scales: a class-feature entry exists at every odd Rogue level', () => {
@@ -111,19 +112,15 @@ describe('feature-coverage matrix: subclasses', () => {
     }
   });
 
-  it('subclass catalog with feature wire-status is stable', () => {
-    const rows: Array<{ subclass: string; level: number; featureId: string; status: WireStatus }> = [];
+  it('wired subclass features catalog is stable', () => {
+    const rows: Array<{ subclass: string; level: number; featureId: string }> = [];
     for (const sub of PACK.subclasses) {
       const tbl = sub.levelGrants as Record<string, Array<{ id: string; effects?: unknown[] }>>;
       for (const [lvlStr, features] of Object.entries(tbl)) {
         const level = Number.parseInt(lvlStr, 10);
         for (const f of features) {
-          rows.push({
-            subclass: sub.id,
-            level,
-            featureId: f.id,
-            status: categorize((f.effects ?? []).length),
-          });
+          if (!isWired((f.effects ?? []).length)) continue;
+          rows.push({ subclass: sub.id, level, featureId: f.id });
         }
       }
     }
@@ -133,7 +130,7 @@ describe('feature-coverage matrix: subclasses', () => {
         a.level - b.level ||
         a.featureId.localeCompare(b.featureId),
     );
-    expect(rows.map((r) => `${r.subclass} L${r.level} ${r.featureId} [${r.status}]`)).toMatchSnapshot();
+    expect(rows.map((r) => `${r.subclass} L${r.level} ${r.featureId}`)).toMatchSnapshot();
   });
 });
 
@@ -172,14 +169,12 @@ describe('feature-coverage matrix: weapon masteries', () => {
 });
 
 describe('feature-coverage matrix: conditions', () => {
-  it('every condition is shipped with status + effects count', () => {
-    const rows = PACK.conditions.map((c) => ({
-      id: c.id,
-      effectsCount: c.effects.length,
-      stackable: c.stackable,
-    }));
-    rows.sort((a, b) => a.id.localeCompare(b.id));
-    expect(rows).toMatchSnapshot();
+  it('wired conditions catalog is stable', () => {
+    const wired = PACK.conditions
+      .filter((c) => isWired(c.effects.length))
+      .map((c) => c.id)
+      .sort();
+    expect(wired).toMatchSnapshot();
   });
 
   it('PHB-2024 official 15 conditions are all present', () => {
@@ -208,14 +203,12 @@ describe('feature-coverage matrix: conditions', () => {
 });
 
 describe('feature-coverage matrix: feats', () => {
-  it('feat catalog by category + wire status is stable', () => {
-    const rows = PACK.feats.map((f) => ({
-      id: f.id,
-      category: f.category,
-      status: categorize((f.effects ?? []).length),
-    }));
-    rows.sort((a, b) => a.category.localeCompare(b.category) || a.id.localeCompare(b.id));
-    expect(rows).toMatchSnapshot();
+  it('wired feats catalog is stable', () => {
+    const wired = PACK.feats
+      .filter((f) => isWired((f.effects ?? []).length))
+      .map((f) => `${f.category}:${f.id}`)
+      .sort();
+    expect(wired).toMatchSnapshot();
   });
 
   it('all six 2024 Fighting Styles ship as feats', () => {
@@ -237,19 +230,21 @@ describe('feature-coverage matrix: feats', () => {
 });
 
 describe('feature-coverage matrix: magic items', () => {
-  it('charges + effect-bearing magic items are stable', () => {
-    // Only the `magic` variant carries `effects[]` / `charges[]`.
-    const rows = [...CONTENT.items.values()]
-      .filter((i) => i.itemKind === 'magic')
-      .map((i) => {
-        if (i.itemKind !== 'magic') return { id: i.id, effectsCount: 0, hasCharges: false };
-        return {
-          id: i.id,
-          effectsCount: (i.effects ?? []).length,
-          hasCharges: i.charges !== undefined,
-        };
-      });
-    rows.sort((a, b) => a.id.localeCompare(b.id));
-    expect(rows).toMatchSnapshot();
+  it('magic-item wire and charge state is stable', () => {
+    // Pure stub items (effects: [], no charges) don't appear in
+    // either list, so content sessions can append wondrous items
+    // freely without tripping the snapshot. A magic item gaining
+    // effects (engineering wired a new mechanic) or charges (or
+    // losing them) trips, which is the audit signal we want.
+    const items = [...CONTENT.items.values()].filter((i) => i.itemKind === 'magic');
+    const wiredIds = items
+      .filter((i) => i.itemKind === 'magic' && (i.effects ?? []).length > 0)
+      .map((i) => i.id)
+      .sort();
+    const withChargesIds = items
+      .filter((i) => i.itemKind === 'magic' && i.charges !== undefined)
+      .map((i) => i.id)
+      .sort();
+    expect({ wiredIds, withChargesIds }).toMatchSnapshot();
   });
 });
