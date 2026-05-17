@@ -2086,7 +2086,15 @@
     { "id": "spell-scroll-of-greater-invisibility", "itemKind": "consumable", "name": "Spell Scroll of Greater Invisibility", "onConsume": [], "description": "Rare spell scroll. Cast Greater Invisibility at 4th level (concentration, 1 minute); scroll crumbles after a single use. Non-class-list casters must succeed on a DC 14 INT or WIS check to read." },
     { "id": "spell-scroll-of-cone-of-cold", "itemKind": "consumable", "name": "Spell Scroll of Cone of Cold", "onConsume": [], "description": "Rare spell scroll. Cast Cone of Cold at 5th level (save DC 17); scroll crumbles after a single use. Non-class-list casters must succeed on a DC 15 INT or WIS check to read." },
     { "id": "spell-scroll-of-disintegrate", "itemKind": "consumable", "name": "Spell Scroll of Disintegrate", "onConsume": [], "description": "Very rare spell scroll. Cast Disintegrate at 6th level (save DC 17); scroll crumbles after a single use. Non-class-list casters must succeed on a DC 16 INT or WIS check to read." },
-    { "id": "spell-scroll-of-wish", "itemKind": "consumable", "name": "Spell Scroll of Wish", "onConsume": [], "description": "Legendary spell scroll. Cast Wish at 9th level (the spell carries its own risk clauses); scroll crumbles after a single use. Non-class-list casters must succeed on a DC 19 INT or WIS check to read; on a failure, the spell ends and the scroll is destroyed without effect." }
+    { "id": "spell-scroll-of-wish", "itemKind": "consumable", "name": "Spell Scroll of Wish", "onConsume": [], "description": "Legendary spell scroll. Cast Wish at 9th level (the spell carries its own risk clauses); scroll crumbles after a single use. Non-class-list casters must succeed on a DC 19 INT or WIS check to read; on a failure, the spell ends and the scroll is destroyed without effect." },
+    { "id": "ioun-stone-strength", "itemKind": "magic", "name": "Ioun Stone, Strength", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-agility", "itemKind": "magic", "name": "Ioun Stone, Agility", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-fortitude", "itemKind": "magic", "name": "Ioun Stone, Fortitude", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-intellect", "itemKind": "magic", "name": "Ioun Stone, Intellect", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-insight", "itemKind": "magic", "name": "Ioun Stone, Insight", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-leadership", "itemKind": "magic", "name": "Ioun Stone, Leadership", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-awareness", "itemKind": "magic", "name": "Ioun Stone, Awareness", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ioun-stone-protection", "itemKind": "magic", "name": "Ioun Stone, Protection", "rarity": "rare", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
