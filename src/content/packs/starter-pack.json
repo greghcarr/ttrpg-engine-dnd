@@ -2163,21 +2163,6 @@
       "languages": ["common", "goblin"]
     },
     {
-      "id": "orc",
-      "name": "Orc",
-      "size": "Medium",
-      "type": "Humanoid",
-      "alignment": { "lawChaos": "chaotic", "goodEvil": "evil" },
-      "ac": 13,
-      "hp": { "average": 15, "formula": "2d8+6" },
-      "speed": { "walk": 30 },
-      "abilityScores": { "STR": 16, "DEX": 12, "CON": 16, "INT": 7, "WIS": 11, "CHA": 10 },
-      "cr": 0.5,
-      "xp": 100,
-      "proficiencyBonus": 2,
-      "languages": ["common", "orc"]
-    },
-    {
       "id": "wolf",
       "name": "Wolf",
       "size": "Medium",
@@ -2620,22 +2605,6 @@
       "languages": []
     },
     {
-      "id": "apprentice-wizard",
-      "name": "Apprentice Wizard",
-      "size": "Medium",
-      "type": "Humanoid",
-      "alignment": "any",
-      "ac": 10,
-      "hp": { "average": 10, "formula": "3d8-3" },
-      "speed": { "walk": 30 },
-      "abilityScores": { "STR": 8, "DEX": 10, "CON": 9, "INT": 14, "WIS": 10, "CHA": 11 },
-      "skills": { "arcana": 4, "history": 4 },
-      "cr": 0.25,
-      "xp": 50,
-      "proficiencyBonus": 2,
-      "languages": ["common"]
-    },
-    {
       "id": "priest",
       "name": "Priest",
       "size": "Medium",
@@ -2902,26 +2871,6 @@
         { "kind": "GrantResistance", "damageType": "piercing", "qualifier": "nonmagical" },
         { "kind": "GrantResistance", "damageType": "slashing", "qualifier": "nonmagical" }
       ]
-    },
-    {
-      "id": "manes",
-      "name": "Manes",
-      "size": "Small",
-      "type": "Fiend",
-      "subtype": "demon",
-      "alignment": { "lawChaos": "chaotic", "goodEvil": "evil" },
-      "ac": 9,
-      "hp": { "average": 9, "formula": "2d6+2" },
-      "speed": { "walk": 20 },
-      "abilityScores": { "STR": 10, "DEX": 9, "CON": 13, "INT": 3, "WIS": 8, "CHA": 4 },
-      "damageResistances": ["cold", "fire", "lightning"],
-      "damageImmunities": ["poison"],
-      "conditionImmunities": ["charmed", "frightened", "poisoned"],
-      "senses": { "darkvision": 60 },
-      "cr": 0.125,
-      "xp": 25,
-      "proficiencyBonus": 2,
-      "languages": ["abyssal"]
     },
     {
       "id": "lemure",
@@ -3566,25 +3515,6 @@
       "languages": ["deep speech", "telepathy 120 ft"]
     },
     {
-      "id": "beholder",
-      "name": "Beholder",
-      "size": "Large",
-      "type": "Aberration",
-      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
-      "ac": 18,
-      "hp": { "average": 180, "formula": "19d10+76" },
-      "speed": { "walk": 0, "fly": 20, "hover": true },
-      "abilityScores": { "STR": 10, "DEX": 14, "CON": 18, "INT": 17, "WIS": 15, "CHA": 17 },
-      "savingThrows": { "INT": 8, "WIS": 7, "CHA": 8 },
-      "skills": { "perception": 12 },
-      "conditionImmunities": ["prone"],
-      "senses": { "darkvision": 120, "passivePerceptionOverride": 22 },
-      "cr": 13,
-      "xp": 10000,
-      "proficiencyBonus": 5,
-      "languages": ["deep speech", "undercommon"]
-    },
-    {
       "id": "gibbering-mouther",
       "name": "Gibbering Mouther",
       "size": "Medium",
@@ -3600,24 +3530,6 @@
       "xp": 450,
       "proficiencyBonus": 2,
       "languages": []
-    },
-    {
-      "id": "mind-flayer",
-      "name": "Mind Flayer",
-      "size": "Medium",
-      "type": "Aberration",
-      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
-      "ac": 15,
-      "hp": { "average": 71, "formula": "13d8+13" },
-      "speed": { "walk": 30 },
-      "abilityScores": { "STR": 11, "DEX": 12, "CON": 12, "INT": 19, "WIS": 17, "CHA": 17 },
-      "savingThrows": { "INT": 7, "WIS": 6, "CHA": 6 },
-      "skills": { "arcana": 7, "deception": 6, "insight": 6, "perception": 6, "persuasion": 6, "stealth": 4 },
-      "senses": { "darkvision": 120, "passivePerceptionOverride": 16 },
-      "cr": 7,
-      "xp": 2900,
-      "proficiencyBonus": 3,
-      "languages": ["deep speech", "undercommon", "telepathy 120 ft"]
     },
     {
       "id": "otyugh",
@@ -3669,23 +3581,6 @@
       "xp": 200,
       "proficiencyBonus": 2,
       "languages": ["elvish", "sylvan"]
-    },
-    {
-      "id": "pixie",
-      "name": "Pixie",
-      "size": "Tiny",
-      "type": "Fey",
-      "alignment": { "lawChaos": "neutral", "goodEvil": "good" },
-      "ac": 15,
-      "hp": { "average": 1, "formula": "1d4-1" },
-      "speed": { "walk": 10, "fly": 30 },
-      "abilityScores": { "STR": 2, "DEX": 20, "CON": 8, "INT": 10, "WIS": 14, "CHA": 15 },
-      "skills": { "perception": 4, "stealth": 7 },
-      "senses": { "passivePerceptionOverride": 14 },
-      "cr": 0.25,
-      "xp": 50,
-      "proficiencyBonus": 2,
-      "languages": ["common", "elvish", "sylvan"]
     },
     {
       "id": "satyr",
@@ -4109,32 +4004,6 @@
       "proficiencyBonus": 6,
       "languages": ["common", "draconic"],
       "breathWeapon": { "id": "fire-breath", "name": "Fire Breath", "rechargeMin": 5, "area": { "shape": "cone", "sizeFeet": 60 }, "saveAbility": "DEX", "saveDC": 21, "damageDice": "18d6", "damageType": "fire", "halfOnSuccess": true }
-    },
-    {
-      "id": "spined-devil",
-      "name": "Spined Devil",
-      "size": "Small",
-      "type": "Fiend",
-      "subtype": "devil",
-      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
-      "ac": 13,
-      "hp": { "average": 22, "formula": "5d6+5" },
-      "speed": { "walk": 20, "fly": 40 },
-      "abilityScores": { "STR": 10, "DEX": 15, "CON": 12, "INT": 11, "WIS": 14, "CHA": 8 },
-      "skills": { "perception": 4 },
-      "damageResistances": ["cold"],
-      "damageImmunities": ["fire", "poison"],
-      "conditionImmunities": ["poisoned"],
-      "senses": { "darkvision": 120, "passivePerceptionOverride": 14 },
-      "cr": 2,
-      "xp": 450,
-      "proficiencyBonus": 2,
-      "languages": ["infernal", "telepathy 120 ft"],
-      "traits": [
-        { "kind": "GrantResistance", "damageType": "bludgeoning", "qualifier": "nonmagical" },
-        { "kind": "GrantResistance", "damageType": "piercing", "qualifier": "nonmagical" },
-        { "kind": "GrantResistance", "damageType": "slashing", "qualifier": "nonmagical" }
-      ]
     },
     {
       "id": "bearded-devil",

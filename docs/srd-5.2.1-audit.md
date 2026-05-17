@@ -16,12 +16,12 @@ The audit is scripted: a Node parser reads the markdown SRD in `references/srd-m
 
 ## Resolution roadmap
 
-| Slice | Scope | Files touched |
-|---|---|---|
-| 141 | Drop 7 non-SRD entries | starter-pack.json, tests referencing dropped ids |
-| 142 | Rename + refresh the 9 rename-and-drift entries | starter-pack.json, tests, transcripts |
-| 143 to 148 | Drift refresh in batches of ~10 monsters | starter-pack.json, golden tests asserting old HP/AC |
-| 149 | Doc refresh ([docs/content-attribution.md](content-attribution.md), README "60% SRD" headline, [docs/starter-pack-gaps.md](starter-pack-gaps.md)) | docs only |
+| Slice | Scope | Status | Files touched |
+|---|---|---|---|
+| 141 | Drop 7 non-SRD entries | **done** | starter-pack.json (-7 entries) |
+| 142 | Rename + refresh the 9 rename-and-drift entries | pending | starter-pack.json, tests, transcripts |
+| 143 to 148 | Drift refresh in batches of ~10 monsters | pending | starter-pack.json, golden tests asserting old HP/AC |
+| 149 | Doc refresh ([docs/content-attribution.md](content-attribution.md), README "60% SRD" headline, [docs/starter-pack-gaps.md](starter-pack-gaps.md)) | pending | docs only |
 
 After this, post-pack count drops from 118 to 111. Combined with the 228 SRD entries we don't ship yet, the new SRD-coverage headline is ~111 / 339 = ~33% by entry count (or higher by frequently-used-in-encounters weighting; the headline math is a Slice 149 decision).
 
