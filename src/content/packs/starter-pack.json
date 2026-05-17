@@ -3087,7 +3087,7 @@
     {
       "id": "protection-from-evil-and-good-active",
       "name": "Protection from Evil and Good",
-      "description": "Aberrations, celestials, elementals, fey, fiends, and undead have disadvantage on attack rolls against the bearer (Protection from Evil and Good spell). The disadvantage gate is enforced via a type-conditional ImposeDisadvantageOnAttackers whose predicate reads `attackerCreatureType` from facts the attack planner supplies. RAW also makes the bearer immune to charmed / frightened / possessed *from those same six types*; that source-gated condition-immunity portion isn't enforced today because GrantConditionImmunity has no source-predicate (a future slice). The shared range / duration distinction with Magic Circle lives on the spell entry, not the condition.",
+      "description": "Aberrations, celestials, elementals, fey, fiends, and undead have disadvantage on attack rolls against the bearer (Protection from Evil and Good spell). The disadvantage gate is enforced via a type-conditional ImposeDisadvantageOnAttackers whose predicate reads `attackerCreatureType` from facts the attack planner supplies. The bearer is also immune to charmed and frightened *from those same six types*; slice 104 added a source-predicate to GrantConditionImmunity so isImmuneToCondition (called from the cast-spell save and buff branches and from the concentration aura tick) gates the immunity on the casting source's creatureType matching the six warded types. The RAW 'possessed' clause isn't modeled (the engine doesn't carry a possessed condition). The shared range / duration distinction with Magic Circle lives on the spell entry, not the condition.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -3104,13 +3104,43 @@
               { "kind": "eq", "path": "attackerCreatureType", "value": "Undead" }
             ]
           }
+        },
+        {
+          "kind": "GrantConditionImmunity",
+          "conditionId": "charmed",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Undead" }
+            ]
+          }
+        },
+        {
+          "kind": "GrantConditionImmunity",
+          "conditionId": "frightened",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Undead" }
+            ]
+          }
         }
       ]
     },
     {
       "id": "magic-circle-active",
       "name": "Magic Circle",
-      "description": "10-foot cylinder ward (Magic Circle spell): creatures of the warded type have disadvantage on attack rolls against creatures inside the circle. Shares the disadvantage shape with Protection from Evil and Good (same six creature types — aberration, celestial, elemental, fey, fiend, undead). RAW lets the caster name a single creature type at cast time; the engine doesn't model the caster choice yet, so the condition wards against all six (broader than RAW for non-fiend casts). The RAW positional constraint (only applies while the warded creature is inside the 10-foot cylinder) is consumer-territory.",
+      "description": "10-foot cylinder ward (Magic Circle spell): creatures of the warded type have disadvantage on attack rolls against creatures inside the circle, and can't charm or frighten them. Shares the disadvantage + condition-immunity shape with Protection from Evil and Good (same six creature types — aberration, celestial, elemental, fey, fiend, undead). RAW lets the caster name a single creature type at cast time; the engine doesn't model the caster choice yet, so the condition wards against all six (broader than RAW for non-fiend casts). The RAW positional constraint (only applies while the warded creature is inside the 10-foot cylinder) is consumer-territory.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -3125,6 +3155,36 @@
               { "kind": "eq", "path": "attackerCreatureType", "value": "Fey" },
               { "kind": "eq", "path": "attackerCreatureType", "value": "Fiend" },
               { "kind": "eq", "path": "attackerCreatureType", "value": "Undead" }
+            ]
+          }
+        },
+        {
+          "kind": "GrantConditionImmunity",
+          "conditionId": "charmed",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Undead" }
+            ]
+          }
+        },
+        {
+          "kind": "GrantConditionImmunity",
+          "conditionId": "frightened",
+          "condition": {
+            "kind": "any",
+            "terms": [
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Aberration" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Celestial" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Elemental" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fey" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Fiend" },
+              { "kind": "eq", "path": "sourceCreatureType", "value": "Undead" }
             ]
           }
         }

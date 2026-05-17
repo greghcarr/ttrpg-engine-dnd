@@ -15,8 +15,10 @@ import type { AttackRolledEvent } from '../../../src/schemas/events/attack.js';
 import { eventId, isoTimestamp } from '../../fixtures/index.js';
 import { buildEffectStack } from '../../../src/derive/effect-stack.js';
 import { resolveContent } from '../../../src/content/pack.js';
+import { isImmuneToCondition } from '../../../src/derive/condition-immunity.js';
 
-// Slice 103 — type-conditional buff / ward primitive.
+// Slice 103 — type-conditional buff / ward primitive (disadvantage arm).
+// Slice 104 — source-predicate on GrantConditionImmunity (immunity arm).
 //
 // 1. EffectAccumulator's `imposesDisadvantageOnAttackers(attackerFacts)`
 //    honors `condition` predicates on each ImposeDisadvantageOnAttackers
@@ -29,6 +31,14 @@ import { resolveContent } from '../../../src/content/pack.js';
 // 3. The attack planner threads the attacker's creature type into the
 //    accumulator query, so the end-to-end Skeleton-attacks-buffed-cleric
 //    AttackRolled event uses disadvantage (two d20s).
+// 4. EffectAccumulator's `hasConditionImmunity(id, sourceFacts)` honors
+//    a `condition?: Predicate` on `GrantConditionImmunity`; PfEoG's
+//    charmed / frightened arms gate on `sourceCreatureType` matching
+//    the six warded types.
+// 5. `isImmuneToCondition` accepts an optional `sourceCharacterId` and
+//    builds `sourceCreatureType` facts from the source's record; the
+//    three call sites (cast-spell save + buff branches, concentration
+//    aura tick) thread it through.
 
 const PACK = loadStarterPack();
 const STARTER_CONTENT = resolveContent([PACK]);
@@ -222,5 +232,209 @@ describe('Attack planner: PfEoG-buffed target', () => {
       return;
     }
     throw new Error('no seed produced an AttackRolled for PfEoG vs Bandit');
+  });
+});
+
+// Slice 104 — source-predicate on GrantConditionImmunity.
+
+const buildPfEoGCleric = (): Character => ({
+  ...buildCleric(),
+  appliedConditions: [
+    {
+      id: newAppliedConditionId(),
+      conditionId: 'protection-from-evil-and-good-active',
+      sourceEventId: 'seed-event-id' as ReturnType<typeof newAppliedConditionId>,
+    },
+  ],
+});
+
+const buildSkeletonCaster = (): Character =>
+  CharacterSchema.parse({
+    id: newCharacterId(),
+    kind: 'creature',
+    name: 'Skeleton Mage',
+    statblockId: 'skeleton',
+    speciesId: 'human',
+    backgroundId: 'sage',
+    classes: [{ classId: 'wizard', level: 5, hitDiceRemaining: 5 }],
+    abilityScores: { STR: 10, DEX: 14, CON: 15, INT: 16, WIS: 12, CHA: 6 },
+    hp: { current: 30, max: 30, temp: 0 },
+    featsTaken: [],
+    preparedSpells: ['cause-fear'],
+  });
+
+const buildHumanoidCaster = (): Character =>
+  CharacterSchema.parse({
+    id: newCharacterId(),
+    name: 'Cult Sorcerer',
+    speciesId: 'human',
+    backgroundId: 'soldier',
+    classes: [{ classId: 'sorcerer', level: 5, hitDiceRemaining: 5 }],
+    abilityScores: { STR: 8, DEX: 12, CON: 14, INT: 10, WIS: 12, CHA: 18 },
+    hp: { current: 28, max: 28, temp: 0 },
+    featsTaken: [],
+    preparedSpells: ['cause-fear'],
+  });
+
+describe('Protection from Evil and Good: source-predicate condition immunity', () => {
+  it('hasConditionImmunity returns true for charmed/frightened when the source is one of the six warded types', () => {
+    const cleric = buildPfEoGCleric();
+    const stack = buildEffectStack({
+      character: cleric,
+      content: STARTER_CONTENT,
+      itemInstances: {},
+      pendingChoices: {},
+    });
+    for (const t of ['Aberration', 'Celestial', 'Elemental', 'Fey', 'Fiend', 'Undead'] as const) {
+      const facts = new Map<string, unknown>([['sourceCreatureType', t]]);
+      expect(stack.hasConditionImmunity('charmed', facts)).toBe(true);
+      expect(stack.hasConditionImmunity('frightened', facts)).toBe(true);
+    }
+  });
+
+  it('hasConditionImmunity returns false for charmed/frightened when the source is outside the warded types', () => {
+    const cleric = buildPfEoGCleric();
+    const stack = buildEffectStack({
+      character: cleric,
+      content: STARTER_CONTENT,
+      itemInstances: {},
+      pendingChoices: {},
+    });
+    for (const t of ['Humanoid', 'Beast', 'Construct', 'Dragon', 'Giant'] as const) {
+      const facts = new Map<string, unknown>([['sourceCreatureType', t]]);
+      expect(stack.hasConditionImmunity('charmed', facts)).toBe(false);
+      expect(stack.hasConditionImmunity('frightened', facts)).toBe(false);
+    }
+  });
+
+  it('hasConditionImmunity returns false for non-warded conditions regardless of source type', () => {
+    const cleric = buildPfEoGCleric();
+    const stack = buildEffectStack({
+      character: cleric,
+      content: STARTER_CONTENT,
+      itemInstances: {},
+      pendingChoices: {},
+    });
+    const facts = new Map<string, unknown>([['sourceCreatureType', 'Fiend']]);
+    expect(stack.hasConditionImmunity('paralyzed', facts)).toBe(false);
+    expect(stack.hasConditionImmunity('poisoned', facts)).toBe(false);
+  });
+
+  it('hasConditionImmunity returns false when no source facts are supplied (predicate-gated entries drop)', () => {
+    const cleric = buildPfEoGCleric();
+    const stack = buildEffectStack({
+      character: cleric,
+      content: STARTER_CONTENT,
+      itemInstances: {},
+      pendingChoices: {},
+    });
+    expect(stack.hasConditionImmunity('charmed')).toBe(false);
+    expect(stack.hasConditionImmunity('frightened')).toBe(false);
+  });
+
+  it('isImmuneToCondition resolves source-gated immunity via sourceCharacterId', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+    const cleric = buildPfEoGCleric();
+    const undead = buildSkeletonCaster();
+    const humanoid = buildHumanoidCaster();
+    let campaign: Campaign = engine.createCampaign({ name: 'pfeg-immune' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: cleric } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: undead } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: humanoid } satisfies CharacterCreatedEvent,
+    ]);
+    // Undead source → cleric is immune to frightened.
+    expect(
+      isImmuneToCondition({
+        state: campaign.state,
+        content: STARTER_CONTENT,
+        targetId: cleric.id,
+        conditionId: 'frightened',
+        sourceCharacterId: undead.id,
+      }),
+    ).toBe(true);
+    // Humanoid source → cleric is not immune.
+    expect(
+      isImmuneToCondition({
+        state: campaign.state,
+        content: STARTER_CONTENT,
+        targetId: cleric.id,
+        conditionId: 'frightened',
+        sourceCharacterId: humanoid.id,
+      }),
+    ).toBe(false);
+    // No source → predicate-gated immunity drops.
+    expect(
+      isImmuneToCondition({
+        state: campaign.state,
+        content: STARTER_CONTENT,
+        targetId: cleric.id,
+        conditionId: 'frightened',
+      }),
+    ).toBe(false);
+  });
+
+  it('cast-spell skips ConditionApplied(frightened) when an Undead source casts Cause Fear at a PfEoG cleric (failed save)', () => {
+    // Walk seeds until the cleric fails the WIS save against Cause Fear.
+    // On failure, normally the planner emits ConditionApplied(frightened);
+    // with source-gated immunity, the planner sees the source is Undead
+    // and skips the apply.
+    for (let seed = 1; seed < 40; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const cleric = buildPfEoGCleric();
+      const undead = buildSkeletonCaster();
+      let campaign: Campaign = engine.createCampaign({ name: `pfeg-cause-fear-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: cleric } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: undead } satisfies CharacterCreatedEvent,
+      ]);
+      const events = engine.plan.castSpell(campaign.state, {
+        characterId: undead.id,
+        spellId: 'cause-fear',
+        slotLevel: 1,
+        targetIds: [cleric.id],
+      }).events;
+      const saveEvent = events.find((e) => e.type === 'SaveRolled');
+      if (saveEvent === undefined || saveEvent.type !== 'SaveRolled') continue;
+      if (saveEvent.success) continue; // we need a failed save to exercise the immunity branch
+      const applied = events.find(
+        (e): e is ConditionAppliedEvent =>
+          e.type === 'ConditionApplied'
+          && (e as ConditionAppliedEvent).conditionId === 'frightened',
+      );
+      expect(applied).toBeUndefined();
+      return;
+    }
+    throw new Error('no seed produced a failed save for PfEoG vs Undead Cause Fear');
+  });
+
+  it('cast-spell still emits ConditionApplied(frightened) when a Humanoid source casts Cause Fear at a PfEoG cleric (failed save)', () => {
+    for (let seed = 1; seed < 40; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const cleric = buildPfEoGCleric();
+      const humanoid = buildHumanoidCaster();
+      let campaign: Campaign = engine.createCampaign({ name: `pfeg-humanoid-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: cleric } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: humanoid } satisfies CharacterCreatedEvent,
+      ]);
+      const events = engine.plan.castSpell(campaign.state, {
+        characterId: humanoid.id,
+        spellId: 'cause-fear',
+        slotLevel: 1,
+        targetIds: [cleric.id],
+      }).events;
+      const saveEvent = events.find((e) => e.type === 'SaveRolled');
+      if (saveEvent === undefined || saveEvent.type !== 'SaveRolled') continue;
+      if (saveEvent.success) continue;
+      const applied = events.find(
+        (e): e is ConditionAppliedEvent =>
+          e.type === 'ConditionApplied'
+          && (e as ConditionAppliedEvent).conditionId === 'frightened',
+      );
+      expect(applied).toBeDefined();
+      return;
+    }
+    throw new Error('no seed produced a failed save for PfEoG vs Humanoid Cause Fear');
   });
 });

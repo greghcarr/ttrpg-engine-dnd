@@ -1,6 +1,7 @@
 import type { CampaignState } from '../schemas/runtime/campaign.js';
 import type { ResolvedContent } from '../content/pack.js';
 import { buildEffectStack } from './effect-stack.js';
+import { getCreatureType } from './creature-type.js';
 
 // Looks up whether the named target is immune to the named condition,
 // folding in every source of `GrantConditionImmunity` on their effect
@@ -11,16 +12,20 @@ import { buildEffectStack } from './effect-stack.js';
 // features like Aura of Courage (Frightened immunity) and Protection
 // from Poison (poisoned immunity).
 //
-// The `characters` map is threaded through so condition-sourced
-// immunities with `sourceCharacterId` links resolve their formulas
-// (currently a no-op for immunity since `GrantConditionImmunity` is
-// numeric-free, but kept symmetric with other derive entry points so
-// future source-relative immunity grants behave consistently).
+// When `sourceCharacterId` is supplied, source-gated immunity entries
+// (Protection from Evil and Good's charmed / frightened arm gated on
+// the source being one of six creature types) can resolve. The
+// helper builds a `sourceCreatureType` fact from the source's
+// `getCreatureType` and passes it to `hasConditionImmunity`; entries
+// without a predicate ignore the facts and apply unconditionally as
+// before. Callers without a source pass `sourceCharacterId: undefined`
+// and source-gated entries silently drop.
 export const isImmuneToCondition = (input: {
   readonly state: CampaignState;
   readonly content: ResolvedContent;
   readonly targetId: string;
   readonly conditionId: string;
+  readonly sourceCharacterId?: string;
 }): boolean => {
   const target = input.state.characters[input.targetId];
   if (target === undefined) return false;
@@ -31,5 +36,14 @@ export const isImmuneToCondition = (input: {
     pendingChoices: input.state.pendingChoices,
     characters: input.state.characters,
   });
-  return stack.hasConditionImmunity(input.conditionId);
+  let sourceFacts: ReadonlyMap<string, unknown> | undefined;
+  if (input.sourceCharacterId !== undefined) {
+    const source = input.state.characters[input.sourceCharacterId];
+    if (source !== undefined) {
+      sourceFacts = new Map<string, unknown>([
+        ['sourceCreatureType', getCreatureType(source, input.content)],
+      ]);
+    }
+  }
+  return stack.hasConditionImmunity(input.conditionId, sourceFacts);
 };

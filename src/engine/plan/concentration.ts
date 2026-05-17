@@ -343,6 +343,7 @@ export const planTickAura = (
         content,
         targetId,
         conditionId: aura.conditionOnFail,
+        sourceCharacterId: intent.casterId,
       });
       if (!immune) {
         events.push({

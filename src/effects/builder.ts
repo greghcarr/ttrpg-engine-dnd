@@ -73,7 +73,14 @@ export class EffectAccumulator {
   private readonly resistances = new Set<DamageType | 'all'>();
   private readonly immunities = new Set<DamageType | 'all'>();
   private readonly vulnerabilities = new Set<DamageType>();
-  private readonly conditionImmunities = new Set<string>();
+  // Per-condition lists of immunity entries. Entries with no predicate
+  // grant immunity unconditionally (Aura of Courage's Frightened
+  // immunity, Freedom of Movement's paralyzed immunity). Entries with
+  // a predicate grant immunity only when the predicate evaluates true
+  // against the caller-supplied source facts (Protection from Evil and
+  // Good's charmed / frightened arm gated on the source being one of
+  // the six warded creature types).
+  private readonly conditionImmunities = new Map<string, Array<{ predicate?: Predicate }>>();
   private readonly acOverrides: ACOverride[] = [];
   private readonly acFloors: { value: number; source: string }[] = [];
   private readonly resourceGrants: ResourceGrant[] = [];
@@ -135,8 +142,13 @@ export class EffectAccumulator {
   addVulnerability(type: DamageType): void {
     this.vulnerabilities.add(type);
   }
-  addConditionImmunity(id: string): void {
-    this.conditionImmunities.add(id);
+  addConditionImmunity(id: string, predicate?: Predicate): void {
+    let list = this.conditionImmunities.get(id);
+    if (list === undefined) {
+      list = [];
+      this.conditionImmunities.set(id, list);
+    }
+    list.push({ predicate });
   }
   addACOverride(override: ACOverride): void {
     this.acOverrides.push(override);
@@ -245,8 +257,16 @@ export class EffectAccumulator {
   hasVulnerability(type: DamageType): boolean {
     return this.vulnerabilities.has(type);
   }
-  hasConditionImmunity(id: string): boolean {
-    return this.conditionImmunities.has(id);
+  hasConditionImmunity(
+    id: string,
+    sourceFacts?: ReadonlyMap<string, unknown>,
+  ): boolean {
+    const list = this.conditionImmunities.get(id);
+    if (list === undefined) return false;
+    return list.some((entry) => {
+      if (entry.predicate === undefined) return true;
+      return evaluatePredicate(entry.predicate, { facts: sourceFacts });
+    });
   }
   effectiveACOverride(): ACOverride | undefined {
     if (this.acOverrides.length === 0) return undefined;
@@ -373,7 +393,7 @@ export const applyEffectToBuilder = (
       acc.addVulnerability(effect.damageType);
       return;
     case 'GrantConditionImmunity':
-      acc.addConditionImmunity(effect.conditionId);
+      acc.addConditionImmunity(effect.conditionId, effect.condition);
       return;
     case 'OverrideACFormula':
       acc.addACOverride({

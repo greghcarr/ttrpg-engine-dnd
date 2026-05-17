@@ -495,6 +495,7 @@ const planSaveMechanic = (
         content,
         targetId,
         conditionId: conditionOnFail,
+        sourceCharacterId: intent.characterId,
       });
       if (!immune) {
         const appliedConditionId = newAppliedConditionId();
@@ -668,7 +669,13 @@ const planBuffMechanic = (
   const conditionId = resolveBuffConditionId(mechanic, intent, spell.id);
   const hpMaxDelta = hpMaxBonusFromCondition(content, conditionId);
   for (const targetId of intent.targetIds) {
-    if (isImmuneToCondition({ state, content, targetId, conditionId })) {
+    if (isImmuneToCondition({
+      state,
+      content,
+      targetId,
+      conditionId,
+      sourceCharacterId: intent.characterId,
+    })) {
       continue;
     }
     const appliedConditionId = newAppliedConditionId();

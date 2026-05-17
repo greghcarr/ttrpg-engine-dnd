@@ -166,7 +166,7 @@ export type Effect =
   | { kind: 'GrantResistance'; damageType: DamageType | 'all'; condition?: Predicate }
   | { kind: 'GrantImmunity'; damageType: DamageType | 'all' }
   | { kind: 'GrantVulnerability'; damageType: DamageType }
-  | { kind: 'GrantConditionImmunity'; conditionId: string }
+  | { kind: 'GrantConditionImmunity'; conditionId: string; condition?: Predicate }
   | { kind: 'OverrideACFormula'; base: number | 'dex' | 'con' | 'wis'; abilityModifiers: AbilityScore[]; dexCap?: number; priority?: number }
   // Sets a floor on the target's AC: after the natural AC is computed
   // from armor + DEX + modifiers, the result is bumped up to `value`
@@ -289,6 +289,7 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
     z.object({
       kind: z.literal('GrantConditionImmunity'),
       conditionId: z.string(),
+      condition: PredicateSchema.optional(),
     }),
     z.object({
       kind: z.literal('OverrideACFormula'),
