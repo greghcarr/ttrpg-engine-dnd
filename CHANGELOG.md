@@ -291,6 +291,25 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *Illusion-interaction primitive: Silent Image + Major Image + Investigate action* (slice 137). New `Illusion` runtime entity (`state.illusions: Record<IllusionId, Illusion>`) modeled on the slice-94 Trap / slice-135 Sensor pattern: id + label + free-text location + `kind: 'visual' \| 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + a baked `investigationDC` (the caster's spell save DC at cast time) + `disbelievedBy: CharacterId[]` set. Three new event types (`IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`) drive the lifecycle; reducers in [src/engine/reducers/illusion.ts](src/engine/reducers/illusion.ts). Four planners in [src/engine/plan/illusion.ts](src/engine/plan/illusion.ts): `planSilentImage` (1st-level visual), `planMajorImage` (3rd-level audiovisual), `planInvestigateIllusion` (a creature spends an action to Study the illusion, rolls INT (Investigation) against the baked DC, success adds them to `disbelievedBy`), `planDismissIllusion` (caster ends spell voluntarily). `clearConcentrationEffect` sweeps illusions linked to a dropped concentration via `sourceEffectInstanceId`, mirroring the slice-135 sensor sweep. The engine surfaces the disbelief set but doesn't itself act on it; consumers / DMs decide what disbelieving creatures see and do. RAW edge cases not modeled this slice: the caster's bonus-action move (Silent Image) and action-recolour (Major Image) of the illusion's shape (a consumer can re-emit IllusionCreated with new label / location until a future schema extension lets the planner mutate the existing entity). Twelve tests cover both cast paths, both Investigate outcomes, the unknown-spell rejection, voluntary dismiss, concentration-drop cleanup, and the multi-creature belief state (two investigators on the same illusion track independently).
 
+*SRD 5.2.1 content drift: 6 spells refreshed to 2024 mechanics* (slice 167). Audit pass on spell `mechanicalEffects` arrays surfaced 2014→2024 drift on several heavily-used spells:
+
+- **Healing Word**: base 1d4 → 2d4, per-slot scaling 1d4 → 2d4 (2024 PHB doubled the base healing).
+- **Mass Healing Word**: base 1d4 → 2d4 (per SRD 5.2.1).
+- **Mass Cure Wounds**: base 3d8 → 5d8.
+- **Ice Storm**: bludgeoning 2d8 → 2d10, per-slot scaling +1d8 → +1d10. The SRD 5.2.1 also adds 4d6 cold (not modeled by the single-damage-type spell encoding; documented gap).
+- **Wall of Fire**: added missing `extraDicePerSlotLevel: 1` (SRD 5.2.1 scales +1d8 per slot above 4).
+- **Spiritual Weapon**: duration `1 minute` → `Concentration, up to 1 minute`; concentration `false` → `true`; added missing `extraDicePerSlotLevel: 1`. The 2024 PHB made this a concentration spell (a significant playstyle change from 2014 where it stacked with other concentration buffs).
+
+Test ripple:
+- `plan-cast-spell-disciple-of-life.test.ts`: heal-range assertions updated to reflect the new Healing Word base (2d4 not 1d4); test ranges shifted from 4-7 / 7-10 to 5-11 / 8-14.
+- Showcase transcript auto-refreshed: Mass Healing Word healing output changes downstream.
+
+What else the audit surfaced but didn't fix in this slice:
+- **Sleep** (2014 PHB `hp-pool-knockout 5d8` → 2024 SRD `WIS save vs Incapacitated, recurring save, Unconscious on second failure`). Substantial mechanical rewrite requiring a new `mechanicalEffect` kind or composite encoding; not a simple field swap. Tracked for a future content slice.
+- **Ice Storm's secondary 4d6 cold damage** (not modeled by single-type spell encoding).
+
+Suite green (1452 passed, 197 skipped).
+
 *SRD 5.2.1 content drift: Young Red Dragon Rend attack* (slice 166). Replaces the 2014-style separate Bite (2d10 piercing) + Claw (2d6 slashing) weapon items with a single Rend (2d6 slashing) per SRD 5.2.1's Multiattack pattern (`The dragon makes three Rend attacks` instead of `bite + claw + claw`).
 
 Pack changes:

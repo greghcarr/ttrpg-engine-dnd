@@ -93,15 +93,16 @@ describe('Disciple of Life (Life Cleric L3)', () => {
 
   it('a plain (non-Life) Cleric does NOT get the Disciple boost', () => {
     const heal = cast(buildCleric({ life: false }), 1);
-    // 1d4 (1..4) + WIS mod (+3) = 4..7. No DoL boost.
-    expect(heal.amount).toBeGreaterThanOrEqual(4);
-    expect(heal.amount).toBeLessThanOrEqual(7);
+    // 2d4 (2..8) + WIS mod (+3) = 5..11. No DoL boost.
+    // (Healing Word base bumped from 1d4 to 2d4 in slice 167 per SRD 5.2.1.)
+    expect(heal.amount).toBeGreaterThanOrEqual(5);
+    expect(heal.amount).toBeLessThanOrEqual(11);
   });
 
   it('a Life Cleric heal at slot 1 adds the boost on top of dice + WIS mod', () => {
     const heal = cast(buildCleric({ life: true }), 1);
-    // 1d4 (1..4) + WIS mod (+3) + DoL (+3) = 7..10.
-    expect(heal.amount).toBeGreaterThanOrEqual(7);
-    expect(heal.amount).toBeLessThanOrEqual(10);
+    // 2d4 (2..8) + WIS mod (+3) + DoL (+3) = 8..14.
+    expect(heal.amount).toBeGreaterThanOrEqual(8);
+    expect(heal.amount).toBeLessThanOrEqual(14);
   });
 });
