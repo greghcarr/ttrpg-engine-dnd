@@ -356,22 +356,27 @@ The DMG is hundreds of items long; this pack ships a representative slice. Magic
 
 ## Monsters
 
-Sixteen statblocks.
+Twenty-one statblocks.
 
 **MM beasts (6):** Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
 
-**NPC roster, content-batch-1.1 (10):** Bandit (CR 1/8), Bandit Captain (CR 2), Cultist (CR 1/8), Cult Fanatic (CR 2), Acolyte (CR 1/4), Commoner (CR 0), Guard (CR 1/8), Noble (CR 1/8), Scout (CR 1/2), Spy (CR 1).
+**NPC roster, content-monsters-batch-1.1 (10):** Bandit (CR 1/8), Bandit Captain (CR 2), Cultist (CR 1/8), Cult Fanatic (CR 2), Acolyte (CR 1/4), Commoner (CR 0), Guard (CR 1/8), Noble (CR 1/8), Scout (CR 1/2), Spy (CR 1).
 
-All sixteen ship `traits: []`. The NPC roster's RAW traits and actions are deferred until the matching engine primitives land:
+**NPC roster, content-monsters-batch-1.2 (5):** Tribal Warrior (CR 1/8), Thug (CR 1/2), Berserker (CR 2), Veteran (CR 3), Knight (CR 3). Closes the humanoid roster up through CR 3.
 
-- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
-- **Parry reaction** (Bandit Captain) — reactions ship as dedicated planners today (counterspell / shield / absorb-elements / sanctuary / feather-fall); there's no generic monster-reaction primitive.
+All twenty-one ship `traits: []`. The NPC roster's RAW traits and actions are deferred until the matching engine primitives land:
+
+- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy, Thug, Veteran, Knight) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
+- **Parry reaction** (Bandit Captain, Knight) — reactions ship as dedicated planners today (counterspell / shield / absorb-elements / sanctuary / feather-fall); there's no generic monster-reaction primitive.
 - **Cunning Action** (Spy) and **Sneak Attack** (Spy) — these are wired as class features on the rogue, but the engine doesn't carry a "monster has class-feature shape" cross-link, so the spy statblock can't borrow them.
 - **RAW spellcasting** (Acolyte, Cult Fanatic) — monsters can't yet carry a spell list (Sacred Flame / Cure Wounds / Bless on the Acolyte; Sacred Flame / Inflict Wounds / Command / Hold Person / Spiritual Weapon on the Cult Fanatic). The class-side spellcasting machinery doesn't have a monster entry point.
 - **Keen Hearing and Sight** (Scout) — needs an advantage-on-perception primitive scoped to specific senses; the engine carries SetAdvantage on rolls but not on sense-modality-specific perception checks.
-- **Dark Devotion** (Cult Fanatic) — advantage on saves against Charmed and Frightened. The closest primitive (`SetAdvantage on:'save:WIS' advantage`) is too broad; a per-condition-saving-throw advantage primitive would close it cleanly.
+- **Dark Devotion** (Cult Fanatic) and **Brave** (Knight) — advantage on saves against specific conditions (Charmed / Frightened on Dark Devotion, Frightened on Brave). The closest existing primitive (`SetAdvantage on:'save:WIS' advantage`) is too broad; a per-condition-saving-throw advantage primitive would close both cleanly.
+- **Reckless** (Berserker) — wired as a class feature on the barbarian (Reckless Attack), but monsters can't yet borrow class features. Same gap shape as Spy's Cunning Action / Sneak Attack.
+- **Pack Tactics** (Thug, Tribal Warrior) — advantage on attacks when an ally is within 5 ft of the target. Needs a positional-condition-with-advantage primitive; the engine doesn't model positions (consumer territory), so the engine can't gate the advantage without an injected fact.
+- **Leadership** (Knight) — recharge-6 short-rest action that grants up to six allies within 30 ft a d4 to attacks and saves for 1 minute. Needs an aura-style action grant paired with a temporary-modifier-with-duration primitive that combines elements of `GrantAura` and the recurring-rider/concentration machinery, neither of which currently composes for a monster action.
 
-Notable gaps still open for tutorial / starter encounters: Veteran (CR 3), Berserker (CR 2), Knight (CR 3), Thug (CR 1/2), Tribal Warrior (CR 1/8). The remaining CR 1/2–3 humanoid roster is the easiest near-term fill before broader MM coverage.
+Notable gaps still open for tutorial / starter encounters: caster NPCs (Mage, Apprentice Wizard, Priest, Druid — all share the deferred monster-spellcasting gap), Gladiator (CR 5), Assassin (CR 8). Beyond the humanoid roster, the bulk of MM coverage (beasts, undead, monstrosities, fiends, celestials, fey, elementals, constructs, aberrations, oozes, plants, and the rest of the dragon / giant families) is wholly unstarted.
 
 ## Species
 
