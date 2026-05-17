@@ -115,9 +115,12 @@ export {
   planClairvoyance,
   planSwitchSensorMode,
   planRemoveSensor,
+  planScrying,
   type ClairvoyanceIntent,
   type SwitchSensorModeIntent,
   type RemoveSensorIntent,
+  type ScryingIntent,
+  type ScryingOutcome,
 } from './sensor.js';
 export {
   planCounterspell,

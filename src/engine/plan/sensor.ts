@@ -18,6 +18,11 @@ import type {
   SpellSlotConsumedEvent,
 } from '../../schemas/events/spellcasting.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
+import type { SaveRolledEvent } from '../../schemas/events/checks.js';
+import { computeSpellSaveDC } from '../../derive/spell-dc.js';
+import { computeSavingThrow } from '../../derive/save.js';
+import { rollDie } from '../../rng/dice.js';
+import { D20_SIDES } from '../../internal/constants.js';
 import { newEventId, newSensorId, newEffectInstanceId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { invariant } from '../../internal/invariants.js';
@@ -266,4 +271,224 @@ export const planRemoveSensor = (
     reason: intent.reason ?? 'casterAction',
   };
   return [removed];
+};
+
+const SCRYING_MIN_SLOT_LEVEL = 5;
+const SCRYING_DURATION_MINUTES = 10;
+
+export interface ScryingIntent {
+  readonly type: 'Scrying';
+  readonly casterId: string;
+  // The creature the caster is trying to scry. The engine resolves
+  // the target by id (the consumer / DM has named or described it);
+  // the WIS-save modifier table from RAW (intimately known, has
+  // hair / blood, etc.) is consumer territory and pre-applied via
+  // `dcAdjustment`.
+  readonly targetId: string;
+  // Optional DC adjustment from the familiarity table. RAW: -10 to
+  // +5 in five tiers (intimately known +5 to secondhand -10). The
+  // consumer rolls up the tier and supplies the delta; the planner
+  // applies it to the caster's spell save DC.
+  readonly dcAdjustment?: number;
+  // Optional sensor mode at cast time. RAW: "you can see and hear
+  // the target through the sensor"; the engine uses one mode at a
+  // time and consumers toggle via planSwitchSensorMode. Defaults to
+  // 'sight'.
+  readonly mode?: SensorMode;
+  // Optional sensor label override (defaults to "Scrying Sensor on
+  // [targetId]"). Free-text consumer display.
+  readonly label?: string;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+export interface ScryingOutcome {
+  readonly events: ReadonlyArray<Event>;
+  // True when the target's WIS save defeats the spell. Slot still
+  // spent (the caster cast the spell; the target's saving throw is
+  // the only thing that stopped the sensor placement).
+  readonly resisted: boolean;
+}
+
+/**
+ * RAW 2024 Scrying: 5th-level divination, 10-minute cast, Self /
+ * Concentration up to 10 minutes. The caster names or describes a
+ * creature; that creature makes a WIS save against the caster's
+ * spell save DC (adjusted by the familiarity table). On a failed
+ * save, a sensor appears near the target and follows it for the
+ * duration. On a successful save, the spell fails; slot is still
+ * consumed.
+ *
+ * The engine doesn't model "sensor follows target"; the sensor's
+ * `location` is free-text consumer territory (the DM / VTT updates
+ * it as the target moves).
+ *
+ * Event sequence on cast:
+ *   - ActionEconomyConsumed (in encounter only)
+ *   - SpellCastDeclared
+ *   - SpellSlotConsumed
+ *   - SaveRolled (target WIS, with sourceIsMagical: true)
+ *   - (on save fail) ConcentrationBroken (if prior concentration)
+ *   - (on save fail) ConcentrationStarted
+ *   - (on save fail) RemoteSensorPlaced
+ */
+export const planScrying = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: ScryingIntent,
+): ScryingOutcome => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const target = state.characters[intent.targetId];
+  invariant(target !== undefined, `Target ${intent.targetId} not found`);
+  const slotLevel = intent.slotLevel ?? SCRYING_MIN_SLOT_LEVEL;
+  invariant(
+    slotLevel >= SCRYING_MIN_SLOT_LEVEL,
+    'Scrying requires a 5th-level or higher slot',
+  );
+  invariant(
+    caster.knownSpells.includes('scrying') || caster.preparedSpells.includes('scrying'),
+    `Caster ${intent.casterId} does not know Scrying`,
+  );
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+
+  const action = economyConsumedIfEncountered(state, intent.casterId, at, 'action');
+  if (action !== undefined) events.push(action);
+
+  const declared: SpellCastDeclaredEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'scrying',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.targetId],
+    castAsRitual: false,
+  };
+  events.push(declared);
+
+  const slotConsumed: SpellSlotConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  };
+  events.push(slotConsumed);
+
+  // Target's WIS save. DC = caster's spell save DC + dcAdjustment
+  // (from RAW familiarity table; consumer-supplied).
+  const castingClassId =
+    caster.classes.find((c) => content.classes.get(c.classId)?.spellcasting !== undefined)
+      ?.classId ?? caster.classes[0]?.classId ?? 'wizard';
+  const dcResult = computeSpellSaveDC({
+    character: caster,
+    itemInstances: state.itemInstances,
+    content,
+    classId: castingClassId,
+    characters: state.characters,
+  });
+  const dc = dcResult.total + (intent.dcAdjustment ?? 0);
+  const saveDerivation = computeSavingThrow({
+    character: target,
+    itemInstances: state.itemInstances,
+    content,
+    ability: 'WIS',
+    characters: state.characters,
+    sourceIsMagical: true,
+  });
+  const rolls: number[] = [rollDie(D20_SIDES, rng)];
+  if (saveDerivation.hasAdvantage || saveDerivation.hasDisadvantage) {
+    rolls.push(rollDie(D20_SIDES, rng));
+  }
+  const used = saveDerivation.hasAdvantage
+    ? 'advantage'
+    : saveDerivation.hasDisadvantage
+      ? 'disadvantage'
+      : 'none';
+  const usedD20 = saveDerivation.hasAdvantage
+    ? Math.max(...rolls)
+    : saveDerivation.hasDisadvantage
+      ? Math.min(...rolls)
+      : rolls[0]!;
+  const total = usedD20 + saveDerivation.total;
+  const success = total >= dc;
+  const save: SaveRolledEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SaveRolled',
+    targetId: intent.targetId as ULID,
+    ability: 'WIS',
+    dc,
+    d20: rolls,
+    used,
+    bonus: saveDerivation.total,
+    total,
+    success,
+    causedByEventId: declared.id,
+    breakdown: [...saveDerivation.breakdown],
+  };
+  events.push(save);
+
+  if (success) {
+    // RAW: "if the target succeeds on the saving throw, the spell
+    // doesn't take effect, and you can't use it again on that
+    // target for 24 hours." Slot stays spent; engine doesn't track
+    // the 24-hour-per-target cooldown (consumer territory).
+    return { events, resisted: true };
+  }
+
+  if (caster.concentrationEffectId !== undefined) {
+    const priorBroken: ConcentrationBrokenEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'ConcentrationBroken',
+      effectInstanceId: caster.concentrationEffectId,
+      casterId: intent.casterId as ULID,
+      reason: 'newConcentrationSpell',
+      causedByEventId: declared.id,
+    };
+    events.push(priorBroken);
+  }
+
+  const effectInstanceId = newEffectInstanceId();
+  const started: ConcentrationStartedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ConcentrationStarted',
+    effectInstanceId: effectInstanceId as ULID,
+    casterId: intent.casterId as ULID,
+    spellId: 'scrying',
+    targetIds: [intent.targetId as ULID],
+    conditionsApplied: [],
+    durationMinutes: SCRYING_DURATION_MINUTES,
+    slotLevel,
+    causedByEventId: declared.id,
+  };
+  events.push(started);
+
+  const sensorId = newSensorId();
+  const placed: RemoteSensorPlacedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'RemoteSensorPlaced',
+    sensorId: sensorId as ULID,
+    label: intent.label ?? `Scrying Sensor on ${target.name}`,
+    // The engine doesn't track the target's actual position; the
+    // location is free-text and the consumer updates it as the
+    // target moves.
+    location: `near ${target.name}`,
+    casterId: intent.casterId as ULID,
+    sourceSpellId: 'scrying',
+    sourceEffectInstanceId: effectInstanceId as ULID,
+    mode: intent.mode ?? 'sight',
+    causedByEventId: declared.id,
+  };
+  events.push(placed);
+
+  return { events, resisted: false };
 };

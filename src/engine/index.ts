@@ -71,6 +71,7 @@ import {
   planClairvoyance,
   planSwitchSensorMode,
   planRemoveSensor,
+  planScrying,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -101,6 +102,8 @@ import {
   type ClairvoyanceIntent,
   type SwitchSensorModeIntent,
   type RemoveSensorIntent,
+  type ScryingIntent,
+  type ScryingOutcome,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
@@ -277,6 +280,7 @@ export interface Engine {
     clairvoyance(state: CampaignState, intent: Omit<ClairvoyanceIntent, 'type'>): PlanResult;
     switchSensorMode(state: CampaignState, intent: Omit<SwitchSensorModeIntent, 'type'>): PlanResult;
     removeSensor(state: CampaignState, intent: Omit<RemoveSensorIntent, 'type'>): PlanResult;
+    scrying(state: CampaignState, intent: Omit<ScryingIntent, 'type'>): ScryingOutcome;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
@@ -537,6 +541,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     removeSensor(state, intent) {
       return { events: planRemoveSensor(state, content, rng, { type: 'RemoveSensor', ...intent }) };
+    },
+    scrying(state, intent) {
+      return planScrying(state, content, rng, { type: 'Scrying', ...intent });
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };

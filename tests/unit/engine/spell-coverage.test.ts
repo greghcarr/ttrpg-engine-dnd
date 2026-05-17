@@ -355,7 +355,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'raise-dead': { kind: 'skip', reason: 'has dedicated engine.plan.resurrect (not planCastSpell)' },
   'rarys-telepathic-bond': { kind: 'skip', reason: 'utility telepathic link, narrative only' },
   'reincarnate': { kind: 'skip', reason: 'has dedicated engine.plan.resurrect with newSpeciesId intent param (not planCastSpell). The random-species-table roll is consumer-side; the engine accepts the chosen species id.' },
-  'scrying': { kind: 'skip', reason: 'remote sensor with WIS save resistance; sensor / scrying primitive not modeled' },
+  'scrying': { kind: 'skip', reason: 'has dedicated planScrying (5th-level slot + WIS save by target; on fail a Sensor entity is placed with the target as a follow anchor, on save the spell fizzles and slot is still consumed)' },
   'seeming': { kind: 'skip', reason: 'mass illusion swap; illusion primitive not modeled' },
   'steel-wind-strike': { kind: 'skip', reason: 'multi-target melee with teleport; multi-target weapon planner not modeled' },
   'swift-quiver': { kind: 'skip', reason: 'bonus-action extra ammo-attacks; on-action attack rider primitive not modeled' },
