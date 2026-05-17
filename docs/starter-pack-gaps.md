@@ -368,7 +368,7 @@ Every magic item except Wand of Magic Missiles ships with `effects: []` today. E
 
 ## Monsters
 
-Forty-four statblocks.
+Forty-nine statblocks.
 
 **MM beasts (6):** Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
 
@@ -384,9 +384,11 @@ Forty-four statblocks.
 
 **Low-CR Undead variety, content-monsters-batch-1.6 (5):** Shadow (CR 1/2), Specter (CR 1), Wight (CR 3), Ghost (CR 4), Wraith (CR 5). Fills the Undead pile out to a usable haunted-location roster. First batch to populate `traits` on monster statblocks: all five carry `GrantResistance` entries with `qualifier: 'nonmagical'` for B/P/S (slice 112 effect shape). This data is currently inert at runtime (see the cross-cutting structural-gap note below), but ships RAW-accurate so it wires for free when the engine consumes monster data.
 
-The thirty-four statblocks from earlier batches and from the original MM-beasts seed ship `traits: []`. The RAW traits and actions on all forty-four statblocks are deferred until the matching engine primitives land:
+**Low-CR Fiend introduction, content-monsters-batch-1.7 (5):** Manes (CR 1/8), Lemure (CR 0), Dretch (CR 1/4), Imp (CR 1), Quasit (CR 1). Opens the Fiend creature type with the canonical low-tier demons and devils, including the familiar pair (Imp / Quasit). Three of the five (Imp, Lemure, Quasit) carry the slice-112 `GrantResistance` B/P/S nonmagical traits; Imp and Lemure's RAW "not made with silvered weapons" further qualifier is deferred (same gap as Wight in batch 1.6). Subtype field exercised for the first time (`subtype: "devil"`, `"demon"`, `"devil, shapechanger"`, `"demon, shapechanger"`).
 
-- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy, Thug, Veteran, Knight, Ghoul, Brown Bear, Black Bear, Wight) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
+The thirty-four statblocks from earlier batches and from the original MM-beasts seed ship `traits: []`. The RAW traits and actions on all forty-nine statblocks are deferred until the matching engine primitives land:
+
+- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy, Thug, Veteran, Knight, Ghoul, Brown Bear, Black Bear, Wight, Dretch) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
 - **Parry reaction** (Bandit Captain, Knight) — reactions ship as dedicated planners today (counterspell / shield / absorb-elements / sanctuary / feather-fall); there's no generic monster-reaction primitive.
 - **Cunning Action** (Spy) and **Sneak Attack** (Spy) — these are wired as class features on the rogue, but the engine doesn't carry a "monster has class-feature shape" cross-link, so the spy statblock can't borrow them.
 - **RAW spellcasting** (Acolyte, Cult Fanatic, Apprentice Wizard, Priest, Druid, Mage) — monsters can't yet carry a spell list. Cantrip and prepared-spell tables across these six NPCs span Wizard L1 → L9 (Mage's Fire Bolt / Mage Armor / Magic Missile / Shield / Detect Magic / Misty Step / Suggestion / Counterspell / Fireball / Fly / Greater Invisibility / Ice Storm / Cone of Cold), Cleric L5 (Priest's Sacred Flame / Cure Wounds / Bless / Spiritual Weapon / Sanctuary), Druid L4 (Druid's Druidcraft / Produce Flame / Shillelagh / Entangle / Speak with Animals / Animal Friendship / Barkskin / Pass without Trace / Call Lightning), and the Wizard L1 / Cleric L1 starter lists for the Apprentice Wizard / Acolyte / Cultist tier. The class-side spellcasting machinery doesn't have a monster entry point; once it does, all six wire as pure data.
@@ -415,14 +417,21 @@ The thirty-four statblocks from earlier batches and from the original MM-beasts 
 - **Possession** (Ghost) — recharge-6 CHA save or the ghost replaces the target's body for up to a day (or until the body drops to 0 HP, the ghost is turned, etc). Needs a body-swap / control-takeover primitive. The "possessed" condition was previously flagged as missing from PfEoG's RAW deferral.
 - **Etherealness** (Ghost) — action to enter / leave the Ethereal Plane. Cross-plane / phase primitive doesn't exist.
 - **Amorphous / Standing Leap / Amphibious / Ethereal Sight** (Shadow, Giant Frog, Ghost) — narrative movement / breathing / sensory traits. No engine work needed; consumer territory.
+- **Magic Resistance** (Imp, Quasit; canonical across CR 5+ Fiends, Fey, Dragons, and many higher-tier spellcasters) — advantage on saving throws against spells and other magical effects. Two missing pieces: (a) `SetAdvantage.on` for saves today requires an ability key (`{kind: 'save', ability: 'STR'}` etc.), so there's no "all saves" variant to express "advantage on every save"; (b) there's no `event.isMagical` fact in the dispatcher to gate the advantage on a magical-source trigger. High-impact gap because Magic Resistance is shared across many MM creatures and will need to wire eventually.
+- **Shapechanger** (Imp, Quasit; canonical to dozens of fey / fiend / monstrosity types and lycanthropes) — action to polymorph between fiend form and a beast form. The `polymorph` spell-planner exists (slice for polymorph spell), but monsters can't invoke it as a non-spell action; the planner expects a spell-cast entry point. Needs monster-action wiring composed with the polymorph planner.
+- **Devil's Sight** (Imp, Lemure; canonical to many devils and the warlock invocation of the same name) — magical darkness doesn't impede vision. Needs a vision-modifier primitive that interacts with the future-deferred "obscurement" / "darkness" primitives.
+- **At-will Invisibility** (Imp, Quasit) — action to turn invisible until the creature attacks, casts a spell, or concentration ends. The `invisible` condition exists; the at-will-action-to-self-apply pathway from a monster doesn't (closest existing analogue is the spell-side `engine.plan.invisibility`, but monsters can't invoke it).
+- **Scare** (Quasit, 1/day) — bonus action, target within 20 ft, WIS save vs frightened 1 min with a recurring save at end of each of target's turns. Same shape as Hold Person's `recurringSave.onSuccess: 'removeCondition'`, but applied via a monster bonus action.
+- **Fetid Cloud** (Dretch, 1/day) — 10-ft radius poisonous cloud, CON save vs poisoned 1 min, recurring save at end of turn. Same shape as the area-effect spell mechanic already partially shipped (slices 68-72); could share once monsters can invoke area-effect actions.
+- **Hellish Rejuvenation** (Lemure) — when killed outside Avernus, the lemure reforms in Avernus after some time. Narrative; consumer territory.
 
-Three cross-cutting structural gaps surface across all 44 entries and aren't specific to any single creature:
+Three cross-cutting structural gaps surface across all 49 entries and aren't specific to any single creature:
 
 - **Monster engine-data not consumed** — `MonsterStatblock` declares `traits: EffectSchema[]`, `damageResistances: DamageType[]`, `damageImmunities: DamageType[]`, `damageVulnerabilities: DamageType[]`, `conditionImmunities: string[]`, and `savingThrows: Record<string, number>`, but none of these fields are read anywhere in `src/derive/` or `src/engine/`. `buildEffectStack` folds species / background / class / feat / item / condition effects but skips monster statblock traits ([src/derive/effect-stack.ts:136-176](../src/derive/effect-stack.ts)). `mitigateDamage` doesn't consult `monster.damageResistances` / `damageImmunities` / `damageVulnerabilities` — even existing entries like Skeleton's bludgeoning vulnerability and Young Red Dragon's fire immunity are inert today. The content data is RAW-accurate and will wire for free when a future engine slice walks the monster→effect-stack pathway, but until then, monster authoring is purely descriptive. Batch 1.6 is the first batch to populate `traits` (with slice-112 `GrantResistance` entries) anticipating that wiring.
 - **No actions field on `MonsterStatblock`** — the schema carries `traits: EffectSchema[]` but no `actions`; bite / slam / claw / weapon attacks on these statblocks are narrative only. Several weapon items exist in the pack with monster-named ids (`dragon-bite`, `dragon-claw`, `ogre-greatclub`) but nothing links the statblocks to those items, so they're orphaned today.
 - **No `creatureSubtype` field beyond the existing `subtype: string`** — fine for most cases, but Goblinoid / Devil / Demon etc. tag-style subtypes (used elsewhere in the rules for targeting / immunity gates) would benefit from being a constrained enum.
 
-Notable gaps still open for tutorial / starter encounters: Gladiator (CR 5), Assassin (CR 8) for the humanoid combat tier-up. Whole creature types remain unstarted: Aberration, Celestial, Construct, Elemental, Fey, Fiend, Monstrosity, Ooze, Plant.
+Notable gaps still open for tutorial / starter encounters: Gladiator (CR 5), Assassin (CR 8) for the humanoid combat tier-up. Whole creature types remain unstarted: Aberration, Celestial, Construct, Elemental, Fey, Monstrosity, Ooze, Plant.
 
 ## Species
 
