@@ -2010,7 +2010,15 @@
     { "id": "potion-of-growth", "itemKind": "consumable", "name": "Potion of Growth", "onConsume": [], "description": "Enlarge effect (as the Enlarge/Reduce spell, enlarge option) for 1d4 hours when consumed." },
     { "id": "potion-of-heroism", "itemKind": "consumable", "name": "Potion of Heroism", "onConsume": [], "description": "Grants 10 temporary hit points and the effects of Bless (no concentration required) for 1 hour." },
     { "id": "potion-of-mind-reading", "itemKind": "consumable", "name": "Potion of Mind Reading", "onConsume": [], "description": "Cast Detect Thoughts (save DC 13) for 10 minutes when consumed." },
-    { "id": "potion-of-resistance", "itemKind": "consumable", "name": "Potion of Resistance", "onConsume": [], "description": "Resistance to one damage type (acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder) chosen at consume time, for 1 hour." }
+    { "id": "potion-of-resistance", "itemKind": "consumable", "name": "Potion of Resistance", "onConsume": [], "description": "Resistance to one damage type (acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder) chosen at consume time, for 1 hour." },
+    { "id": "gloves-of-missile-snaring", "itemKind": "magic", "name": "Gloves of Missile Snaring", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "lantern-of-revealing", "itemKind": "magic", "name": "Lantern of Revealing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "cap-of-water-breathing", "itemKind": "magic", "name": "Cap of Water Breathing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "robe-of-useful-items", "itemKind": "magic", "name": "Robe of Useful Items", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "bracers-of-archery", "itemKind": "magic", "name": "Bracers of Archery", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "winged-boots", "itemKind": "magic", "name": "Winged Boots", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "gloves-of-swimming-and-climbing", "itemKind": "magic", "name": "Gloves of Swimming and Climbing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "stone-of-good-luck", "itemKind": "magic", "name": "Stone of Good Luck", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
