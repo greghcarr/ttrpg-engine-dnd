@@ -2102,7 +2102,17 @@
     { "id": "ring-of-free-action", "itemKind": "magic", "name": "Ring of Free Action", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-resistance", "itemKind": "magic", "name": "Ring of Resistance", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-regeneration", "itemKind": "magic", "name": "Ring of Regeneration", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
-    { "id": "ring-of-invisibility", "itemKind": "magic", "name": "Ring of Invisibility", "rarity": "legendary", "requiresAttunement": true, "effects": [] }
+    { "id": "ring-of-invisibility", "itemKind": "magic", "name": "Ring of Invisibility", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "belt-of-stone-giant-strength", "itemKind": "magic", "name": "Belt of Stone Giant Strength", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "belt-of-frost-giant-strength", "itemKind": "magic", "name": "Belt of Frost Giant Strength", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "belt-of-fire-giant-strength", "itemKind": "magic", "name": "Belt of Fire Giant Strength", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "belt-of-cloud-giant-strength", "itemKind": "magic", "name": "Belt of Cloud Giant Strength", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "belt-of-storm-giant-strength", "itemKind": "magic", "name": "Belt of Storm Giant Strength", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "potion-of-stone-giant-strength", "itemKind": "consumable", "name": "Potion of Stone Giant Strength", "onConsume": [], "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher." },
+    { "id": "potion-of-frost-giant-strength", "itemKind": "consumable", "name": "Potion of Frost Giant Strength", "onConsume": [], "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher." },
+    { "id": "potion-of-fire-giant-strength", "itemKind": "consumable", "name": "Potion of Fire Giant Strength", "onConsume": [], "description": "STR becomes 25 for 1 hour when consumed. No effect if the consumer's STR is already 25 or higher." },
+    { "id": "potion-of-cloud-giant-strength", "itemKind": "consumable", "name": "Potion of Cloud Giant Strength", "onConsume": [], "description": "STR becomes 27 for 1 hour when consumed. No effect if the consumer's STR is already 27 or higher." },
+    { "id": "potion-of-storm-giant-strength", "itemKind": "consumable", "name": "Potion of Storm Giant Strength", "onConsume": [], "description": "STR becomes 29 for 1 hour when consumed. No effect if the consumer's STR is already 29 or higher." }
   ],
   "monsters": [
     {
