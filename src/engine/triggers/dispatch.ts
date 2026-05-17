@@ -199,6 +199,7 @@ const fireApplyCondition = (
   bearerId: string,
   causedByEventId: string,
   currentRound: number | undefined,
+  parentEffectInstanceId: string | undefined,
 ): Event[] => {
   if (event.type !== 'AttackRolled' && event.type !== 'DamageApplied') return [];
   const targetId = event.targetId;
@@ -215,6 +216,9 @@ const fireApplyCondition = (
     appliedConditionId: newAppliedConditionId() as ULID,
     sourceCharacterId: bearerId as ULID,
     ...(expiresOnRound !== undefined ? { expiresOnRound } : {}),
+    ...(parentEffectInstanceId !== undefined
+      ? { sourceEffectInstanceId: parentEffectInstanceId as ULID }
+      : {}),
     causedByEventId: causedByEventId as ULID,
   };
   return [applied];
@@ -240,6 +244,7 @@ const fireApplyConditionToAttacker = (
   bearerId: string,
   causedByEventId: string,
   currentRound: number | undefined,
+  parentEffectInstanceId: string | undefined,
 ): Event[] => {
   if (event.type !== 'AttackRolled') return [];
   const expiresOnRound =
@@ -257,6 +262,9 @@ const fireApplyConditionToAttacker = (
     appliedConditionId: newAppliedConditionId() as ULID,
     sourceCharacterId,
     ...(expiresOnRound !== undefined ? { expiresOnRound } : {}),
+    ...(parentEffectInstanceId !== undefined
+      ? { sourceEffectInstanceId: parentEffectInstanceId as ULID }
+      : {}),
     causedByEventId: causedByEventId as ULID,
   };
   return [applied];
@@ -270,6 +278,7 @@ const fireTrigger = (
   rng: RNG,
   at: string,
   currentRound: number | undefined,
+  parentEffectInstanceId: string | undefined,
 ): FiredTrigger | null => {
   const cadence = cadencePayload(effect.oncePer);
   const triggerFired: TriggerFiredEvent = {
@@ -289,11 +298,25 @@ const fireTrigger = (
       events.push(...fireAddDamageToAttacker(action, event, rng, triggerFired.id));
     } else if (action.kind === 'ApplyCondition') {
       events.push(
-        ...fireApplyCondition(action, event, character.id, triggerFired.id, currentRound),
+        ...fireApplyCondition(
+          action,
+          event,
+          character.id,
+          triggerFired.id,
+          currentRound,
+          parentEffectInstanceId,
+        ),
       );
     } else if (action.kind === 'ApplyConditionToAttacker') {
       events.push(
-        ...fireApplyConditionToAttacker(action, event, character.id, triggerFired.id, currentRound),
+        ...fireApplyConditionToAttacker(
+          action,
+          event,
+          character.id,
+          triggerFired.id,
+          currentRound,
+          parentEffectInstanceId,
+        ),
       );
     }
   }
@@ -407,7 +430,28 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
       if (filter !== undefined && !evaluatePredicate(filter, { facts })) continue;
       const triggerId = triggerIdOf(effect, characterId);
       if (!cadenceAllowsFiring(character, triggerId, effect.oncePer)) continue;
-      const fired = fireTrigger(effect, character, triggerId, event, rng, at, currentRound);
+      // Slice 110: if the OnEvent rider lives inside a condition that
+      // an EffectInstance is tracking, stamp that instance id onto any
+      // ApplyCondition events the rider emits. Lets the concentration
+      // cleanup sweep find rider-applied conditions when the parent
+      // effect ends. Walks effectInstances looking for the parent
+      // AppliedCondition; undefined for class-feature / item / racial
+      // riders that aren't backed by an effect instance.
+      const parentEffectInstanceId = appliedFrom
+        ? Object.values(state.effectInstances).find((inst) =>
+            inst.conditionsApplied.some((c) => c.appliedConditionId === appliedFrom.id),
+          )?.id
+        : undefined;
+      const fired = fireTrigger(
+        effect,
+        character,
+        triggerId,
+        event,
+        rng,
+        at,
+        currentRound,
+        parentEffectInstanceId,
+      );
       if (fired === null) continue;
       emitted.push(...fired.events);
       if (effect.consumeOnTrigger === true) {

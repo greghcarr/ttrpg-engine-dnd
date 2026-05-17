@@ -153,6 +153,9 @@ export const applyConditionApplied = (
     ...(event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0
       ? { hpMaxBonusDelta: event.hpMaxBonusDelta }
       : {}),
+    ...(event.sourceEffectInstanceId !== undefined
+      ? { sourceEffectInstanceId: event.sourceEffectInstanceId }
+      : {}),
   });
   if (event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0) {
     character.hp.maxBonus = (character.hp.maxBonus ?? 0) + event.hpMaxBonusDelta;

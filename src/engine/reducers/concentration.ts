@@ -76,6 +76,27 @@ export const clearConcentrationEffect = (
       (c) => c.id !== applied.appliedConditionId,
     );
   }
+  // Slice 110: sweep rider-applied conditions across all characters.
+  // Rider-applied entries (Holy Aura's blinded on attackers, Spirit
+  // Shroud's heal-block on hit targets) are stamped with
+  // `sourceEffectInstanceId` at dispatch time. The direct-condition
+  // loop above only catches what the EffectInstance tracks in its
+  // `conditionsApplied` array; this loop catches everything else
+  // keyed back to this concentration.
+  for (const ch of Object.values(state.characters)) {
+    const matches = ch.appliedConditions.filter(
+      (c) => c.sourceEffectInstanceId === effectInstanceId,
+    );
+    if (matches.length === 0) continue;
+    for (const entry of matches) {
+      if (entry.hpMaxBonusDelta !== undefined && entry.hpMaxBonusDelta !== 0) {
+        ch.hp.maxBonus = (ch.hp.maxBonus ?? 0) - entry.hpMaxBonusDelta;
+      }
+    }
+    ch.appliedConditions = ch.appliedConditions.filter(
+      (c) => c.sourceEffectInstanceId !== effectInstanceId,
+    );
+  }
   if (caster?.concentrationEffectId === effectInstanceId) {
     caster.concentrationEffectId = undefined;
   }

@@ -41,6 +41,15 @@ export const AppliedConditionSchema = z.object({
   // ConditionRemoved or ConcentrationBroken) can reverse exactly the
   // same delta without re-running content lookups from the reducer.
   hpMaxBonusDelta: z.number().int().optional(),
+  // Set on conditions applied transitively by an OnEvent rider that
+  // lives inside a parent concentration effect (Holy Aura's blinded
+  // rider, Spirit Shroud's heal-block rider). Points at the parent
+  // concentration's EffectInstance id so `clearConcentrationEffect`
+  // can sweep these out when concentration ends. Unset for direct
+  // cast-time applications (those are tracked via
+  // `EffectInstance.conditionsApplied` instead) and for riders
+  // applied by non-concentration sources (class features, magic items).
+  sourceEffectInstanceId: ULIDSchema.optional(),
 });
 export type AppliedCondition = z.infer<typeof AppliedConditionSchema>;
 

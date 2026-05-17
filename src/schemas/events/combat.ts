@@ -60,6 +60,9 @@ export const ConditionAppliedEventSchema = EventEnvelopeSchema.extend({
   // condition entry and bumps `hp.maxBonus`. Removal reverses the same
   // delta without re-running content lookups.
   hpMaxBonusDelta: z.number().int().optional(),
+  // Slice 110: parent concentration effect for rider-applied conditions.
+  // See AppliedCondition.sourceEffectInstanceId for the full semantics.
+  sourceEffectInstanceId: ULIDSchema.optional(),
 });
 export type ConditionAppliedEvent = z.infer<typeof ConditionAppliedEventSchema>;
 
