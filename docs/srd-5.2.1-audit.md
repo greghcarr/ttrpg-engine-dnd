@@ -19,7 +19,7 @@ The audit is scripted: a Node parser reads the markdown SRD in `references/srd-m
 | Slice | Scope | Status | Files touched |
 |---|---|---|---|
 | 141 | Drop 7 non-SRD entries | **done** | starter-pack.json (-7 entries) |
-| 142 | Rename + refresh the 9 rename-and-drift entries | pending | starter-pack.json, tests, transcripts |
+| 142 | Rename + refresh the 9 rename-and-drift entries | **done** | starter-pack.json, starter-pack.test.ts (one `goblin` to `goblin-warrior` id update) |
 | 143 to 148 | Drift refresh in batches of ~10 monsters | pending | starter-pack.json, golden tests asserting old HP/AC |
 | 149 | Doc refresh ([docs/content-attribution.md](content-attribution.md), README "60% SRD" headline, [docs/starter-pack-gaps.md](starter-pack-gaps.md)) | pending | docs only |
 

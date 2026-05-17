@@ -95,7 +95,7 @@ describe('starter content pack', () => {
     const wand = resolved.items.get('wand-of-magic-missiles');
     expect(wand?.itemKind === 'magic' && wand.charges?.max).toBe(7);
     expect(resolved.monsters.size).toBeGreaterThanOrEqual(5);
-    expect(resolved.monsters.get('goblin')?.cr).toBe(0.25);
+    expect(resolved.monsters.get('goblin-warrior')?.cr).toBe(0.25);
     expect(resolved.monsters.get('young-red-dragon')?.cr).toBe(10);
     expect(resolved.monsters.get('skeleton')?.damageImmunities).toContain('poison');
   });
