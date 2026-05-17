@@ -746,7 +746,7 @@ exports[`feature-coverage matrix: feats > feat catalog by category + wire status
   {
     "category": "fighting-style",
     "id": "fighting-style-two-weapon",
-    "status": "stub",
+    "status": "wired",
   },
   {
     "category": "general",

@@ -4,7 +4,7 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
-The post-alpha.5 stretch: 71 slices. Slices 48–118 mix vocabulary expansion with infrastructure hygiene. The architectural skeleton is untouched. `SCHEMA_VERSION` unchanged; every new event shape and effect kind is additive. Test count grew from 1009 to 1358 across 188 files (+349 / +49); all replay-equivalence and RNG-capture invariants still hold.
+The post-alpha.5 stretch: 72 slices. Slices 48–119 mix vocabulary expansion with infrastructure hygiene. The architectural skeleton is untouched. `SCHEMA_VERSION` unchanged; every new event shape and effect kind is additive. Test count grew from 1009 to 1360 across 189 files (+351 / +50); all replay-equivalence and RNG-capture invariants still hold.
 
 The session cadence settled into a "primitive + canonical content user" shape: each slice adds a focused engine primitive (~50–200 LoC) and the first one or two RAW spells / features that exercise it, walking those entries from schema-only to wired in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
 
@@ -100,6 +100,8 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 *Dueling Fighting Style + Frenzy melee gate* (slice 117). Closes the third of the four Fighting Style gates and surfaces a latent miss: the `target: 'damage'` modifier sum was never being consumed by any planner. Five effects relied on it (4 Dueling entries + 1 Frenzy condition) and all were dormant. `planAttack` now consumes `attackerEffects.modifierSum('damage', facts)` into `damageRollPayload.modifier`. The facts map carries `event.attackKind` (from the weapon definition) and `bearer.offHandHasWeapon` (true iff the off-hand slot holds an item whose def is `itemKind: 'weapon'`; shields live in a separate slot). Dueling's +2 ships across all four pack locations with `condition: { kind: 'all', terms: [eq(event.attackKind, 'melee'), eq(bearer.offHandHasWeapon, false)] }`. The Frenzy condition (`frenzied`) gets the same melee predicate. Both effects now correctly apply.
 
 *CI hygiene: Node 24 migration* (slice 118). GitHub flagged `actions/checkout@v4` and `actions/setup-node@v4` for Node 20 EOL on 2026-06-02. Both actions bumped to `@v5` (Node 24 runtime) across all three workflows: ci.yml, deploy-demo.yml, deploy-dndbnb.yml. CI test matrix updated from `[18, 20, 22]` to `[20, 22, 24]`: Node 18 reached EOL on 2025-04-30 (drop), Node 24 is the current line (add). package.json `engines.node` bumped from `>=18` to `>=20` to match. Deploy workflows stay on Node 22 (the LTS we target for production-bundle output); only the test matrix exercises the wider range.
+
+*Two-Weapon Fighting Fighting Style* (slice 119). Closes the 4th and final Fighting Style gate (the FS track is fully wired). New `GrantTwoWeaponFighting` marker Effect kind — same shape as `GrantEvasion` / `GrantFallingProtection`: no fields, accumulator flag, planner queries via `hasTwoWeaponFighting()`. `planOffHandAttack` now builds an attacker effect stack and flips the damage-modifier rule when the flag is set: instead of stripping positive ability mods (RAW default for off-hand attacks), the full ability modifier lands on the damage roll. Wired across all three pack locations (standalone feat + Fighter L1 option + Ranger L2 option). Features-coverage snapshot refreshed for the new effect kind.
 
 ### Fixed
 

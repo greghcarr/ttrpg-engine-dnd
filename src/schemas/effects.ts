@@ -253,6 +253,12 @@ export type Effect =
   // Canonical user: Death Ward. Future users: Half-Orc Relentless
   // Endurance, Aura of Life.
   | { kind: 'PreventFatalDamage' }
+  // Slice 119. Marker that enables the Two-Weapon Fighting bonus:
+  // planOffHandAttack adds the wielder's ability modifier to off-hand
+  // damage (positive mods included). Without this flag, off-hand
+  // damage only includes negative ability mods per RAW. Canonical
+  // user: the Two-Weapon Fighting Fighting Style.
+  | { kind: 'GrantTwoWeaponFighting' }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -461,6 +467,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('PreventFatalDamage'),
     }),
     z.object({
+      kind: z.literal('GrantTwoWeaponFighting'),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -505,5 +514,6 @@ export const EFFECT_KINDS = [
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',
+  'GrantTwoWeaponFighting',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

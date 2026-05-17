@@ -19,6 +19,7 @@ import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
 import { isMagicWeaponAttack } from '../../derive/magicality.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 import { applyAll } from '../apply.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
@@ -145,12 +146,27 @@ export const planOffHandAttack = (
     return [...economyEvents, attackRolled];
   }
 
-  // Off-hand attacks do NOT add ability modifier to damage (except negative).
+  // Off-hand attacks do NOT add ability modifier to damage by default
+  // (negative mods still apply, since they're a penalty). Slice 119:
+  // the Two-Weapon Fighting Fighting Style flips this — when the
+  // attacker's effect stack carries `GrantTwoWeaponFighting`, the
+  // ability mod is included regardless of sign.
   const strMod = abilityModifier(attacker.abilityScores.STR);
   const dexMod = abilityModifier(attacker.abilityScores.DEX);
   const isFinesse = weaponDef.properties.includes('finesse');
   const abilityMod = isFinesse ? Math.max(strMod, dexMod) : strMod;
-  const offHandModifier = abilityMod < 0 ? abilityMod : 0;
+  const attackerEffects = buildEffectStack({
+    character: attacker,
+    itemInstances: state.itemInstances,
+    content,
+    pendingChoices: state.pendingChoices,
+    characters: state.characters,
+  });
+  const offHandModifier = attackerEffects.hasTwoWeaponFighting()
+    ? abilityMod
+    : abilityMod < 0
+      ? abilityMod
+      : 0;
   const damageExpression = applyMartialArtsDieScaling(attacker, weaponDef.id, weaponDef.damageDice);
   const parsed = parseDiceExpression(damageExpression);
   const totalRolls = critical ? parsed.count * 2 : parsed.count;

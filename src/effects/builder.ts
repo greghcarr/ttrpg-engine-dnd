@@ -106,6 +106,11 @@ export class EffectAccumulator {
   private healingBoostFlat: number = 0;
   private healingBoostPerSpellLevel: number = 0;
   private evasionFlag: boolean = false;
+  // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
+  // When set, planOffHandAttack adds the wielder's ability mod to
+  // off-hand damage even when positive (RAW: only negative mods
+  // apply by default).
+  private twoWeaponFightingFlag: boolean = false;
 
   addModifier(target: ModifierTarget, value: number, source: string, predicate?: Predicate): void {
     const key = modifierKey(target);
@@ -375,6 +380,12 @@ export class EffectAccumulator {
   hasEvasion(): boolean {
     return this.evasionFlag;
   }
+  markTwoWeaponFighting(): void {
+    this.twoWeaponFightingFlag = true;
+  }
+  hasTwoWeaponFighting(): boolean {
+    return this.twoWeaponFightingFlag;
+  }
 }
 
 export interface BuilderContext {
@@ -477,6 +488,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantEvasion':
       acc.markEvasion();
+      return;
+    case 'GrantTwoWeaponFighting':
+      acc.markTwoWeaponFighting();
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();
