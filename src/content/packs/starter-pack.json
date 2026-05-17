@@ -2024,7 +2024,15 @@
     { "id": "weapon-plus-3", "itemKind": "magic", "name": "Weapon, +3", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
     { "id": "armor-plus-1", "itemKind": "magic", "name": "Armor, +1", "rarity": "rare", "requiresAttunement": false, "effects": [] },
     { "id": "armor-plus-2", "itemKind": "magic", "name": "Armor, +2", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
-    { "id": "armor-plus-3", "itemKind": "magic", "name": "Armor, +3", "rarity": "legendary", "requiresAttunement": false, "effects": [] }
+    { "id": "armor-plus-3", "itemKind": "magic", "name": "Armor, +3", "rarity": "legendary", "requiresAttunement": false, "effects": [] },
+    { "id": "immovable-rod", "itemKind": "magic", "name": "Immovable Rod", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "ring-of-jumping", "itemKind": "magic", "name": "Ring of Jumping", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "folding-boat", "itemKind": "magic", "name": "Folding Boat", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "eversmoking-bottle", "itemKind": "magic", "name": "Eversmoking Bottle", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "marvelous-pigments", "itemKind": "magic", "name": "Marvelous Pigments", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
+    { "id": "apparatus-of-the-crab", "itemKind": "magic", "name": "Apparatus of the Crab", "rarity": "legendary", "requiresAttunement": false, "effects": [] },
+    { "id": "bag-of-beans", "itemKind": "magic", "name": "Bag of Beans", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "quaals-feather-token-anchor", "itemKind": "magic", "name": "Quaal's Feather Token, Anchor", "rarity": "rare", "requiresAttunement": false, "effects": [] }
   ],
   "monsters": [
     {

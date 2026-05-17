@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 1.6**
+
+8 more wondrous / utility items added to the starter pack: Immovable Rod (uncommon), Ring of Jumping (uncommon), Folding Boat (rare), Eversmoking Bottle (uncommon), Marvelous Pigments (very rare), Apparatus of the Crab (legendary), Bag of Beans (rare), Quaal's Feather Token Anchor (rare). Three uncommon, three rare, one very rare, one legendary; only Ring of Jumping requires attunement. Pure stub shape (`effects: []`, no charges), snapshot-clean under slice 126. The Deferred-wiring subsection gained a parent bullet for items-batch-1.6 with five sub-bullets covering the RAW-shape blockers (positional anchoring, jump-distance derive surface, object transformation, vehicle + pilot-controlled actions, and a roll-up for the pure-DM-discretion items in this batch). Originally proposed Driftglobe in slot 2 but swapped for Ring of Jumping because Driftglobe carries 1/day Daylight charges, which would re-trip `withChargesIds`. Magic-item count bumped from 39 to 47.
+
 **Content authoring: items batch 1.5**
 
 6 numeric-bonus magic gear templates added to the starter pack: Weapon +1 (uncommon), Weapon +2 (rare), Weapon +3 (very rare), Armor +1 (rare), Armor +2 (very rare), Armor +3 (legendary). Shipped as generic templates rather than specific weapons / armors (the existing Flametongue Longsword is the only concrete +N weapon entry); consumers instantiate by overlaying a template onto a base weapon or armor. All `itemKind: 'magic'` with `effects: []` and no charges, snapshot-clean. The Deferred-wiring subsection gained a sixth bullet covering both blockers: the shared magic-item-effect-projection pass, plus an extension of the slice-76 `ItemInstance.temporaryBuff` shape into a permanent / inherent counterpart for the weapon templates. Magic-item count bumped from 33 to 39, broadening the rarity mix into very-rare and legendary for the first time outside Deck of Many Things.
