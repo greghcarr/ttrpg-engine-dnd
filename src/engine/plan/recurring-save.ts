@@ -110,6 +110,7 @@ export const planTickRecurringSave = (
     content,
     pendingChoices: state.pendingChoices,
     classId: castingClassId,
+    characters: state.characters,
   });
 
   const saveDerivation = computeSavingThrow({

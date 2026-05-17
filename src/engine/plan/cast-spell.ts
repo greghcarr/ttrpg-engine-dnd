@@ -288,6 +288,7 @@ const planAttackMechanic = (
     itemInstances: state.itemInstances,
     content,
     classId: castingClassId,
+    characters: state.characters,
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
@@ -300,6 +301,7 @@ const planAttackMechanic = (
       character: target,
       itemInstances: state.itemInstances,
       content,
+      characters: state.characters,
     });
     const d20 = rollDie(D20_SIDES, rng);
     const total = d20 + attackBonus.total;
@@ -355,6 +357,7 @@ const planAttackMechanic = (
       itemInstances: state.itemInstances,
       content,
       rawComponents: [{ amount: Math.max(0, damageTotal), type: damageType }],
+      characters: state.characters,
     });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,
@@ -397,6 +400,7 @@ const planSaveMechanic = (
     itemInstances: state.itemInstances,
     content,
     classId: castingClassId,
+    characters: state.characters,
   });
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
@@ -472,6 +476,7 @@ const planSaveMechanic = (
           itemInstances: state.itemInstances,
           content,
           rawComponents: [{ amount: finalAmount, type: mechanic.damageType }],
+          characters: state.characters,
         });
         const damageApplied: DamageAppliedEvent = {
           id: newEventId() as ULID,
@@ -770,6 +775,7 @@ const planAutoHitMechanic = (
       itemInstances: state.itemInstances,
       content,
       rawComponents: [{ amount: raw, type: mechanic.damageType }],
+      characters: state.characters,
     });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,
@@ -931,6 +937,7 @@ const planTrapMechanic = (
       itemInstances: state.itemInstances,
       content,
       classId: castingClassId,
+      characters: state.characters,
     });
     dc = dcResult.total;
   }

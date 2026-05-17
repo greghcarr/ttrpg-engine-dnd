@@ -28,6 +28,12 @@ export interface ComputeAbilityCheckInput {
   readonly ability: AbilityScore;
   readonly skill?: Skill;
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
+  // Optional: when provided, source-relative formulas on condition
+  // effects (Aura of Protection's +CHA-mod-of-source) resolve via
+  // the source character's stats. Saves already thread this since
+  // slice 64; slice 105 closes the same RAW gap for ability checks
+  // so the Paladin's L6 Aura of Protection applies to both rolls.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 const exhaustionPenalty = (level: number): number =>

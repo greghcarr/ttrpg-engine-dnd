@@ -157,6 +157,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     itemInstances: state.itemInstances,
     content,
     weaponInstanceId: input.weaponInstanceId,
+    characters: state.characters,
   });
 
   const cover = input.cover ?? 'none';
@@ -167,6 +168,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     character: target,
     itemInstances: state.itemInstances,
     content,
+    characters: state.characters,
   });
   const coverBonus = coverACBonus(cover);
   const acResult = { ...acResultBase, total: acResultBase.total + coverBonus };
@@ -438,6 +440,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     itemInstances: state.itemInstances,
     content,
     rawComponents,
+    characters: state.characters,
   });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
@@ -745,6 +748,7 @@ const planActionEconomyForAttack = (
     character: attacker,
     itemInstances: state.itemInstances,
     content,
+    characters: state.characters,
   });
 
   if (active.actionUsed && active.attacksMadeThisTurn === 0) {

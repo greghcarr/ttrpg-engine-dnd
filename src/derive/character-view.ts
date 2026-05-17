@@ -40,6 +40,13 @@ export interface ComputeDerivedCharacterInput {
   readonly itemInstances: Readonly<Record<string, ItemInstance>>;
   readonly content: ResolvedContent;
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
+  // Optional: enables source-relative formulas across every derive
+  // surface the view aggregates (saves, ability checks, AC, attack,
+  // spell-DC, action-economy, damage-mitigation). Callers that
+  // compose the view from `CampaignState` should pass
+  // `state.characters` so Aura of Protection (and any future
+  // source-relative content) resolves correctly.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 export const computeDerivedCharacter = (

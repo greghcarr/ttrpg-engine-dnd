@@ -95,6 +95,12 @@ export interface ComputeACInput {
   readonly itemInstances: Readonly<Record<string, ItemInstance>>;
   readonly content: ResolvedContent;
   readonly pendingChoices?: Readonly<Record<string, import('../schemas/runtime/pending-choice.js').PendingChoice>>;
+  // Optional: when provided, source-relative formulas on condition
+  // effects (e.g., `sourceAbilityMod`) resolve via the source
+  // character's stats. Callers without source-relative AC content
+  // can omit this (formulas drop to 0 in its absence). See
+  // [src/derive/effect-stack.ts] for the source-resolution rule.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 // Bump the natural AC up to the floor when an effect (Barkskin etc.)

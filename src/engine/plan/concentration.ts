@@ -100,6 +100,7 @@ export const planCheckConcentration = (
     itemInstances: state.itemInstances,
     content,
     ability: 'CON',
+    characters: state.characters,
   });
   const d20 = rollDie(D20_SIDES, rng);
   const total = d20 + saveDerivation.total;
@@ -244,6 +245,7 @@ export const planTickAura = (
     itemInstances: state.itemInstances,
     content,
     classId: findCastingClassForSpell(caster, content, spell.id),
+    characters: state.characters,
   });
 
   const events: Event[] = [];
@@ -263,6 +265,7 @@ export const planTickAura = (
         itemInstances: state.itemInstances,
         content,
         ability: aura.saveAbility,
+        characters: state.characters,
       });
       const d20 = rollDie(D20_SIDES, rng);
       const total = d20 + saveDerivation.total;
@@ -315,6 +318,7 @@ export const planTickAura = (
           itemInstances: state.itemInstances,
           content,
           rawComponents: [{ amount: final, type: aura.damageType }],
+          characters: state.characters,
         });
         events.push({
           id: newEventId() as ULID,
@@ -420,6 +424,7 @@ export const planTickMovementDamage = (
     itemInstances: state.itemInstances,
     content,
     rawComponents: [{ amount: rawDamage, type: mechanic.damageType }],
+    characters: state.characters,
   });
   return [
     {
@@ -536,6 +541,7 @@ export const planTickRecurring = (
     itemInstances: state.itemInstances,
     content,
     rawComponents: [{ amount, type: mechanic.damageType }],
+    characters: state.characters,
   });
   return [
     {

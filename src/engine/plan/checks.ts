@@ -61,6 +61,7 @@ export const planSave = (
     content,
     ability: intent.ability,
     pendingChoices: state.pendingChoices,
+    characters: state.characters,
   });
   const used = resolveAdvantage(
     intent.advantage,
@@ -111,6 +112,7 @@ export const planAbilityCheck = (
     ability: intent.ability,
     ...(intent.skill !== undefined ? { skill: intent.skill } : {}),
     pendingChoices: state.pendingChoices,
+    characters: state.characters,
   });
   const used = resolveAdvantage(
     intent.advantage,

@@ -23,6 +23,10 @@ export interface ComputeSpellDCInput {
   readonly content: ResolvedContent;
   readonly classId: string;
   readonly pendingChoices?: Readonly<Record<string, import('../schemas/runtime/pending-choice.js').PendingChoice>>;
+  // Optional: enables source-relative formulas (`sourceAbilityMod`)
+  // on condition effects that touch spell save DC / spell attack
+  // bonus. Callers without source-relative content can omit.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 const lookupSpellcastingAbility = (input: ComputeSpellDCInput): 'INT' | 'WIS' | 'CHA' | undefined => {

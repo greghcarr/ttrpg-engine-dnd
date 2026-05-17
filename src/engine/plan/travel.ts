@@ -42,6 +42,7 @@ export const planForage = (
     ability: 'WIS',
     skill: 'survival',
     pendingChoices: state.pendingChoices,
+    characters: state.characters,
   });
   const d20 = rollDie(D20_SIDES, rng);
   const total = d20 + derivation.total;
@@ -138,6 +139,7 @@ export const planForcedMarch = (
         itemInstances: state.itemInstances,
         content,
         ability: 'CON',
+        characters: state.characters,
       });
       const d20 = rollDie(D20_SIDES, rng);
       const total = d20 + saveDerivation.total;
@@ -192,6 +194,7 @@ export const planNavigationCheck = (
     ability: 'WIS',
     skill: 'survival',
     pendingChoices: state.pendingChoices,
+    characters: state.characters,
   });
   const d20 = rollDie(D20_SIDES, rng);
   const total = d20 + derivation.total;

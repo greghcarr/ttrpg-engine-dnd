@@ -11,6 +11,9 @@ export interface ComputeActionEconomyInput {
   readonly itemInstances: Readonly<Record<string, ItemInstance>>;
   readonly content: ResolvedContent;
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
+  // Optional: enables source-relative formulas (`sourceAbilityMod`)
+  // on condition effects that touch action-economy modifiers.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 export interface ActionEconomyBudget {

@@ -134,12 +134,14 @@ export const planPolymorph = (
       itemInstances: state.itemInstances,
       content,
       classId: caster.classes[0]?.classId ?? 'wizard',
+      characters: state.characters,
     });
     const saveDerivation = computeSavingThrow({
       character: target,
       itemInstances: state.itemInstances,
       content,
       ability: 'WIS',
+      characters: state.characters,
     });
     const d20 = rollDie(D20_SIDES, rng);
     const total = d20 + saveDerivation.total;

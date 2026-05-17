@@ -80,6 +80,7 @@ export const planStunningStrike = (
     content,
     ability: 'CON',
     pendingChoices: state.pendingChoices,
+    characters: state.characters,
   });
   const useAdv: 'advantage' | 'disadvantage' | 'none' = saveDerivation.hasAdvantage
     ? saveDerivation.hasDisadvantage

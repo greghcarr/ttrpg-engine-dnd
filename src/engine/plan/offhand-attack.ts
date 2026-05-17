@@ -107,11 +107,13 @@ export const planOffHandAttack = (
     itemInstances: state.itemInstances,
     content,
     weaponInstanceId: intent.weaponInstanceId,
+    characters: state.characters,
   });
   const acResult = computeAC({
     character: target,
     itemInstances: state.itemInstances,
     content,
+    characters: state.characters,
   });
   const d20 = rollDie(D20_SIDES, rng);
   const total = d20 + attackBonusResult.total;
@@ -176,6 +178,7 @@ export const planOffHandAttack = (
     itemInstances: state.itemInstances,
     content,
     rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
+    characters: state.characters,
   });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,

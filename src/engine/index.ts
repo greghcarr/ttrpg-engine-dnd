@@ -583,6 +583,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           itemInstances: state.itemInstances,
           content,
           pendingChoices: state.pendingChoices,
+          characters: state.characters,
         }),
       );
     },
@@ -593,6 +594,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           itemInstances: state.itemInstances,
           content,
           pendingChoices: state.pendingChoices,
+          characters: state.characters,
         }),
       );
     },
@@ -604,6 +606,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           content,
           pendingChoices: state.pendingChoices,
           ability,
+          characters: state.characters,
         }),
       );
     },
@@ -615,6 +618,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           content,
           pendingChoices: state.pendingChoices,
           weaponInstanceId,
+          characters: state.characters,
         }),
       );
     },
@@ -626,6 +630,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           content,
           pendingChoices: state.pendingChoices,
           classId,
+          characters: state.characters,
         }),
       );
     },
@@ -637,6 +642,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           content,
           pendingChoices: state.pendingChoices,
           classId,
+          characters: state.characters,
         }),
       );
     },

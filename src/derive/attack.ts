@@ -22,6 +22,10 @@ export interface ComputeAttackInput {
   readonly content: ResolvedContent;
   readonly weaponInstanceId: string;
   readonly pendingChoices?: Readonly<Record<string, import('../schemas/runtime/pending-choice.js').PendingChoice>>;
+  // Optional: enables source-relative formulas (`sourceAbilityMod`)
+  // on condition effects that touch attack bonuses. Callers without
+  // source-relative attack content can omit (formulas drop to 0).
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 const chooseAttackAbility = (character: Character, weapon: Weapon): 'STR' | 'DEX' => {

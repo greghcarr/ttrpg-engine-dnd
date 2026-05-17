@@ -15,6 +15,10 @@ export interface MitigateDamageInput {
   readonly content: ResolvedContent;
   readonly pendingChoices?: Readonly<Record<string, PendingChoice>>;
   readonly rawComponents: ReadonlyArray<{ readonly amount: number; readonly type: DamageType }>;
+  // Optional: enables source-relative formulas (`sourceAbilityMod`)
+  // on condition effects that touch flat damage reduction. Callers
+  // without source-relative content can omit.
+  readonly characters?: Readonly<Record<string, Character>>;
 }
 
 const halfRoundDown = (n: number): number => Math.floor(n / RESISTANCE_DIVISOR);

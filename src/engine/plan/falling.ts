@@ -107,6 +107,7 @@ export const planFalling = (
     itemInstances: state.itemInstances,
     content,
     rawComponents: [{ amount: rawDamage, type: 'bludgeoning' }],
+    characters: state.characters,
   });
   const at = intent.at ?? nowIso();
   const damageApplied: DamageAppliedEvent = {

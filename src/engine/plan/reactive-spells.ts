@@ -110,6 +110,7 @@ export const planCounterspell = (
     content,
     pendingChoices: state.pendingChoices,
     classId: intent.castingClassId,
+    characters: state.characters,
   });
   const dc = dcResult.total;
   const conBonus = abilityModifier(target.abilityScores.CON);
