@@ -30,6 +30,14 @@ export interface ComputeSaveInput {
   // source, etc.) resolve via the linked source character. Omitting
   // it makes those formulas evaluate to 0.
   readonly characters?: Readonly<Record<string, Character>>;
+  // Slice 131: tells the save resolver whether the saving throw is
+  // against a spell or magical effect. When true and the character
+  // carries `GrantMagicResistance`, the resolver contributes advantage
+  // to the roll. Default (undefined / false) is non-magical (e.g.
+  // monster Multiattack save, Stunning Strike, etc.). Callers from
+  // magical sources (cast-spell, traps spell-armed, recurring saves
+  // on spell-applied conditions, etc.) pass `true`.
+  readonly sourceIsMagical?: boolean;
 }
 
 const isSaveProficient = (character: Character, ability: AbilityScore, content: ResolvedContent): boolean => {
@@ -79,11 +87,18 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   }
 
   const adv = effects.advantageFor(target);
+  // Slice 131: Magic Resistance contributes advantage to the save
+  // when the source is magical. RAW advantage / disadvantage
+  // cancellation still applies (a creature with both Magic Resistance
+  // and a separate disadvantage source nets neither).
+  const magicResistanceAdvantage =
+    input.sourceIsMagical === true && effects.hasMagicResistance();
+  const effectiveAdvantage = adv.advantage || magicResistanceAdvantage;
   const total = breakdown.reduce((acc, e) => acc + e.value, 0);
   return {
     total,
     breakdown,
-    hasAdvantage: adv.advantage && !adv.disadvantage,
-    hasDisadvantage: adv.disadvantage && !adv.advantage,
+    hasAdvantage: effectiveAdvantage && !adv.disadvantage,
+    hasDisadvantage: adv.disadvantage && !effectiveAdvantage,
   };
 };

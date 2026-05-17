@@ -297,6 +297,20 @@ export class EffectAccumulator {
     return this.healingBlockedFlag;
   }
 
+  // Slice 131: RAW Magic Resistance ("advantage on saves vs spells
+  // and other magical effects"). Marker-only; consumers consult
+  // hasMagicResistance() and contribute advantage on the save roll
+  // when the save's source-is-magical fact is true.
+  private magicResistanceFlag = false;
+
+  markMagicResistance(): void {
+    this.magicResistanceFlag = true;
+  }
+
+  hasMagicResistance(): boolean {
+    return this.magicResistanceFlag;
+  }
+
   grantSense(sense: Sense, range: number): void {
     const existing = this.senseGrants.get(sense) ?? 0;
     if (range > existing) this.senseGrants.set(sense, range);
@@ -484,6 +498,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantConditionImmunity':
       acc.addConditionImmunity(effect.conditionId, effect.condition);
+      return;
+    case 'GrantMagicResistance':
+      acc.markMagicResistance();
       return;
     case 'OverrideACFormula':
       acc.addACOverride({

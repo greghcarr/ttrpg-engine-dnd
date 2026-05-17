@@ -209,6 +209,20 @@ describe('EffectAccumulator', () => {
     expect(acc.senseRange('blindsight')).toBe(0);
   });
 
+  // Slice 131: GrantMagicResistance is a marker; the accumulator
+  // tracks the flag and consumers (computeSavingThrow) decide what to
+  // do with it based on the save's source-is-magical fact.
+  it('GrantMagicResistance flips the marker', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.hasMagicResistance()).toBe(false);
+    applyEffectToBuilder(
+      { kind: 'GrantMagicResistance' },
+      acc,
+      { source: 'imp' },
+    );
+    expect(acc.hasMagicResistance()).toBe(true);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,

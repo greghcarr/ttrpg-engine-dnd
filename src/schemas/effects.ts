@@ -182,6 +182,13 @@ export type Effect =
   | { kind: 'GrantImmunity'; damageType: DamageType | 'all' }
   | { kind: 'GrantVulnerability'; damageType: DamageType }
   | { kind: 'GrantConditionImmunity'; conditionId: string; condition?: Predicate }
+  // Slice 131: RAW Magic Resistance. "The creature has advantage on
+  // saving throws against spells and other magical effects." Marker-
+  // only; consumers (computeSavingThrow) consult the accumulator's
+  // hasMagicResistance() and contribute advantage when the save's
+  // sourceIsMagical fact is true. Canonical across most CR 5+
+  // Fiends / Fey / Dragons / spellcaster monsters.
+  | { kind: 'GrantMagicResistance' }
   | { kind: 'OverrideACFormula'; base: number | 'dex' | 'con' | 'wis'; abilityModifiers: AbilityScore[]; dexCap?: number; priority?: number }
   // Sets a floor on the target's AC: after the natural AC is computed
   // from armor + DEX + modifiers, the result is bumped up to `value`
@@ -332,6 +339,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantConditionImmunity'),
       conditionId: z.string(),
       condition: PredicateSchema.optional(),
+    }),
+    z.object({
+      kind: z.literal('GrantMagicResistance'),
     }),
     z.object({
       kind: z.literal('OverrideACFormula'),
@@ -511,6 +521,7 @@ export const EFFECT_KINDS = [
   'GrantImmunity',
   'GrantVulnerability',
   'GrantConditionImmunity',
+  'GrantMagicResistance',
   'OverrideACFormula',
   'SetACFloor',
   'GrantResource',

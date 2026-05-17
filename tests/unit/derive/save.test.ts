@@ -179,3 +179,77 @@ describe('computeSavingThrow consults monster.savingThrows (slice 130)', () => {
     expect(sources).toContain('STR-mod');
   });
 });
+
+// Slice 131: GrantMagicResistance + sourceIsMagical contributes
+// advantage; without the magical-source flag the trait stays silent.
+
+describe('computeSavingThrow honors Magic Resistance (slice 131)', () => {
+  it('Imp + sourceIsMagical: true → hasAdvantage', () => {
+    // Imp carries GrantMagicResistance via its traits[].
+    const imp = buildCreature('imp', 'Naughty', {
+      STR: 6, DEX: 17, CON: 13, INT: 11, WIS: 12, CHA: 14,
+    });
+    const r = computeSavingThrow({
+      character: imp,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'DEX',
+      sourceIsMagical: true,
+    });
+    expect(r.hasAdvantage).toBe(true);
+    expect(r.hasDisadvantage).toBe(false);
+  });
+
+  it('Imp + sourceIsMagical: false → no advantage from Magic Resistance', () => {
+    const imp = buildCreature('imp', 'Naughty', {
+      STR: 6, DEX: 17, CON: 13, INT: 11, WIS: 12, CHA: 14,
+    });
+    const r = computeSavingThrow({
+      character: imp,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'DEX',
+      sourceIsMagical: false,
+    });
+    expect(r.hasAdvantage).toBe(false);
+  });
+
+  it('Imp + sourceIsMagical: undefined → no advantage (default treats source as non-magical)', () => {
+    const imp = buildCreature('imp', 'Naughty', {
+      STR: 6, DEX: 17, CON: 13, INT: 11, WIS: 12, CHA: 14,
+    });
+    const r = computeSavingThrow({
+      character: imp,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'DEX',
+    });
+    expect(r.hasAdvantage).toBe(false);
+  });
+
+  it('PC without Magic Resistance + sourceIsMagical: true → no advantage', () => {
+    const character = buildFighter({ STR: 16, level: 1 });
+    const r = computeSavingThrow({
+      character,
+      itemInstances: {},
+      content: TEST_CONTENT,
+      ability: 'STR',
+      sourceIsMagical: true,
+    });
+    expect(r.hasAdvantage).toBe(false);
+  });
+
+  it('Quasit (also has Magic Resistance via batch 1.7 traits): advantage on magical save', () => {
+    const quasit = buildCreature('quasit', 'Imp Cousin', {
+      STR: 5, DEX: 17, CON: 10, INT: 7, WIS: 10, CHA: 10,
+    });
+    const r = computeSavingThrow({
+      character: quasit,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'CON',
+      sourceIsMagical: true,
+    });
+    expect(r.hasAdvantage).toBe(true);
+  });
+});

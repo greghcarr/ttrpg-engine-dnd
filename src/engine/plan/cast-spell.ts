@@ -444,9 +444,31 @@ const planSaveMechanic = (
       content,
       ability: mechanic.ability,
       characters: state.characters,
+      // Slice 131: spells are magical sources. Magic Resistance and
+      // other "advantage vs magical effects" sources fold in here.
+      sourceIsMagical: true,
     });
-    const d20 = rollDie(D20_SIDES, rng);
-    const total = d20 + saveDerivation.total;
+    // Slice 131: honor save advantage / disadvantage. Pre-slice 131
+    // this path always rolled a single d20, silently ignoring effect-
+    // stack save-advantage signals (Magic Resistance, Holy Aura,
+    // Foresight, etc.). Now rolls 2d20 take-max / take-min per the
+    // SaveResult flags. Single d20 still wires when neither advantage
+    // nor disadvantage applies (common case).
+    const rolls: number[] = [rollDie(D20_SIDES, rng)];
+    if (saveDerivation.hasAdvantage || saveDerivation.hasDisadvantage) {
+      rolls.push(rollDie(D20_SIDES, rng));
+    }
+    const used = saveDerivation.hasAdvantage
+      ? 'advantage'
+      : saveDerivation.hasDisadvantage
+        ? 'disadvantage'
+        : 'none';
+    const usedD20 = saveDerivation.hasAdvantage
+      ? Math.max(...rolls)
+      : saveDerivation.hasDisadvantage
+        ? Math.min(...rolls)
+        : rolls[0]!;
+    const total = usedD20 + saveDerivation.total;
     const success = total >= dcResult.total;
     const saveEvent: SaveRolledEvent = {
       id: newEventId() as ULID,
@@ -455,8 +477,8 @@ const planSaveMechanic = (
       targetId,
       ability: mechanic.ability,
       dc: dcResult.total,
-      d20: [d20],
-      used: 'none',
+      d20: rolls,
+      used,
       bonus: saveDerivation.total,
       total,
       success,
