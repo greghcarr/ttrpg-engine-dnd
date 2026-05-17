@@ -2046,7 +2046,15 @@
     { "id": "ear-horn-of-hearing", "itemKind": "magic", "name": "Ear Horn of Hearing", "rarity": "common", "requiresAttunement": false, "effects": [] },
     { "id": "mystery-key", "itemKind": "magic", "name": "Mystery Key", "rarity": "common", "requiresAttunement": false, "effects": [] },
     { "id": "shield-of-expression", "itemKind": "magic", "name": "Shield of Expression", "rarity": "common", "requiresAttunement": false, "effects": [] },
-    { "id": "tankard-of-sobriety", "itemKind": "magic", "name": "Tankard of Sobriety", "rarity": "common", "requiresAttunement": false, "effects": [] }
+    { "id": "tankard-of-sobriety", "itemKind": "magic", "name": "Tankard of Sobriety", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "vicious-weapon", "itemKind": "magic", "name": "Vicious Weapon", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "sun-blade", "itemKind": "magic", "name": "Sun Blade", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "frost-brand", "itemKind": "magic", "name": "Frost Brand", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "holy-avenger", "itemKind": "magic", "name": "Holy Avenger", "rarity": "legendary", "requiresAttunement": true, "attunementCondition": "Paladin", "effects": [] },
+    { "id": "vorpal-sword", "itemKind": "magic", "name": "Vorpal Sword", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "dwarven-thrower", "itemKind": "magic", "name": "Dwarven Thrower", "rarity": "very-rare", "requiresAttunement": true, "attunementCondition": "Dwarf", "effects": [] },
+    { "id": "hammer-of-thunderbolts", "itemKind": "magic", "name": "Hammer of Thunderbolts", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "berserker-axe", "itemKind": "magic", "name": "Berserker Axe", "rarity": "rare", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
