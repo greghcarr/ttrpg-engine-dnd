@@ -291,6 +291,14 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *Illusion-interaction primitive: Silent Image + Major Image + Investigate action* (slice 137). New `Illusion` runtime entity (`state.illusions: Record<IllusionId, Illusion>`) modeled on the slice-94 Trap / slice-135 Sensor pattern: id + label + free-text location + `kind: 'visual' \| 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + a baked `investigationDC` (the caster's spell save DC at cast time) + `disbelievedBy: CharacterId[]` set. Three new event types (`IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`) drive the lifecycle; reducers in [src/engine/reducers/illusion.ts](src/engine/reducers/illusion.ts). Four planners in [src/engine/plan/illusion.ts](src/engine/plan/illusion.ts): `planSilentImage` (1st-level visual), `planMajorImage` (3rd-level audiovisual), `planInvestigateIllusion` (a creature spends an action to Study the illusion, rolls INT (Investigation) against the baked DC, success adds them to `disbelievedBy`), `planDismissIllusion` (caster ends spell voluntarily). `clearConcentrationEffect` sweeps illusions linked to a dropped concentration via `sourceEffectInstanceId`, mirroring the slice-135 sensor sweep. The engine surfaces the disbelief set but doesn't itself act on it; consumers / DMs decide what disbelieving creatures see and do. RAW edge cases not modeled this slice: the caster's bonus-action move (Silent Image) and action-recolour (Major Image) of the illusion's shape (a consumer can re-emit IllusionCreated with new label / location until a future schema extension lets the planner mutate the existing entity). Twelve tests cover both cast paths, both Investigate outcomes, the unknown-spell rejection, voluntary dismiss, concentration-drop cleanup, and the multi-creature belief state (two investigators on the same illusion track independently).
 
+*SRD 5.2.1 content drift: 3 more spells refreshed* (slice 168). Continued spell mechanicalEffects audit:
+
+- **Phantasmal Killer**: `halfOnSuccess: false` → `true`. Per SRD 5.2.1: "On a successful save, the target takes half as much damage, and the spell ends." Pack was using the 2014 shape where save = no damage.
+- **Blade Barrier**: damageType `slashing` → `force`. Per SRD 5.2.1 Blade Barrier deals Force damage (not slashing as the 2014 version specified).
+- **Web**: duration string `"Up to 1 hour"` → `"Concentration, up to 1 hour"`. The `concentration: true` flag was already correct; the display string was missing the prefix.
+
+No test ripple (these fields aren't asserted in tests). Suite green (1452 passed, 197 skipped).
+
 *SRD 5.2.1 content drift: 6 spells refreshed to 2024 mechanics* (slice 167). Audit pass on spell `mechanicalEffects` arrays surfaced 2014→2024 drift on several heavily-used spells:
 
 - **Healing Word**: base 1d4 → 2d4, per-slot scaling 1d4 → 2d4 (2024 PHB doubled the base healing).
