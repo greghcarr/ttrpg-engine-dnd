@@ -59,6 +59,18 @@ export const AutoExpirySchema = z.object({
 });
 export type AutoExpiry = z.infer<typeof AutoExpirySchema>;
 
+// Slice 134: removal-category taxonomy. Conditions can mark
+// themselves as curse / disease / poison so dedicated removal
+// planners (Remove Curse, Lesser Restoration, Greater Restoration,
+// etc.) can strip them in bulk. Optional; conditions without a
+// category aren't reachable by any of those removers and must be
+// stripped through other paths (recurring save, concentration drop,
+// dispel magic, etc.). This is intentionally a small fixed enum
+// matching the 2024 PHB's named removal interactions; broader
+// tagging (e.g. fey-effect, divine-effect) is out of scope.
+export const ConditionCategorySchema = z.enum(['curse', 'disease', 'poison']);
+export type ConditionCategory = z.infer<typeof ConditionCategorySchema>;
+
 export const ConditionSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -78,5 +90,6 @@ export const ConditionSchema = z.object({
     .default([]),
   recurringSave: RecurringSaveSchema.optional(),
   autoExpiry: AutoExpirySchema.optional(),
+  category: ConditionCategorySchema.optional(),
 });
 export type Condition = z.infer<typeof ConditionSchema>;

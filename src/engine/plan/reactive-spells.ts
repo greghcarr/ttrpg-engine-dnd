@@ -27,7 +27,7 @@ import type {
 import { buildEffectStack } from '../../derive/effect-stack.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import { computeSavingThrow } from '../../derive/save.js';
-import type { ConditionAppliedEvent, HealedEvent } from '../../schemas/events/combat.js';
+import type { ConditionAppliedEvent, ConditionRemovedEvent, HealedEvent } from '../../schemas/events/combat.js';
 import type { DamageType } from '../../schemas/primitives.js';
 import type { ConcentrationBrokenEvent } from '../../schemas/events/concentration.js';
 import { newAppliedConditionId } from '../../ids.js';
@@ -244,6 +244,86 @@ export const planDispelMagic = (
       dispelledByCharacterId: intent.casterId,
     } satisfies SpellDispelledEvent);
   }
+  return events;
+};
+
+// Slice 134: Remove Curse. Action, 3rd-level abjuration, range
+// Touch. RAW 2024: "Until the spell ends, you touch one creature
+// or object, and any curse affecting that creature or object
+// ends." The engine models curses as conditions with
+// `category: 'curse'`. The planner walks the touched target's
+// appliedConditions, emits a ConditionRemoved for each match, and
+// consumes the slot + action. No save, no roll.
+export interface RemoveCurseIntent {
+  readonly type: 'RemoveCurse';
+  readonly casterId: string;
+  // The creature whose curses are being stripped. (Object curses
+  // aren't modeled; the engine has no curse target shape for items.)
+  readonly targetId: string;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+const REMOVE_CURSE_MIN_SLOT_LEVEL = 3;
+
+export const planRemoveCurse = (
+  state: CampaignState,
+  content: ResolvedContent,
+  _rng: RNG,
+  intent: RemoveCurseIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const target = state.characters[intent.targetId];
+  invariant(target !== undefined, `Target ${intent.targetId} not found`);
+  const slotLevel = intent.slotLevel ?? REMOVE_CURSE_MIN_SLOT_LEVEL;
+  invariant(
+    slotLevel >= REMOVE_CURSE_MIN_SLOT_LEVEL,
+    'Remove Curse requires a 3rd-level or higher slot',
+  );
+  const knowsSpell =
+    caster.knownSpells.includes('remove-curse') || caster.preparedSpells.includes('remove-curse');
+  invariant(knowsSpell, `Caster ${intent.casterId} does not know Remove Curse`);
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  const action = economyConsumedIfEncountered(state, intent.casterId, at, 'action');
+  if (action !== undefined) events.push(action);
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'remove-curse',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.targetId],
+    castAsRitual: false,
+  });
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  } satisfies SpellSlotConsumedEvent);
+
+  // Walk the target's applied conditions; strip every entry whose
+  // content-pack definition has `category: 'curse'`. RAW: "any
+  // curse affecting that creature ends": no per-curse save or
+  // ability check.
+  for (const applied of target.appliedConditions) {
+    const conditionDef = content.conditions.get(applied.conditionId);
+    if (conditionDef?.category !== 'curse') continue;
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ConditionRemoved',
+      targetId: intent.targetId,
+      conditionId: applied.conditionId,
+    } satisfies ConditionRemovedEvent);
+  }
+
   return events;
 };
 

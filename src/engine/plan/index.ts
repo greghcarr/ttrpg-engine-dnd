@@ -114,6 +114,7 @@ export {
 export {
   planCounterspell,
   planDispelMagic,
+  planRemoveCurse,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -122,6 +123,7 @@ export {
   planConsumeGuidance,
   type CounterspellIntent,
   type DispelMagicIntent,
+  type RemoveCurseIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,

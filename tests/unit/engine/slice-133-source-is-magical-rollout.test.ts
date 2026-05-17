@@ -130,7 +130,7 @@ describe('slice 133: sourceIsMagical rollout to non-cast-spell magical save plan
     const tickEvents = engine.plan.tickRecurringSave(campaign.state, {
       targetId: imp.id,
       conditionId: 'held-paralyzed-active',
-      sourceCharacterId: cleric.id,
+      casterId: cleric.id,
     }).events;
     const save = findEvent<SaveRolledEvent>(tickEvents, 'SaveRolled');
     expect(save).toBeDefined();

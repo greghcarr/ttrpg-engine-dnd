@@ -259,7 +259,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'phantom-steed': { kind: 'summon' },
   'plant-growth': { kind: 'skip', reason: 'area difficult terrain + agricultural utility; area-effect mechanic not modeled' },
   'protection-from-energy': { kind: 'buff', conditionId: 'protection-fire-active', casterChoice: { kind: 'variant', value: 'fire' } },
-  'remove-curse': { kind: 'skip', reason: 'removes the cursed condition; cursed condition itself not yet modeled' },
+  'remove-curse': { kind: 'skip', reason: 'has dedicated planRemoveCurse (strips conditions tagged with category: curse from the touched target)' },
   'revivify': { kind: 'skip', reason: 'has dedicated engine.plan.resurrect (the resurrection planner handles revivify / raise-dead / reincarnate / resurrection / true-resurrection — not planCastSpell)' },
   'sending': { kind: 'skip', reason: 'utility (telepathic message), narrative only' },
   'slow': { kind: 'skip', reason: 'area + multi-effect WIS save (speed half + no reactions + delayed action); composite area condition not modeled' },

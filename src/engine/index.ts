@@ -67,6 +67,7 @@ import {
   planHide,
   planCounterspell,
   planDispelMagic,
+  planRemoveCurse,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -93,6 +94,7 @@ import {
   type HideIntent,
   type CounterspellIntent,
   type DispelMagicIntent,
+  type RemoveCurseIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
@@ -265,6 +267,7 @@ export interface Engine {
     hide(state: CampaignState, intent: Omit<HideIntent, 'type'>): PlanResult;
     counterspell(state: CampaignState, intent: Omit<CounterspellIntent, 'type'>): PlanResult;
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
+    removeCurse(state: CampaignState, intent: Omit<RemoveCurseIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
@@ -513,6 +516,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     dispelMagic(state, intent) {
       return { events: planDispelMagic(state, content, rng, { type: 'DispelMagic', ...intent }) };
+    },
+    removeCurse(state, intent) {
+      return { events: planRemoveCurse(state, content, rng, { type: 'RemoveCurse', ...intent }) };
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };

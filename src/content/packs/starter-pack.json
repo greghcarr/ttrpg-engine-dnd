@@ -3338,7 +3338,8 @@
       "description": "The caster chose one ability score at cast time; while Cursed, the target has Disadvantage on ability checks and saves made with that ability. The chosen ability isn't represented in the condition itself (the engine's casterChoosesVariant primitive is flat; a nested sub-choice for the specific ability isn't modeled), so the consumer carries the ability name out-of-band and enforces the disadvantage on checks/saves.",
       "stackable": false,
       "endsOn": [],
-      "effects": []
+      "effects": [],
+      "category": "curse"
     },
     {
       "id": "cursed-attacks-active",
@@ -3348,7 +3349,8 @@
       "endsOn": [],
       "effects": [
         { "kind": "SetAdvantageVsSource", "on": "attack", "mode": "disadvantage" }
-      ]
+      ],
+      "category": "curse"
     },
     {
       "id": "cursed-inert-active",
@@ -3357,7 +3359,8 @@
       "stackable": false,
       "endsOn": [],
       "effects": [],
-      "recurringSave": { "ability": "WIS", "onFail": "consumeAction" }
+      "recurringSave": { "ability": "WIS", "onFail": "consumeAction" },
+      "category": "curse"
     },
     {
       "id": "cursed-vulnerable-active",
@@ -3375,7 +3378,8 @@
           },
           "actions": [{ "kind": "AddDamage", "dice": "1d8", "damageType": "necrotic" }]
         }
-      ]
+      ],
+      "category": "curse"
     },
     {
       "id": "held-paralyzed-active",
