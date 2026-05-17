@@ -63,6 +63,28 @@ export const SanctuaryProtectedEventSchema = EventEnvelopeSchema.extend({
 });
 export type SanctuaryProtectedEvent = z.infer<typeof SanctuaryProtectedEventSchema>;
 
+// Slice 120. Record-only event surfaced by `planProtection` when a
+// Fighting Style: Protection bearer spends their reaction to impose
+// disadvantage on an attack against a nearby ally. The planner rolls
+// one additional d20; the consumer pairs it with the original
+// AttackRolled's d20 to compute the disadvantaged outcome (lower of
+// the two). Engine doesn't model positions / line-of-sight, so the
+// consumer is responsible for the "ally within 5 ft / attacker
+// visible" preconditions.
+export const ProtectionUsedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ProtectionUsed'),
+  protectorId: ULIDSchema,
+  attackerId: ULIDSchema,
+  // The AttackRolled event id that the disadvantage is being imposed
+  // on. Recorded so the consumer can pair the new d20 with the
+  // original roll for the final outcome.
+  triggeringAttackEventId: ULIDSchema,
+  // Fresh d20 representing the disadvantage roll. Consumers compute
+  // the disadvantaged result as min(original d20, this d20).
+  newD20: z.number().int().min(1).max(20),
+});
+export type ProtectionUsedEvent = z.infer<typeof ProtectionUsedEventSchema>;
+
 export const GuidanceUsedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('GuidanceUsed'),
   targetId: ULIDSchema,

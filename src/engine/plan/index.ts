@@ -116,6 +116,7 @@ export {
   planShield,
   planAbsorbElements,
   planSanctuaryWardSave,
+  planProtection,
   planConsumeGuidance,
   type CounterspellIntent,
   type DispelMagicIntent,
@@ -126,6 +127,8 @@ export {
   type AbsorbElementsOutcome,
   type SanctuaryWardSaveIntent,
   type SanctuaryWardSaveOutcome,
+  type ProtectionIntent,
+  type ProtectionOutcome,
   type ConsumeGuidanceIntent,
   type ConsumeGuidanceOutcome,
 } from './reactive-spells.js';

@@ -111,6 +111,11 @@ export class EffectAccumulator {
   // off-hand damage even when positive (RAW: only negative mods
   // apply by default).
   private twoWeaponFightingFlag: boolean = false;
+  // Slice 120: marker for the Protection Fighting Style. When set,
+  // planProtection lets the bearer spend their reaction to impose
+  // disadvantage on an attack against a nearby ally (shield required;
+  // engine doesn't enforce position).
+  private protectionFightingStyleFlag: boolean = false;
 
   addModifier(target: ModifierTarget, value: number, source: string, predicate?: Predicate): void {
     const key = modifierKey(target);
@@ -386,6 +391,12 @@ export class EffectAccumulator {
   hasTwoWeaponFighting(): boolean {
     return this.twoWeaponFightingFlag;
   }
+  markProtectionFightingStyle(): void {
+    this.protectionFightingStyleFlag = true;
+  }
+  hasProtectionFightingStyle(): boolean {
+    return this.protectionFightingStyleFlag;
+  }
 }
 
 export interface BuilderContext {
@@ -491,6 +502,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();
+      return;
+    case 'GrantProtectionFightingStyle':
+      acc.markProtectionFightingStyle();
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();

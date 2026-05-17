@@ -436,6 +436,11 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const warded = characterName(stateBefore, event.wardedCharacterId);
       return `**${attacker}** fails the Sanctuary WIS save; the attack on **${warded}** is averted.`;
     }
+    case 'ProtectionUsed': {
+      const protector = characterName(stateBefore, event.protectorId);
+      const attacker = characterName(stateBefore, event.attackerId);
+      return `**${protector}** uses their reaction (Protection); **${attacker}**'s attack now has disadvantage (new d20: ${event.newD20}).`;
+    }
     case 'HPMaxBonusChanged': {
       const who = characterName(stateBefore, event.targetId);
       const sign = event.delta >= 0 ? '+' : '';

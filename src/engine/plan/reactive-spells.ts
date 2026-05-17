@@ -21,8 +21,10 @@ import type {
   ShieldCastEvent,
   AbsorbElementsCastEvent,
   SanctuaryProtectedEvent,
+  ProtectionUsedEvent,
   GuidanceUsedEvent,
 } from '../../schemas/events/reactive-spells.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import type { ConditionAppliedEvent, HealedEvent } from '../../schemas/events/combat.js';
@@ -746,4 +748,79 @@ export const planSanctuaryWardSave = (
     triggeringSaveEventId: saveEvent.id,
   };
   return { events: [saveEvent, protectedEvent], prevented: true };
+};
+
+// Slice 120 — Protection Fighting Style reaction. RAW 2024:
+// "When a creature you can see attacks a target other than you that
+// is within 5 feet of you, you can use your reaction to impose
+// Disadvantage on the attack roll. You must be wielding a Shield."
+//
+// The "you can see attacker" and "ally within 5 ft" preconditions are
+// position / vision concerns the engine doesn't model — the consumer
+// owns those checks. This planner enforces what the engine does know:
+// the protector exists, has the Fighting Style: Protection marker in
+// their effect stack, has a shield equipped, and hasn't used their
+// reaction this round. Then it rolls one fresh d20 for the consumer
+// to pair with the original AttackRolled.d20 (lower-of-two = the
+// disadvantage outcome).
+
+export interface ProtectionIntent {
+  readonly type: 'Protection';
+  readonly protectorId: string;
+  readonly attackerId: string;
+  // The AttackRolled event id whose roll is being given disadvantage.
+  // Recorded on the ProtectionUsed event so the consumer can pair the
+  // fresh d20 with the original.
+  readonly triggeringAttackEventId: string;
+  readonly at?: string;
+}
+
+export interface ProtectionOutcome {
+  readonly events: ReadonlyArray<Event>;
+  readonly newD20: number;
+}
+
+export const planProtection = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: ProtectionIntent,
+): ProtectionOutcome => {
+  const protector = state.characters[intent.protectorId];
+  invariant(protector !== undefined, `Protector ${intent.protectorId} not found`);
+  if (protector.equipped.shield === undefined) {
+    throw new Error(
+      `${protector.name} cannot use Protection: a shield must be equipped`,
+    );
+  }
+  const effects = buildEffectStack({
+    character: protector,
+    itemInstances: state.itemInstances,
+    content,
+    pendingChoices: state.pendingChoices,
+    characters: state.characters,
+  });
+  if (!effects.hasProtectionFightingStyle()) {
+    throw new Error(
+      `${protector.name} cannot use Protection: does not have the Fighting Style`,
+    );
+  }
+  assertReactionAvailable(state, intent.protectorId, 'use Protection');
+  const at = intent.at ?? nowIso();
+
+  const newD20 = rollDie(D20_SIDES, rng);
+  const events: Event[] = [];
+  const reaction = economyConsumedIfEncountered(state, intent.protectorId, at, 'reaction');
+  if (reaction !== undefined) events.push(reaction);
+  const protectionEvent: ProtectionUsedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ProtectionUsed',
+    protectorId: intent.protectorId as ULID,
+    attackerId: intent.attackerId as ULID,
+    triggeringAttackEventId: intent.triggeringAttackEventId as ULID,
+    newD20,
+  };
+  events.push(protectionEvent);
+  return { events, newD20 };
 };

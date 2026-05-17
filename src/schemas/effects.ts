@@ -259,6 +259,13 @@ export type Effect =
   // damage only includes negative ability mods per RAW. Canonical
   // user: the Two-Weapon Fighting Fighting Style.
   | { kind: 'GrantTwoWeaponFighting' }
+  // Slice 120. Marker that enables the Protection reaction:
+  // planProtection consults the bearer's effect stack for this flag
+  // before letting them spend their reaction to impose disadvantage on
+  // an attack against a nearby ally. The shield requirement is checked
+  // separately (character.equipped.shield !== undefined). Canonical
+  // user: the Protection Fighting Style.
+  | { kind: 'GrantProtectionFightingStyle' }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -470,6 +477,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantTwoWeaponFighting'),
     }),
     z.object({
+      kind: z.literal('GrantProtectionFightingStyle'),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -515,5 +525,6 @@ export const EFFECT_KINDS = [
   'GrantFallingProtection',
   'PreventFatalDamage',
   'GrantTwoWeaponFighting',
+  'GrantProtectionFightingStyle',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

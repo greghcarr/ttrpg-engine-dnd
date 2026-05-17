@@ -426,6 +426,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // case for the transcript and for the consumer's branching
         // (consumer redirects or drops the attack).
         break;
+      case 'ProtectionUsed':
+        // Pure notification — the new d20 is on the event payload;
+        // the consumer pairs it with the original AttackRolled's d20
+        // to compute the disadvantaged outcome (lower of the two).
+        // ActionEconomyConsumed handles the reaction bookkeeping.
+        break;
       case 'GuidanceUsed':
         // Pure notification — the 'guided' condition is lifted by the
         // ConcentrationBroken(reason='used') that the planner emits
