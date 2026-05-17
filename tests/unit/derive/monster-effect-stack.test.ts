@@ -84,17 +84,19 @@ describe('buildEffectStack folds monster statblock data', () => {
     expect(stack.hasImmunity('fire')).toBe(true);
   });
 
-  it('Specter: traits[] GrantResistance qualified nonmagical folds verbatim', () => {
-    // Specter ships three trait entries: B/P/S nonmagical resistance.
-    // The resistance only applies against non-magical damage; magical
-    // sources cut through. This exercises both the traits[] fold and
-    // the qualifier-aware resistance lookup in one shot.
+  it('Specter: SRD 5.2.1 unqualified B/P/S resistance + necrotic/poison immunity folds', () => {
+    // SRD 5.2.1 simplified Specter's resistance: B/P/S are now unqualified
+    // (resists both magical and nonmagical sources), where 2014 had them
+    // as nonmagical-only. Slice 162 added the unqualified entries to
+    // damageResistances per the 2024 SRD. The pack retains the slice-112
+    // nonmagical traits as redundant (a cleanup follow-up); both layers
+    // produce the same observed resistance against any B/P/S source.
     const specter = buildCreature('specter', 'Haunter');
     const stack = stackFor(specter);
     expect(stack.hasResistance('bludgeoning', false)).toBe(true);
     expect(stack.hasResistance('piercing', false)).toBe(true);
     expect(stack.hasResistance('slashing', false)).toBe(true);
-    expect(stack.hasResistance('bludgeoning', true)).toBe(false);
+    expect(stack.hasResistance('bludgeoning', true)).toBe(true);
     expect(stack.hasResistance('necrotic', false)).toBe(false);
   });
 
