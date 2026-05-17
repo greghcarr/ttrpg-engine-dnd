@@ -113,6 +113,10 @@ const SpellAutoHitMechanicSchema = z.object({
 // and set `casterChoosesVariant` listing each variant's `key` and the
 // `conditionId` it applies. Exactly one of the two must be set; the
 // planner validates at cast time.
+//
+// `appliedConditionLevel` (slice 124) stamps an initial `level` on the
+// emitted ConditionApplied. Lets a buff carry a pool count
+// (Mirror Image: 3 duplicates) at cast time. Omitted = no level.
 const SpellBuffMechanicSchema = z.object({
   kind: z.literal('buff'),
   conditionId: z.string().optional(),
@@ -128,6 +132,7 @@ const SpellBuffMechanicSchema = z.object({
         .min(2),
     })
     .optional(),
+  appliedConditionLevel: z.number().int().min(1).optional(),
 });
 
 // Strips one of a fixed list of conditions from each target (Lesser

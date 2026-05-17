@@ -1704,7 +1704,7 @@
     { "id": "locate-object", "name": "Locate Object", "level": 2, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a forked twig" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "druid", "paladin", "ranger", "wizard"], "mechanicalEffects": [] },
     { "id": "magic-mouth", "name": "Magic Mouth", "level": 2, "school": "illusion", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small bit of honeycomb and jade dust worth 10+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": true, "classes": ["bard", "wizard"], "mechanicalEffects": [] },
     { "id": "magic-weapon", "name": "Magic Weapon", "level": 2, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["paladin", "sorcerer", "wizard"], "mechanicalEffects": [] },
-    { "id": "mirror-image", "name": "Mirror Image", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
+    { "id": "mirror-image", "name": "Mirror Image", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "mirror-image-active", "appliedConditionLevel": 3 }] },
     { "id": "nystuls-magic-aura", "name": "Nystul's Magic Aura", "level": 2, "school": "illusion", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a small square of silk" }, "duration": "24 hours", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "pass-without-trace", "name": "Pass without Trace", "level": 2, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "ashes from a burned leaf of mistletoe and a sprig of spruce" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "pass-without-trace-active" }] },
     { "id": "phantasmal-force", "name": "Phantasmal Force", "level": 2, "school": "illusion", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of fleece" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
@@ -3046,6 +3046,14 @@
           "actions": [{ "kind": "AddDamageToAttacker", "dice": "2d8", "damageType": "cold" }]
         }
       ]
+    },
+    {
+      "id": "mirror-image-active",
+      "name": "Mirror Image",
+      "description": "Three illusory duplicates protect the bearer (PHB 2024). On each incoming weapon attack, the planner rolls a deflection d20: 6+ at 3 duplicates, 8+ at 2, 11+ at 1 redirects the attack to a duplicate with AC 10 + bearer DEX mod. A hit destroys the duplicate; a miss does nothing. When all 3 duplicates are destroyed, the condition is removed automatically. The bearer's AppliedCondition.level tracks remaining duplicates (starts at 3). Slice 124 wires planAttack + planOffHandAttack; cast-spell.ts attack-mechanic spells (Eldritch Blast etc.) don't yet consult Mirror Image (deferred — rare in practice since most attacks against the bearer are weapon attacks). RAW vision-gate exemptions for blind / blindsight / truesight attackers are not modeled — the spell fires regardless of attacker senses. Duration 1 minute, not concentration; consumer manages duration narratively.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "freedom-of-movement-active",

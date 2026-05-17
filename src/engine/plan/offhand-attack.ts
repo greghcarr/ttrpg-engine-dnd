@@ -10,7 +10,8 @@ import type {
 import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
-import { applyMartialArtsDieScaling } from './attack.js';
+import { applyMartialArtsDieScaling, tryBuildDeflectedAttack } from './attack.js';
+import { findMirrorImage } from '../../derive/mirror-image.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { computeAttackBonus } from '../../derive/attack.js';
@@ -119,6 +120,25 @@ export const planOffHandAttack = (
     content,
     characters: state.characters,
   });
+  // Slice 124: Mirror Image deflection. Off-hand attacks against a
+  // warded bearer roll the deflection d20 first; on success the
+  // attack rolls against the duplicate AC and emits no damage chain.
+  // Same vision-gate caveat as the main attack path.
+  const mirrorImage = findMirrorImage(target);
+  if (mirrorImage !== undefined) {
+    const deflectedEvents = tryBuildDeflectedAttack({
+      attackerId: intent.attackerId,
+      bearerId: intent.targetId,
+      weaponInstanceId: intent.weaponInstanceId,
+      attackBonus: attackBonusResult.total,
+      advantage: 'none',
+      attackKind: weaponDef.attackKind,
+      rng,
+      at,
+      mirrorImage,
+    });
+    if (deflectedEvents !== undefined) return [...economyEvents, ...deflectedEvents];
+  }
   const d20 = rollDie(D20_SIDES, rng);
   const total = d20 + attackBonusResult.total;
   const naturalHit = d20 === NAT_20;

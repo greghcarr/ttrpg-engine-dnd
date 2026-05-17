@@ -6,7 +6,8 @@ import type {
   DamageRolledEvent,
   DamageRoll,
 } from '../../schemas/events/attack.js';
-import type { DamageAppliedEvent } from '../../schemas/events/combat.js';
+import type { DamageAppliedEvent, ConditionRemovedEvent } from '../../schemas/events/combat.js';
+import type { MirrorImageDeflectedEvent } from '../../schemas/events/mirror-image.js';
 import type { ItemTemporaryBuff } from '../../schemas/runtime/item-instance.js';
 import type { RNG } from '../../rng/index.js';
 import { rollDie, parseDiceExpression } from '../../rng/dice.js';
@@ -20,6 +21,12 @@ import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
 import { isMagicWeaponAttack } from '../../derive/magicality.js';
+import {
+  findMirrorImage,
+  mirrorImageThreshold,
+  duplicateAC as computeDuplicateAC,
+  type MirrorImageState,
+} from '../../derive/mirror-image.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
@@ -54,6 +61,106 @@ const buildBuffExtraDamageRoll = (
     modifier: parsed.modifier,
     type: buff.extraDamageType,
   };
+};
+
+// Slice 124. Builds the event tail for a Mirror Image-deflected
+// attack: AttackRolled (with hit:false against the duplicate AC) +
+// MirrorImageDeflected, plus a trailing ConditionRemoved when the
+// last duplicate is destroyed. Returns undefined when the deflection
+// d20 doesn't meet the duplicate-pool threshold; callers fall back
+// to the normal attack flow.
+//
+// Deferred: the deflected AttackRolled doesn't run `dispatchTriggers`.
+// Bearer-side hit-gated riders (AoA, Fire Shield) wouldn't fire
+// anyway (hit:false). Attacker-side on-miss riders (e.g., Studied
+// Attacks' consume-on-attack-vs-source) would fire RAW-correctly on
+// a real miss but are skipped here — a contrived edge case (attacker
+// studying a Mirror-Image-warded bearer). Wire trigger dispatch in
+// a follow-up if it ever matters.
+export interface DeflectedAttackInput {
+  readonly attackerId: ULID;
+  readonly bearerId: ULID;
+  readonly weaponInstanceId: ULID;
+  readonly attackBonus: number;
+  readonly advantage: 'none' | 'advantage' | 'disadvantage';
+  readonly attackKind: 'melee' | 'ranged';
+  readonly rng: RNG;
+  readonly at: string;
+  readonly mirrorImage: MirrorImageState;
+  readonly causedByEventId?: ULID;
+}
+
+export const tryBuildDeflectedAttack = (
+  input: DeflectedAttackInput,
+): ReadonlyArray<Event> | undefined => {
+  const deflectionD20 = rollDie(D20_SIDES, input.rng);
+  const threshold = mirrorImageThreshold(input.mirrorImage.duplicates);
+  if (deflectionD20 < threshold) return undefined;
+
+  const duplicateAC = computeDuplicateAC(input.mirrorImage.bearerDexMod);
+  const attackRolls: number[] = [rollDie(D20_SIDES, input.rng)];
+  if (input.advantage !== 'none') attackRolls.push(rollDie(D20_SIDES, input.rng));
+  const usedRoll =
+    input.advantage === 'advantage'
+      ? Math.max(...attackRolls)
+      : input.advantage === 'disadvantage'
+        ? Math.min(...attackRolls)
+        : (attackRolls[0] ?? 0);
+  const attackTotal = usedRoll + input.attackBonus;
+  const natural20 = usedRoll === NAT_20;
+  const natural1 = usedRoll === NAT_1;
+  const duplicateHit = !natural1 && (natural20 || attackTotal >= duplicateAC);
+  const duplicatesAfter = duplicateHit
+    ? input.mirrorImage.duplicates - 1
+    : input.mirrorImage.duplicates;
+
+  const attackRolled: AttackRolledEvent = {
+    id: newEventId() as ULID,
+    at: input.at,
+    type: 'AttackRolled',
+    attackerId: input.attackerId,
+    targetId: input.bearerId,
+    weaponInstanceId: input.weaponInstanceId,
+    d20: attackRolls,
+    used: input.advantage,
+    attackBonus: input.attackBonus,
+    total: attackTotal,
+    targetAC: duplicateAC,
+    hit: false,
+    critical: false,
+    attackKind: input.attackKind,
+  };
+  const deflected: MirrorImageDeflectedEvent = {
+    id: newEventId() as ULID,
+    at: input.at,
+    type: 'MirrorImageDeflected',
+    bearerId: input.bearerId,
+    attackerId: input.attackerId,
+    appliedConditionId: input.mirrorImage.appliedConditionId,
+    deflectionD20,
+    deflectionThreshold: threshold,
+    duplicateAC,
+    attackD20: usedRoll,
+    attackTotal,
+    duplicateHit,
+    duplicatesAfter,
+    ...(input.causedByEventId !== undefined
+      ? { causedByEventId: input.causedByEventId }
+      : {}),
+  };
+  const events: Event[] = [attackRolled, deflected];
+  if (duplicateHit && duplicatesAfter === 0) {
+    const removed: ConditionRemovedEvent = {
+      id: newEventId() as ULID,
+      at: input.at,
+      type: 'ConditionRemoved',
+      targetId: input.bearerId,
+      conditionId: 'mirror-image-active',
+      causedByEventId: deflected.id,
+    };
+    events.push(removed);
+  }
+  return events;
 };
 
 export const COVER_KINDS = ['none', 'half', 'three-quarters', 'total'] as const;
@@ -298,6 +405,27 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     advantage = 'none';
   } else if (advantage === 'disadvantage' && effectivelyGrantsAdvantage) {
     advantage = 'none';
+  }
+  // Slice 124: Mirror Image deflection. Roll the deflection d20 before
+  // the attack roll; on success the attack rolls against the duplicate
+  // AC = 10 + bearer DEX mod instead, and emits no damage chain. The
+  // deferred vision gate (blind / blindsight / truesight attackers
+  // bypass the spell per RAW) is not modeled here — Mirror Image fires
+  // against every attack while the bearer carries the condition.
+  const mirrorImage = findMirrorImage(target);
+  if (mirrorImage !== undefined) {
+    const deflectedEvents = tryBuildDeflectedAttack({
+      attackerId: input.attackerId,
+      bearerId: input.targetId,
+      weaponInstanceId: input.weaponInstanceId,
+      attackBonus: attackBonusResult.total,
+      advantage,
+      attackKind: weaponDef.attackKind,
+      rng,
+      at,
+      mirrorImage,
+    });
+    if (deflectedEvents !== undefined) return deflectedEvents;
   }
   const rolls: number[] = [rollDie(D20_SIDES, rng)];
   if (advantage !== 'none') {

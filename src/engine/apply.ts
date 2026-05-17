@@ -107,6 +107,7 @@ import {
   applySpellDispelled,
   applyItemIdentified,
 } from './reducers/reactive-spells.js';
+import { applyMirrorImageDeflected } from './reducers/mirror-image.js';
 import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
 import {
   applyMounted,
@@ -437,6 +438,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // ConcentrationBroken(reason='used') that the planner emits
         // alongside this event. The d4 value is informational; the
         // consumer adds it to whatever ability check it applies to.
+        break;
+      case 'MirrorImageDeflected':
+        applyMirrorImageDeflected(draft, event);
         break;
       case 'WeaponMasteryActivated':
         applyWeaponMasteryActivated(draft, event);

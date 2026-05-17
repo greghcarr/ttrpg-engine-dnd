@@ -173,6 +173,7 @@ import {
   TrapTriggeredEventSchema,
   TrapExpiredEventSchema,
 } from './traps.js';
+import { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
   CharacterCreatedEventSchema,
@@ -297,6 +298,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
+  MirrorImageDeflectedEventSchema,
 ]);
 export type Event = z.infer<typeof EventSchema>;
 export type EventType = Event['type'];
@@ -422,6 +424,7 @@ export const EVENT_TYPES = [
   'CampaignSettingsChanged',
   'HeroPointGranted',
   'HeroPointSpent',
+  'MirrorImageDeflected',
 ] as const satisfies ReadonlyArray<EventType>;
 
 export type {
@@ -835,3 +838,5 @@ export type {
   TrapExpiredEvent,
   TrapExpiryReason,
 } from './traps.js';
+export { MirrorImageDeflectedEventSchema } from './mirror-image.js';
+export type { MirrorImageDeflectedEvent } from './mirror-image.js';

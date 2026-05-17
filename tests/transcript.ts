@@ -436,6 +436,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const warded = characterName(stateBefore, event.wardedCharacterId);
       return `**${attacker}** fails the Sanctuary WIS save; the attack on **${warded}** is averted.`;
     }
+    case 'MirrorImageDeflected': {
+      const attacker = characterName(stateBefore, event.attackerId);
+      const bearer = characterName(stateBefore, event.bearerId);
+      const outcome = event.duplicateHit
+        ? `hits the duplicate (AC ${event.duplicateAC}) — destroyed, ${event.duplicatesAfter} remaining`
+        : `misses the duplicate (AC ${event.duplicateAC}) — ${event.duplicatesAfter} remaining`;
+      return `**${attacker}**'s attack is deflected to a Mirror Image duplicate of **${bearer}** (d20 ${event.deflectionD20} >= ${event.deflectionThreshold}); attack d20(${event.attackD20}) total ${event.attackTotal} ${outcome}.`;
+    }
     case 'ProtectionUsed': {
       const protector = characterName(stateBefore, event.protectorId);
       const attacker = characterName(stateBefore, event.attackerId);

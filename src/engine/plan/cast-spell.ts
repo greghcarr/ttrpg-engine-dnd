@@ -746,6 +746,11 @@ const planBuffMechanic = (
       ...(expiryFields.expiryTrigger !== undefined
         ? { expiryTrigger: expiryFields.expiryTrigger }
         : {}),
+      // Slice 124: buff mechanics can stamp an initial pool count
+      // (Mirror Image: 3 duplicates) via appliedConditionLevel.
+      ...(mechanic.appliedConditionLevel !== undefined
+        ? { level: mechanic.appliedConditionLevel }
+        : {}),
     };
     events.push(cond);
     conditionsApplied.push({
