@@ -111,14 +111,18 @@ describe('buildEffectStack folds monster statblock data', () => {
     expect(stack.hasConditionImmunity('paralyzed')).toBe(true);
   });
 
-  it('Imp: traits[] from batch 1.7 fold (Fiend nonmagical B/P/S)', () => {
-    // Confirms the fold catches content-batch-1.7's slice-112-shaped
-    // GrantResistance entries on the new Fiend statblocks.
+  it('Imp: no B/P/S resistance per SRD 5.2.1 (slice 163 trait-cleanup)', () => {
+    // Slice 163 removed the 2014-era nonmagical-B/P/S GrantResistance traits
+    // from Imp and 22 other monsters that SRD 5.2.1 simplified to either
+    // unqualified B/P/S resistance (handled via damageResistances on
+    // Specter/Ghost/etc.) or no B/P/S resistance at all. Imp's SRD 5.2.1
+    // entry lists only Cold resistance; no B/P/S resistance of any kind.
     const imp = buildCreature('imp', 'Naughty');
     const stack = stackFor(imp);
-    expect(stack.hasResistance('bludgeoning', false)).toBe(true);
-    expect(stack.hasResistance('piercing', false)).toBe(true);
-    expect(stack.hasResistance('slashing', false)).toBe(true);
+    expect(stack.hasResistance('bludgeoning', false)).toBe(false);
+    expect(stack.hasResistance('piercing', false)).toBe(false);
+    expect(stack.hasResistance('slashing', false)).toBe(false);
+    expect(stack.hasResistance('cold', false)).toBe(true);
   });
 
   it('PC (no statblockId): monster fold short-circuits — no monster data accidentally folded', () => {
@@ -157,7 +161,9 @@ describe('monster fold flows through mitigateDamage (end-to-end signal)', () => 
     expect(out!.mitigation).toBe('immune');
   });
 
-  it('Imp halves nonmagical slashing damage but takes full magical slashing (traits qualifier)', () => {
+  it('Imp takes full slashing damage from any source per SRD 5.2.1 (slice 163)', () => {
+    // SRD 5.2.1 Imp has no B/P/S resistance (only Cold). The 2014-era
+    // nonmagical-B/P/S traits were removed in slice 163.
     const imp = buildCreature('imp', 'Naughty');
     const [nonMagical] = mitigateDamage({
       character: imp,
@@ -166,8 +172,7 @@ describe('monster fold flows through mitigateDamage (end-to-end signal)', () => 
       rawComponents: [{ amount: 10, type: 'slashing' }],
       sourceIsMagical: false,
     });
-    expect(nonMagical!.amount).toBe(5);
-    expect(nonMagical!.mitigation).toBe('resisted');
+    expect(nonMagical!.amount).toBe(10);
     const [magical] = mitigateDamage({
       character: imp,
       itemInstances: {},
