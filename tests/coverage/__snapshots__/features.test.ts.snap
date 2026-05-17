@@ -2,9 +2,9 @@
 
 exports[`feature-coverage matrix: class features > counts: wired vs stub split is stable 1`] = `
 {
-  "stub": 76,
+  "stub": 75,
   "total": 173,
-  "wired": 97,
+  "wired": 98,
 }
 `;
 
@@ -72,7 +72,7 @@ exports[`feature-coverage matrix: class features > every named class feature par
   "fighter L11 extra-attack-2 [wired]",
   "fighter L11 tactical-master [stub]",
   "fighter L13 indomitable-2 [wired]",
-  "fighter L13 studied-attacks [stub]",
+  "fighter L13 studied-attacks [wired]",
   "fighter L17 action-surge-2 [wired]",
   "fighter L20 extra-attack-3 [wired]",
   "fighter L20 indomitable-3 [wired]",
@@ -631,6 +631,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "spirit-shroud-radiant-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 2,
+    "id": "studied-target-active",
     "stackable": false,
   },
   {

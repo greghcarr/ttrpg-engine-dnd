@@ -189,7 +189,7 @@
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "11": { "proficiencyBonus": 4, "features": [{ "id": "extra-attack-2", "name": "Extra Attack (2)", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "tactical-master", "name": "Tactical Master", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "13": { "proficiencyBonus": 5, "features": [{ "id": "indomitable-2", "name": "Indomitable (2/long rest)", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 2, "recharge": "longRest" }] }, { "id": "studied-attacks", "name": "Studied Attacks", "effects": [] }], "columns": {} },
+        "13": { "proficiencyBonus": 5, "features": [{ "id": "indomitable-2", "name": "Indomitable (2/long rest)", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 2, "recharge": "longRest" }] }, { "id": "studied-attacks", "name": "Studied Attacks", "effects": [{ "kind": "OnEvent", "id": "studied-attacks-on-miss", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": false }] } }, "actions": [{ "kind": "ApplyConditionToAttacker", "conditionId": "studied-target-active", "sourceFromEventTarget": true }] }] }], "columns": {} },
         "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
@@ -3122,6 +3122,26 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantSense", "sense": "darkvision", "range": 60 }
+      ]
+    },
+    {
+      "id": "studied-target-active",
+      "name": "Studied Target",
+      "description": "Fighter has Advantage on the next attack roll against the studied creature (Studied Attacks, Fighter L13). The condition lives on the fighter with `sourceCharacterId` set to the missed creature (slice 108's `sourceFromEventTarget` flag on ApplyConditionToAttacker); SetAdvantageVsSource keys against that creature so only attacks against THAT target get the bonus. The OnEvent rider consumes the condition on the fighter's next attack against the studied creature (`event.attackerIsSelf` + `event.targetIsSource`, consumeOnTrigger), regardless of hit/miss. Known limitations: (1) RAW also expires the studying \"before end of your next turn\" — that time-window expiry isn't modeled (the consumer can remove the condition manually at end of turn). (2) Consecutive misses against the same target don't refresh: the second miss's class-feature OnEvent re-applies, but the ConditionApplied reducer dedupes by conditionId so the second application is a no-op while the consume rider still fires, leaving the condition gone. Most playgroups won't hit this edge case.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "SetAdvantageVsSource", "on": "attack", "mode": "advantage" },
+        {
+          "kind": "OnEvent",
+          "id": "studied-target-consume",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.targetIsSource", "value": true }] }
+          },
+          "actions": [],
+          "consumeOnTrigger": true
+        }
       ]
     },
     {

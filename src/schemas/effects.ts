@@ -89,7 +89,14 @@ export type TriggerAction =
   // is omitted the condition sticks until consumer removes it; when
   // set, slice 102's auto-expiry lifts it at the start of the bearer's
   // turn in the target round.
-  | { kind: 'ApplyConditionToAttacker'; conditionId: string; durationRounds?: number }
+  //
+  // When `sourceFromEventTarget` is true, the emitted ConditionApplied's
+  // `sourceCharacterId` is set to the triggering event's `targetId`
+  // instead of the rider's bearer. Used by Fighter Studied Attacks
+  // (L13): on a miss, the fighter applies a self-condition keyed
+  // against the missed creature so SetAdvantageVsSource grants
+  // advantage on the fighter's next attack against that same target.
+  | { kind: 'ApplyConditionToAttacker'; conditionId: string; durationRounds?: number; sourceFromEventTarget?: boolean }
   | { kind: 'SpendResource'; resourceId: string; amount: number }
   | { kind: 'ModifyDamageTaken'; amount: number | Formula; cap?: number }
   | { kind: 'EmitEvent'; eventType: string; payload?: unknown };
@@ -118,6 +125,7 @@ export const TriggerActionSchema: z.ZodType<TriggerAction> = z.union([
     kind: z.literal('ApplyConditionToAttacker'),
     conditionId: z.string(),
     durationRounds: z.number().int().optional(),
+    sourceFromEventTarget: z.boolean().optional(),
   }),
   z.object({
     kind: z.literal('SpendResource'),

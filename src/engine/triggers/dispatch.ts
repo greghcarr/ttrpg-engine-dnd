@@ -59,6 +59,11 @@ const buildEventFacts = (
       appliedFrom?.sourceCharacterId !== undefined
         && event.attackerId === appliedFrom.sourceCharacterId,
     );
+    facts.set(
+      'event.targetIsSource',
+      appliedFrom?.sourceCharacterId !== undefined
+        && event.targetId === appliedFrom.sourceCharacterId,
+    );
     const attacker = state.characters[event.attackerId];
     if (attacker !== undefined) {
       facts.set('event.attackerCreatureType', getCreatureType(attacker, content));
@@ -222,6 +227,13 @@ const fireApplyCondition = (
 // bearer's id as `sourceCharacterId` so slice 102's auto-expiry
 // can find it (when `durationRounds` is supplied). Only fires on
 // AttackRolled (the only event with an attackerId).
+//
+// When `action.sourceFromEventTarget` is true (Fighter Studied
+// Attacks: bearer-keys-on-victim), the emitted ConditionApplied
+// stamps `sourceCharacterId = event.targetId` (the missed creature)
+// instead of the bearer. This lets SetAdvantageVsSource on the
+// applied condition key against that target so the fighter's next
+// attack against the same creature gets advantage.
 const fireApplyConditionToAttacker = (
   action: ApplyConditionToAttackerAction,
   event: Event,
@@ -234,6 +246,8 @@ const fireApplyConditionToAttacker = (
     action.durationRounds !== undefined && currentRound !== undefined
       ? currentRound + action.durationRounds
       : undefined;
+  const sourceCharacterId =
+    action.sourceFromEventTarget === true ? event.targetId : (bearerId as ULID);
   const applied: ConditionAppliedEvent = {
     id: newEventId() as ULID,
     at: event.at,
@@ -241,7 +255,7 @@ const fireApplyConditionToAttacker = (
     targetId: event.attackerId,
     conditionId: action.conditionId,
     appliedConditionId: newAppliedConditionId() as ULID,
-    sourceCharacterId: bearerId as ULID,
+    sourceCharacterId,
     ...(expiresOnRound !== undefined ? { expiresOnRound } : {}),
     causedByEventId: causedByEventId as ULID,
   };
