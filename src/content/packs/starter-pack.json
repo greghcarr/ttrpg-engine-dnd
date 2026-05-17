@@ -2120,7 +2120,15 @@
     { "id": "bracers-of-defense", "itemKind": "magic", "name": "Bracers of Defense", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "boots-of-levitation", "itemKind": "magic", "name": "Boots of Levitation", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "boots-of-speed", "itemKind": "magic", "name": "Boots of Speed", "rarity": "rare", "requiresAttunement": true, "effects": [] },
-    { "id": "smoldering-armor", "itemKind": "magic", "name": "Smoldering Armor", "rarity": "common", "requiresAttunement": false, "effects": [] }
+    { "id": "smoldering-armor", "itemKind": "magic", "name": "Smoldering Armor", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "cloak-of-the-manta-ray", "itemKind": "magic", "name": "Cloak of the Manta Ray", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "amulet-of-proof-against-detection-and-location", "itemKind": "magic", "name": "Amulet of Proof Against Detection and Location", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "periapt-of-health", "itemKind": "magic", "name": "Periapt of Health", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "talisman-of-the-sphere", "itemKind": "magic", "name": "Talisman of the Sphere", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
+    { "id": "eyes-of-minute-seeing", "itemKind": "magic", "name": "Eyes of Minute Seeing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "helm-of-comprehending-languages", "itemKind": "magic", "name": "Helm of Comprehending Languages", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "gloves-of-thievery", "itemKind": "magic", "name": "Gloves of Thievery", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "boots-of-the-winterlands", "itemKind": "magic", "name": "Boots of the Winterlands", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
