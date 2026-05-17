@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 1.5**
+
+6 low-CR Beast tier-up entries added: Mastiff (CR 1/8), Boar (CR 1/4), Constrictor Snake (CR 1/4), Giant Frog (CR 1/4), Giant Centipede (CR 1/4), Black Bear (CR 1/2). Brings the Beast pile to encounter-table density for wilderness / dungeon ambient threats. All six ship as bare statblocks (`traits: []`); RAW Multiattack / Keen senses / on-hit save-or-condition rider fold into existing deferrals. Four new deferrals introduced and documented in the gaps doc: on-hit auto-grapple (Constrictor Snake, Giant Frog — bite that applies grappled / restrained without a save), Charge (Boar — movement-conditional +1d6 + STR save vs prone, needs a movement-since-turn-start fact), Relentless (Boar — flat-damage-cap variant of Undead Fortitude), Swallow (Giant Frog — compound multi-step action with recurring acid + blinded + restrained while consumed), and degree-of-failure save tier (Giant Centipede — fail-by-5 compounds to 0 HP + no heal for 1 hour). Monster count grows from 33 to 39.
+
 **Content authoring: monsters batch 1.4**
 
 4 caster NPCs added to close the spell-using humanoid gap: Apprentice Wizard (CR 1/4), Priest (CR 2), Druid (CR 2), Mage (CR 6). All four ship as bare statblocks (`traits: []`); their cantrip and prepared-spell tables fold into the existing monster-spellcasting deferral note alongside Acolyte and Cult Fanatic (six casters now waiting on the same primitive — when monster spellcasting lands, all six wire as pure data). One new deferral introduced: Divine Eminence (Priest's bonus-action slot-spend that adds radiant damage to the next weapon attack — needs a slot-spend-without-cast primitive composed with the existing on-hit-add-damage rider shape). Monster count grows from 29 to 33.
