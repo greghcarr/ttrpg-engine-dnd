@@ -4213,6 +4213,42 @@
       "xp": 3900,
       "proficiencyBonus": 3,
       "languages": []
+    },
+    {
+      "id": "gladiator",
+      "name": "Gladiator",
+      "size": "Medium",
+      "type": "Humanoid",
+      "alignment": "any",
+      "ac": 16,
+      "hp": { "average": 112, "formula": "15d8+45" },
+      "speed": { "walk": 30 },
+      "abilityScores": { "STR": 18, "DEX": 15, "CON": 16, "INT": 10, "WIS": 12, "CHA": 15 },
+      "savingThrows": { "STR": 7, "DEX": 5, "CON": 6 },
+      "skills": { "athletics": 10, "intimidation": 5 },
+      "cr": 5,
+      "xp": 1800,
+      "proficiencyBonus": 3,
+      "languages": ["common"]
+    },
+    {
+      "id": "assassin",
+      "name": "Assassin",
+      "size": "Medium",
+      "type": "Humanoid",
+      "alignment": "any",
+      "ac": 15,
+      "hp": { "average": 78, "formula": "12d8+24" },
+      "speed": { "walk": 30 },
+      "abilityScores": { "STR": 11, "DEX": 16, "CON": 14, "INT": 13, "WIS": 11, "CHA": 10 },
+      "savingThrows": { "DEX": 6, "INT": 4 },
+      "skills": { "acrobatics": 6, "deception": 3, "perception": 3, "stealth": 9 },
+      "damageResistances": ["poison"],
+      "senses": { "darkvision": 60, "passivePerceptionOverride": 13 },
+      "cr": 8,
+      "xp": 3900,
+      "proficiencyBonus": 3,
+      "languages": ["common", "thieves' cant"]
     }
   ],
   "conditions": [
