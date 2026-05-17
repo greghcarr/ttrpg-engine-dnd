@@ -20,7 +20,7 @@ npm install
 npx vitest run
 ```
 
-`npm install` is required because `node_modules` is gitignored and per-worktree. Confirm the suite is green (193 files, ~1378 tests as of slice 124) before starting Claude in the new window.
+`npm install` is required because `node_modules` is gitignored and per-worktree. Confirm the suite is green (194 files, ~1391 tests as of slice 128) before starting Claude in the new window.
 
 For subsequent batches, after merging batch N back to `main`, branch off again from inside the worktree: `git checkout main && git pull && git checkout -b content/authoring-batch-2`. Or reuse the same branch name if you removed the worktree at cleanup.
 
