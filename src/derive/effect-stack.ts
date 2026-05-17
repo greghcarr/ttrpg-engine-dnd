@@ -96,6 +96,37 @@ const collectItemEffects = (
   return effects;
 };
 
+// Slice 129: monsters carry their RAW data on the statblock
+// (damageResistances / damageImmunities / damageVulnerabilities /
+// conditionImmunities arrays plus an EffectSchema[] `traits` array)
+// rather than expressing every line as an effect. Walk those four
+// arrays into the equivalent `Grant*` effects so the accumulator
+// sees them the same way it sees a PC's species or condition
+// effects. The `traits[]` array (already EffectSchema[]) folds
+// verbatim. Without this fold, content data on every creature is
+// inert at runtime: Skeleton's bludgeoning vulnerability and Young
+// Red Dragon's fire immunity have been ignored since alpha.5.
+const collectMonsterEffects = (character: Character, content: ResolvedContent): Effect[] => {
+  if (character.statblockId === undefined) return [];
+  const statblock = content.monsters.get(character.statblockId);
+  if (statblock === undefined) return [];
+  const effects: Effect[] = [];
+  for (const damageType of statblock.damageResistances) {
+    effects.push({ kind: 'GrantResistance', damageType });
+  }
+  for (const damageType of statblock.damageImmunities) {
+    effects.push({ kind: 'GrantImmunity', damageType });
+  }
+  for (const damageType of statblock.damageVulnerabilities) {
+    effects.push({ kind: 'GrantVulnerability', damageType });
+  }
+  for (const conditionId of statblock.conditionImmunities) {
+    effects.push({ kind: 'GrantConditionImmunity', conditionId });
+  }
+  effects.push(...statblock.traits);
+  return effects;
+};
+
 const collectConditionEffects = (character: Character, content: ResolvedContent): Effect[] => {
   const effects: Effect[] = [];
   for (const applied of character.appliedConditions) {
@@ -143,6 +174,7 @@ export const collectEffectsFromCharacter = (input: BuildEffectStackInput): Effec
   effects.push(...collectClassEffects(character, content));
   effects.push(...collectFeatEffects(character, content));
   effects.push(...collectItemEffects(character, itemInstances, content));
+  effects.push(...collectMonsterEffects(character, content));
   effects.push(...collectConditionEffects(character, content));
   if (pendingChoices) {
     effects.push(...collectResolvedChoiceEffects(character, pendingChoices));
@@ -183,6 +215,9 @@ export const buildEffectStack = (input: BuildEffectStackInput): EffectAccumulato
   }
   for (const effect of collectItemEffects(character, itemInstances, content)) {
     applyEffectToBuilder(effect, acc, { source: 'item', formulaContext: targetFormulaContext });
+  }
+  for (const effect of collectMonsterEffects(character, content)) {
+    applyEffectToBuilder(effect, acc, { source: 'monster', formulaContext: targetFormulaContext });
   }
 
   // Conditions get per-applied-condition handling so that formula
