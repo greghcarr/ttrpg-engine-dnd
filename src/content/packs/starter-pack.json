@@ -2038,7 +2038,15 @@
     { "id": "wind-fan", "itemKind": "magic", "name": "Wind Fan", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
     { "id": "circlet-of-blasting", "itemKind": "magic", "name": "Circlet of Blasting", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
     { "id": "gem-of-brightness", "itemKind": "magic", "name": "Gem of Brightness", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 50, "recharge": "never" }, "effects": [] },
-    { "id": "driftglobe", "itemKind": "magic", "name": "Driftglobe", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] }
+    { "id": "driftglobe", "itemKind": "magic", "name": "Driftglobe", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 1, "recharge": "dawn" }, "effects": [] },
+    { "id": "cloak-of-many-fashions", "itemKind": "magic", "name": "Cloak of Many Fashions", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "clothes-of-mending", "itemKind": "magic", "name": "Clothes of Mending", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "pole-of-angling", "itemKind": "magic", "name": "Pole of Angling", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "hat-of-vermin", "itemKind": "magic", "name": "Hat of Vermin", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "ear-horn-of-hearing", "itemKind": "magic", "name": "Ear Horn of Hearing", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "mystery-key", "itemKind": "magic", "name": "Mystery Key", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "shield-of-expression", "itemKind": "magic", "name": "Shield of Expression", "rarity": "common", "requiresAttunement": false, "effects": [] },
+    { "id": "tankard-of-sobriety", "itemKind": "magic", "name": "Tankard of Sobriety", "rarity": "common", "requiresAttunement": false, "effects": [] }
   ],
   "monsters": [
     {
