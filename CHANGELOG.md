@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 1.4**
+
+4 caster NPCs added to close the spell-using humanoid gap: Apprentice Wizard (CR 1/4), Priest (CR 2), Druid (CR 2), Mage (CR 6). All four ship as bare statblocks (`traits: []`); their cantrip and prepared-spell tables fold into the existing monster-spellcasting deferral note alongside Acolyte and Cult Fanatic (six casters now waiting on the same primitive — when monster spellcasting lands, all six wire as pure data). One new deferral introduced: Divine Eminence (Priest's bonus-action slot-spend that adds radiant damage to the next weapon attack — needs a slot-spend-without-cast primitive composed with the existing on-hit-add-damage rider shape). Monster count grows from 29 to 33.
+
 **Content authoring: items batch 1.1**
 
 8 uncommon wondrous items added to the starter pack: Goggles of Night, Cloak of Elvenkind, Slippers of Spider Climbing, Brooch of Shielding, Periapt of Wound Closure, Ring of Swimming, Eyes of the Eagle, Hat of Disguise. All ship as `itemKind: 'magic'` with `effects: []` (schema-only, matching the existing wondrous-item pattern); the engine primitives each would eventually need are catalogued in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) under "Deferred mechanical wiring." Magic-item count in the gaps doc bumped from 9 to 17.
