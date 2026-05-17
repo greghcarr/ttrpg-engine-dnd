@@ -82,7 +82,14 @@ export const computeAttackBonus = (input: ComputeAttackInput): AttackResult => {
   }
 
   const effects = buildEffectStack(input);
-  const modifierBonus = effects.modifierSum('attack');
+  // Slice 115: build a facts map for predicate-gated modifiers
+  // (Archery's "ranged-only" +2, future Defense / Dueling / TWF
+  // gates). Currently carries `event.attackKind` — additional facts
+  // can join here as more predicates land.
+  const facts = new Map<string, unknown>([
+    ['event.attackKind', weapon.attackKind],
+  ]);
+  const modifierBonus = effects.modifierSum('attack', facts);
   if (modifierBonus !== 0) breakdown.push({ source: 'modifier', value: modifierBonus });
 
   // Spell-applied temporary buff stamped on this specific weapon

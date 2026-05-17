@@ -31,6 +31,11 @@ const rollKey = (target: RollTarget): string => {
 export interface ModifierContribution {
   readonly source: string;
   readonly value: number;
+  // Slice 115: optional gating predicate. When set, the modifier
+  // only contributes if the predicate evaluates true against the
+  // caller-supplied facts at query time (Archery's +2 attack only
+  // applies on ranged attacks). Unset = always contributes.
+  readonly predicate?: Predicate;
 }
 
 export interface AdvantageState {
@@ -102,14 +107,14 @@ export class EffectAccumulator {
   private healingBoostPerSpellLevel: number = 0;
   private evasionFlag: boolean = false;
 
-  addModifier(target: ModifierTarget, value: number, source: string): void {
+  addModifier(target: ModifierTarget, value: number, source: string, predicate?: Predicate): void {
     const key = modifierKey(target);
     let list = this.modifiers.get(key);
     if (list === undefined) {
       list = [];
       this.modifiers.set(key, list);
     }
-    list.push({ source, value });
+    list.push(predicate !== undefined ? { source, value, predicate } : { source, value });
   }
 
   setAdvantage(target: RollTarget, mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'): void {
@@ -186,14 +191,23 @@ export class EffectAccumulator {
     }
   }
 
-  modifierSum(target: ModifierTarget): number {
+  modifierSum(target: ModifierTarget, facts?: ReadonlyMap<string, unknown>): number {
     const list = this.modifiers.get(modifierKey(target));
     if (list === undefined) return 0;
-    return list.reduce((acc, c) => acc + c.value, 0);
+    return list.reduce((acc, c) => {
+      if (c.predicate !== undefined && !evaluatePredicate(c.predicate, { facts })) {
+        return acc;
+      }
+      return acc + c.value;
+    }, 0);
   }
 
-  modifierBreakdown(target: ModifierTarget): ReadonlyArray<ModifierContribution> {
-    return this.modifiers.get(modifierKey(target)) ?? [];
+  modifierBreakdown(target: ModifierTarget, facts?: ReadonlyMap<string, unknown>): ReadonlyArray<ModifierContribution> {
+    const list = this.modifiers.get(modifierKey(target));
+    if (list === undefined) return [];
+    return list.filter((c) =>
+      c.predicate === undefined || evaluatePredicate(c.predicate, { facts }),
+    );
   }
 
   advantageFor(target: RollTarget): AdvantageState {
@@ -389,10 +403,10 @@ export const applyEffectToBuilder = (
   switch (effect.kind) {
     case 'AddModifier': {
       if (typeof effect.value === 'number') {
-        acc.addModifier(effect.target, effect.value, ctx.source);
+        acc.addModifier(effect.target, effect.value, ctx.source, effect.condition);
       } else if (ctx.formulaContext !== undefined) {
         const value = evaluateFormula(effect.value, ctx.formulaContext);
-        acc.addModifier(effect.target, value, ctx.source);
+        acc.addModifier(effect.target, value, ctx.source, effect.condition);
       }
       return;
     }
