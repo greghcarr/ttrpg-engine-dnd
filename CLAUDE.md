@@ -141,6 +141,10 @@ Defers to [~/.claude/CLAUDE.md](../../../.claude/CLAUDE.md) (global) for the ful
 - Bump on meaningful surface changes, not on every commit.
 - `SCHEMA_VERSION` (in [src/version.ts](src/version.ts)) is independent of package version. Bump only when persisted shapes change, and ship a migration in the same PR.
 
+## Parallel sessions
+
+When engine-slice work and content authoring (monsters, magic items) can both make useful progress, run them in parallel via two git worktrees: engine on `main` in the primary worktree, content on a sibling branch in `../ttrpg-engine-dnd-content`. Both worktrees share `.git` history but hold independent working files. See [docs/parallel-authoring.md](docs/parallel-authoring.md) for setup commands, the file-footprint rules each session must respect, the starter prompt for the content-session Claude chat, and merge/cleanup steps.
+
 ## Slice workflow
 
 Each slice typically touches the same set of layers. When working on a new slice:
