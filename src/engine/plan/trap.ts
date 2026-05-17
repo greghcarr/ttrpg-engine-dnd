@@ -9,6 +9,7 @@ import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { applyAll } from '../apply.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type {
@@ -101,15 +102,23 @@ export const planTriggerTrap = (
       : rolled.total;
 
   if (rawAmount > 0) {
-    const component: DamageComponent = {
-      amount: rawAmount,
-      type: trap.payload.damageType,
-    };
+    // Slice 113: trap damage now flows through the mitigation pipeline.
+    // Starter-pack traps (Glyph of Warding, Cordon of Arrows) are
+    // spell-sourced, so they count as magical for the resistance
+    // qualifier.
+    const mitigated = mitigateDamage({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      rawComponents: [{ amount: rawAmount, type: trap.payload.damageType }],
+      characters: state.characters,
+      sourceIsMagical: true,
+    });
     const intercept = interceptFatalDamage({
       state: applyAll(state, events),
       content,
       targetId: intent.triggeringCharacterId,
-      mitigatedComponents: [component],
+      mitigatedComponents: mitigated,
       causedByEventId: saveEvent.id,
       at,
     });

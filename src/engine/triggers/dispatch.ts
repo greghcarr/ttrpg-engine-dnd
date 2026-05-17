@@ -9,6 +9,8 @@ import { rollDie, parseDiceExpression } from '../../rng/dice.js';
 import { evaluatePredicate } from '../../effects/predicate.js';
 import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
 import { getCreatureType } from '../../derive/creature-type.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { isMagicWeaponAttack } from '../../derive/magicality.js';
 import type { AppliedCondition } from '../../schemas/runtime/character.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
@@ -135,21 +137,45 @@ interface FiredTrigger {
   readonly cadence: TriggerFiredEvent['cadence'];
 }
 
+// Slice 113. Rider damage now flows through the standard mitigation
+// pipeline (resistance / immunity / vulnerability / flat reduction /
+// qualifier-aware checks). The dispatcher computes a `sourceIsMagical`
+// flag per rider (see `isRiderMagical` below) and hands it to
+// mitigateDamage so the resistance qualifier (slice 112) applies
+// correctly to riders too.
 const fireAddDamage = (
-  action: AddDamageAction,
-  event: Event,
-  rng: RNG,
-  causedByEventId: string,
+  input: {
+    action: AddDamageAction;
+    event: Event;
+    rng: RNG;
+    causedByEventId: string;
+    state: CampaignState;
+    content: ResolvedContent;
+    sourceIsMagical: boolean;
+  },
 ): Event[] => {
+  const { action, event, rng, causedByEventId, state, content, sourceIsMagical } = input;
   if (event.type !== 'AttackRolled') return [];
   const { amount } = rollAddDamage(action, rng, event.critical);
   if (amount <= 0) return [];
+  const target = state.characters[event.targetId];
+  const rawComponents = [{ amount, type: action.damageType }];
+  const components = target !== undefined
+    ? mitigateDamage({
+        character: target,
+        itemInstances: state.itemInstances,
+        content,
+        rawComponents,
+        characters: state.characters,
+        sourceIsMagical,
+      })
+    : rawComponents;
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
     at: event.at,
     type: 'DamageApplied',
     targetId: event.targetId,
-    components: [{ amount, type: action.damageType }],
+    components,
     causedByEventId: causedByEventId as ULID,
   };
   return [damageApplied];
@@ -160,11 +186,17 @@ const fireAddDamage = (
 // retaliation dice — RAW says "takes 2d8" not "takes 2d8 doubled on a
 // crit against you", so we pass critical=false to rollAddDamage.
 const fireAddDamageToAttacker = (
-  action: AddDamageToAttackerAction,
-  event: Event,
-  rng: RNG,
-  causedByEventId: string,
+  input: {
+    action: AddDamageToAttackerAction;
+    event: Event;
+    rng: RNG;
+    causedByEventId: string;
+    state: CampaignState;
+    content: ResolvedContent;
+    sourceIsMagical: boolean;
+  },
 ): Event[] => {
+  const { action, event, rng, causedByEventId, state, content, sourceIsMagical } = input;
   if (event.type !== 'AttackRolled') return [];
   const { amount } = rollAddDamage(
     { kind: 'AddDamage', dice: action.dice, damageType: action.damageType },
@@ -172,15 +204,57 @@ const fireAddDamageToAttacker = (
     false,
   );
   if (amount <= 0) return [];
+  const target = state.characters[event.attackerId];
+  const rawComponents = [{ amount, type: action.damageType }];
+  const components = target !== undefined
+    ? mitigateDamage({
+        character: target,
+        itemInstances: state.itemInstances,
+        content,
+        rawComponents,
+        characters: state.characters,
+        sourceIsMagical,
+      })
+    : rawComponents;
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
     at: event.at,
     type: 'DamageApplied',
     targetId: event.attackerId,
-    components: [{ amount, type: action.damageType }],
+    components,
     causedByEventId: causedByEventId as ULID,
   };
   return [damageApplied];
+};
+
+// Determine whether a fired rider's damage is "magical" for the
+// resistance-qualifier check. Two signals:
+// 1. The bearing condition (if any) is tracked by an EffectInstance
+//    whose spellId is set — the rider is spell-sourced, always magical
+//    (smite damage, Spirit Shroud rider, Crusader's Mantle, Hex).
+// 2. Otherwise on AttackRolled riders, inherit from the triggering
+//    weapon (Sneak Attack on a magic longsword counts as magical;
+//    Sneak Attack on a regular longsword does not).
+// Class-feature riders on a nonmagical weapon, and riders from
+// non-AttackRolled events, default to non-magical.
+const isRiderMagical = (
+  state: CampaignState,
+  content: ResolvedContent,
+  event: Event,
+  appliedFrom: AppliedCondition | undefined,
+): boolean => {
+  if (appliedFrom?.sourceEffectInstanceId !== undefined) {
+    const inst = state.effectInstances[appliedFrom.sourceEffectInstanceId];
+    if (inst?.spellId !== undefined) return true;
+  }
+  if (event.type === 'AttackRolled' && event.weaponInstanceId !== undefined) {
+    const weaponInst = state.itemInstances[event.weaponInstanceId];
+    if (weaponInst === undefined) return false;
+    const def = content.items.get(weaponInst.definitionId);
+    if (def === undefined) return false;
+    return isMagicWeaponAttack(weaponInst, def);
+  }
+  return false;
 };
 
 // Fires an ApplyCondition TriggerAction. Targets the event's target
@@ -279,6 +353,9 @@ const fireTrigger = (
   at: string,
   currentRound: number | undefined,
   parentEffectInstanceId: string | undefined,
+  state: CampaignState,
+  content: ResolvedContent,
+  sourceIsMagical: boolean,
 ): FiredTrigger | null => {
   const cadence = cadencePayload(effect.oncePer);
   const triggerFired: TriggerFiredEvent = {
@@ -293,9 +370,29 @@ const fireTrigger = (
 
   for (const action of effect.actions) {
     if (action.kind === 'AddDamage') {
-      events.push(...fireAddDamage(action, event, rng, triggerFired.id));
+      events.push(
+        ...fireAddDamage({
+          action,
+          event,
+          rng,
+          causedByEventId: triggerFired.id,
+          state,
+          content,
+          sourceIsMagical,
+        }),
+      );
     } else if (action.kind === 'AddDamageToAttacker') {
-      events.push(...fireAddDamageToAttacker(action, event, rng, triggerFired.id));
+      events.push(
+        ...fireAddDamageToAttacker({
+          action,
+          event,
+          rng,
+          causedByEventId: triggerFired.id,
+          state,
+          content,
+          sourceIsMagical,
+        }),
+      );
     } else if (action.kind === 'ApplyCondition') {
       events.push(
         ...fireApplyCondition(
@@ -442,6 +539,12 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
             inst.conditionsApplied.some((c) => c.appliedConditionId === appliedFrom.id),
           )?.id
         : undefined;
+      // Slice 113: rider-damage magicality for the mitigation pipeline.
+      // Spell-sourced riders (bearing condition tracked by an EffectInstance
+      // with a spellId) count as magical; weapon-attack riders inherit
+      // from the triggering weapon's magicality; everything else is
+      // non-magical by default.
+      const sourceIsMagical = isRiderMagical(state, content, event, appliedFrom);
       const fired = fireTrigger(
         effect,
         character,
@@ -451,6 +554,9 @@ export const dispatchTriggers = (input: DispatchInput): Event[] => {
         at,
         currentRound,
         parentEffectInstanceId,
+        state,
+        content,
+        sourceIsMagical,
       );
       if (fired === null) continue;
       emitted.push(...fired.events);

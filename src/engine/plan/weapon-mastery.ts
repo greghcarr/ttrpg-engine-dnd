@@ -17,6 +17,8 @@ import type { CombatantMovedEvent } from '../../schemas/events/movement.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { isMagicWeaponAttack } from '../../derive/magicality.js';
 import { applyAll } from '../apply.js';
 
 const UNARMED_DC_BASE = 8;
@@ -179,11 +181,23 @@ export const planWeaponMastery = (
       const grazeAmount = Math.max(0, abilityModifier(attacker.abilityScores.STR));
       if (grazeAmount > 0) {
         const grazeDamageId = newEventId() as ULID;
+        // Slice 113: Graze damage now flows through the mitigation
+        // pipeline so resistance / immunity / vulnerability apply.
+        // Magicality inherits from the weapon (a magic-weapon Graze
+        // counts as magical for the resistance qualifier).
+        const mitigated = mitigateDamage({
+          character: target,
+          itemInstances: state.itemInstances,
+          content,
+          rawComponents: [{ amount: grazeAmount, type: damageType }],
+          characters: state.characters,
+          sourceIsMagical: isMagicWeaponAttack(weaponInst, weapon),
+        });
         const intercept = interceptFatalDamage({
           state: applyAll(state, events),
           content,
           targetId: intent.targetId,
-          mitigatedComponents: [{ amount: grazeAmount, type: damageType, rawAmount: grazeAmount }],
+          mitigatedComponents: mitigated,
           causedByEventId: grazeDamageId,
           at,
         });
