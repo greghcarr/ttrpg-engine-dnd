@@ -116,6 +116,43 @@ If the merge has conflicts, VS Code's merge editor handles them. `git worktree r
 
 For multiple batches you can keep the worktree around and just create a new branch from inside it after each merge instead of removing and recreating.
 
+## Scaling beyond two sessions
+
+The pattern accommodates a third (or fourth) parallel session if you can carve N disjoint file footprints. The constraint is unchanged: every session must have a clear, non-overlapping set of files it owns.
+
+### Practical N=3 splits
+
+| Split | Lane A (primary, `main`) | Lane B (worktree 1) | Lane C (worktree 2) |
+|---|---|---|---|
+| Two content cohorts | Engine | Monsters only | Magic items only |
+| Content + subclasses | Engine | Monsters + items | Subclasses only |
+| Content + docs polish | Engine (defers README / api-overview edits while Lane C is active) | Monsters + items | README + api-overview + tutorial / examples |
+
+All three options keep `starter-pack.json` writes to disjoint top-level arrays (monsters / items / subclasses / spells-and-conditions), so JSON-level merge conflicts stay rare.
+
+### New friction points at N≥3
+
+- **CHANGELOG.md three-way contention.** All sessions add subheads under `## Unreleased`. Merge conflicts go from rare to routine but stay mechanical to resolve when each session uses a rigid subhead label: `**Engine slices**`, `**Content authoring batch N**`, `**Subclass authoring batch N**`.
+- **Coverage-at-a-glance table in [docs/starter-pack-gaps.md](starter-pack-gaps.md).** Two content sessions touching adjacent rows in a single Markdown table conflict on every merge. Mitigation: designate the engine session as the scorekeeper. Content sessions update their per-category section bodies but leave the summary table to the engine session, which bumps counts at merge time.
+- **features.test.ts snapshot.** The "only one session refreshes at a time" rule from the 2-session pattern still applies; the bottleneck just becomes more visible.
+- **Disk and CPU.** Each worktree carries its own `node_modules` (~300 MB). Three concurrent `npx vitest run` invocations (90s each, property tests CPU-bound) compete for cores.
+- **Mental overhead.** Three Claude chats is meaningfully harder to context-switch than two; expect to spend more time on "which lane is this again?" between interactions.
+
+### Practical ceiling
+
+Probably 3-4 sessions before the coordination tax exceeds the parallelization benefit. Beyond that, serialize or combine lanes into longer batched sessions.
+
+### Setup for a third worktree
+
+From the primary worktree:
+
+```bash
+git worktree add ../ttrpg-engine-dnd-items -b content/items-batch-1
+code ../ttrpg-engine-dnd-items
+```
+
+In the new window's terminal: `npm install && npx vitest run`. Paste a content-session-style prompt adapted to the lane's narrower footprint (e.g. for an items-only lane: forbid edits to the `monsters` array and the Monsters section of the gaps doc, in addition to the existing forbidden list).
+
 ## When NOT to use this pattern
 
 - For a single small content addition (one or two monsters), the overhead of a worktree isn't worth it. Add directly to `main` in the engine session.
