@@ -18,6 +18,10 @@ export const RemoteSensorPlacedEventSchema = EventEnvelopeSchema.extend({
   sourceSpellId: z.string(),
   sourceEffectInstanceId: ULIDSchema.optional(),
   mode: SensorModeSchema,
+  // Slice 138: Arcane Eye places a mobile sensor with darkvision.
+  // Clairvoyance / Scrying default to immobile, no darkvision.
+  mobile: z.boolean().default(false),
+  darkvisionRange: z.number().int().min(0).optional(),
 });
 export type RemoteSensorPlacedEvent = z.infer<typeof RemoteSensorPlacedEventSchema>;
 
@@ -27,6 +31,18 @@ export const RemoteSensorModeChangedEventSchema = EventEnvelopeSchema.extend({
   mode: SensorModeSchema,
 });
 export type RemoteSensorModeChangedEvent = z.infer<typeof RemoteSensorModeChangedEventSchema>;
+
+// Slice 138: Arcane Eye moves on the caster's bonus action; the
+// engine doesn't model the eye's 3D position so the event carries
+// the free-text `location` before and after the move for consumer
+// display / audit.
+export const RemoteSensorMovedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('RemoteSensorMoved'),
+  sensorId: ULIDSchema,
+  fromLocation: z.string(),
+  toLocation: z.string(),
+});
+export type RemoteSensorMovedEvent = z.infer<typeof RemoteSensorMovedEventSchema>;
 
 export const SENSOR_REMOVAL_REASONS = [
   'concentrationDropped',

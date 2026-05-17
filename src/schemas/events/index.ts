@@ -177,6 +177,7 @@ import {
   RemoteSensorPlacedEventSchema,
   RemoteSensorModeChangedEventSchema,
   RemoteSensorRemovedEventSchema,
+  RemoteSensorMovedEventSchema,
 } from './sensors.js';
 import {
   IllusionCreatedEventSchema,
@@ -308,6 +309,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   RemoteSensorPlacedEventSchema,
   RemoteSensorModeChangedEventSchema,
   RemoteSensorRemovedEventSchema,
+  RemoteSensorMovedEventSchema,
   IllusionCreatedEventSchema,
   IllusionInvestigatedEventSchema,
   IllusionDismissedEventSchema,
@@ -440,6 +442,7 @@ export const EVENT_TYPES = [
   'RemoteSensorPlaced',
   'RemoteSensorModeChanged',
   'RemoteSensorRemoved',
+  'RemoteSensorMoved',
   'IllusionCreated',
   'IllusionInvestigated',
   'IllusionDismissed',
@@ -864,6 +867,7 @@ export {
   RemoteSensorPlacedEventSchema,
   RemoteSensorModeChangedEventSchema,
   RemoteSensorRemovedEventSchema,
+  RemoteSensorMovedEventSchema,
   SENSOR_REMOVAL_REASONS,
   SensorRemovalReasonSchema,
 } from './sensors.js';
@@ -871,6 +875,7 @@ export type {
   RemoteSensorPlacedEvent,
   RemoteSensorModeChangedEvent,
   RemoteSensorRemovedEvent,
+  RemoteSensorMovedEvent,
   SensorRemovalReason,
 } from './sensors.js';
 export {

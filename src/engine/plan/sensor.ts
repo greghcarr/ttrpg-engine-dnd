@@ -6,6 +6,7 @@ import type {
   RemoteSensorPlacedEvent,
   RemoteSensorModeChangedEvent,
   RemoteSensorRemovedEvent,
+  RemoteSensorMovedEvent,
   SensorRemovalReason,
 } from '../../schemas/events/sensors.js';
 import type { SensorMode } from '../../schemas/runtime/sensor.js';
@@ -183,6 +184,7 @@ export const planClairvoyance = (
     sourceSpellId: 'clairvoyance',
     sourceEffectInstanceId: effectInstanceId as ULID,
     mode: intent.mode,
+    mobile: false,
     causedByEventId: declared.id,
   };
   events.push(placed);
@@ -486,9 +488,190 @@ export const planScrying = (
     sourceSpellId: 'scrying',
     sourceEffectInstanceId: effectInstanceId as ULID,
     mode: intent.mode ?? 'sight',
+    mobile: false,
     causedByEventId: declared.id,
   };
   events.push(placed);
 
   return { events, resisted: false };
+};
+
+const ARCANE_EYE_MIN_SLOT_LEVEL = 4;
+const ARCANE_EYE_DURATION_MINUTES = 60;
+const ARCANE_EYE_DARKVISION_FEET = 30;
+
+export interface ArcaneEyeIntent {
+  readonly type: 'ArcaneEye';
+  readonly casterId: string;
+  // Free-text initial location of the eye. RAW: created within 30 ft
+  // of the caster. Engine doesn't reason about it; consumer supplies.
+  readonly location: string;
+  // Optional display label (defaults to "Arcane Eye").
+  readonly label?: string;
+  // Initial sense mode (default 'sight'; RAW: the eye sees, doesn't
+  // hear separately, but we reuse the slice-135 mode field for
+  // consistency).
+  readonly mode?: SensorMode;
+  readonly slotLevel?: number;
+  readonly at?: string;
+}
+
+/**
+ * RAW 2024 Arcane Eye: 4th-level divination, Action, Self,
+ * Concentration up to 1 hour. Creates an invisible, magical eye
+ * sensor that hovers within 30 ft of the caster. The eye has
+ * darkvision 30 ft; the caster perceives through it. The caster
+ * can use a bonus action to fly the eye up to 30 ft in any
+ * direction via `planMoveSensor`.
+ *
+ * Event sequence:
+ *   - ActionEconomyConsumed (in encounter only)
+ *   - SpellCastDeclared
+ *   - SpellSlotConsumed
+ *   - ConcentrationBroken (if a prior concentration was active)
+ *   - ConcentrationStarted
+ *   - RemoteSensorPlaced (mobile: true, darkvisionRange: 30)
+ */
+export const planArcaneEye = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  _rng: RNG,
+  intent: ArcaneEyeIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const slotLevel = intent.slotLevel ?? ARCANE_EYE_MIN_SLOT_LEVEL;
+  invariant(
+    slotLevel >= ARCANE_EYE_MIN_SLOT_LEVEL,
+    'Arcane Eye requires a 4th-level or higher slot',
+  );
+  invariant(
+    caster.knownSpells.includes('arcane-eye') || caster.preparedSpells.includes('arcane-eye'),
+    `Caster ${intent.casterId} does not know Arcane Eye`,
+  );
+
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  const action = economyConsumedIfEncountered(state, intent.casterId, at, 'action');
+  if (action !== undefined) events.push(action);
+
+  const declared: SpellCastDeclaredEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'arcane-eye',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds: [intent.casterId],
+    castAsRitual: false,
+  };
+  events.push(declared);
+
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  } satisfies SpellSlotConsumedEvent);
+
+  if (caster.concentrationEffectId !== undefined) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'ConcentrationBroken',
+      effectInstanceId: caster.concentrationEffectId,
+      casterId: intent.casterId as ULID,
+      reason: 'newConcentrationSpell',
+      causedByEventId: declared.id,
+    } satisfies ConcentrationBrokenEvent);
+  }
+
+  const effectInstanceId = newEffectInstanceId();
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'ConcentrationStarted',
+    effectInstanceId: effectInstanceId as ULID,
+    casterId: intent.casterId as ULID,
+    spellId: 'arcane-eye',
+    targetIds: [intent.casterId as ULID],
+    conditionsApplied: [],
+    durationMinutes: ARCANE_EYE_DURATION_MINUTES,
+    slotLevel,
+    causedByEventId: declared.id,
+  } satisfies ConcentrationStartedEvent);
+
+  const sensorId = newSensorId();
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'RemoteSensorPlaced',
+    sensorId: sensorId as ULID,
+    label: intent.label ?? 'Arcane Eye',
+    location: intent.location,
+    casterId: intent.casterId as ULID,
+    sourceSpellId: 'arcane-eye',
+    sourceEffectInstanceId: effectInstanceId as ULID,
+    mode: intent.mode ?? 'sight',
+    mobile: true,
+    darkvisionRange: ARCANE_EYE_DARKVISION_FEET,
+    causedByEventId: declared.id,
+  } satisfies RemoteSensorPlacedEvent);
+
+  return events;
+};
+
+export interface MoveSensorIntent {
+  readonly type: 'MoveSensor';
+  readonly casterId: string;
+  readonly sensorId: string;
+  // Free-text new location. RAW Arcane Eye caps the move at 30 ft
+  // per bonus action; the engine doesn't reason about distance, so
+  // the limit is consumer-enforced.
+  readonly toLocation: string;
+  readonly at?: string;
+}
+
+/**
+ * Moves a mobile sensor (Arcane Eye) on the caster's bonus action.
+ * Updates the sensor's `location` and emits RemoteSensorMoved.
+ * Rejects:
+ *   - non-mobile sensors (Clairvoyance / Scrying)
+ *   - moves by a character other than the original caster
+ *   - moves where fromLocation === toLocation (no-op rejection)
+ */
+export const planMoveSensor = (
+  state: CampaignState,
+  _content: ResolvedContent,
+  _rng: RNG,
+  intent: MoveSensorIntent,
+): ReadonlyArray<Event> => {
+  const sensor = state.sensors[intent.sensorId];
+  invariant(sensor !== undefined, `Sensor ${intent.sensorId} not found`);
+  invariant(
+    sensor.casterId === intent.casterId,
+    `Sensor ${intent.sensorId} is not owned by caster ${intent.casterId}`,
+  );
+  if (!sensor.mobile) {
+    throw new Error(`Sensor ${intent.sensorId} is not mobile`);
+  }
+  if (sensor.location === intent.toLocation) {
+    throw new Error(`Sensor ${intent.sensorId} is already at ${intent.toLocation}`);
+  }
+  const at = intent.at ?? nowIso();
+  const events: Event[] = [];
+  const bonus = economyConsumedIfEncountered(state, intent.casterId, at, 'bonusAction');
+  if (bonus !== undefined) events.push(bonus);
+  const moved: RemoteSensorMovedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'RemoteSensorMoved',
+    sensorId: intent.sensorId as ULID,
+    fromLocation: sensor.location,
+    toLocation: intent.toLocation,
+  };
+  events.push(moved);
+  return events;
 };

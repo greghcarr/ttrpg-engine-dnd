@@ -116,11 +116,15 @@ export {
   planSwitchSensorMode,
   planRemoveSensor,
   planScrying,
+  planArcaneEye,
+  planMoveSensor,
   type ClairvoyanceIntent,
   type SwitchSensorModeIntent,
   type RemoveSensorIntent,
   type ScryingIntent,
   type ScryingOutcome,
+  type ArcaneEyeIntent,
+  type MoveSensorIntent,
 } from './sensor.js';
 export {
   planSilentImage,

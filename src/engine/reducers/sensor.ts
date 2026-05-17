@@ -5,6 +5,7 @@ import type {
   RemoteSensorPlacedEvent,
   RemoteSensorModeChangedEvent,
   RemoteSensorRemovedEvent,
+  RemoteSensorMovedEvent,
 } from '../../schemas/events/sensors.js';
 
 export const applyRemoteSensorPlaced = (
@@ -23,7 +24,18 @@ export const applyRemoteSensorPlaced = (
     sourceSpellId: event.sourceSpellId,
     sourceEffectInstanceId: event.sourceEffectInstanceId,
     mode: event.mode,
+    mobile: event.mobile,
+    darkvisionRange: event.darkvisionRange,
   };
+};
+
+export const applyRemoteSensorMoved = (
+  draft: Draft<CampaignState>,
+  event: RemoteSensorMovedEvent,
+): void => {
+  const sensor = draft.sensors[event.sensorId];
+  invariant(sensor !== undefined, `Sensor ${event.sensorId} not found`);
+  sensor.location = event.toLocation;
 };
 
 export const applyRemoteSensorModeChanged = (

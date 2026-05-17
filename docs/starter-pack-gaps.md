@@ -98,12 +98,12 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 **Wired (15):** blight, charm-monster, conjure-minor-elementals (summon), conjure-woodland-beings (summon), death-ward (slice-111 buff: `death-ward-active` carries the new `PreventFatalDamage` marker; every primary-damage emitter consults `interceptFatalDamage` after mitigation and clamps + removes the bearing condition; slice 114 extends the intercept to rider-emitted damage via the trigger dispatcher), fire-shield (caster-chosen 2-variant buff; warm = cold resistance + 2d8 fire retaliation, chill = fire resistance + 2d8 cold retaliation), freedom-of-movement, greater-invisibility, ice-storm, phantasmal-killer, stoneskin (slice-112 buff: `stoneskin-active` ships B/P/S `GrantResistance` entries each qualified `'nonmagical'`; SRD shape — the 2024 PHB simplified to plain B/P/S resistance), summon-aberration (summon), summon-construct (summon), summon-elemental (summon), summon-greater-demon (summon).
 
-**Dedicated planner (1):** polymorph.
+**Dedicated planner (2):** polymorph, arcane-eye (slice 138: 4th-level slot + action + concentration; places a mobile Sensor entity with darkvision 30 and `mobile: true`; `planMoveSensor` consumes a bonus action to update the eye's free-text location).
 
 **Schema-only (25):** grouped by the engine primitive each one needs.
 
 - **Area-effect spell mechanic**: `black-tentacles`, `wall-of-fire`, `guardian-of-faith`, `private-sanctum`, `compulsion`. Five area shapes / variants of the same deferred primitive.
-- **Sensor / scrying primitive**: `arcane-eye`, `locate-creature`. Remote viewing surfaces.
+- (Arcane Eye wired in slice 138 via `planArcaneEye` + a `mobile: true` extension to the slice-135 Sensor schema. The caster moves the eye on a bonus action via `planMoveSensor`, which emits `RemoteSensorMoved` and updates the sensor's free-text location. Locate Creature still ships schema-only; it composes the sensor primitive with a one-way directional ping (mostly narrative), and a content-only buff condition would carry the concentration without engine work.)
 - **Aura primitive (sub-effects beyond simple condition projection)**: `aura-of-life` (sub-HP-floor mechanic + auto-revive at 0 HP), `aura-of-purity` (multi-effect resistance + condition immunities).
 - **Cross-plane travel / banishment**: `banishment` (CHA save → other plane; return on concentration end).
 - **Multi-target movement-restriction**: `resilient-sphere`, `watery-sphere`. Force-cage variants needing per-target restraint with sphere-shaped lifetime.

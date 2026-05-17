@@ -290,7 +290,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'summon-elemental': { kind: 'summon' },
   'summon-greater-demon': { kind: 'summon' },
   // PHB 2024 L4 spells shipped schema-only; see docs/starter-pack-gaps.md.
-  'arcane-eye': { kind: 'skip', reason: 'sensor (controllable remote viewing eye); sensor / scrying primitive not modeled' },
+  'arcane-eye': { kind: 'skip', reason: 'has dedicated planArcaneEye (places a mobile Sensor entity with darkvision 30; caster moves it on a bonus action via planMoveSensor)' },
   'aura-of-life': { kind: 'skip', reason: 'paladin aura that holds allies above half-HP-floor + revives at 0 HP; sub-floor health mechanic not modeled' },
   'aura-of-purity': { kind: 'skip', reason: 'paladin aura granting resistance to poison + disease/condition immunities; multi-effect aura ally projection not wired' },
   'banishment': { kind: 'skip', reason: 'CHA save banishes target to another plane; cross-plane travel + return-on-concentration-drop not modeled' },

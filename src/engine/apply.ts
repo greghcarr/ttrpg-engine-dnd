@@ -112,6 +112,7 @@ import {
   applyRemoteSensorPlaced,
   applyRemoteSensorModeChanged,
   applyRemoteSensorRemoved,
+  applyRemoteSensorMoved,
 } from './reducers/sensor.js';
 import {
   applyIllusionCreated,
@@ -562,6 +563,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'RemoteSensorRemoved':
         applyRemoteSensorRemoved(draft, event);
+        break;
+      case 'RemoteSensorMoved':
+        applyRemoteSensorMoved(draft, event);
         break;
       case 'IllusionCreated':
         applyIllusionCreated(draft, event);

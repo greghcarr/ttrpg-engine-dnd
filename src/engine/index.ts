@@ -72,6 +72,8 @@ import {
   planSwitchSensorMode,
   planRemoveSensor,
   planScrying,
+  planArcaneEye,
+  planMoveSensor,
   planSilentImage,
   planMajorImage,
   planInvestigateIllusion,
@@ -108,6 +110,8 @@ import {
   type RemoveSensorIntent,
   type ScryingIntent,
   type ScryingOutcome,
+  type ArcaneEyeIntent,
+  type MoveSensorIntent,
   type SilentImageIntent,
   type MajorImageIntent,
   type InvestigateIllusionIntent,
@@ -289,6 +293,8 @@ export interface Engine {
     switchSensorMode(state: CampaignState, intent: Omit<SwitchSensorModeIntent, 'type'>): PlanResult;
     removeSensor(state: CampaignState, intent: Omit<RemoveSensorIntent, 'type'>): PlanResult;
     scrying(state: CampaignState, intent: Omit<ScryingIntent, 'type'>): ScryingOutcome;
+    arcaneEye(state: CampaignState, intent: Omit<ArcaneEyeIntent, 'type'>): PlanResult;
+    moveSensor(state: CampaignState, intent: Omit<MoveSensorIntent, 'type'>): PlanResult;
     silentImage(state: CampaignState, intent: Omit<SilentImageIntent, 'type'>): PlanResult;
     majorImage(state: CampaignState, intent: Omit<MajorImageIntent, 'type'>): PlanResult;
     investigateIllusion(state: CampaignState, intent: Omit<InvestigateIllusionIntent, 'type'>): PlanResult;
@@ -556,6 +562,12 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     scrying(state, intent) {
       return planScrying(state, content, rng, { type: 'Scrying', ...intent });
+    },
+    arcaneEye(state, intent) {
+      return { events: planArcaneEye(state, content, rng, { type: 'ArcaneEye', ...intent }) };
+    },
+    moveSensor(state, intent) {
+      return { events: planMoveSensor(state, content, rng, { type: 'MoveSensor', ...intent }) };
     },
     silentImage(state, intent) {
       return { events: planSilentImage(state, content, rng, { type: 'SilentImage', ...intent }) };

@@ -653,6 +653,9 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     case 'RemoteSensorRemoved': {
       return `Sensor closes (${event.reason}).`;
     }
+    case 'RemoteSensorMoved': {
+      return `Sensor moves from ${event.fromLocation} to ${event.toLocation}.`;
+    }
     case 'IllusionCreated': {
       const who = characterName(stateBefore, event.casterId);
       return `**${who}** conjures ${event.label} (${event.kind} illusion) at ${event.location}.`;

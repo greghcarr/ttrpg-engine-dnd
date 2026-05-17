@@ -46,5 +46,13 @@ export const SensorSchema = z.object({
   // when the linked effect ends.
   sourceEffectInstanceId: ULIDSchema.optional(),
   mode: SensorModeSchema,
+  // Slice 138: Arcane Eye creates a mobile sensor the caster moves
+  // with a bonus action. Clairvoyance / Scrying sensors stay fixed.
+  // planMoveSensor rejects moves on immobile sensors.
+  mobile: z.boolean().default(false),
+  // Optional darkvision range in feet. RAW Arcane Eye: 30 ft.
+  // Informational for consumer display; the engine doesn't reason
+  // about light through the sensor.
+  darkvisionRange: z.number().int().min(0).optional(),
 });
 export type Sensor = z.infer<typeof SensorSchema>;
