@@ -21,7 +21,8 @@ The audit is scripted: a Node parser reads the markdown SRD in `references/srd-m
 | 141 | Drop 7 non-SRD entries | **done** | starter-pack.json (-7 entries) |
 | 142 | Rename + refresh the 9 rename-and-drift entries | **done** | starter-pack.json, starter-pack.test.ts (one `goblin` to `goblin-warrior` id update) |
 | 143 | Drift refresh batch 1 of 6 (Aboleth, Adult Black/Blue/Green/Red Dragon, Ankheg, Assassin, Bandit Captain, Bearded Devil, Black Bear) | **done** | starter-pack.json |
-| 144 to 148 | Drift refresh batches 2 to 6 of 6 (~10 monsters each, 46 remaining) | pending | starter-pack.json, possibly tests |
+| 144 | Drift refresh batch 2 of 6 (Black Pudding, Boar, Bone Devil, Brown Bear, Chain Devil, Constrictor Snake, Couatl, Deva, Dire Wolf, Dretch) | **done** | starter-pack.json |
+| 145 to 148 | Drift refresh batches 3 to 6 of 6 (~10 monsters each, 36 remaining) | pending | starter-pack.json, possibly tests |
 | 149 | Doc refresh ([docs/content-attribution.md](content-attribution.md), README "60% SRD" headline, [docs/starter-pack-gaps.md](starter-pack-gaps.md)) | pending | docs only |
 
 After this, post-pack count drops from 118 to 111. Combined with the 228 SRD entries we don't ship yet, the new SRD-coverage headline is ~111 / 339 = ~33% by entry count (or higher by frequently-used-in-encounters weighting; the headline math is a Slice 149 decision).
