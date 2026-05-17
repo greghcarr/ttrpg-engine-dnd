@@ -20,8 +20,18 @@ describe('parseDiceExpression', () => {
   it('rejects malformed strings', () => {
     expect(() => parseDiceExpression('not a roll')).toThrow();
     expect(() => parseDiceExpression('2x6')).toThrow();
-    expect(() => parseDiceExpression('0d6')).toThrow();
     expect(() => parseDiceExpression('1d1')).toThrow();
+  });
+
+  it('accepts 0-count expressions as flat damage (slice 122)', () => {
+    // "0d6+5" parses as count=0, die=6, modifier=5. The roll loop
+    // skips entirely and the modifier is returned as-is. Lets
+    // dice-shaped slots carry flat damage (Armor of Agathys's
+    // "5 cold" retaliation).
+    const parsed = parseDiceExpression('0d6+5');
+    expect(parsed.count).toBe(0);
+    expect(parsed.die).toBe(6);
+    expect(parsed.modifier).toBe(5);
   });
 });
 

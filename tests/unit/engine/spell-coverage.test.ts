@@ -129,6 +129,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'absorb-elements': { kind: 'skip', reason: 'has dedicated engine.plan.absorbElements (reaction to a DamageApplied event of the matching type, not planCastSpell)' },
   'alarm': { kind: 'skip', reason: 'ritual alarm zone; no combat-event side' },
   'animal-friendship': { kind: 'skip', reason: 'charmed-beast-only variant; condition target restriction not modeled' },
+  'armor-of-agathys': { kind: 'temp-hp' },
   'chromatic-orb': { kind: 'attack', casterChoice: { kind: 'damageType', value: 'fire' } },
   'command': { kind: 'save', casterChoice: { kind: 'variant', value: 'halt' } },
   'compelled-duel': { kind: 'skip', reason: 'movement-aversion rider on charm; rider primitive not modeled' },

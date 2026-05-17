@@ -220,6 +220,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 1,
+    "id": "armor-of-agathys-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "aura-of-courage-active",
     "stackable": false,
   },

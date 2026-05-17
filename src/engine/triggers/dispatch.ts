@@ -47,6 +47,15 @@ const buildEventFacts = (
   content: ResolvedContent,
 ): Map<string, unknown> => {
   const facts = new Map<string, unknown>([['event.type', event.type]]);
+  // Slice 122: bearer-state facts for numeric-comparison predicates
+  // on OnEvent riders. `bearer.tempHp` is the bearer's current temp
+  // HP — gates Armor of Agathys's retaliation rider on "while you
+  // have these Hit Points" (approximated as bearer.hp.temp > 0 since
+  // the engine doesn't track temp-HP provenance).
+  const bearer = state.characters[characterId];
+  if (bearer !== undefined) {
+    facts.set('bearer.tempHp', bearer.hp.temp);
+  }
   if (event.type === 'AttackRolled') {
     facts.set('event.attackerIsSelf', event.attackerId === characterId);
     facts.set('event.targetIsSelf', event.targetId === characterId);

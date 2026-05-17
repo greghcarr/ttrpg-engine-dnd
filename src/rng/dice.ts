@@ -33,7 +33,11 @@ export const parseDiceExpression = (expression: string): ParsedDiceExpression =>
   const count = Number.parseInt(countStr, 10);
   const die = Number.parseInt(dieStr, 10);
   const modifier = modStr === undefined ? 0 : Number.parseInt(modStr, 10);
-  if (count <= 0) throw new Error(`Dice count must be > 0: ${expression}`);
+  // Slice 122: allow count=0 for flat-damage shapes ("0d6+5" =
+  // 5 flat). Existing dice paths skip the roll loop when count=0
+  // and fold modifier in unchanged. Die size is still > 1 since
+  // count=0 makes the die value irrelevant.
+  if (count < 0) throw new Error(`Dice count must be >= 0: ${expression}`);
   if (die <= 1) throw new Error(`Die size must be > 1: ${expression}`);
   return { count, die, modifier };
 };

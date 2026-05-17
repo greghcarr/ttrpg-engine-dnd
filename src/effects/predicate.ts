@@ -23,6 +23,14 @@ export const evaluatePredicate = (predicate: Predicate, ctx: PredicateContext): 
       return ctx.self === true;
     case 'eq':
       return getPath(ctx.facts, predicate.path) === predicate.value;
+    case 'gt': {
+      const v = getPath(ctx.facts, predicate.path);
+      return typeof v === 'number' && v > predicate.value;
+    }
+    case 'gte': {
+      const v = getPath(ctx.facts, predicate.path);
+      return typeof v === 'number' && v >= predicate.value;
+    }
     case 'hasProperty':
       return ctx.weaponProperties?.has(predicate.property) === true;
     case 'hasCondition':
