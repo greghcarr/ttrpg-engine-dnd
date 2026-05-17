@@ -18,6 +18,7 @@ import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { isMagicWeaponAttack } from '../../derive/magicality.js';
 import { applyAll } from '../apply.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
@@ -181,6 +182,7 @@ export const planOffHandAttack = (
     content,
     rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
     characters: state.characters,
+    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef),
   });
   const intercept = interceptFatalDamage({
     state: applyAll(state, [...economyEvents, attackRolled, damageRolled]),

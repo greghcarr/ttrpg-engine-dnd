@@ -313,7 +313,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'resilient-sphere': { kind: 'skip', reason: 'forced cage around target on DEX save; multi-target movement-restriction primitive not modeled' },
   'secret-chest': { kind: 'skip', reason: 'extradimensional storage utility; ethereal-stash primitive not modeled' },
   'stone-shape': { kind: 'skip', reason: 'utility shaping of stone; terrain primitive not modeled' },
-  'stoneskin': { kind: 'skip', reason: 'resistance to nonmagical B/P/S; resistance qualifier (magical-vs-nonmagical) not modeled' },
+  'stoneskin': { kind: 'buff', conditionId: 'stoneskin-active' },
   'wall-of-fire': { kind: 'skip', reason: 'aura-damage mechanic (DEX save 5d8 fire, half on success); fires via engine.plan.tickAura per-turn, not on cast. RAW side-selectable damage isn\'t expressed.' },
   'watery-sphere': { kind: 'skip', reason: 'STR save sphere prison + movement; multi-target movement-restriction primitive not modeled' },
   // PHB 2024 L5 spells with wired mechanics

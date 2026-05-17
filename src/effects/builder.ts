@@ -70,7 +70,16 @@ export class EffectAccumulator {
   // disadvantage variant); queried by consumers that know the relevant
   // counterparty id (the attack planner with the target's id).
   private readonly advantagesVsSource = new Map<string, AdvantageState>();
-  private readonly resistances = new Set<DamageType | 'all'>();
+  // Slice 112: per-type resistance entries with optional qualifier.
+  // No qualifier means the resistance always applies. A 'nonmagical'
+  // qualifier means the resistance applies only when the incoming
+  // damage source is non-magical (Stoneskin in SRD form, the common
+  // monster "resistance to B/P/S from nonmagical attacks" trait).
+  // A 'magical' qualifier means the resistance applies only when the
+  // source IS magical. Resistance from multiple entries stacks via
+  // any-match semantics: if any matching entry fires, the damage is
+  // halved (resistance doesn't compound).
+  private readonly resistances = new Map<DamageType | 'all', Array<{ qualifier?: 'nonmagical' | 'magical' }>>();
   private readonly immunities = new Set<DamageType | 'all'>();
   private readonly vulnerabilities = new Set<DamageType>();
   // Per-condition lists of immunity entries. Entries with no predicate
@@ -133,8 +142,13 @@ export class EffectAccumulator {
     else state.autoFail = true;
   }
 
-  addResistance(type: DamageType | 'all'): void {
-    this.resistances.add(type);
+  addResistance(type: DamageType | 'all', qualifier?: 'nonmagical' | 'magical'): void {
+    let list = this.resistances.get(type);
+    if (list === undefined) {
+      list = [];
+      this.resistances.set(type, list);
+    }
+    list.push({ qualifier });
   }
   addImmunity(type: DamageType | 'all'): void {
     this.immunities.add(type);
@@ -248,8 +262,18 @@ export class EffectAccumulator {
     return this.healingBlockedFlag;
   }
 
-  hasResistance(type: DamageType): boolean {
-    return this.resistances.has(type) || this.resistances.has('all');
+  hasResistance(type: DamageType, sourceIsMagical?: boolean): boolean {
+    const matches = (entries: Array<{ qualifier?: 'nonmagical' | 'magical' }>): boolean =>
+      entries.some((entry) => {
+        if (entry.qualifier === undefined) return true;
+        if (entry.qualifier === 'nonmagical') return sourceIsMagical !== true;
+        return sourceIsMagical === true;
+      });
+    const typeEntries = this.resistances.get(type);
+    if (typeEntries !== undefined && matches(typeEntries)) return true;
+    const allEntries = this.resistances.get('all');
+    if (allEntries !== undefined && matches(allEntries)) return true;
+    return false;
   }
   hasImmunity(type: DamageType): boolean {
     return this.immunities.has(type) || this.immunities.has('all');
@@ -384,7 +408,7 @@ export const applyEffectToBuilder = (
       acc.markHealingBlocked();
       return;
     case 'GrantResistance':
-      acc.addResistance(effect.damageType);
+      acc.addResistance(effect.damageType, effect.qualifier);
       return;
     case 'GrantImmunity':
       acc.addImmunity(effect.damageType);

@@ -19,6 +19,7 @@ import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { isMagicWeaponAttack } from '../../derive/magicality.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
@@ -442,6 +443,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     content,
     rawComponents,
     characters: state.characters,
+    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef),
   });
   // Slice 111: simulate prior-rider damage so the Death Ward intercept
   // sees the target's HP at the moment the main damage event commits.

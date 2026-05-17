@@ -19,6 +19,13 @@ export interface MitigateDamageInput {
   // on condition effects that touch flat damage reduction. Callers
   // without source-relative content can omit.
   readonly characters?: Readonly<Record<string, Character>>;
+  // Slice 112: tells the resistance check whether the damage source
+  // is magical so GrantResistance entries with a `qualifier` are
+  // honored correctly. Default (undefined) is treated as non-magical,
+  // matching the common case of physical-attack damage. Spell-sourced
+  // damage emitters pass `true`; falling / mundane-weapon damage
+  // emitters omit (or pass `false`).
+  readonly sourceIsMagical?: boolean;
 }
 
 const halfRoundDown = (n: number): number => Math.floor(n / RESISTANCE_DIVISOR);
@@ -41,7 +48,7 @@ export const mitigateDamage = (input: MitigateDamageInput): DamageComponent[] =>
         mitigation: 'vulnerable',
       };
     }
-    if (effects.hasResistance(component.type)) {
+    if (effects.hasResistance(component.type, input.sourceIsMagical)) {
       return {
         amount: halfRoundDown(afterFlat),
         type: component.type,

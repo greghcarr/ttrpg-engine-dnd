@@ -171,7 +171,14 @@ export type Effect =
   // regain HP until start of caster's next turn" rider on a hit;
   // duration is consumer-managed today (no auto-expiry).
   | { kind: 'BlockHealing' }
-  | { kind: 'GrantResistance'; damageType: DamageType | 'all'; condition?: Predicate }
+  // Slice 112: optional `qualifier` restricts the resistance to one
+  // damage-source kind. `'nonmagical'` (Stoneskin in SRD form, the
+  // common MM "resistance to B/P/S from nonmagical attacks" pattern)
+  // applies only when the attacking weapon is not magical and the
+  // damage is not spell-sourced. `'magical'` applies only when the
+  // damage source IS magical (some monster traits and abjuration
+  // effects). When unset the resistance applies regardless of source.
+  | { kind: 'GrantResistance'; damageType: DamageType | 'all'; qualifier?: 'nonmagical' | 'magical'; condition?: Predicate }
   | { kind: 'GrantImmunity'; damageType: DamageType | 'all' }
   | { kind: 'GrantVulnerability'; damageType: DamageType }
   | { kind: 'GrantConditionImmunity'; conditionId: string; condition?: Predicate }
@@ -290,6 +297,7 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
     z.object({
       kind: z.literal('GrantResistance'),
       damageType: z.union([DamageTypeSchema, z.literal('all')]),
+      qualifier: z.enum(['nonmagical', 'magical']).optional(),
       condition: PredicateSchema.optional(),
     }),
     z.object({

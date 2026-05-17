@@ -321,6 +321,7 @@ export const planTickAura = (
           content,
           rawComponents: [{ amount: final, type: aura.damageType }],
           characters: state.characters,
+          sourceIsMagical: true,
         });
         const damageId = newEventId() as ULID;
         const intercept = interceptFatalDamage({
@@ -437,6 +438,7 @@ export const planTickMovementDamage = (
     content,
     rawComponents: [{ amount: rawDamage, type: mechanic.damageType }],
     characters: state.characters,
+    sourceIsMagical: true,
   });
   const damageId = newEventId() as ULID;
   const intercept = interceptFatalDamage({
@@ -564,6 +566,7 @@ export const planTickRecurring = (
     content,
     rawComponents: [{ amount, type: mechanic.damageType }],
     characters: state.characters,
+    sourceIsMagical: true,
   });
   const damageId = newEventId() as ULID;
   const intercept = interceptFatalDamage({

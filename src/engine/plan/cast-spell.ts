@@ -360,6 +360,7 @@ const planAttackMechanic = (
       content,
       rawComponents: [{ amount: Math.max(0, damageTotal), type: damageType }],
       characters: state.characters,
+      sourceIsMagical: true,
     });
     const intercept = interceptFatalDamage({
       state: applyAll(state, events),
@@ -488,6 +489,7 @@ const planSaveMechanic = (
           content,
           rawComponents: [{ amount: finalAmount, type: mechanic.damageType }],
           characters: state.characters,
+          sourceIsMagical: true,
         });
         const intercept = interceptFatalDamage({
           state: applyAll(state, events),
@@ -820,6 +822,7 @@ const planAutoHitMechanic = (
       content,
       rawComponents: [{ amount: raw, type: mechanic.damageType }],
       characters: state.characters,
+      sourceIsMagical: true,
     });
     const intercept = interceptFatalDamage({
       state: applyAll(state, events),

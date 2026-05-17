@@ -1267,7 +1267,7 @@
     { "id": "resilient-sphere", "name": "Otiluke's Resilient Sphere", "level": 4, "school": "abjuration", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a hemispherical piece of clear crystal and a matching piece of gum arabic" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "secret-chest", "name": "Leomund's Secret Chest", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "an ornate chest worth 5,000+ GP and a Tiny replica worth 50+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["wizard"], "mechanicalEffects": [] },
     { "id": "stone-shape", "name": "Stone Shape", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "soft clay" }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
-    { "id": "stoneskin", "name": "Stoneskin", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "diamond dust worth 100+ GP" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "stoneskin", "name": "Stoneskin", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "diamond dust worth 100+ GP" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "stoneskin-active" }] },
     { "id": "summon-aberration", "name": "Summon Aberration", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "an eyeball encased in gold worth 400+ GP" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Aberrant Spirit", "ac": 11, "hpBase": 40, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 30 }] },
     { "id": "summon-construct", "name": "Summon Construct", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a 100+ GP gem inside a sculpted clay statuette" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["artificer", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Construct Spirit", "ac": 13, "hpBase": 40, "hpPerSlotAbove": 15, "baseSlotLevel": 4, "speedFeet": 30 }] },
     { "id": "summon-elemental", "name": "Summon Elemental", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "an elemental gem (air, earth, fire, or water) worth 400+ GP" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Elemental Spirit", "ac": 11, "hpBase": 50, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 40 }] },
@@ -3153,6 +3153,18 @@
       "endsOn": [],
       "effects": [
         { "kind": "PreventFatalDamage" }
+      ]
+    },
+    {
+      "id": "stoneskin-active",
+      "name": "Stoneskin",
+      "description": "Concentration, up to 1 hour (Stoneskin spell, SRD form): resistance to Bludgeoning, Piercing, and Slashing damage from nonmagical attacks. Wired via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance: every emitter that consults `mitigateDamage` passes a `sourceIsMagical` flag, and the resistance check honors the qualifier. Weapon attacks with `temporaryBuff` set (Magic Weapon / Elemental Weapon) count as magical and bypass the resistance; spell-sourced damage is always magical. Note: the 2024 PHB Stoneskin dropped the qualifier; this entry follows the SRD 5.2 shape to exercise the primitive. The same `qualifier` field unblocks the common MM trait 'resistance to B/P/S damage from nonmagical attacks' on future monster authoring. Known limitation: rider-emitted damage from the trigger dispatcher (Sneak Attack, smites, Spirit Shroud, Fire Shield) bypasses `mitigateDamage` entirely and therefore also bypasses the qualifier — pre-existing dispatcher quirk separate from this slice.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantResistance", "damageType": "bludgeoning", "qualifier": "nonmagical" },
+        { "kind": "GrantResistance", "damageType": "piercing", "qualifier": "nonmagical" },
+        { "kind": "GrantResistance", "damageType": "slashing", "qualifier": "nonmagical" }
       ]
     },
     {
