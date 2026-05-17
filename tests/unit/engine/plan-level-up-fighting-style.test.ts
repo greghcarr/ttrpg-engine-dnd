@@ -8,7 +8,7 @@ import { newCharacterId } from '../../../src/ids.js';
 import type { Campaign } from '../../../src/engine/commit.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
 import type { ChoiceRequiredEvent } from '../../../src/schemas/events/level-up.js';
-import { eventId, isoTimestamp } from '../../fixtures/index.js';
+import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
 
 // Tests Fighting Style choice (OfferChoice path). Bug this prevents:
 // Fighter/Paladin/Ranger should emit a ChoiceRequired event when they
@@ -87,11 +87,19 @@ describe('Fighting Style choice (OfferChoice plumbing)', () => {
     expect(choice!.options.length).toBe(4);
   });
 
-  it('resolving Defense increases the Paladin AC by 1', () => {
-    const paladin = buildPaladin(1);
+  it('resolving Defense increases the Paladin AC by 1 (while wearing armor)', () => {
+    // Slice 116: Defense gates the +1 on `bearer.wearingArmor`. Equip
+    // chain mail so the predicate fires.
+    const chain = makeItemInstance('chain-mail');
+    const paladin = CharacterSchema.parse({
+      ...buildPaladin(1),
+      inventory: [chain.id],
+      equipped: { armor: chain.id, attuned: [] },
+    });
     const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(0) });
     let campaign: Campaign = engine.createCampaign({ name: 'pal-fs-resolve' });
     campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: chain },
       { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: paladin } satisfies CharacterCreatedEvent,
     ]);
     const acBefore = engine.derive.ac(campaign.state, paladin.id).total;

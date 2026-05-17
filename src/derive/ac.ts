@@ -125,6 +125,15 @@ export const computeAC = (input: ComputeACInput): ACResult => {
   const effects = buildEffectStack(input);
   const floor = effects.effectiveACFloor();
 
+  // Slice 116: bearer-state facts for predicate-gated AC modifiers.
+  // Defense Fighting Style's +1 AC only applies while wearing armor;
+  // future modifiers (shield-only, heavy-armor-only, etc.) can join
+  // the same fact namespace. `bearer.wearingArmor` is true iff the
+  // character has an item equipped in their armor slot.
+  const facts = new Map<string, unknown>([
+    ['bearer.wearingArmor', input.character.equipped.armor !== undefined],
+  ]);
+
   // A flat `armorClass` on the character takes precedence over equipment
   // and effect-based overrides. It's used by creatures whose AC comes
   // from natural armor (hide, scales, plate-skin) declared on a statblock
@@ -134,7 +143,7 @@ export const computeAC = (input: ComputeACInput): ACResult => {
     const breakdown: ACBreakdownEntry[] = [
       { source: 'natural-armor', value: input.character.armorClass },
     ];
-    const modifierBonus = effects.modifierSum('ac');
+    const modifierBonus = effects.modifierSum('ac', facts);
     if (modifierBonus !== 0) {
       breakdown.push({ source: 'modifier', value: modifierBonus });
     }
@@ -152,7 +161,7 @@ export const computeAC = (input: ComputeACInput): ACResult => {
     breakdown = computeArmorAC(input.character, input.itemInstances, input.content);
   }
 
-  const modifierBonus = effects.modifierSum('ac');
+  const modifierBonus = effects.modifierSum('ac', facts);
   if (modifierBonus !== 0) {
     breakdown.push({ source: 'modifier', value: modifierBonus });
   }
