@@ -88,12 +88,25 @@ Pick the doc that matches what you want:
 
 **Alpha.** Architecturally complete and content-substantial. 1289 tests across 173 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full.
 
-The high-level state:
+### Coverage at a glance
 
-- **Engine architecture**: locked. ~30 effect primitives, plus the `CustomEffect` escape hatch. The trigger dispatcher, plan/commit split, replay equivalence, RNG capture, branded IDs, schema versioning, content-pack loader + validator all ship.
-- **Engine vocabulary**: still growing. Each remaining engine slice adds a focused primitive (target-side rider, trap, recurring save, directional advantage, heal-block, retaliation damage, etc.) that unblocks a cohort of currently schema-only content. About 15–25 such primitives remain on the catalog in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
-- **Content**: 399 spells (every PHB 2024 entry, ~164 mechanically wired); 12 classes with 1–20 level tables fully populated (slices through L20 across all 12); 12 subclasses (one canonical per class, L3 only); 16 of 16 PHB 2024 backgrounds (complete); 37 conditions (all 15 RAW plus 22 mechanic-rider variants); ~33 feats; 9 magic items; 6 monster statblocks.
-- **Variant rules**: `grittyRest` and `heroPoints` enforce. `sanity` and `massCombat` still toggle but don't enforce (separate slices, ⚪ in Known gaps).
+Engine and pack content tracked separately: the architecture is locked; what grows each slice is the effect-primitive vocabulary plus the content that exercises it. Engine *mechanics* are well past the halfway mark; *content* is dominated by the long tail of DMG magic items and the MM bestiary, both consumer-fillable.
+
+| Category | Progress | Notes |
+|---|---|---|
+| Engine architecture | `████████████████████` 100% | event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, dispatcher: all locked |
+| Effect-primitive vocabulary | `████████████░░░░░░░░` ~60% | ~30 primitives wired; 15–25 still on the menu in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) |
+| Classes (1–20 tables) | `████████████████████` 100% | 12/12 scaffolded; features fully wired through L7, partial L8–L20 |
+| Subclasses | `█████░░░░░░░░░░░░░░░` 24% | 12/~50; one canonical per class at L3 only |
+| Species | `██████████████░░░░░░` 70% | 7/10 PHB 2024 (Aasimar, Goliath, Orc deferred) |
+| Backgrounds | `████████████████████` 100% | 16/16 PHB 2024 |
+| Feats | `█████████████░░░░░░░` 66% | ~33/~50 (origin + general + fighting style + epic boon) |
+| Spells (shipped) | `████████████████████` 100% | 399/399 PHB 2024 across L0–L9 |
+| Spells (mechanically wired) | `████████░░░░░░░░░░░░` 41% | ~165/399; remainder names the engine primitive each blocks on |
+| Conditions | `████████████████████` 100% | 15/15 RAW + 22 mechanic-rider variants the engine emits |
+| Magic items | `█░░░░░░░░░░░░░░░░░░░` ~5% | 9 items across rarity tiers; bulk of DMG catalog deferred |
+| Monsters | `░░░░░░░░░░░░░░░░░░░░` ~2% | 6/~370 MM statblocks (single largest content gap by count) |
+| Variant rules enforced | `██████████░░░░░░░░░░` 50% | `grittyRest` + `heroPoints` enforce; `sanity` + `massCombat` toggle but don't yet enforce |
 
 **What this means for use**: the engine is solid for "create a character, run combat, do a session." For a campaign that exercises the long tail of PHB spells, the missing subclasses, or the bulk of MM monsters, you'll be authoring content packs alongside the starter pack. See the per-category breakdown below and [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the canonical inventory.
 
