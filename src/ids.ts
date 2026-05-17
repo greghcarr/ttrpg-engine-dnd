@@ -18,6 +18,7 @@ export type ChoiceId = Brand<string, 'ChoiceId'>;
 export type EffectInstanceId = Brand<string, 'EffectInstanceId'>;
 export type AppliedConditionId = Brand<string, 'AppliedConditionId'>;
 export type TrapId = Brand<string, 'TrapId'>;
+export type SensorId = Brand<string, 'SensorId'>;
 
 export type SpeciesId = Brand<string, 'SpeciesId'>;
 export type BackgroundId = Brand<string, 'BackgroundId'>;
@@ -51,6 +52,7 @@ export const newEffectInstanceId = (): EffectInstanceId => ulid() as EffectInsta
 export const newAppliedConditionId = (): AppliedConditionId => ulid() as AppliedConditionId;
 export const newItemInstanceId = (): ItemInstanceId => ulid() as ItemInstanceId;
 export const newTrapId = (): TrapId => ulid() as TrapId;
+export const newSensorId = (): SensorId => ulid() as SensorId;
 
 export const asCharacterId = (s: string): CharacterId => s as CharacterId;
 export const asCreatureId = (s: string): CreatureId => s as CreatureId;

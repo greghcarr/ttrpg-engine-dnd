@@ -108,6 +108,11 @@ import {
   applyItemIdentified,
 } from './reducers/reactive-spells.js';
 import { applyMirrorImageDeflected } from './reducers/mirror-image.js';
+import {
+  applyRemoteSensorPlaced,
+  applyRemoteSensorModeChanged,
+  applyRemoteSensorRemoved,
+} from './reducers/sensor.js';
 import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
 import {
   applyMounted,
@@ -543,6 +548,15 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'TrapExpired':
         applyTrapExpired(draft, event);
+        break;
+      case 'RemoteSensorPlaced':
+        applyRemoteSensorPlaced(draft, event);
+        break;
+      case 'RemoteSensorModeChanged':
+        applyRemoteSensorModeChanged(draft, event);
+        break;
+      case 'RemoteSensorRemoved':
+        applyRemoteSensorRemoved(draft, event);
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);

@@ -119,6 +119,14 @@ export const clearConcentrationEffect = (
       instance.temporaryBuff = undefined;
     }
   }
+  // Slice 135: sweep sensors (Clairvoyance, future Scrying) linked
+  // to this concentration. Same shape as the item-buff sweep above.
+  for (const sensorId of Object.keys(state.sensors)) {
+    const sensor = state.sensors[sensorId];
+    if (sensor?.sourceEffectInstanceId === effectInstanceId) {
+      delete state.sensors[sensorId];
+    }
+  }
   delete state.effectInstances[effectInstanceId];
 };
 

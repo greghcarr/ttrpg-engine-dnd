@@ -68,6 +68,9 @@ import {
   planCounterspell,
   planDispelMagic,
   planRemoveCurse,
+  planClairvoyance,
+  planSwitchSensorMode,
+  planRemoveSensor,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -95,6 +98,9 @@ import {
   type CounterspellIntent,
   type DispelMagicIntent,
   type RemoveCurseIntent,
+  type ClairvoyanceIntent,
+  type SwitchSensorModeIntent,
+  type RemoveSensorIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
@@ -268,6 +274,9 @@ export interface Engine {
     counterspell(state: CampaignState, intent: Omit<CounterspellIntent, 'type'>): PlanResult;
     dispelMagic(state: CampaignState, intent: Omit<DispelMagicIntent, 'type'>): PlanResult;
     removeCurse(state: CampaignState, intent: Omit<RemoveCurseIntent, 'type'>): PlanResult;
+    clairvoyance(state: CampaignState, intent: Omit<ClairvoyanceIntent, 'type'>): PlanResult;
+    switchSensorMode(state: CampaignState, intent: Omit<SwitchSensorModeIntent, 'type'>): PlanResult;
+    removeSensor(state: CampaignState, intent: Omit<RemoveSensorIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
@@ -519,6 +528,15 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     removeCurse(state, intent) {
       return { events: planRemoveCurse(state, content, rng, { type: 'RemoveCurse', ...intent }) };
+    },
+    clairvoyance(state, intent) {
+      return { events: planClairvoyance(state, content, rng, { type: 'Clairvoyance', ...intent }) };
+    },
+    switchSensorMode(state, intent) {
+      return { events: planSwitchSensorMode(state, content, rng, { type: 'SwitchSensorMode', ...intent }) };
+    },
+    removeSensor(state, intent) {
+      return { events: planRemoveSensor(state, content, rng, { type: 'RemoveSensor', ...intent }) };
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };

@@ -112,6 +112,14 @@ export {
   type HideIntent,
 } from './contested.js';
 export {
+  planClairvoyance,
+  planSwitchSensorMode,
+  planRemoveSensor,
+  type ClairvoyanceIntent,
+  type SwitchSensorModeIntent,
+  type RemoveSensorIntent,
+} from './sensor.js';
+export {
   planCounterspell,
   planDispelMagic,
   planRemoveCurse,

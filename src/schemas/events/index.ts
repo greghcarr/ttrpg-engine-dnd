@@ -173,6 +173,11 @@ import {
   TrapTriggeredEventSchema,
   TrapExpiredEventSchema,
 } from './traps.js';
+import {
+  RemoteSensorPlacedEventSchema,
+  RemoteSensorModeChangedEventSchema,
+  RemoteSensorRemovedEventSchema,
+} from './sensors.js';
 import { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
@@ -295,6 +300,9 @@ export const EventSchema = z.discriminatedUnion('type', [
   TrapArmedEventSchema,
   TrapTriggeredEventSchema,
   TrapExpiredEventSchema,
+  RemoteSensorPlacedEventSchema,
+  RemoteSensorModeChangedEventSchema,
+  RemoteSensorRemovedEventSchema,
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
@@ -421,6 +429,9 @@ export const EVENT_TYPES = [
   'TrapArmed',
   'TrapTriggered',
   'TrapExpired',
+  'RemoteSensorPlaced',
+  'RemoteSensorModeChanged',
+  'RemoteSensorRemoved',
   'CampaignSettingsChanged',
   'HeroPointGranted',
   'HeroPointSpent',
@@ -838,5 +849,18 @@ export type {
   TrapExpiredEvent,
   TrapExpiryReason,
 } from './traps.js';
+export {
+  RemoteSensorPlacedEventSchema,
+  RemoteSensorModeChangedEventSchema,
+  RemoteSensorRemovedEventSchema,
+  SENSOR_REMOVAL_REASONS,
+  SensorRemovalReasonSchema,
+} from './sensors.js';
+export type {
+  RemoteSensorPlacedEvent,
+  RemoteSensorModeChangedEvent,
+  RemoteSensorRemovedEvent,
+  SensorRemovalReason,
+} from './sensors.js';
 export { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 export type { MirrorImageDeflectedEvent } from './mirror-image.js';

@@ -643,6 +643,16 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     case 'TrapExpired': {
       return `Trap expired (${event.reason}).`;
     }
+    case 'RemoteSensorPlaced': {
+      const who = characterName(stateBefore, event.casterId);
+      return `**${who}** opens a clairvoyant sensor (${event.mode}) over ${event.location}.`;
+    }
+    case 'RemoteSensorModeChanged': {
+      return `Sensor switches to ${event.mode}.`;
+    }
+    case 'RemoteSensorRemoved': {
+      return `Sensor closes (${event.reason}).`;
+    }
   }
 };
 
