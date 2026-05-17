@@ -15,7 +15,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
 | Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~158 wired with `mechanicalEffects` (~20 cantrips, ~33 L1, ~26 L2 including Mirror Image from slice 124, ~22 L3, ~15 L4 including Death Ward + Stoneskin from slices 111-112, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 10 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, sanctuary, hunters-mark, polymorph). The remaining ~241 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
-| Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. The common "resistance to B/P/S from nonmagical attacks" trait is now expressible via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance. |
+| Monsters | 16 / hundreds | ~370 (MM) | Six MM beasts (Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon) plus the content-batch-1.1 NPC roster (Bandit, Bandit Captain, Cultist, Cult Fanatic, Acolyte, Commoner, Guard, Noble, Scout, Spy). CR 0–10 covered; most of MM still deferred. The common "resistance to B/P/S from nonmagical attacks" trait is now expressible via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance. |
 | Conditions | 39 / 15 | 15 (RAW) | All 15 RAW conditions plus 24 mechanic-rider conditions used by the engine (death-ward-active + stoneskin-active landed in slices 111-112; mirror-image-active landed in slice 124). |
 
 ## Spells
@@ -356,9 +356,40 @@ The DMG is hundreds of items long; this pack ships a representative slice. Magic
 
 ## Monsters
 
-Six statblocks: Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
+Twenty-nine statblocks.
 
-Notable gaps for tutorial / starter encounters: Bandit, Cultist, Commoner, Guard, Veteran, Bandit Captain. CR 1/8 and the rest of CR 1/2–1 is the easiest near-term fill.
+**MM beasts (6):** Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
+
+**NPC roster, content-monsters-batch-1.1 (10):** Bandit (CR 1/8), Bandit Captain (CR 2), Cultist (CR 1/8), Cult Fanatic (CR 2), Acolyte (CR 1/4), Commoner (CR 0), Guard (CR 1/8), Noble (CR 1/8), Scout (CR 1/2), Spy (CR 1).
+
+**NPC roster, content-monsters-batch-1.2 (5):** Tribal Warrior (CR 1/8), Thug (CR 1/2), Berserker (CR 2), Veteran (CR 3), Knight (CR 3). Closes the humanoid roster up through CR 3.
+
+**Bestiary, content-monsters-batch-1.3 (8):** Zombie (CR 1/4), Ghoul (CR 1), Giant Rat (CR 1/8), Giant Spider (CR 1), Giant Wolf Spider (CR 1/4), Brown Bear (CR 1), Dire Wolf (CR 1), Stirge (CR 1/8). First broad fill outside humanoids: 6 Beasts + 2 Undead, covering the most-encountered low-CR creature types.
+
+All twenty-nine ship `traits: []`. The RAW traits and actions on these statblocks are deferred until the matching engine primitives land:
+
+- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy, Thug, Veteran, Knight, Ghoul, Brown Bear) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
+- **Parry reaction** (Bandit Captain, Knight) — reactions ship as dedicated planners today (counterspell / shield / absorb-elements / sanctuary / feather-fall); there's no generic monster-reaction primitive.
+- **Cunning Action** (Spy) and **Sneak Attack** (Spy) — these are wired as class features on the rogue, but the engine doesn't carry a "monster has class-feature shape" cross-link, so the spy statblock can't borrow them.
+- **RAW spellcasting** (Acolyte, Cult Fanatic) — monsters can't yet carry a spell list (Sacred Flame / Cure Wounds / Bless on the Acolyte; Sacred Flame / Inflict Wounds / Command / Hold Person / Spiritual Weapon on the Cult Fanatic). The class-side spellcasting machinery doesn't have a monster entry point.
+- **Keen senses family** (Scout's Keen Hearing and Sight; Giant Rat's Keen Smell; Brown Bear's Keen Smell; Dire Wolf's Keen Hearing and Smell) — needs an advantage-on-perception primitive scoped to specific senses; the engine carries SetAdvantage on rolls but not on sense-modality-specific perception checks.
+- **Dark Devotion** (Cult Fanatic) and **Brave** (Knight) — advantage on saves against specific conditions (Charmed / Frightened on Dark Devotion, Frightened on Brave). The closest existing primitive (`SetAdvantage on:'save:WIS' advantage`) is too broad; a per-condition-saving-throw advantage primitive would close both cleanly.
+- **Reckless** (Berserker) — wired as a class feature on the barbarian (Reckless Attack), but monsters can't yet borrow class features. Same gap shape as Spy's Cunning Action / Sneak Attack.
+- **Pack Tactics** (Thug, Tribal Warrior, Giant Rat, Dire Wolf) — advantage on attacks when an ally is within 5 ft of the target. Needs a positional-condition-with-advantage primitive; the engine doesn't model positions (consumer territory), so the engine can't gate the advantage without an injected fact.
+- **Leadership** (Knight) — recharge-6 short-rest action that grants up to six allies within 30 ft a d4 to attacks and saves for 1 minute. Needs an aura-style action grant paired with a temporary-modifier-with-duration primitive that combines elements of `GrantAura` and the recurring-rider/concentration machinery, neither of which currently composes for a monster action.
+- **Undead Fortitude** (Zombie) — when reduced to 0 HP by damage other than radiant or a critical hit, the zombie makes a CON save (DC 5 + damage) and drops to 1 HP on success. Closest analogue is slice 111's `PreventFatalDamage` marker (Death Ward), but that's an unconditional clamp; Undead Fortitude needs a save-gated variant with damage-type exclusions.
+- **On-hit save-or-condition rider** (Ghoul's Paralyzing Touch; Dire Wolf's bite knockdown) — claw or bite attack with a CON-vs-paralyzed or STR-vs-prone save on hit. The spell pipeline models this via the `conditionOnFail` save mechanic, but monsters can't yet wire a per-attack on-hit save without going through the spell planner.
+- **Recharge-N actions** (Giant Spider's Web; future Young Red Dragon Breath Weapon, etc.) — actions usable once per encounter that recharge on a per-turn d6 roll. Needs both a monster-action vocabulary and a recharge primitive; neither exists.
+- **Poison damage rider on attack** (Giant Spider, Giant Wolf Spider bite) — extra poison damage with half-on-save. Same shape gap as the on-hit-save-rider above, just with damage instead of a condition on the outcome.
+- **Blood Drain attach** (Stirge) — on a successful hit, the stirge attaches and auto-deals damage at the start of each of its turns until killed or removed. Needs an "attached" condition with recurring per-turn damage on a fixed target, plus an automatic action substitution while attached. No primitive composes for this today.
+- **Web Sense / Web Walker** (Giant Spider, Giant Wolf Spider) — narrative; "ignore movement restrictions caused by webbing." No engine work needed (the engine doesn't model webbed terrain).
+
+Two cross-cutting structural gaps surface across all 29 entries and aren't specific to any single creature:
+
+- **No actions field on `MonsterStatblock`** — the schema carries `traits: EffectSchema[]` but no `actions`; bite / slam / claw / weapon attacks on these statblocks are narrative only. Several weapon items exist in the pack with monster-named ids (`dragon-bite`, `dragon-claw`, `ogre-greatclub`) but nothing links the statblocks to those items, so they're orphaned today.
+- **No `creatureSubtype` field beyond the existing `subtype: string`** — fine for most cases, but Goblinoid / Devil / Demon etc. tag-style subtypes (used elsewhere in the rules for targeting / immunity gates) would benefit from being a constrained enum.
+
+Notable gaps still open for tutorial / starter encounters: caster NPCs (Mage, Apprentice Wizard, Priest, Druid — all share the deferred monster-spellcasting gap), Gladiator (CR 5), Assassin (CR 8). Bestiary at low CR is still thin: no Giant Frog / Boar / Mastiff / Black Bear / Constrictor Snake for the Beast pile; no Specter / Wraith / Ghost / Shadow for the Undead pile. Whole creature types remain unstarted: Aberration, Celestial, Construct, Elemental, Fey, Fiend, Monstrosity, Ooze, Plant.
 
 ## Species
 
