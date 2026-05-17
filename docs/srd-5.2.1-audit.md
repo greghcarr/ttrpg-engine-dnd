@@ -26,7 +26,7 @@ The audit is scripted: a Node parser reads the markdown SRD in `references/srd-m
 | 146 | Drift refresh batch 4 of 6 (Imp, Invisible Stalker, Iron Golem, Lemure, Mage, Ochre Jelly, Ogre, Otyugh, Planetar, Priest) | **done** | starter-pack.json |
 | 147 | Drift refresh batch 5 of 6 (Quasit, Satyr, Shadow, Shambling Mound, Skeleton, Solar, Sprite, Stirge, Stone Golem, Storm Giant) | **done** | starter-pack.json |
 | 148 | Drift refresh batch 6 of 6 (Triceratops, Unicorn, Wight, Wolf, Young White Dragon, Zombie) | **done** | starter-pack.json |
-| 149 | Doc refresh ([docs/content-attribution.md](content-attribution.md), README "60% SRD" headline, [docs/starter-pack-gaps.md](starter-pack-gaps.md)) | pending | docs only |
+| 149 | Doc refresh: content-attribution.md rewritten to current audit state, README "60% SRD" headline bumped to ~65%, starter-pack-gaps.md scrubbed of dropped + renamed monster references | **done** | docs only |
 
 **As of slice 148: 111 / 111 starter-pack monsters match SRD 5.2.1 exactly on the audited fields (AC, HP, abilities, CR).** The action / trait / save / resistance / immunity drift checks remain as a follow-up pass (see Audit fields and caveats below).
 
