@@ -2054,7 +2054,15 @@
     { "id": "vorpal-sword", "itemKind": "magic", "name": "Vorpal Sword", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
     { "id": "dwarven-thrower", "itemKind": "magic", "name": "Dwarven Thrower", "rarity": "very-rare", "requiresAttunement": true, "attunementCondition": "Dwarf", "effects": [] },
     { "id": "hammer-of-thunderbolts", "itemKind": "magic", "name": "Hammer of Thunderbolts", "rarity": "legendary", "requiresAttunement": true, "effects": [] },
-    { "id": "berserker-axe", "itemKind": "magic", "name": "Berserker Axe", "rarity": "rare", "requiresAttunement": true, "effects": [] }
+    { "id": "berserker-axe", "itemKind": "magic", "name": "Berserker Axe", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "adamantine-armor", "itemKind": "magic", "name": "Adamantine Armor", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "mithral-armor", "itemKind": "magic", "name": "Mithral Armor", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "elven-chain", "itemKind": "magic", "name": "Elven Chain", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "glamoured-studded-leather", "itemKind": "magic", "name": "Glamoured Studded Leather", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "dragon-scale-mail", "itemKind": "magic", "name": "Dragon Scale Mail", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "demon-armor", "itemKind": "magic", "name": "Demon Armor", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "sentinel-shield", "itemKind": "magic", "name": "Sentinel Shield", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "spellguard-shield", "itemKind": "magic", "name": "Spellguard Shield", "rarity": "very-rare", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
