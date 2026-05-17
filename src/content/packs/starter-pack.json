@@ -2128,7 +2128,15 @@
     { "id": "eyes-of-minute-seeing", "itemKind": "magic", "name": "Eyes of Minute Seeing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "helm-of-comprehending-languages", "itemKind": "magic", "name": "Helm of Comprehending Languages", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "gloves-of-thievery", "itemKind": "magic", "name": "Gloves of Thievery", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
-    { "id": "boots-of-the-winterlands", "itemKind": "magic", "name": "Boots of the Winterlands", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
+    { "id": "boots-of-the-winterlands", "itemKind": "magic", "name": "Boots of the Winterlands", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-spell-storing", "itemKind": "magic", "name": "Ring of Spell Storing", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 5, "recharge": "never" }, "effects": [] },
+    { "id": "ring-of-three-wishes", "itemKind": "magic", "name": "Ring of Three Wishes", "rarity": "legendary", "requiresAttunement": true, "charges": { "max": 3, "recharge": "never" }, "effects": [] },
+    { "id": "ring-of-x-ray-vision", "itemKind": "magic", "name": "Ring of X-Ray Vision", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 1, "recharge": "longRest" }, "effects": [] },
+    { "id": "ring-of-the-ram", "itemKind": "magic", "name": "Ring of the Ram", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "ring-of-evasion", "itemKind": "magic", "name": "Ring of Evasion", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "ring-of-animal-influence", "itemKind": "magic", "name": "Ring of Animal Influence", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "ring-of-shooting-stars", "itemKind": "magic", "name": "Ring of Shooting Stars", "rarity": "very-rare", "requiresAttunement": true, "charges": { "max": 6, "recharge": "dawn" }, "effects": [] },
+    { "id": "ring-of-spell-turning", "itemKind": "magic", "name": "Ring of Spell Turning", "rarity": "legendary", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] }
   ],
   "monsters": [
     {
