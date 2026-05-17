@@ -273,4 +273,95 @@ describe('Mirror Image', () => {
     }
     throw new Error('no seed produced a deflection-success for the trigger-dispatch test');
   });
+
+  // Slice 127: RAW vision-gate. Mirror Image is bypassed by attackers
+  // that see by senses other than sight (blindsight / truesight) or
+  // that cannot see at all (Blinded condition). Bypass means: no
+  // deflection roll, no MirrorImageDeflected event, the attack rolls
+  // normally against the bearer's AC.
+  it('a truesight attacker bypasses Mirror Image (no MirrorImageDeflected emitted)', () => {
+    // Boon of Truesight grants truesight 60 ft. Repeated across many
+    // seeds: no seed should ever produce a deflection because the
+    // bypass short-circuits before the d20 is rolled.
+    for (let seed = 1; seed < 50; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const longsword = makeItemInstance('longsword');
+      const wizard = buildWizard();
+      const truesightedAttacker: Character = {
+        ...buildAttacker(longsword.id),
+        featsTaken: ['boon-of-truesight'],
+      };
+      let campaign: Campaign = engine.createCampaign({ name: `mi-truesight-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: truesightedAttacker } satisfies CharacterCreatedEvent,
+      ]);
+      const ward: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: wizard.id,
+        conditionId: 'mirror-image-active',
+        appliedConditionId: newAppliedConditionId(),
+        level: 3,
+      };
+      campaign = commit(campaign, [ward]);
+      const events = engine.plan.attack(campaign.state, {
+        attackerId: truesightedAttacker.id,
+        targetId: wizard.id,
+        weaponInstanceId: longsword.id,
+      }).events;
+      const deflected = events.find(
+        (e): e is MirrorImageDeflectedEvent =>
+          (e as { type?: string }).type === 'MirrorImageDeflected',
+      );
+      expect(deflected).toBeUndefined();
+    }
+  });
+
+  it('a blinded attacker bypasses Mirror Image (no MirrorImageDeflected emitted)', () => {
+    // RAW: "A creature is unaffected by this spell if it can't see ...".
+    // Blinded fits: the bearer can't be the illusion's target.
+    for (let seed = 1; seed < 50; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const longsword = makeItemInstance('longsword');
+      const wizard = buildWizard();
+      const attacker = buildAttacker(longsword.id);
+      let campaign: Campaign = engine.createCampaign({ name: `mi-blinded-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: longsword },
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: attacker } satisfies CharacterCreatedEvent,
+      ]);
+      const ward: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: wizard.id,
+        conditionId: 'mirror-image-active',
+        appliedConditionId: newAppliedConditionId(),
+        level: 3,
+      };
+      const blinded: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: attacker.id,
+        conditionId: 'blinded',
+        appliedConditionId: newAppliedConditionId(),
+      };
+      campaign = commit(campaign, [ward, blinded]);
+      const events = engine.plan.attack(campaign.state, {
+        attackerId: attacker.id,
+        targetId: wizard.id,
+        weaponInstanceId: longsword.id,
+      }).events;
+      const deflected = events.find(
+        (e): e is MirrorImageDeflectedEvent =>
+          (e as { type?: string }).type === 'MirrorImageDeflected',
+      );
+      expect(deflected).toBeUndefined();
+    }
+  });
 });

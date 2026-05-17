@@ -194,4 +194,36 @@ describe('EffectAccumulator', () => {
     );
     expect(acc.modifierSum('ac')).toBe(0);
   });
+
+  // Slice 127: GrantSense flows through to senseRange / hasSense.
+  it('GrantSense records the sense and its range', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'GrantSense', sense: 'darkvision', range: 60 },
+      acc,
+      { source: 'dwarf-species' },
+    );
+    expect(acc.hasSense('darkvision')).toBe(true);
+    expect(acc.senseRange('darkvision')).toBe(60);
+    expect(acc.hasSense('blindsight')).toBe(false);
+    expect(acc.senseRange('blindsight')).toBe(0);
+  });
+
+  it('GrantSense keeps the larger range when the same sense is granted twice', () => {
+    // RAW: a creature with overlapping sense grants keeps the longer
+    // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,
+    // not 180 ft). The accumulator takes the max, not the sum.
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'GrantSense', sense: 'darkvision', range: 60 },
+      acc,
+      { source: 'dwarf' },
+    );
+    applyEffectToBuilder(
+      { kind: 'GrantSense', sense: 'darkvision', range: 120 },
+      acc,
+      { source: 'devils-sight' },
+    );
+    expect(acc.senseRange('darkvision')).toBe(120);
+  });
 });

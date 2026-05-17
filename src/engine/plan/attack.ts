@@ -423,11 +423,18 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   }
   // Slice 124: Mirror Image deflection. Roll the deflection d20 before
   // the attack roll; on success the attack rolls against the duplicate
-  // AC = 10 + bearer DEX mod instead, and emits no damage chain. The
-  // deferred vision gate (blind / blindsight / truesight attackers
-  // bypass the spell per RAW) is not modeled here — Mirror Image fires
-  // against every attack while the bearer carries the condition.
-  const mirrorImage = findMirrorImage(target);
+  // AC = 10 + bearer DEX mod instead, and emits no damage chain.
+  // Slice 127: RAW vision-gate. PHB 2024 Mirror Image: "A creature is
+  // unaffected by this spell if it can't see, if it relies on senses
+  // other than sight (such as Blindsight), or if it can perceive
+  // illusions as false (as with Truesight)." Attackers with blindsight
+  // or truesight at any range, or attackers carrying the Blinded
+  // condition, see the bearer directly and bypass the deflection pool.
+  const attackerBypassesMirrorImage =
+    attackerEffects.hasSense('blindsight')
+    || attackerEffects.hasSense('truesight')
+    || attacker.appliedConditions.some((c) => c.conditionId === 'blinded');
+  const mirrorImage = attackerBypassesMirrorImage ? undefined : findMirrorImage(target);
   if (mirrorImage !== undefined) {
     const deflectedEvents = tryBuildDeflectedAttack({
       state,

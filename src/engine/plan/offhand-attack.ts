@@ -123,8 +123,19 @@ export const planOffHandAttack = (
   // Slice 124: Mirror Image deflection. Off-hand attacks against a
   // warded bearer roll the deflection d20 first; on success the
   // attack rolls against the duplicate AC and emits no damage chain.
-  // Same vision-gate caveat as the main attack path.
-  const mirrorImage = findMirrorImage(target);
+  // Slice 127: same RAW vision-gate as the main attack path.
+  const attackerEffects = buildEffectStack({
+    character: attacker,
+    itemInstances: state.itemInstances,
+    content,
+    pendingChoices: state.pendingChoices,
+    characters: state.characters,
+  });
+  const attackerBypassesMirrorImage =
+    attackerEffects.hasSense('blindsight')
+    || attackerEffects.hasSense('truesight')
+    || attacker.appliedConditions.some((c) => c.conditionId === 'blinded');
+  const mirrorImage = attackerBypassesMirrorImage ? undefined : findMirrorImage(target);
   if (mirrorImage !== undefined) {
     const deflectedEvents = tryBuildDeflectedAttack({
       state,
@@ -178,13 +189,6 @@ export const planOffHandAttack = (
   const dexMod = abilityModifier(attacker.abilityScores.DEX);
   const isFinesse = weaponDef.properties.includes('finesse');
   const abilityMod = isFinesse ? Math.max(strMod, dexMod) : strMod;
-  const attackerEffects = buildEffectStack({
-    character: attacker,
-    itemInstances: state.itemInstances,
-    content,
-    pendingChoices: state.pendingChoices,
-    characters: state.characters,
-  });
   const offHandModifier = attackerEffects.hasTwoWeaponFighting()
     ? abilityMod
     : abilityMod < 0

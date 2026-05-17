@@ -1,5 +1,5 @@
 import type { Effect, ModifierTarget, RollTarget } from '../schemas/effects.js';
-import type { AbilityScore, DamageType, Skill } from '../schemas/primitives.js';
+import type { AbilityScore, DamageType, Sense, Skill } from '../schemas/primitives.js';
 import type { Predicate } from '../schemas/predicate.js';
 import { evaluatePredicate } from './predicate.js';
 import { evaluateFormula, type FormulaContext } from './formula.js';
@@ -98,6 +98,13 @@ export class EffectAccumulator {
   private readonly acOverrides: ACOverride[] = [];
   private readonly acFloors: { value: number; source: string }[] = [];
   private readonly resourceGrants: ResourceGrant[] = [];
+  // Slice 127: granted senses (darkvision / blindsight / tremorsense /
+  // truesight). Stored as sense -> max-range (feet) where multiple
+  // grants of the same sense take the larger range (RAW: a dwarf
+  // with 60 ft darkvision who multiclasses into Warlock and gains
+  // Devil's Sight 120 ft keeps the 120 ft figure, not the sum).
+  // Mirror Image and similar vision-gated effects query this.
+  private readonly senseGrants = new Map<Sense, number>();
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
   private readonly flatDamageReductions = new Map<DamageType, number>();
@@ -288,6 +295,19 @@ export class EffectAccumulator {
 
   hasHealingBlocked(): boolean {
     return this.healingBlockedFlag;
+  }
+
+  grantSense(sense: Sense, range: number): void {
+    const existing = this.senseGrants.get(sense) ?? 0;
+    if (range > existing) this.senseGrants.set(sense, range);
+  }
+
+  hasSense(sense: Sense): boolean {
+    return (this.senseGrants.get(sense) ?? 0) > 0;
+  }
+
+  senseRange(sense: Sense): number {
+    return this.senseGrants.get(sense) ?? 0;
   }
 
   hasResistance(type: DamageType, sourceIsMagical?: boolean): boolean {
@@ -526,6 +546,8 @@ export const applyEffectToBuilder = (
       acc.markImposesDisadvantageOnAttackers(effect.condition);
       return;
     case 'GrantSense':
+      acc.grantSense(effect.sense, effect.range);
+      return;
     case 'ModifySpeed':
     case 'GrantSpellSlots':
     case 'GrantSpell':

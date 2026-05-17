@@ -193,6 +193,7 @@ exports[`feature-coverage matrix: conditions > wired conditions catalog is stabl
 
 exports[`feature-coverage matrix: feats > wired feats catalog is stable 1`] = `
 [
+  "epic-boon:boon-of-truesight",
   "fighting-style:fighting-style-archery",
   "fighting-style:fighting-style-defense",
   "fighting-style:fighting-style-dueling",
