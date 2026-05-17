@@ -112,7 +112,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'dissonant-whispers': { kind: 'save' },
   'guiding-bolt': { kind: 'attack' },
   'hellish-rebuke': { kind: 'save' },
-  'inflict-wounds': { kind: 'attack' },
+  'inflict-wounds': { kind: 'save' },
   'ray-of-sickness': { kind: 'attack' },
   'hideous-laughter': { kind: 'save' },
   // PHB 2024 L1 spells shipped schema-only (no mechanicalEffects yet).

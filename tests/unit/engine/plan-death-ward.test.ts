@@ -83,9 +83,9 @@ const seedDeathWarded = (victimHp: number): {
 describe('Death Ward on-fatal-damage intercept', () => {
   it('clamps a would-be-fatal spell hit so HP lands at 1 and removes the condition', () => {
     const { campaign, engine, casterId, victimId } = seedDeathWarded(8);
-    // Inflict Wounds is melee-spell-attack 3d10 necrotic at L1 — well
-    // over 8 HP on most rolls. We don't need the attack to crit; even
-    // a low roll on 3d10 averages 16.5, way past the threshold.
+    // Inflict Wounds is CON save 2d10 necrotic at L1 (SRD 5.2.1). 2d10
+    // failed-save averages 11; the seed search finds a failed-save
+    // roll that produces > 8 damage so Death Ward's clamp engages.
     let outcome: { events: ReadonlyArray<Event> } | undefined;
     for (let seed = 1; seed < 80; seed += 1) {
       const e = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
@@ -97,12 +97,12 @@ describe('Death Ward on-fatal-damage intercept', () => {
       }).events;
       const dmg = events.find((ev): ev is DamageAppliedEvent => ev.type === 'DamageApplied');
       // Find a seed that produced enough damage to be fatal pre-intercept.
-      if (dmg !== undefined && dmg.components.reduce((s, c) => s + c.amount, 0) > 0) {
+      if (dmg !== undefined && dmg.components.reduce((s, c) => s + c.amount, 0) >= 7) {
         outcome = { events };
         break;
       }
     }
-    if (outcome === undefined) throw new Error('no seed produced damage');
+    if (outcome === undefined) throw new Error('no seed produced fatal damage');
 
     const damageApplied = outcome.events.find(
       (e): e is DamageAppliedEvent => (e as DamageAppliedEvent).type === 'DamageApplied',
