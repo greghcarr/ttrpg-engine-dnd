@@ -10,6 +10,56 @@ import {
   SpeedSchema,
 } from '../primitives.js';
 import { EffectSchema } from '../effects.js';
+import { DiceExpressionSchema } from '../primitives.js';
+
+// Slice 140: breath weapon RAW shape, parameterized so a single
+// primitive handles every dragon, golem, and ankheg-style "Recharge
+// area-save damage" action. RAW examples:
+//   Adult Red Dragon Fire Breath: Recharge 5-6, 60-ft cone,
+//     DEX DC 21, 18d6 fire, half on success
+//   Young Blue Dragon Lightning Breath: Recharge 5-6, 60-ft line,
+//     DEX DC 16, 10d10 lightning, half on success
+//   Iron Golem Poison Breath: Recharge 6, 15-ft cone, CON DC 19,
+//     10d8 poison, half on success
+//   Ankheg Acid Spray: Recharge 6, 30-ft line, DEX DC 13, 3d6 acid,
+//     half on success
+//
+// The engine doesn't model area-of-effect target inclusion (no LOS
+// or positional cone / line resolution); consumers supply the
+// affected target list directly, same as planThunderStep's ally
+// argument. The area shape + size ship as data for consumer display.
+//
+// `rechargeMin` is the minimum d6 roll that returns the action to
+// ready at the start of the bearer's turn. 5 means recharge on a
+// roll of 5 or 6 (Dragon style); 6 means recharge on 6 only (Iron
+// Golem / Ankheg style). Recharge state lives on the bearer's
+// `breathWeaponExpended` runtime flag.
+
+export const BreathWeaponAreaSchema = z.object({
+  shape: z.enum(['cone', 'line']),
+  sizeFeet: z.number().int().min(1),
+});
+export type BreathWeaponArea = z.infer<typeof BreathWeaponAreaSchema>;
+
+export const BreathWeaponSpecSchema = z.object({
+  // Stable id for consumer display ("fire-breath", "acid-spray").
+  // No relationship to other ids in the engine.
+  id: z.string(),
+  name: z.string(),
+  // Minimum d6 roll that returns the action to ready at turn-start.
+  // Most dragons: 5 (i.e. 5 or 6 recharges). Iron Golem / Ankheg: 6.
+  rechargeMin: z.number().int().min(2).max(6),
+  area: BreathWeaponAreaSchema,
+  saveAbility: z.enum(['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']),
+  saveDC: z.number().int().min(1),
+  damageDice: DiceExpressionSchema,
+  damageType: DamageTypeSchema,
+  // RAW: every breath weapon halves damage on a successful save.
+  // Field exists for future variants (instant-death breath weapons,
+  // breath weapons with no save, etc.).
+  halfOnSuccess: z.boolean().default(true),
+});
+export type BreathWeaponSpec = z.infer<typeof BreathWeaponSpecSchema>;
 
 export const MonsterStatblockSchema = z.object({
   id: z.string(),
@@ -37,5 +87,6 @@ export const MonsterStatblockSchema = z.object({
   xp: z.number().int().min(0),
   proficiencyBonus: z.number().int().min(2).max(9),
   traits: z.array(EffectSchema).default([]),
+  breathWeapon: BreathWeaponSpecSchema.optional(),
 });
 export type MonsterStatblock = z.infer<typeof MonsterStatblockSchema>;

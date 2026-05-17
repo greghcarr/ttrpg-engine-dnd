@@ -24,6 +24,7 @@ import { D20_SIDES, NAT_20 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { Character } from '../../schemas/runtime/character.js';
+import { planBreathWeaponRechargeAtTurnStart } from './breath-weapon.js';
 
 const DEATH_SAVE_SUCCESS_THRESHOLD = 10;
 const DEATH_SAVE_FAILURES_TO_DIE = 3;
@@ -247,7 +248,7 @@ export interface AdvanceTurnIntent {
 
 export const planAdvanceTurn = (
   state: CampaignState,
-  _content: ResolvedContent,
+  content: ResolvedContent,
   rng: RNG,
   intent: AdvanceTurnIntent,
 ): ReadonlyArray<Event> => {
@@ -308,7 +309,14 @@ export const planAdvanceTurn = (
       nextTurn.id,
       at,
     );
-    return [turnEnd, ...endTurnExpired, roundEnd, nextTurn, ...deathSave, ...expired];
+    const recharge = planBreathWeaponRechargeAtTurnStart(
+      state,
+      content,
+      rng,
+      first.combatantId,
+      at,
+    );
+    return [turnEnd, ...endTurnExpired, roundEnd, nextTurn, ...deathSave, ...expired, ...recharge];
   }
   const next = encounter.combatants[encounter.activeIndex + 1];
   if (!next) throw new Error('Bad combatant index');
@@ -333,7 +341,14 @@ export const planAdvanceTurn = (
     nextTurn.id,
     at,
   );
-  return [turnEnd, ...endTurnExpired, nextTurn, ...deathSave, ...expired];
+  const recharge = planBreathWeaponRechargeAtTurnStart(
+    state,
+    content,
+    rng,
+    next.combatantId,
+    at,
+  );
+  return [turnEnd, ...endTurnExpired, nextTurn, ...deathSave, ...expired, ...recharge];
 };
 
 export interface BeginFirstTurnIntent {
@@ -344,7 +359,7 @@ export interface BeginFirstTurnIntent {
 
 export const planBeginFirstTurn = (
   state: CampaignState,
-  _content: ResolvedContent,
+  content: ResolvedContent,
   rng: RNG,
   intent: BeginFirstTurnIntent,
 ): ReadonlyArray<Event> => {
@@ -367,7 +382,14 @@ export const planBeginFirstTurn = (
     turnStart.id,
     at,
   );
-  return [turnStart, ...deathSave];
+  const recharge = planBreathWeaponRechargeAtTurnStart(
+    state,
+    content,
+    rng,
+    first.combatantId,
+    at,
+  );
+  return [turnStart, ...deathSave, ...recharge];
 };
 
 export interface EndEncounterIntent {

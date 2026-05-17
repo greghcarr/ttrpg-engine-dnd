@@ -137,6 +137,11 @@ export {
   type DismissIllusionIntent,
 } from './illusion.js';
 export {
+  planBreathWeapon,
+  planBreathWeaponRechargeAtTurnStart,
+  type BreathWeaponIntent,
+} from './breath-weapon.js';
+export {
   planCounterspell,
   planDispelMagic,
   planRemoveCurse,

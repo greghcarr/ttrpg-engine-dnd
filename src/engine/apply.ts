@@ -119,6 +119,10 @@ import {
   applyIllusionInvestigated,
   applyIllusionDismissed,
 } from './reducers/illusion.js';
+import {
+  applyBreathWeaponFired,
+  applyBreathWeaponRecharged,
+} from './reducers/breath-weapon.js';
 import { applyWeaponMasteryActivated } from './reducers/weapon-mastery.js';
 import {
   applyMounted,
@@ -575,6 +579,12 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'IllusionDismissed':
         applyIllusionDismissed(draft, event);
+        break;
+      case 'BreathWeaponFired':
+        applyBreathWeaponFired(draft, event);
+        break;
+      case 'BreathWeaponRecharged':
+        applyBreathWeaponRecharged(draft, event);
         break;
       case 'CampaignSettingsChanged':
         applyCampaignSettingsChanged(draft, event);

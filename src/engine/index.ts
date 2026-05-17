@@ -78,6 +78,7 @@ import {
   planMajorImage,
   planInvestigateIllusion,
   planDismissIllusion,
+  planBreathWeapon,
   planIdentify,
   planShield,
   planAbsorbElements,
@@ -116,6 +117,7 @@ import {
   type MajorImageIntent,
   type InvestigateIllusionIntent,
   type DismissIllusionIntent,
+  type BreathWeaponIntent,
   type IdentifyIntent,
   type ShieldIntent,
   type ShieldOutcome,
@@ -299,6 +301,7 @@ export interface Engine {
     majorImage(state: CampaignState, intent: Omit<MajorImageIntent, 'type'>): PlanResult;
     investigateIllusion(state: CampaignState, intent: Omit<InvestigateIllusionIntent, 'type'>): PlanResult;
     dismissIllusion(state: CampaignState, intent: Omit<DismissIllusionIntent, 'type'>): PlanResult;
+    breathWeapon(state: CampaignState, intent: Omit<BreathWeaponIntent, 'type'>): PlanResult;
     identify(state: CampaignState, intent: Omit<IdentifyIntent, 'type'>): PlanResult;
     shield(state: CampaignState, intent: Omit<ShieldIntent, 'type'>): ShieldOutcome;
     absorbElements(state: CampaignState, intent: Omit<AbsorbElementsIntent, 'type'>): AbsorbElementsOutcome;
@@ -580,6 +583,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     dismissIllusion(state, intent) {
       return { events: planDismissIllusion(state, content, rng, { type: 'DismissIllusion', ...intent }) };
+    },
+    breathWeapon(state, intent) {
+      return { events: planBreathWeapon(state, content, rng, { type: 'BreathWeapon', ...intent }) };
     },
     identify(state, intent) {
       return { events: planIdentify(state, content, rng, { type: 'Identify', ...intent }) };

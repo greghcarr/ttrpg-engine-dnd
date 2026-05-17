@@ -152,6 +152,13 @@ export const CharacterSchema = z.object({
     .default({}),
   featsTaken: z.array(z.string()).default([]),
   pendingChoiceIds: z.array(ULIDSchema).default([]),
+  // Slice 140: tracks whether the bearer's `MonsterStatblock.breath
+  // Weapon` action is currently expended. Cleared at turn-start when
+  // a d6 recharge roll meets the breathWeapon.rechargeMin threshold;
+  // set true after planBreathWeapon emits the fire chain. Defaults
+  // false (action available). Persists across encounters per RAW
+  // (recharge resolves by die roll, not by rest).
+  breathWeaponExpended: z.boolean().default(false),
   // Hero Points pool (DMG 2024 variant rule, gated by
   // `CampaignSettings.heroPoints`). Each character starts with
   // `5 + 1 per level above 1`. Spent for a 1d6 bonus on an attack /

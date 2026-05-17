@@ -184,6 +184,10 @@ import {
   IllusionInvestigatedEventSchema,
   IllusionDismissedEventSchema,
 } from './illusions.js';
+import {
+  BreathWeaponFiredEventSchema,
+  BreathWeaponRechargedEventSchema,
+} from './breath-weapon.js';
 import { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 
 export const EventSchema = z.discriminatedUnion('type', [
@@ -313,6 +317,8 @@ export const EventSchema = z.discriminatedUnion('type', [
   IllusionCreatedEventSchema,
   IllusionInvestigatedEventSchema,
   IllusionDismissedEventSchema,
+  BreathWeaponFiredEventSchema,
+  BreathWeaponRechargedEventSchema,
   CampaignSettingsChangedEventSchema,
   HeroPointGrantedEventSchema,
   HeroPointSpentEventSchema,
@@ -446,6 +452,8 @@ export const EVENT_TYPES = [
   'IllusionCreated',
   'IllusionInvestigated',
   'IllusionDismissed',
+  'BreathWeaponFired',
+  'BreathWeaponRecharged',
   'CampaignSettingsChanged',
   'HeroPointGranted',
   'HeroPointSpent',
@@ -891,5 +899,13 @@ export type {
   IllusionDismissedEvent,
   IllusionDismissalReason,
 } from './illusions.js';
+export {
+  BreathWeaponFiredEventSchema,
+  BreathWeaponRechargedEventSchema,
+} from './breath-weapon.js';
+export type {
+  BreathWeaponFiredEvent,
+  BreathWeaponRechargedEvent,
+} from './breath-weapon.js';
 export { MirrorImageDeflectedEventSchema } from './mirror-image.js';
 export type { MirrorImageDeflectedEvent } from './mirror-image.js';

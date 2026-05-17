@@ -668,6 +668,14 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
     case 'IllusionDismissed': {
       return `Illusion fades (${event.reason}).`;
     }
+    case 'BreathWeaponFired': {
+      const who = characterName(stateBefore, event.monsterId);
+      return `**${who}** unleashes ${event.breathWeaponId}.`;
+    }
+    case 'BreathWeaponRecharged': {
+      const who = characterName(stateBefore, event.monsterId);
+      return `**${who}**'s ${event.breathWeaponId} recharges (rolled ${event.roll}).`;
+    }
   }
 };
 
