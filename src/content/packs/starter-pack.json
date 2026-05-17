@@ -2018,7 +2018,13 @@
     { "id": "bracers-of-archery", "itemKind": "magic", "name": "Bracers of Archery", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "winged-boots", "itemKind": "magic", "name": "Winged Boots", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "gloves-of-swimming-and-climbing", "itemKind": "magic", "name": "Gloves of Swimming and Climbing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
-    { "id": "stone-of-good-luck", "itemKind": "magic", "name": "Stone of Good Luck", "rarity": "uncommon", "requiresAttunement": true, "effects": [] }
+    { "id": "stone-of-good-luck", "itemKind": "magic", "name": "Stone of Good Luck", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "weapon-plus-1", "itemKind": "magic", "name": "Weapon, +1", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "weapon-plus-2", "itemKind": "magic", "name": "Weapon, +2", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "weapon-plus-3", "itemKind": "magic", "name": "Weapon, +3", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
+    { "id": "armor-plus-1", "itemKind": "magic", "name": "Armor, +1", "rarity": "rare", "requiresAttunement": false, "effects": [] },
+    { "id": "armor-plus-2", "itemKind": "magic", "name": "Armor, +2", "rarity": "very-rare", "requiresAttunement": false, "effects": [] },
+    { "id": "armor-plus-3", "itemKind": "magic", "name": "Armor, +3", "rarity": "legendary", "requiresAttunement": false, "effects": [] }
   ],
   "monsters": [
     {

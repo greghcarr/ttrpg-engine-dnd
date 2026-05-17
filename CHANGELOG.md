@@ -4,6 +4,10 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 1.5**
+
+6 numeric-bonus magic gear templates added to the starter pack: Weapon +1 (uncommon), Weapon +2 (rare), Weapon +3 (very rare), Armor +1 (rare), Armor +2 (very rare), Armor +3 (legendary). Shipped as generic templates rather than specific weapons / armors (the existing Flametongue Longsword is the only concrete +N weapon entry); consumers instantiate by overlaying a template onto a base weapon or armor. All `itemKind: 'magic'` with `effects: []` and no charges, snapshot-clean. The Deferred-wiring subsection gained a sixth bullet covering both blockers: the shared magic-item-effect-projection pass, plus an extension of the slice-76 `ItemInstance.temporaryBuff` shape into a permanent / inherent counterpart for the weapon templates. Magic-item count bumped from 33 to 39, broadening the rarity mix into very-rare and legendary for the first time outside Deck of Many Things.
+
 **Content authoring: items batch 1.4**
 
 8 more wondrous items added to the starter pack: Gloves of Missile Snaring, Lantern of Revealing, Cap of Water Breathing, Robe of Useful Items, Bracers of Archery, Winged Boots, Gloves of Swimming and Climbing, Stone of Good Luck. All uncommon, six attuned + two unattuned. Pure stub (`itemKind: 'magic'`, `effects: []`, no charges), snapshot-clean under slice 126. The Deferred-wiring subsection in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) gained four new bullets (reactive missile interception, activated breathlessness, per-day time-budget resource, items-waiting-on-projection) plus a pure-narrative bullet for Lantern of Revealing + Robe of Useful Items. Magic-item count bumped from 25 to 33.
