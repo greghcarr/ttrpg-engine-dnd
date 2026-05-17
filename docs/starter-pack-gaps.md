@@ -15,7 +15,7 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
 | Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~158 wired with `mechanicalEffects` (~20 cantrips, ~33 L1, ~26 L2 including Mirror Image from slice 124, ~22 L3, ~15 L4 including Death Ward + Stoneskin from slices 111-112, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 10 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, sanctuary, hunters-mark, polymorph). The remaining ~241 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
-| Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. The common "resistance to B/P/S from nonmagical attacks" trait is now expressible via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance. |
+| Monsters | 16 / hundreds | ~370 (MM) | Six MM beasts (Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon) plus the content-batch-1.1 NPC roster (Bandit, Bandit Captain, Cultist, Cult Fanatic, Acolyte, Commoner, Guard, Noble, Scout, Spy). CR 0–10 covered; most of MM still deferred. The common "resistance to B/P/S from nonmagical attacks" trait is now expressible via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance. |
 | Conditions | 39 / 15 | 15 (RAW) | All 15 RAW conditions plus 24 mechanic-rider conditions used by the engine (death-ward-active + stoneskin-active landed in slices 111-112; mirror-image-active landed in slice 124). |
 
 ## Spells
@@ -356,9 +356,22 @@ The DMG is hundreds of items long; this pack ships a representative slice. Magic
 
 ## Monsters
 
-Six statblocks: Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
+Sixteen statblocks.
 
-Notable gaps for tutorial / starter encounters: Bandit, Cultist, Commoner, Guard, Veteran, Bandit Captain. CR 1/8 and the rest of CR 1/2–1 is the easiest near-term fill.
+**MM beasts (6):** Goblin (CR 1/4), Orc (CR 1/2), Wolf (CR 1/4), Skeleton (CR 1/4), Ogre (CR 2), Young Red Dragon (CR 10).
+
+**NPC roster, content-batch-1.1 (10):** Bandit (CR 1/8), Bandit Captain (CR 2), Cultist (CR 1/8), Cult Fanatic (CR 2), Acolyte (CR 1/4), Commoner (CR 0), Guard (CR 1/8), Noble (CR 1/8), Scout (CR 1/2), Spy (CR 1).
+
+All sixteen ship `traits: []`. The NPC roster's RAW traits and actions are deferred until the matching engine primitives land:
+
+- **Multiattack** (Bandit Captain, Cult Fanatic, Scout, Spy) — the engine has no monster-action / multiattack primitive; statblocks can't yet express "this creature makes N attacks per Attack action."
+- **Parry reaction** (Bandit Captain) — reactions ship as dedicated planners today (counterspell / shield / absorb-elements / sanctuary / feather-fall); there's no generic monster-reaction primitive.
+- **Cunning Action** (Spy) and **Sneak Attack** (Spy) — these are wired as class features on the rogue, but the engine doesn't carry a "monster has class-feature shape" cross-link, so the spy statblock can't borrow them.
+- **RAW spellcasting** (Acolyte, Cult Fanatic) — monsters can't yet carry a spell list (Sacred Flame / Cure Wounds / Bless on the Acolyte; Sacred Flame / Inflict Wounds / Command / Hold Person / Spiritual Weapon on the Cult Fanatic). The class-side spellcasting machinery doesn't have a monster entry point.
+- **Keen Hearing and Sight** (Scout) — needs an advantage-on-perception primitive scoped to specific senses; the engine carries SetAdvantage on rolls but not on sense-modality-specific perception checks.
+- **Dark Devotion** (Cult Fanatic) — advantage on saves against Charmed and Frightened. The closest primitive (`SetAdvantage on:'save:WIS' advantage`) is too broad; a per-condition-saving-throw advantage primitive would close it cleanly.
+
+Notable gaps still open for tutorial / starter encounters: Veteran (CR 3), Berserker (CR 2), Knight (CR 3), Thug (CR 1/2), Tribal Warrior (CR 1/8). The remaining CR 1/2–3 humanoid roster is the easiest near-term fill before broader MM coverage.
 
 ## Species
 
