@@ -13,10 +13,10 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~155 wired with `mechanicalEffects` (~20 cantrips, ~33 L1, ~25 L2, ~22 L3, ~13 L4, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 10 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, sanctuary, hunters-mark, polymorph). The remaining ~244 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
+| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~157 wired with `mechanicalEffects` (~20 cantrips, ~33 L1, ~25 L2, ~22 L3, ~15 L4 including Death Ward + Stoneskin from slices 111-112, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 10 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, sanctuary, hunters-mark, polymorph). The remaining ~242 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
-| Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
-| Conditions | 37 / 15 | 15 (RAW) | All 15 RAW conditions plus 22 mechanic-rider conditions used by the engine. |
+| Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. The common "resistance to B/P/S from nonmagical attacks" trait is now expressible via the slice-112 `qualifier: 'nonmagical'` field on GrantResistance. |
+| Conditions | 38 / 15 | 15 (RAW) | All 15 RAW conditions plus 23 mechanic-rider conditions used by the engine (death-ward-active + stoneskin-active landed in slices 111-112). |
 
 ## Spells
 
@@ -96,11 +96,11 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### L4: 40 / 40 (full PHB list)
 
-**Wired (13):** blight, charm-monster, conjure-minor-elementals (summon), conjure-woodland-beings (summon), fire-shield (caster-chosen 2-variant buff; warm = cold resistance + 2d8 fire retaliation, chill = fire resistance + 2d8 cold retaliation), freedom-of-movement, greater-invisibility, ice-storm, phantasmal-killer, summon-aberration (summon), summon-construct (summon), summon-elemental (summon), summon-greater-demon (summon).
+**Wired (15):** blight, charm-monster, conjure-minor-elementals (summon), conjure-woodland-beings (summon), death-ward (slice-111 buff: `death-ward-active` carries the new `PreventFatalDamage` marker; every primary-damage emitter consults `interceptFatalDamage` after mitigation and clamps + removes the bearing condition; slice 114 extends the intercept to rider-emitted damage via the trigger dispatcher), fire-shield (caster-chosen 2-variant buff; warm = cold resistance + 2d8 fire retaliation, chill = fire resistance + 2d8 cold retaliation), freedom-of-movement, greater-invisibility, ice-storm, phantasmal-killer, stoneskin (slice-112 buff: `stoneskin-active` ships B/P/S `GrantResistance` entries each qualified `'nonmagical'`; SRD shape — the 2024 PHB simplified to plain B/P/S resistance), summon-aberration (summon), summon-construct (summon), summon-elemental (summon), summon-greater-demon (summon).
 
 **Dedicated planner (1):** polymorph.
 
-**Schema-only (27):** grouped by the engine primitive each one needs.
+**Schema-only (25):** grouped by the engine primitive each one needs.
 
 - **Area-effect spell mechanic**: `black-tentacles`, `wall-of-fire`, `guardian-of-faith`, `private-sanctum`, `compulsion`. Five area shapes / variants of the same deferred primitive.
 - **Sensor / scrying primitive**: `arcane-eye`, `locate-creature`. Remote viewing surfaces.
@@ -114,10 +114,8 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Domination semantics**: `dominate-beast` — distinct from Charmed (full control); not modeled.
 - **Caster-chosen damage type + on-attack output**: `elemental-bane`.
 - **Alarm + delayed-attack pattern**: `faithful-hound`.
-- (AddDamageToAttacker wired in slice 100 — Fire Shield ships as a caster-chosen 2-variant buff: 'warm' grants Cold resistance + 2d8 fire retaliation, 'chill' grants Fire resistance + 2d8 cold retaliation. Crits on the triggering attack don't double the retaliation dice per RAW. The "creature within 5 ft" and "melee attack" RAW gates aren't enforced.)
+- (AddDamageToAttacker wired in slice 100 — Fire Shield ships as a caster-chosen 2-variant buff: 'warm' grants Cold resistance + 2d8 fire retaliation, 'chill' grants Fire resistance + 2d8 cold retaliation. Crits on the triggering attack don't double the retaliation dice per RAW. The "creature within 5 ft" and "melee attack" RAW gates aren't enforced. Retaliation damage now flows through `mitigateDamage` (slice 113) and consults `interceptFatalDamage` (slice 114) on the attacker.)
 - **Transformation handler for non-self targets**: `giant-insect`.
-- **On-fatal-damage trigger primitive**: `death-ward`.
-- **Resistance qualifier (magical-vs-nonmagical)**: `stoneskin` — half damage from nonmagical B/P/S only.
 - **Extradimensional storage**: `secret-chest`.
 
 ### L5: 46 / ~46 (full PHB list)
