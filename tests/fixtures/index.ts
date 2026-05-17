@@ -104,7 +104,7 @@ export interface BuildOgreOptions {
 }
 
 export const buildOgre = (opts: BuildOgreOptions = {}) => {
-  const hp = opts.hpMax ?? 59;
+  const hp = opts.hpMax ?? 68;
   const base = CharacterSchema.parse({
     id: newCharacterId(),
     kind: 'creature',

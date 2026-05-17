@@ -2,7 +2,7 @@
 
 Item acquired: Longsword.
 
-**Grimtooth** appears (ogre, 59/59 HP).
+**Grimtooth** appears (ogre, 68/68 HP).
 
 **Cassius** joined (fighter 1, 40/40 HP).
 

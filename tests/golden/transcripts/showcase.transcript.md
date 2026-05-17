@@ -316,7 +316,7 @@ Door "Iron portcullis" is now open by **Vex**.
 
 Item acquired: Greatclub (Ogre).
 
-**Slag the Ogre** appears (ogre, 59/59 HP).
+**Slag the Ogre** appears (ogre, 68/68 HP).
 
 ## Encounter created: Slag the Ogre (5 combatants)
 
@@ -334,11 +334,11 @@ _(Vex consumes attack)_
 
 _(sneak-attack triggers for Vex)_
 
-**Slag the Ogre** takes 9 damage (9 piercing). (HP 59 -> 50)
+**Slag the Ogre** takes 9 damage (9 piercing). (HP 68 -> 59)
 
 Damage rolled: 1d4=[3]+4 piercing.
 
-**Slag the Ogre** takes 7 damage (7 piercing). (HP 50 -> 43)
+**Slag the Ogre** takes 7 damage (7 piercing). (HP 59 -> 52)
 
 End of Vex's turn.
 
@@ -352,7 +352,7 @@ _(Alyx consumes attack)_
 
 Damage rolled: 1d8=[3]+4 slashing.
 
-**Slag the Ogre** takes 7 damage (7 slashing). (HP 43 -> 36)
+**Slag the Ogre** takes 7 damage (7 slashing). (HP 52 -> 45)
 
 End of Alyx's turn.
 
@@ -362,7 +362,7 @@ End of Alyx's turn.
 
 Slot consumed: 4th-level.
 
-**Mira** casts Polymorph on **Alyx**: new form is Giant Ape (157 HP, AC 12, speed 40).
+**Mira** casts Polymorph on **Alyx**: new form is Giant Ape (168 HP, AC 12, speed 40).
 
 End of Mira's turn.
 
@@ -386,7 +386,7 @@ _(Slag the Ogre consumes action)_
 
 Damage rolled: 2d8=[7,6]+4 bludgeoning.
 
-**Alyx** takes 17 damage (17 bludgeoning). (HP 157 -> 140)
+**Alyx** takes 17 damage (17 bludgeoning). (HP 168 -> 151)
 
 End of Slag the Ogre's turn.
 
@@ -402,7 +402,7 @@ End of Vex's turn.
 
 ### Round 2: Alyx's turn
 
-**Slag the Ogre** takes 25 damage from **Alyx** (25 bludgeoning). (HP 36 -> 11)
+**Slag the Ogre** takes 25 damage from **Alyx** (25 bludgeoning). (HP 45 -> 20)
 
 End of Alyx's turn.
 
@@ -410,7 +410,7 @@ End of Alyx's turn.
 
 Wand of Magic Missiles loses 2 charge(s) by **Mira** for Magic Missile (3rd level).
 
-**Slag the Ogre** takes 11 damage from **Mira** (11 force). (HP 11 -> 0)
+**Slag the Ogre** takes 20 damage from **Mira** (20 force). (HP 20 -> 0)
 
 ## Encounter ends: victory.
 

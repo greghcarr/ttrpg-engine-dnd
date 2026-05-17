@@ -503,7 +503,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       speciesId: 'human',
       backgroundId: 'soldier',
       classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
-      abilityScores: { STR: 8, DEX: 14, CON: 10, INT: 10, WIS: 8, CHA: 8 },
+      abilityScores: { STR: 8, DEX: 15, CON: 10, INT: 10, WIS: 8, CHA: 8 },
       hp: { current: 14, max: 14, temp: 0 },
       armorClass: 15, // leather armor + shield per MM 2024
       featsTaken: ['savage-attacker'],
@@ -515,7 +515,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
       speciesId: 'human',
       backgroundId: 'soldier',
       classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
-      abilityScores: { STR: 8, DEX: 14, CON: 10, INT: 10, WIS: 8, CHA: 8 },
+      abilityScores: { STR: 8, DEX: 15, CON: 10, INT: 10, WIS: 8, CHA: 8 },
       hp: { current: 12, max: 12, temp: 0 },
       armorClass: 15, // leather armor + shield per MM 2024
       featsTaken: ['savage-attacker'],
@@ -1009,7 +1009,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
 
     // The dragon awaits. Build an ogre as midboss first, defeat him,
     // then engage the dragon. (Two combats, one transcript.)
-    const ogre = buildOgre('Slag the Ogre', 59, ogreClub.id);
+    const ogre = buildOgre('Slag the Ogre', 68, ogreClub.id);
     campaign = commit(campaign, [
       evt<ItemAcquiredEvent>({ type: 'ItemAcquired', instance: ogreClub }),
       evt<CharacterCreatedEvent>({ type: 'CharacterCreated', snapshot: ogre }),
@@ -1099,9 +1099,9 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         kind: 'polymorph',
         form: {
           name: 'Giant Ape',
-          hp: 157,
+          hp: 168,
           ac: 12,
-          abilityScores: { STR: 23, DEX: 14, CON: 18, INT: 7, WIS: 12, CHA: 7 },
+          abilityScores: { STR: 23, DEX: 14, CON: 18, INT: 5, WIS: 12, CHA: 7 },
           speedFeet: 40,
         },
       }),

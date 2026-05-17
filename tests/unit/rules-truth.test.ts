@@ -98,8 +98,14 @@ describe('rules truth: spell slots (single-class)', () => {
     expect(slots.standardByLevel.slice(0, 3)).toEqual([4, 2, 0]);
   });
   it('Paladin 2: 2 first, no second', () => {
-    // Paladins get spellcasting at level 2 in the 2024 rules.
+    // 2024 SRD has Paladin gaining Spellcasting at L1 (engine grants
+    // 2 first-level slots via the half-caster table at L1 + L2).
     const p = buildPC({ classId: 'paladin', level: 2 });
+    const slots = computeAvailableSpellSlots(p, CONTENT.classes);
+    expect(slots.standardByLevel.slice(0, 2)).toEqual([2, 0]);
+  });
+  it('Paladin 1: 2 first slots (SRD 5.2.1 grants Spellcasting at L1)', () => {
+    const p = buildPC({ classId: 'paladin', level: 1 });
     const slots = computeAvailableSpellSlots(p, CONTENT.classes);
     expect(slots.standardByLevel.slice(0, 2)).toEqual([2, 0]);
   });
