@@ -85,7 +85,7 @@
   },
   "homepage": "https://github.com/greghcarr/ttrpg-engine-dnd#readme",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "keywords": [
     "dnd",

@@ -20,7 +20,7 @@ The engine architecture is locked. Original Phase A–E combat / state / adoptio
 2. **Content authoring** — most of what's left. The bulk of the MM bestiary (~365 statblocks), most subclasses (~38), the long tail of schema-only spells (~247), the DMG magic-item catalog. None requires engine work, just JSON. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the catalog.
 3. **Phase F** (optional) — `ttrpg-engine-core` extraction. Unstarted. Only do this if multi-system support becomes a real goal.
 
-When working in this repo, the slice cadence is "primitive + canonical user": one focused primitive plus the first one or two RAW spells / features that exercise it. See recent slices (88–117) for the pattern.
+When working in this repo, the slice cadence is "primitive + canonical user": one focused primitive plus the first one or two RAW spells / features that exercise it. See recent slices (88–118) for the pattern.
 
 ## System-agnostic core seam (forward-looking)
 
