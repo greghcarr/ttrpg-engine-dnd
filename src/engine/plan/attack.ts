@@ -404,10 +404,28 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // the generic effect-stack 'damage' modifier because the buff is
   // weapon-specific to this exact instance.
   const weaponBuffDamageBonus = weaponInstance.temporaryBuff?.damageBonus ?? 0;
+  // Slice 117: consume the effect stack's 'damage' modifier sum.
+  // Predicate-gated entries (Dueling: melee + off-hand-no-weapon;
+  // Frenzy: melee) use the facts populated below. Predicate-less
+  // entries apply unconditionally. Two new facts: `event.attackKind`
+  // (already populated for attack-bonus) and `bearer.offHandHasWeapon`
+  // (off-hand slot holds an item whose def is `itemKind: 'weapon'`).
+  const offHandInstanceId = attacker.equipped.offHand;
+  const offHandInstance = offHandInstanceId !== undefined
+    ? state.itemInstances[offHandInstanceId]
+    : undefined;
+  const offHandDef = offHandInstance !== undefined
+    ? content.items.get(offHandInstance.definitionId)
+    : undefined;
+  const damageFacts = new Map<string, unknown>([
+    ['event.attackKind', weaponDef.attackKind],
+    ['bearer.offHandHasWeapon', offHandDef?.itemKind === 'weapon'],
+  ]);
+  const damageModifierBonus = attackerEffects.modifierSum('damage', damageFacts);
   const damageRollPayload: DamageRoll = {
     expression: damageExpression,
     rolls: damageRolls,
-    modifier: damageAbilityMod + parsed.modifier + weaponBuffDamageBonus,
+    modifier: damageAbilityMod + parsed.modifier + weaponBuffDamageBonus + damageModifierBonus,
     type: weaponDef.damageType,
   };
 
