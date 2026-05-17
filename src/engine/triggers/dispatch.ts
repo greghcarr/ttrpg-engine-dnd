@@ -11,6 +11,8 @@ import { collectEffectsFromCharacter } from '../../derive/effect-stack.js';
 import { getCreatureType } from '../../derive/creature-type.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { isMagicWeaponAttack } from '../../derive/magicality.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 import type { AppliedCondition } from '../../schemas/runtime/character.js';
 import { newEventId } from '../../ids.js';
 import type { ULID } from '../ids-utils.js';
@@ -160,7 +162,7 @@ const fireAddDamage = (
   if (amount <= 0) return [];
   const target = state.characters[event.targetId];
   const rawComponents = [{ amount, type: action.damageType }];
-  const components = target !== undefined
+  const mitigatedComponents = target !== undefined
     ? mitigateDamage({
         character: target,
         itemInstances: state.itemInstances,
@@ -170,15 +172,28 @@ const fireAddDamage = (
         sourceIsMagical,
       })
     : rawComponents;
+  // Slice 114: a rider that would drop the target to 0 HP consults
+  // interceptFatalDamage just like main-damage emitters. Pairs with
+  // the per-rider state advancement in dispatchTriggers below so
+  // Death Ward fires correctly on a rider-alone kill.
+  const damageAppliedId = newEventId() as ULID;
+  const intercept = interceptFatalDamage({
+    state,
+    content,
+    targetId: event.targetId,
+    mitigatedComponents,
+    causedByEventId: damageAppliedId,
+    at: event.at,
+  });
   const damageApplied: DamageAppliedEvent = {
-    id: newEventId() as ULID,
+    id: damageAppliedId,
     at: event.at,
     type: 'DamageApplied',
     targetId: event.targetId,
-    components,
+    components: intercept.components,
     causedByEventId: causedByEventId as ULID,
   };
-  return [damageApplied];
+  return [damageApplied, ...intercept.extraEvents];
 };
 
 // Retaliation variant: damage goes to event.attackerId (Fire Shield,
@@ -206,7 +221,7 @@ const fireAddDamageToAttacker = (
   if (amount <= 0) return [];
   const target = state.characters[event.attackerId];
   const rawComponents = [{ amount, type: action.damageType }];
-  const components = target !== undefined
+  const mitigatedComponents = target !== undefined
     ? mitigateDamage({
         character: target,
         itemInstances: state.itemInstances,
@@ -216,15 +231,27 @@ const fireAddDamageToAttacker = (
         sourceIsMagical,
       })
     : rawComponents;
+  // Slice 114: also consult interceptFatalDamage on retaliation
+  // damage. If Fire Shield-style damage to the attacker would drop
+  // them to 0 HP and they have Death Ward, the ward fires for them.
+  const damageAppliedId = newEventId() as ULID;
+  const intercept = interceptFatalDamage({
+    state,
+    content,
+    targetId: event.attackerId,
+    mitigatedComponents,
+    causedByEventId: damageAppliedId,
+    at: event.at,
+  });
   const damageApplied: DamageAppliedEvent = {
-    id: newEventId() as ULID,
+    id: damageAppliedId,
     at: event.at,
     type: 'DamageApplied',
     targetId: event.attackerId,
-    components,
+    components: intercept.components,
     causedByEventId: causedByEventId as ULID,
   };
-  return [damageApplied];
+  return [damageApplied, ...intercept.extraEvents];
 };
 
 // Determine whether a fired rider's damage is "magical" for the
@@ -505,74 +532,83 @@ const findAppliedConditionForOnEvent = (
 
 export const dispatchTriggers = (input: DispatchInput): Event[] => {
   const { state, content, rng, event, at } = input;
-  const currentRound = state.activeEncounterId
-    ? state.encounters[state.activeEncounterId]?.round
-    : undefined;
   const emitted: Event[] = [];
-  for (const characterId of Object.keys(state.characters)) {
-    const character = state.characters[characterId];
+  // Slice 114: maintain a runningState that incorporates each fired
+  // trigger's events before the next trigger is evaluated. Lets per-
+  // rider interceptFatalDamage see the target's HP after prior riders
+  // applied, so Death Ward (and any future fatal-damage primitive)
+  // can intercept a rider-alone kill correctly. Also closes a latent
+  // gap where rider-consumed conditions were still visible to later
+  // riders on the same character.
+  let runningState: CampaignState = state;
+  const characterIds = Object.keys(state.characters);
+  for (const characterId of characterIds) {
+    const character = runningState.characters[characterId];
     if (character === undefined) continue;
+    const currentRound = runningState.activeEncounterId
+      ? runningState.encounters[runningState.activeEncounterId]?.round
+      : undefined;
     const effects = collectEffectsFromCharacter({
       character,
       content,
-      itemInstances: state.itemInstances,
-      pendingChoices: state.pendingChoices,
+      itemInstances: runningState.itemInstances,
+      pendingChoices: runningState.pendingChoices,
     });
     for (const effect of effects) {
       if (effect.kind !== 'OnEvent') continue;
       if (effect.trigger.eventType !== event.type) continue;
-      const appliedFrom = findAppliedConditionForOnEvent(character, content, effect.id);
-      const facts = buildEventFacts(event, characterId, appliedFrom, state, content);
+      // Re-resolve the character against the running state so the
+      // appliedConditions reflect prior in-dispatch mutations (e.g.
+      // a consumeOnTrigger removal earlier in the loop).
+      const currentCharacter = runningState.characters[characterId];
+      if (currentCharacter === undefined) break;
+      const appliedFrom = findAppliedConditionForOnEvent(currentCharacter, content, effect.id);
+      const facts = buildEventFacts(event, characterId, appliedFrom, runningState, content);
       const filter = effect.trigger.filter as Predicate | undefined;
       if (filter !== undefined && !evaluatePredicate(filter, { facts })) continue;
       const triggerId = triggerIdOf(effect, characterId);
-      if (!cadenceAllowsFiring(character, triggerId, effect.oncePer)) continue;
+      if (!cadenceAllowsFiring(currentCharacter, triggerId, effect.oncePer)) continue;
       // Slice 110: if the OnEvent rider lives inside a condition that
       // an EffectInstance is tracking, stamp that instance id onto any
-      // ApplyCondition events the rider emits. Lets the concentration
-      // cleanup sweep find rider-applied conditions when the parent
-      // effect ends. Walks effectInstances looking for the parent
-      // AppliedCondition; undefined for class-feature / item / racial
-      // riders that aren't backed by an effect instance.
+      // ApplyCondition events the rider emits.
       const parentEffectInstanceId = appliedFrom
-        ? Object.values(state.effectInstances).find((inst) =>
+        ? Object.values(runningState.effectInstances).find((inst) =>
             inst.conditionsApplied.some((c) => c.appliedConditionId === appliedFrom.id),
           )?.id
         : undefined;
       // Slice 113: rider-damage magicality for the mitigation pipeline.
-      // Spell-sourced riders (bearing condition tracked by an EffectInstance
-      // with a spellId) count as magical; weapon-attack riders inherit
-      // from the triggering weapon's magicality; everything else is
-      // non-magical by default.
-      const sourceIsMagical = isRiderMagical(state, content, event, appliedFrom);
+      const sourceIsMagical = isRiderMagical(runningState, content, event, appliedFrom);
       const fired = fireTrigger(
         effect,
-        character,
+        currentCharacter,
         triggerId,
         event,
         rng,
         at,
         currentRound,
         parentEffectInstanceId,
-        state,
+        runningState,
         content,
         sourceIsMagical,
       );
       if (fired === null) continue;
       emitted.push(...fired.events);
+      runningState = applyAll(runningState, fired.events);
       if (effect.consumeOnTrigger === true) {
         const triggerFiredId = fired.events[0]?.id;
         if (triggerFiredId !== undefined) {
-          emitted.push(
-            ...buildConsumeEvents({
-              character,
-              content,
-              effectInstances: state.effectInstances,
-              onEventId: effect.id,
-              triggerFiredId,
-              at,
-            }),
-          );
+          const consumeEvents = buildConsumeEvents({
+            character: runningState.characters[characterId] ?? currentCharacter,
+            content,
+            effectInstances: runningState.effectInstances,
+            onEventId: effect.id,
+            triggerFiredId,
+            at,
+          });
+          emitted.push(...consumeEvents);
+          if (consumeEvents.length > 0) {
+            runningState = applyAll(runningState, consumeEvents);
+          }
         }
       }
     }
