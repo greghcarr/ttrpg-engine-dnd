@@ -2094,7 +2094,15 @@
     { "id": "ioun-stone-insight", "itemKind": "magic", "name": "Ioun Stone, Insight", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
     { "id": "ioun-stone-leadership", "itemKind": "magic", "name": "Ioun Stone, Leadership", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
     { "id": "ioun-stone-awareness", "itemKind": "magic", "name": "Ioun Stone, Awareness", "rarity": "rare", "requiresAttunement": true, "effects": [] },
-    { "id": "ioun-stone-protection", "itemKind": "magic", "name": "Ioun Stone, Protection", "rarity": "rare", "requiresAttunement": true, "effects": [] }
+    { "id": "ioun-stone-protection", "itemKind": "magic", "name": "Ioun Stone, Protection", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-feather-falling", "itemKind": "magic", "name": "Ring of Feather Falling", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-mind-shielding", "itemKind": "magic", "name": "Ring of Mind Shielding", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-warmth", "itemKind": "magic", "name": "Ring of Warmth", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-water-walking", "itemKind": "magic", "name": "Ring of Water Walking", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
+    { "id": "ring-of-free-action", "itemKind": "magic", "name": "Ring of Free Action", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-resistance", "itemKind": "magic", "name": "Ring of Resistance", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-regeneration", "itemKind": "magic", "name": "Ring of Regeneration", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
+    { "id": "ring-of-invisibility", "itemKind": "magic", "name": "Ring of Invisibility", "rarity": "legendary", "requiresAttunement": true, "effects": [] }
   ],
   "monsters": [
     {
