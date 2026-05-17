@@ -673,6 +673,24 @@ const planBuffMechanic = (
   const conditionsApplied: AppliedConditionRef[] = [];
   const conditionId = resolveBuffConditionId(mechanic, intent, spell.id);
   const hpMaxDelta = hpMaxBonusFromCondition(content, conditionId);
+  // Read the condition's declarative auto-expiry metadata (slice 109).
+  // When set and we're inside an active encounter, stamp expiresOnRound
+  // + expiryTrigger so `planAdvanceTurn` lifts the condition at the
+  // matching boundary (Blade Ward: "1 round" turn-end self-buff).
+  // Outside an encounter, expiry stays consumer-managed.
+  const autoExpiry = content.conditions.get(conditionId)?.autoExpiry;
+  const currentRound = state.activeEncounterId
+    ? state.encounters[state.activeEncounterId]?.round
+    : undefined;
+  const expiryFields: {
+    expiresOnRound?: number;
+    expiryTrigger?: 'turnStart' | 'turnEnd';
+  } = autoExpiry !== undefined && currentRound !== undefined
+    ? {
+        expiresOnRound: currentRound + autoExpiry.afterRounds,
+        expiryTrigger: autoExpiry.trigger,
+      }
+    : {};
   for (const targetId of intent.targetIds) {
     if (isImmuneToCondition({
       state,
@@ -694,6 +712,12 @@ const planBuffMechanic = (
       sourceCharacterId: intent.characterId as ULID,
       causedByEventId: declaredEventId as ULID,
       ...(hpMaxDelta !== 0 ? { hpMaxBonusDelta: hpMaxDelta } : {}),
+      ...(expiryFields.expiresOnRound !== undefined
+        ? { expiresOnRound: expiryFields.expiresOnRound }
+        : {}),
+      ...(expiryFields.expiryTrigger !== undefined
+        ? { expiryTrigger: expiryFields.expiryTrigger }
+        : {}),
     };
     events.push(cond);
     conditionsApplied.push({

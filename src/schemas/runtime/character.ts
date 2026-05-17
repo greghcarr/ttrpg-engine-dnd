@@ -27,6 +27,15 @@ export const AppliedConditionSchema = z.object({
   sourceCharacterId: ULIDSchema.optional(),
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
+  // Which turn-boundary the `expiresOnRound` check fires on.
+  // 'turnStart' (default, used by slice-102 trigger-applied conditions
+  // like Spirit Shroud's heal-block) lifts the condition at the start
+  // of the source's turn in the target round. 'turnEnd' (slice 109,
+  // for Blade Ward's "1 round" self-buff) lifts at the end of the
+  // source's turn in the target round. Stamped from the condition
+  // definition's `autoExpiry.trigger` at apply time when the source
+  // planner is inside an active encounter.
+  expiryTrigger: z.enum(['turnStart', 'turnEnd']).optional(),
   // The hpMax-modifier delta this applied condition contributed to
   // the character's `hp.maxBonus`. Stored here so removal (via
   // ConditionRemoved or ConcentrationBroken) can reverse exactly the

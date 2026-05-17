@@ -30,13 +30,18 @@ const DEATH_SAVE_FAILURES_TO_DIE = 3;
 const DEATH_SAVE_SUCCESSES_TO_STABILIZE = 3;
 
 /**
- * At the start of a combatant's turn, sweep every other character's
- * applied conditions for any whose `sourceCharacterId` is the combatant
- * starting the turn and whose `expiresOnRound` has now arrived (or
- * passed). RAW shape this models: "until the start of the source's
- * next turn" duration metadata stamped by ApplyCondition trigger
- * actions (Spirit Shroud's heal-block rider, future similar riders).
- * Returns one `ConditionRemoved` event per matching applied condition.
+ * At the start of a combatant's turn, sweep every character's applied
+ * conditions for entries whose `sourceCharacterId` is the combatant
+ * starting the turn, whose `expiryTrigger` is 'turnStart' (or
+ * unspecified — the slice-102 default for trigger-applied conditions),
+ * and whose `expiresOnRound` has now arrived. RAW shape this models:
+ * "until the start of the source's next turn" — Spirit Shroud's
+ * heal-block, future similar riders stamped via durationRounds on
+ * ApplyCondition trigger actions.
+ *
+ * Conditions stamped with `expiryTrigger: 'turnEnd'` (Blade Ward and
+ * future "1 round" buffs) are handled by `planAutoExpireConditionsAtTurnEnd`
+ * instead.
  */
 const planAutoExpireConditionsAtTurnStart = (
   state: CampaignState,
@@ -51,6 +56,42 @@ const planAutoExpireConditionsAtTurnStart = (
       if (applied.sourceCharacterId !== sourceCharacterId) continue;
       if (applied.expiresOnRound === undefined) continue;
       if (applied.expiresOnRound > round) continue;
+      if (applied.expiryTrigger === 'turnEnd') continue;
+      events.push({
+        id: newEventId() as ULID,
+        at,
+        type: 'ConditionRemoved',
+        targetId: character.id as ULID,
+        conditionId: applied.conditionId,
+        causedByEventId,
+      });
+    }
+  }
+  return events;
+};
+
+/**
+ * Mirror of `planAutoExpireConditionsAtTurnStart` for turn-end-keyed
+ * auto-expiry. RAW shape: "until the end of your next turn" /
+ * "for 1 round" — Blade Ward's 1-round self-buff is the canonical
+ * user. Called from `planAdvanceTurn` after the TurnEnded event so
+ * the condition is still active during the combatant's just-finished
+ * turn and only lifts when that turn's resolution wraps up.
+ */
+const planAutoExpireConditionsAtTurnEnd = (
+  state: CampaignState,
+  sourceCharacterId: string,
+  round: number,
+  causedByEventId: ULID,
+  at: string,
+): ReadonlyArray<ConditionRemovedEvent> => {
+  const events: ConditionRemovedEvent[] = [];
+  for (const character of Object.values(state.characters)) {
+    for (const applied of character.appliedConditions) {
+      if (applied.sourceCharacterId !== sourceCharacterId) continue;
+      if (applied.expiresOnRound === undefined) continue;
+      if (applied.expiresOnRound > round) continue;
+      if (applied.expiryTrigger !== 'turnEnd') continue;
       events.push({
         id: newEventId() as ULID,
         at,
@@ -223,6 +264,18 @@ export const planAdvanceTurn = (
     combatantId: current.combatantId,
     round: encounter.round,
   };
+  // Sweep `expiryTrigger: 'turnEnd'` conditions for the combatant
+  // whose turn is ending (slice 109; Blade Ward, future "1 round"
+  // self-buffs). Conditions are still active during the just-finished
+  // turn; the sweep emits ConditionRemoved here so they're gone for
+  // the next combatant's actions.
+  const endTurnExpired = planAutoExpireConditionsAtTurnEnd(
+    state,
+    current.combatantId,
+    encounter.round,
+    turnEnd.id,
+    at,
+  );
   const isLast = encounter.activeIndex >= encounter.combatants.length - 1;
   if (isLast) {
     const roundEnd: RoundEndedEvent = {
@@ -255,7 +308,7 @@ export const planAdvanceTurn = (
       nextTurn.id,
       at,
     );
-    return [turnEnd, roundEnd, nextTurn, ...deathSave, ...expired];
+    return [turnEnd, ...endTurnExpired, roundEnd, nextTurn, ...deathSave, ...expired];
   }
   const next = encounter.combatants[encounter.activeIndex + 1];
   if (!next) throw new Error('Bad combatant index');
@@ -280,7 +333,7 @@ export const planAdvanceTurn = (
     nextTurn.id,
     at,
   );
-  return [turnEnd, nextTurn, ...deathSave, ...expired];
+  return [turnEnd, ...endTurnExpired, nextTurn, ...deathSave, ...expired];
 };
 
 export interface BeginFirstTurnIntent {

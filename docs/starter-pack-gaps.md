@@ -24,7 +24,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### Cantrips (L0): 34 / 34
 
-**Wired (20):** acid-splash, blade-ward (buff condition with GrantResistance for bludgeoning/piercing/slashing), chill-touch, eldritch-blast, fire-bolt, frostbite, guidance, mind-sliver, poison-spray, produce-flame, ray-of-frost, resistance (buff condition; consumer-managed 1d4 bonus to one save like Guidance), sacred-flame, shocking-grasp, starry-wisp, thorn-whip, thunderclap, toll-the-dead, vicious-mockery, word-of-radiance.
+**Wired (20):** acid-splash, blade-ward (buff condition with GrantResistance for bludgeoning/piercing/slashing; turn-end auto-expiry via slice-109 `autoExpiry: { afterRounds: 1, trigger: 'turnEnd' }`), chill-touch, eldritch-blast, fire-bolt, frostbite, guidance, mind-sliver, poison-spray, produce-flame, ray-of-frost, resistance (buff condition; consumer-managed 1d4 bonus to one save like Guidance), sacred-flame, shocking-grasp, starry-wisp, thorn-whip, thunderclap, toll-the-dead, vicious-mockery, word-of-radiance.
 
 **Schema-only (14):** dancing-lights, druidcraft, friends, light, mage-hand, mending, message, minor-illusion, mold-earth, prestidigitation, shillelagh, spare-the-dying, thaumaturgy, true-strike. All intentionally narrative / utility — no mechanical event to emit.
 

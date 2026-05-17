@@ -41,6 +41,24 @@ export const RecurringSaveSchema = z
   );
 export type RecurringSave = z.infer<typeof RecurringSaveSchema>;
 
+// Declarative auto-expiry metadata. When a planner that applies this
+// condition runs inside an active encounter, it stamps `expiresOnRound`
+// (= currentRound + afterRounds) and `expiryTrigger` on the emitted
+// ConditionApplied. `planAdvanceTurn` then auto-lifts the condition at
+// the matching moment — `'turnStart'` at the start of the source's
+// next turn in the target round (Spirit Shroud's heal-block via the
+// `durationRounds` field on the trigger action), `'turnEnd'` at the
+// end of the source's turn in the target round (Blade Ward's "1 round"
+// self-buff). For self-cast buffs, source == bearer, so turn-end
+// expiry fires at the end of the bearer's own next turn per RAW.
+// Outside an active encounter the planner doesn't stamp anything and
+// the consumer manages expiry.
+export const AutoExpirySchema = z.object({
+  afterRounds: z.number().int().min(0),
+  trigger: z.enum(['turnStart', 'turnEnd']),
+});
+export type AutoExpiry = z.infer<typeof AutoExpirySchema>;
+
 export const ConditionSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -59,5 +77,6 @@ export const ConditionSchema = z.object({
     )
     .default([]),
   recurringSave: RecurringSaveSchema.optional(),
+  autoExpiry: AutoExpirySchema.optional(),
 });
 export type Condition = z.infer<typeof ConditionSchema>;

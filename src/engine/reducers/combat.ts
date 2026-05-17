@@ -149,6 +149,7 @@ export const applyConditionApplied = (
       : {}),
     ...(event.level !== undefined ? { level: event.level } : {}),
     ...(event.expiresOnRound !== undefined ? { expiresOnRound: event.expiresOnRound } : {}),
+    ...(event.expiryTrigger !== undefined ? { expiryTrigger: event.expiryTrigger } : {}),
     ...(event.hpMaxBonusDelta !== undefined && event.hpMaxBonusDelta !== 0
       ? { hpMaxBonusDelta: event.hpMaxBonusDelta }
       : {}),

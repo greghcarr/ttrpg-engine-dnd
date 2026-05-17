@@ -3087,9 +3087,10 @@
     {
       "id": "blade-warded-active",
       "name": "Blade Warded",
-      "description": "Until end of next turn (Blade Ward cantrip): resistance to Bludgeoning, Piercing, and Slashing damage. RAW duration is 1 round; the engine doesn't auto-expire single-round buffs today, so the consumer removes the condition at the end of the bearer's next turn.",
+      "description": "Until end of next turn (Blade Ward cantrip): resistance to Bludgeoning, Piercing, and Slashing damage. The `autoExpiry` field (slice 109) tells the cast-spell planner to stamp `expiresOnRound = currentRound + 1` and `expiryTrigger = 'turnEnd'` on the emitted ConditionApplied when cast inside an active encounter; `planAdvanceTurn` lifts the condition at the end of the bearer's turn in the target round. Outside an encounter the expiry stays consumer-managed.",
       "stackable": false,
       "endsOn": [],
+      "autoExpiry": { "afterRounds": 1, "trigger": "turnEnd" },
       "effects": [
         { "kind": "GrantResistance", "damageType": "bludgeoning" },
         { "kind": "GrantResistance", "damageType": "piercing" },

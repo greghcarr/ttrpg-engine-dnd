@@ -45,6 +45,9 @@ export const ConditionAppliedEventSchema = EventEnvelopeSchema.extend({
   conditionId: z.string(),
   level: z.number().int().min(1).optional(),
   expiresOnRound: z.number().int().optional(),
+  // Companion to `expiresOnRound`. Slice 109; see AppliedCondition
+  // for full semantics.
+  expiryTrigger: z.enum(['turnStart', 'turnEnd']).optional(),
   appliedConditionId: ULIDSchema.optional(),
   // For sourced conditions (Frightened, Charmed, etc.), the creature
   // that is the source. Stored on the applied-condition entry so
