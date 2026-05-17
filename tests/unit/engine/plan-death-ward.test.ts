@@ -20,6 +20,7 @@ import type {
   ConditionRemovedEvent,
   DamageAppliedEvent,
 } from '../../../src/schemas/events/combat.js';
+import type { Event } from '../../../src/schemas/events/index.js';
 import { eventId, isoTimestamp } from '../../fixtures/index.js';
 
 const PACK = loadStarterPack();
@@ -85,7 +86,7 @@ describe('Death Ward on-fatal-damage intercept', () => {
     // Inflict Wounds is melee-spell-attack 3d10 necrotic at L1 — well
     // over 8 HP on most rolls. We don't need the attack to crit; even
     // a low roll on 3d10 averages 16.5, way past the threshold.
-    let outcome: { events: ReadonlyArray<DamageAppliedEvent | ConditionRemovedEvent | unknown> } | undefined;
+    let outcome: { events: ReadonlyArray<Event> } | undefined;
     for (let seed = 1; seed < 80; seed += 1) {
       const e = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
       const events = e.plan.castSpell(campaign.state, {
