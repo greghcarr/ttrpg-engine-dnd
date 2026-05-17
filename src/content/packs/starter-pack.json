@@ -1589,7 +1589,7 @@
       "classes": ["bard", "wizard"]
     },
     { "id": "acid-splash", "name": "Acid Splash", "level": 0, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "DEX", "damageDice": "1d6", "damageType": "acid", "cantripScalingDice": "1d6" }] },
-    { "id": "blade-ward", "name": "Blade Ward", "level": 0, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
+    { "id": "blade-ward", "name": "Blade Ward", "level": 0, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "blade-warded-active" }] },
     { "id": "chill-touch", "name": "Chill Touch", "level": 0, "school": "necromancy", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 round", "concentration": false, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "1d8", "damageType": "necrotic", "cantripScalingDice": "1d8" }] },
     { "id": "dancing-lights", "name": "Dancing Lights", "level": 0, "school": "evocation", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of phosphorus or wychwood, or a glowworm" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "druidcraft", "name": "Druidcraft", "level": 0, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid"], "mechanicalEffects": [] },
@@ -1602,7 +1602,7 @@
     { "id": "mold-earth", "name": "Mold Earth", "level": 0, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "somatic": true }, "duration": "Instantaneous or 1 hour", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "poison-spray", "name": "Poison Spray", "level": 0, "school": "necromancy", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["druid", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "save", "ability": "CON", "damageDice": "1d12", "damageType": "poison", "cantripScalingDice": "1d12" }] },
     { "id": "produce-flame", "name": "Produce Flame", "level": 0, "school": "conjuration", "castingTime": "Action", "range": "Self / 30 feet", "components": { "verbal": true, "somatic": true }, "duration": "10 minutes", "concentration": false, "ritual": false, "classes": ["druid"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "1d8", "damageType": "fire", "cantripScalingDice": "1d8" }] },
-    { "id": "resistance", "name": "Resistance", "level": 0, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a miniature cloak" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "druid"], "mechanicalEffects": [] },
+    { "id": "resistance", "name": "Resistance", "level": 0, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a miniature cloak" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["cleric", "druid"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "resisted" }] },
     { "id": "shillelagh", "name": "Shillelagh", "level": 0, "school": "transmutation", "castingTime": "Bonus Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "mistletoe, a shamrock leaf, and a club or quarterstaff" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid"], "mechanicalEffects": [] },
     { "id": "spare-the-dying", "name": "Spare the Dying", "level": 0, "school": "necromancy", "castingTime": "Action", "range": "15 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["cleric", "druid"], "mechanicalEffects": [] },
     { "id": "starry-wisp", "name": "Starry Wisp", "level": 0, "school": "evocation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "druid"], "mechanicalEffects": [{ "kind": "attack", "damageDice": "1d8", "damageType": "radiant", "cantripScalingDice": "1d8" }] },
@@ -1649,7 +1649,7 @@
     { "id": "hex", "name": "Hex", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "the petrified eye of a newt" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "hexed-active" }] },
     { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
     { "id": "jump", "name": "Jump", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a grasshopper's hind leg" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
-    { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [] },
+    { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "longstrider-active" }] },
     { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "holy water or powdered silver and iron" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "paladin", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "protection-from-evil-and-good-active" }] },
     { "id": "purify-food-and-drink", "name": "Purify Food and Drink", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "10 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "paladin"], "mechanicalEffects": [] },
     { "id": "sanctuary", "name": "Sanctuary", "level": 1, "school": "abjuration", "castingTime": "Bonus Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a small silver mirror" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["cleric"], "mechanicalEffects": [] },
@@ -1684,7 +1684,7 @@
     { "id": "continual-flame", "name": "Continual Flame", "level": 2, "school": "evocation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "ruby dust worth 50+ GP" }, "duration": "Until dispelled", "concentration": false, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
     { "id": "cordon-of-arrows", "name": "Cordon of Arrows", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "5 feet", "components": { "verbal": true, "somatic": true, "material": "four arrows or bolts" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [{ "kind": "trap", "saveAbility": "DEX", "fixedDC": 13, "damageDice": "1d6", "damageType": "piercing", "halfOnSuccess": false, "charges": 4, "label": "Arrow" }] },
     { "id": "darkness", "name": "Darkness", "level": 2, "school": "evocation", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "material": "bat fur and a drop of pitch or piece of coal" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "targeting": { "shape": "sphere", "size": 15 }, "mechanicalEffects": [] },
-    { "id": "darkvision", "name": "Darkvision", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "either a pinch of dried carrot or an agate" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "darkvision", "name": "Darkvision", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "either a pinch of dried carrot or an agate" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "darkvision-active" }] },
     { "id": "detect-thoughts", "name": "Detect Thoughts", "level": 2, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a copper coin" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "dragons-breath", "name": "Dragon's Breath", "level": 2, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a hot pepper" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "dust-devil", "name": "Dust Devil", "level": 2, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a pinch of dust" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer", "wizard"], "targeting": { "shape": "cube", "size": 5 }, "mechanicalEffects": [] },
@@ -3082,6 +3082,46 @@
       "endsOn": [],
       "effects": [
         { "kind": "GrantImmunity", "damageType": "all" }
+      ]
+    },
+    {
+      "id": "blade-warded-active",
+      "name": "Blade Warded",
+      "description": "Until end of next turn (Blade Ward cantrip): resistance to Bludgeoning, Piercing, and Slashing damage. RAW duration is 1 round; the engine doesn't auto-expire single-round buffs today, so the consumer removes the condition at the end of the bearer's next turn.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantResistance", "damageType": "bludgeoning" },
+        { "kind": "GrantResistance", "damageType": "piercing" },
+        { "kind": "GrantResistance", "damageType": "slashing" }
+      ]
+    },
+    {
+      "id": "resisted",
+      "name": "Resisted",
+      "description": "May add 1d4 to one saving throw; consumed on use (Resistance cantrip). Same consumer-managed shape as Guidance: no engine event fires at consume time, the consumer rolls the d4 and removes the condition.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
+    },
+    {
+      "id": "longstrider-active",
+      "name": "Longstrider",
+      "description": "+10 ft walking Speed for 1 hour (Longstrider spell). The slice-77 ModifySpeed retrofit ensures the buff flows through the movement planner's getEffectiveSpeed.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 10 }
+      ]
+    },
+    {
+      "id": "darkvision-active",
+      "name": "Darkvision",
+      "description": "Darkvision out to 60 ft for 8 hours (Darkvision spell). The engine stores the sense grant on the target's effect stack; consumers expose it via the character view's senses surface.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "GrantSense", "sense": "darkvision", "range": 60 }
       ]
     },
     {

@@ -244,6 +244,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
     "stackable": false,
   },
   {
+    "effectsCount": 3,
+    "id": "blade-warded-active",
+    "stackable": false,
+  },
+  {
     "effectsCount": 7,
     "id": "blessed",
     "stackable": false,
@@ -321,6 +326,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 1,
     "id": "cursed-vulnerable-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
+    "id": "darkvision-active",
     "stackable": false,
   },
   {
@@ -485,6 +495,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   },
   {
     "effectsCount": 1,
+    "id": "longstrider-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 1,
     "id": "mage-armored",
     "stackable": false,
   },
@@ -561,6 +576,11 @@ exports[`feature-coverage matrix: conditions > every condition is shipped with s
   {
     "effectsCount": 2,
     "id": "reduced-active",
+    "stackable": false,
+  },
+  {
+    "effectsCount": 0,
+    "id": "resisted",
     "stackable": false,
   },
   {

@@ -13,10 +13,10 @@ This is separate from [content-attribution.md](content-attribution.md), which is
 | Species | 7 / ~10 | ~10 | Aasimar, Goliath, Orc deferred. |
 | Backgrounds | 19 / 16 | 16 | Full PHB 2024 list shipped (plus three legacy entries kept for round-trip compatibility). |
 | Feats | 33 total | ~50+ | 12 origin / 6 general / 6 fighting style / 9 epic boon. General feats partial. |
-| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~150 wired with `mechanicalEffects` (~18 cantrips, ~31 L1, ~24 L2, ~22 L3, ~13 L4, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 9 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~249 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
+| Spells | 399 / 399 | ~399 | 34 / 60 / 63 / 54 / 40 / 46 / 38 / 24 / 19 / 21 across L0–L9. **Every PHB 2024 spell now ships in the pack.** ~154 wired with `mechanicalEffects` (~20 cantrips, ~32 L1, ~25 L2, ~22 L3, ~13 L4, ~13 L5, ~10 L6, ~5 L7, ~8 L8, ~5 L9) + 9 dedicated planners (absorb-elements, counterspell, dispel-magic, elemental-weapon, identify, misty-step, shield, hunters-mark, polymorph). The remaining ~245 ship schema-only, each blocked on a named engine primitive captured in the per-level sections below. |
 | Items | 77 total | hundreds (DMG) | 53 weapons + armor + shields + tools + mundane gear + 9 magic items. Bulk DMG magic items deferred. |
 | Monsters | 6 / hundreds | ~370 (MM) | Goblin, Orc, Wolf, Skeleton, Ogre, Young Red Dragon. CR 1/2 and most of MM deferred. |
-| Conditions | 31 / 15 | 15 (RAW) | All 15 RAW conditions plus 16 mechanic-rider conditions used by the engine. |
+| Conditions | 35 / 15 | 15 (RAW) | All 15 RAW conditions plus 20 mechanic-rider conditions used by the engine. |
 
 ## Spells
 
@@ -24,13 +24,13 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 
 ### Cantrips (L0): 34 / 34
 
-**Wired (18):** acid-splash, chill-touch, eldritch-blast, fire-bolt, frostbite, guidance, mind-sliver, poison-spray, produce-flame, ray-of-frost, sacred-flame, shocking-grasp, starry-wisp, thorn-whip, thunderclap, toll-the-dead, vicious-mockery, word-of-radiance.
+**Wired (20):** acid-splash, blade-ward (buff condition with GrantResistance for bludgeoning/piercing/slashing), chill-touch, eldritch-blast, fire-bolt, frostbite, guidance, mind-sliver, poison-spray, produce-flame, ray-of-frost, resistance (buff condition; consumer-managed 1d4 bonus to one save like Guidance), sacred-flame, shocking-grasp, starry-wisp, thorn-whip, thunderclap, toll-the-dead, vicious-mockery, word-of-radiance.
 
-**Schema-only (16):** blade-ward, dancing-lights, druidcraft, friends, light, mage-hand, mending, message, minor-illusion, mold-earth, prestidigitation, resistance, shillelagh, spare-the-dying, thaumaturgy, true-strike. All intentionally narrative / utility — no mechanical event to emit.
+**Schema-only (14):** dancing-lights, druidcraft, friends, light, mage-hand, mending, message, minor-illusion, mold-earth, prestidigitation, shillelagh, spare-the-dying, thaumaturgy, true-strike. All intentionally narrative / utility — no mechanical event to emit.
 
 ### L1: 60 / 60 (full PHB list)
 
-**Wired (31):** bane, bless, burning-hands, cause-fear, charm-person, chromatic-orb (caster-chosen damage type), color-spray, command (caster-chosen variant on save mechanic, 5 variants), cure-wounds, divine-favor (on-hit rider), dissonant-whispers, earth-tremor, faerie-fire, feather-fall (falling-protection buff), find-familiar (summon), guiding-bolt, healing-word, hellish-rebuke, hex (target-side source-filtered rider, +1d6 necrotic), inflict-wounds, mage-armor, magic-missile, protection-from-evil-and-good (full RAW shape as of slice 104: type-conditional ImposeDisadvantageOnAttackers + source-gated charmed/frightened GrantConditionImmunity, both gating on the six warded types — aberration, celestial, elemental, fey, fiend, undead; the RAW "possessed" clause stays narrative since the engine has no possessed condition), ray-of-sickness, searing-smite (on-hit rider, one-shot), sleep, tashas-hideous-laughter (end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), thunderous-smite (on-hit rider, one-shot), thunderwave, unseen-servant (summon), wrathful-smite (on-hit rider, one-shot).
+**Wired (32):** bane, bless, burning-hands, cause-fear, charm-person, chromatic-orb (caster-chosen damage type), color-spray, command (caster-chosen variant on save mechanic, 5 variants), cure-wounds, divine-favor (on-hit rider), dissonant-whispers, earth-tremor, faerie-fire, feather-fall (falling-protection buff), find-familiar (summon), guiding-bolt, healing-word, hellish-rebuke, hex (target-side source-filtered rider, +1d6 necrotic), inflict-wounds, longstrider (buff condition with ModifySpeed +10 walk), mage-armor, magic-missile, protection-from-evil-and-good (full RAW shape as of slice 104: type-conditional ImposeDisadvantageOnAttackers + source-gated charmed/frightened GrantConditionImmunity, both gating on the six warded types — aberration, celestial, elemental, fey, fiend, undead; the RAW "possessed" clause stays narrative since the engine has no possessed condition), ray-of-sickness, searing-smite (on-hit rider, one-shot), sleep, tashas-hideous-laughter (end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), thunderous-smite (on-hit rider, one-shot), thunderwave, unseen-servant (summon), wrathful-smite (on-hit rider, one-shot).
 
 **Dedicated planner (4):** hunters-mark, identify, shield, absorb-elements.
 
@@ -42,11 +42,11 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Temp-HP grant as a spell mechanic** (current `heal` writes to `current` only): `false-life`, `heroism`.
 - (Caster-chosen options wired for L1 — Chromatic Orb's damage type via slice 82, Command's 5-variant save via slice 85.)
 - **AC-buff condition** (flat AC bonus tied to a condition): `shield-of-faith`.
-- **Pure narrative / utility** (intentionally no mechanical event): `alarm`, `animal-friendship`, `comprehend-languages`, `compelled-duel`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-magic`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `longstrider`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Rituals, illusions, sensory spells; they parse and load, they just don't emit anything.
+- **Pure narrative / utility** (intentionally no mechanical event): `alarm`, `animal-friendship`, `comprehend-languages`, `compelled-duel`, `create-or-destroy-water`, `detect-evil-and-good`, `detect-magic`, `detect-poison-and-disease`, `disguise-self`, `expeditious-retreat`, `fog-cloud`, `goodberry`, `jump`, `purify-food-and-drink`, `silent-image`, `speak-with-animals`. Rituals, illusions, sensory spells; they parse and load, they just don't emit anything.
 
 ### L2: 63 / 63 (full PHB list)
 
-**Wired (24):** aid, blindness-deafness, branding-smite (on-hit rider, one-shot), calm-emotions (caster-chosen save variant), cordon-of-arrows (trap, 4 charges, fixed DC 13 piercing), crown-of-madness, enhance-ability (6-variant buff), enlarge-reduce (caster-chosen buff variant), find-steed (summon), flame-blade, heat-metal, hold-person (paralyzed + end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, summon-beast (summon), web.
+**Wired (25):** aid, blindness-deafness, branding-smite (on-hit rider, one-shot), calm-emotions (caster-chosen save variant), cordon-of-arrows (trap, 4 charges, fixed DC 13 piercing), crown-of-madness, darkvision (buff condition with GrantSense darkvision 60), enhance-ability (6-variant buff), enlarge-reduce (caster-chosen buff variant), find-steed (summon), flame-blade, heat-metal, hold-person (paralyzed + end-of-turn WIS save lifts the condition via `recurringSave.onSuccess: 'removeCondition'`), invisibility, lesser-restoration, melfs-acid-arrow, moonbeam, prayer-of-healing, protection-from-poison, scorching-ray, shatter, spiritual-weapon, suggestion, summon-beast (summon), web.
 
 **Dedicated planner (1):** misty-step.
 
@@ -68,7 +68,7 @@ Status legend: `wired` = has `mechanicalEffects` array entries that the engine c
 - **Multi-target linked condition** (effect that ties two creatures together): `warding-bond`.
 - **Transformation handler** (shapeshift utility): `alter-self`.
 - **Push primitive** (move target via STR save with no damage): `gust-of-wind`.
-- **Pure narrative / utility** (intentionally no mechanical event): `animal-messenger`, `arcane-lock`, `augury`, `continual-flame`, `darkvision`, `detect-thoughts`, `find-traps`, `gentle-repose`, `knock`, `locate-animals-or-plants`, `locate-object`, `magic-mouth`, `nystuls-magic-aura`, `rope-trick`, `see-invisibility`, `skywrite`. Ritual, divination, illusion, and utility spells; they parse and load, they just don't emit a mechanical event.
+- **Pure narrative / utility** (intentionally no mechanical event): `animal-messenger`, `arcane-lock`, `augury`, `continual-flame`, `detect-thoughts`, `find-traps`, `gentle-repose`, `knock`, `locate-animals-or-plants`, `locate-object`, `magic-mouth`, `nystuls-magic-aura`, `rope-trick`, `see-invisibility`, `skywrite`. Ritual, divination, illusion, and utility spells; they parse and load, they just don't emit a mechanical event.
 
 ### L3: 54 / 54 (full PHB list)
 
@@ -381,7 +381,7 @@ PHB 2024 ships ~30 general feats and ~25 origin feats; this pack carries the mos
 
 ## Conditions
 
-All 15 RAW conditions ship (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious). Sixteen engine-mechanic conditions also ship to back rider effects (e.g. `sapped`, `vexed-by`, `slowed-10ft` for weapon masteries; `blessed`, `mage-armored`, `guided`, `concentrating`; recent multi-effect buff conditions `foresight-active`, `mind-blanked-active`, `invulnerable-active`; plus the slice-103 type-conditional wards `protection-from-evil-and-good-active`, `magic-circle-active`, `holy-aura-active`). Complete.
+All 15 RAW conditions ship (Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, Unconscious). Twenty engine-mechanic conditions also ship to back rider effects (e.g. `sapped`, `vexed-by`, `slowed-10ft` for weapon masteries; `blessed`, `mage-armored`, `guided`, `concentrating`; multi-effect buff conditions `foresight-active`, `mind-blanked-active`, `invulnerable-active`; type-conditional wards `protection-from-evil-and-good-active`, `magic-circle-active`, `holy-aura-active`; plus the slice-106 utility buffs `blade-warded-active`, `resisted`, `longstrider-active`, `darkvision-active`). Complete.
 
 ## Future engine slices (what unblocks the deferred spells)
 
