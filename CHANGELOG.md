@@ -291,6 +291,22 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *Illusion-interaction primitive: Silent Image + Major Image + Investigate action* (slice 137). New `Illusion` runtime entity (`state.illusions: Record<IllusionId, Illusion>`) modeled on the slice-94 Trap / slice-135 Sensor pattern: id + label + free-text location + `kind: 'visual' \| 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + a baked `investigationDC` (the caster's spell save DC at cast time) + `disbelievedBy: CharacterId[]` set. Three new event types (`IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`) drive the lifecycle; reducers in [src/engine/reducers/illusion.ts](src/engine/reducers/illusion.ts). Four planners in [src/engine/plan/illusion.ts](src/engine/plan/illusion.ts): `planSilentImage` (1st-level visual), `planMajorImage` (3rd-level audiovisual), `planInvestigateIllusion` (a creature spends an action to Study the illusion, rolls INT (Investigation) against the baked DC, success adds them to `disbelievedBy`), `planDismissIllusion` (caster ends spell voluntarily). `clearConcentrationEffect` sweeps illusions linked to a dropped concentration via `sourceEffectInstanceId`, mirroring the slice-135 sensor sweep. The engine surfaces the disbelief set but doesn't itself act on it; consumers / DMs decide what disbelieving creatures see and do. RAW edge cases not modeled this slice: the caster's bonus-action move (Silent Image) and action-recolour (Major Image) of the illusion's shape (a consumer can re-emit IllusionCreated with new label / location until a future schema extension lets the planner mutate the existing entity). Twelve tests cover both cast paths, both Investigate outcomes, the unknown-spell rejection, voluntary dismiss, concentration-drop cleanup, and the multi-creature belief state (two investigators on the same illusion track independently).
 
+*SRD 5.2.1 compliance: saving throw proficiency refresh on 28 monsters* (slice 157). Refreshes the savingThrows map on 28 monsters where the pack carried 2014 MM proficiency profiles instead of SRD 5.2.1. Audit at [docs/srd-5.2.1-audit-monsters-secondary.md](docs/srd-5.2.1-audit-monsters-secondary.md).
+
+Pattern: 2024 SRD significantly narrowed dragon save proficiencies (every chromatic dragon dropped CON + CHA proficiency, keeping only DEX + WIS) and adjusted save profiles on several other CR 8+ monsters. Target maps were script-extracted directly from the SRD markdown tables (only saves where save bonus differs from ability modifier, indicating proficiency added).
+
+Notable changes:
+- All 10 chromatic dragons (Young White / Black / Green / Blue / Red + Adult White / Black / Green / Blue / Red): drop CON and CHA save proficiency.
+- Solar: drop all save proficiencies (SRD lists none; pack had INT / WIS / CHA).
+- Aboleth: add DEX +3.
+- Cloud Giant: drop CHA (kept CON + WIS).
+- Bone Devil: add INT, WIS, CHA proficiencies (pack had only no entries; SRD has STR + INT + WIS + CHA).
+- Bearded Devil: drop WIS, add CHA.
+- Mammoth, Tyrannosaurus Rex, Gladiator, Pegasus, Planetar: add multi-save proficiency profiles.
+- Smaller swaps on Couatl, Chain Devil, Cultist, Cultist Fanatic, Giant Rat, Mastiff, Storm Giant, Assassin.
+
+Two save derivation tests in tests/unit/derive/save.test.ts updated to reflect the new SRD-compliant Young Red Dragon save profile (was DEX +4 / CON +9 / WIS +4 / CHA +8, now DEX +4 / WIS +4). Audit re-run: 0 save diffs remaining (was 45); drift count drops from 101 to 89 monsters with any secondary-field diff. Full suite green.
+
 *SRD 5.2.1 compliance: type / size / alignment fixes for 3 monsters* (slice 156). Second small-fix slice from the slice 154 secondary audit. Three monsters had type/size/alignment drift between 2014 MM and SRD 5.2.1:
 
 - **Goblin Warrior**: type Humanoid → Fey + new subtype "goblinoid" + alignment {neutral, evil} → {chaotic, neutral}. The 2024 SRD reclassified goblins as Fey (Goblinoid) with a Chaotic Neutral default alignment, a significant lore shift from 2014.

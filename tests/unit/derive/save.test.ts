@@ -86,17 +86,17 @@ const buildCreature = (statblockId: string, name: string, abilityScores: Charact
   });
 
 describe('computeSavingThrow consults monster.savingThrows (slice 130)', () => {
-  it('Young Red Dragon: listed DEX +4 / CON +9 / WIS +4 / CHA +8 use the baked total', () => {
-    // RAW MM Young Red Dragon: STR 23 / DEX 10 / CON 21 / INT 14 / WIS 11 / CHA 19.
-    // Listed saves: DEX +4, CON +9, WIS +4, CHA +8 (each = ability mod + PB of 4).
+  it('Young Red Dragon: listed DEX +4 / WIS +4 use the baked total (slice 157 SRD 5.2.1 refresh)', () => {
+    // SRD 5.2.1 Young Red Dragon: STR 23 / DEX 10 / CON 21 / INT 14 / WIS 11 / CHA 19.
+    // SRD lists proficient saves on DEX +4 and WIS +4 (mod + PB of 4 with no
+    // proficiency on the others). Pre-slice 157, the pack carried 2014 MM's
+    // CON +9 / CHA +8 proficiencies too; those were dropped to match RAW.
     const dragon = buildCreature('young-red-dragon', 'Smaug Jr', {
       STR: 23, DEX: 10, CON: 21, INT: 14, WIS: 11, CHA: 19,
     });
     const ctx = { character: dragon, itemInstances: {}, content: STARTER_CONTENT };
     expect(computeSavingThrow({ ...ctx, ability: 'DEX' }).total).toBe(4);
-    expect(computeSavingThrow({ ...ctx, ability: 'CON' }).total).toBe(9);
     expect(computeSavingThrow({ ...ctx, ability: 'WIS' }).total).toBe(4);
-    expect(computeSavingThrow({ ...ctx, ability: 'CHA' }).total).toBe(8);
   });
 
   it('Young Red Dragon: unlisted STR save falls through to ability-mod-only path', () => {
@@ -131,6 +131,8 @@ describe('computeSavingThrow consults monster.savingThrows (slice 130)', () => {
   });
 
   it('breakdown carries a single monster:<id>:save entry, not ability-mod + proficiency', () => {
+    // Same Young Red Dragon, but checking DEX (a listed proficient save in
+    // SRD 5.2.1) instead of CON (which slice 157 dropped from the pack).
     const dragon = buildCreature('young-red-dragon', 'Smaug Jr', {
       STR: 23, DEX: 10, CON: 21, INT: 14, WIS: 11, CHA: 19,
     });
@@ -138,11 +140,11 @@ describe('computeSavingThrow consults monster.savingThrows (slice 130)', () => {
       character: dragon,
       itemInstances: {},
       content: STARTER_CONTENT,
-      ability: 'CON',
+      ability: 'DEX',
     });
     const sources = r.breakdown.map((e) => e.source);
     expect(sources).toContain('monster:young-red-dragon:save');
-    expect(sources).not.toContain('CON-mod');
+    expect(sources).not.toContain('DEX-mod');
     expect(sources).not.toContain('proficiency');
   });
 
