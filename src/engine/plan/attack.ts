@@ -398,6 +398,30 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   for (let i = 0; i < totalRolls; i++) {
     damageRolls.push(rollDie(parsed.die, rng));
   }
+  // Slice 121: Great Weapon Fighting reroll-to-3 rule. Triggers on a
+  // melee attack with a two-handed wield (Two-Handed property, or
+  // Versatile with both off-hand and shield slots empty). Each weapon
+  // damage die showing 1 or 2 is treated as 3. Applied to the rolled
+  // values in place so the DamageRolled event reflects the final
+  // dice. Doesn't apply to the slice-90 `extraDamageDice` rider — RAW
+  // GWF covers "the weapon's damage dice" only. Stricter than the
+  // Flex `wieldedTwoHanded` check above: GWF requires the shield slot
+  // to be empty too, since a shield occupies the off hand even though
+  // the engine tracks it in a separate slot.
+  const twoHandedForGwf =
+    weaponDef.properties.includes('two-handed')
+    || (weaponDef.properties.includes('versatile')
+        && attacker.equipped.offHand === undefined
+        && attacker.equipped.shield === undefined);
+  const gwfApplies =
+    weaponDef.attackKind === 'melee'
+    && twoHandedForGwf
+    && attackerEffects.hasGreatWeaponFighting();
+  if (gwfApplies) {
+    for (let i = 0; i < damageRolls.length; i++) {
+      if (damageRolls[i]! < 3) damageRolls[i] = 3;
+    }
+  }
   // Spell-applied weapon buff stamped on this instance (Magic
   // Weapon, Elemental Weapon, etc.). Adds a flat damage bonus to
   // the existing ability-mod + dice-modifier roll. Distinct from

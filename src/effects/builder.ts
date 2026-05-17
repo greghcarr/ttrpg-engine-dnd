@@ -116,6 +116,10 @@ export class EffectAccumulator {
   // disadvantage on an attack against a nearby ally (shield required;
   // engine doesn't enforce position).
   private protectionFightingStyleFlag: boolean = false;
+  // Slice 121: marker for the Great Weapon Fighting Fighting Style.
+  // When set, planAttack replaces any 1 or 2 on the weapon damage
+  // dice with 3, gated on a two-handed melee wield.
+  private greatWeaponFightingFlag: boolean = false;
 
   addModifier(target: ModifierTarget, value: number, source: string, predicate?: Predicate): void {
     const key = modifierKey(target);
@@ -397,6 +401,12 @@ export class EffectAccumulator {
   hasProtectionFightingStyle(): boolean {
     return this.protectionFightingStyleFlag;
   }
+  markGreatWeaponFighting(): void {
+    this.greatWeaponFightingFlag = true;
+  }
+  hasGreatWeaponFighting(): boolean {
+    return this.greatWeaponFightingFlag;
+  }
 }
 
 export interface BuilderContext {
@@ -505,6 +515,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantProtectionFightingStyle':
       acc.markProtectionFightingStyle();
+      return;
+    case 'GrantGreatWeaponFighting':
+      acc.markGreatWeaponFighting();
       return;
     case 'GrantAdvantageToAttackers':
       acc.markGrantsAdvantageToAttackers();

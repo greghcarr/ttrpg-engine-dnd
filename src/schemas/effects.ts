@@ -266,6 +266,13 @@ export type Effect =
   // separately (character.equipped.shield !== undefined). Canonical
   // user: the Protection Fighting Style.
   | { kind: 'GrantProtectionFightingStyle' }
+  // Slice 121. Marker that enables Great Weapon Fighting's reroll
+  // rule: planAttack replaces any 1 or 2 on a weapon damage die with
+  // 3, but only when the attack is melee and the weapon is wielded
+  // two-handed (Two-Handed property, or Versatile property with both
+  // off-hand and shield slots empty). Canonical user: the Great
+  // Weapon Fighting Fighting Style.
+  | { kind: 'GrantGreatWeaponFighting' }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -480,6 +487,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantProtectionFightingStyle'),
     }),
     z.object({
+      kind: z.literal('GrantGreatWeaponFighting'),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -526,5 +536,6 @@ export const EFFECT_KINDS = [
   'PreventFatalDamage',
   'GrantTwoWeaponFighting',
   'GrantProtectionFightingStyle',
+  'GrantGreatWeaponFighting',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;
