@@ -459,6 +459,7 @@ export const applyEffectToBuilder = (
     case 'OfferChoice':
     case 'GrantAura':
     case 'GrantFallingProtection':
+    case 'PreventFatalDamage':
     case 'Custom':
       return;
     default: {

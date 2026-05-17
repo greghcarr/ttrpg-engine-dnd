@@ -297,7 +297,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'compulsion': { kind: 'skip', reason: 'forced movement on WIS save with recurring re-save; recurring-save area mechanic not modeled' },
   'confusion': { kind: 'save' },
   'control-water': { kind: 'skip', reason: 'water-shape utility; terrain primitive not modeled' },
-  'death-ward': { kind: 'skip', reason: 'prevents one death; on-fatal-damage trigger primitive not modeled' },
+  'death-ward': { kind: 'buff', conditionId: 'death-ward-active' },
   'dimension-door': { kind: 'skip', reason: 'short-range teleport (with optional passenger); has a teleport-pattern similar to Misty Step but no dedicated planner yet' },
   'divination': { kind: 'skip', reason: 'cleric ritual divination; DM-resolution primitive not modeled' },
   'dominate-beast': { kind: 'skip', reason: 'WIS save → controlled-mind; domination semantics distinct from Charmed not modeled' },

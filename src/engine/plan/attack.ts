@@ -18,6 +18,7 @@ import { getCreatureType } from '../../derive/creature-type.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { dispatchTriggers } from '../triggers/dispatch.js';
 import { applyAll } from '../apply.js';
@@ -442,17 +443,30 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     rawComponents,
     characters: state.characters,
   });
+  // Slice 111: simulate prior-rider damage so the Death Ward intercept
+  // sees the target's HP at the moment the main damage event commits.
+  // Without applyAll here, a rider that dropped the target's HP to a
+  // sliver would still be ignored when scaling the main damage.
+  const stateBeforeMainDamage = applyAll(state, [attackRolled, ...attackTriggers, damageRolled]);
+  const intercept = interceptFatalDamage({
+    state: stateBeforeMainDamage,
+    content,
+    targetId: input.targetId,
+    mitigatedComponents,
+    causedByEventId: damageRolled.id,
+    at,
+  });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
     at,
     type: 'DamageApplied',
     targetId: input.targetId,
-    components: mitigatedComponents,
+    components: intercept.components,
     causedByEventId: damageRolled.id,
   };
   const concentrationBreak = planConcentrationBreakOnDrop(
     target,
-    mitigatedComponents,
+    intercept.components,
     damageApplied.id,
     at,
   );
@@ -462,6 +476,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     ...attackTriggers,
     damageRolled,
     damageApplied,
+    ...intercept.extraEvents,
     ...concentrationBreak,
   ];
 };

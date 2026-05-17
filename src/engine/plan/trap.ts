@@ -8,6 +8,8 @@ import { D20_SIDES } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import { computeSavingThrow } from '../../derive/save.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import type {
   DamageAppliedEvent,
@@ -103,17 +105,26 @@ export const planTriggerTrap = (
       amount: rawAmount,
       type: trap.payload.damageType,
     };
+    const intercept = interceptFatalDamage({
+      state: applyAll(state, events),
+      content,
+      targetId: intent.triggeringCharacterId,
+      mitigatedComponents: [component],
+      causedByEventId: saveEvent.id,
+      at,
+    });
     const damage: DamageAppliedEvent = {
       id: newEventId() as ULID,
       at,
       type: 'DamageApplied',
       targetId: intent.triggeringCharacterId as ULID,
-      components: [component],
+      components: intercept.components,
       sourceCharacterId: trap.sourceCharacterId,
       source: `trap:${trap.sourceSpellId}:${trap.label}`,
       causedByEventId: saveEvent.id,
     };
     events.push(damage);
+    events.push(...intercept.extraEvents);
   }
 
   const triggered: TrapTriggeredEvent = {

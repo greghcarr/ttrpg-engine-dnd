@@ -1247,7 +1247,7 @@
     { "id": "conjure-minor-elementals", "name": "Conjure Minor Elementals", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "wizard"], "mechanicalEffects": [{ "kind": "summon", "name": "Minor Elemental Spirit", "ac": 13, "hpBase": 40, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 40 }] },
     { "id": "conjure-woodland-beings", "name": "Conjure Woodland Beings", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "one holly berry per creature summoned" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [{ "kind": "summon", "name": "Fey Spirit", "ac": 13, "hpBase": 30, "hpPerSlotAbove": 10, "baseSlotLevel": 4, "speedFeet": 30 }] },
     { "id": "control-water", "name": "Control Water", "level": 4, "school": "transmutation", "castingTime": "Action", "range": "300 feet", "components": { "verbal": true, "somatic": true, "material": "a drop of water and a pinch of dust" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "wizard"], "mechanicalEffects": [] },
-    { "id": "death-ward", "name": "Death Ward", "level": 4, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [] },
+    { "id": "death-ward", "name": "Death Ward", "level": 4, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["cleric", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "death-ward-active" }] },
     { "id": "dimension-door", "name": "Dimension Door", "level": 4, "school": "conjuration", "castingTime": "Action", "range": "500 feet", "components": { "verbal": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["bard", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "divination", "name": "Divination", "level": 4, "school": "divination", "castingTime": "1 action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "incense and a sacrificial offering worth 25+ GP" }, "duration": "Instantaneous", "concentration": false, "ritual": true, "classes": ["cleric"], "mechanicalEffects": [] },
     { "id": "dominate-beast", "name": "Dominate Beast", "level": 4, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "sorcerer"], "mechanicalEffects": [] },
@@ -3143,6 +3143,16 @@
           "actions": [],
           "consumeOnTrigger": true
         }
+      ]
+    },
+    {
+      "id": "death-ward-active",
+      "name": "Death Ward",
+      "description": "Up to 8 hours (Death Ward spell): the first time the warded creature would drop to 0 HP from damage, the damage is reduced so HP lands at 1 and this condition is removed. Every primary-damage emitter (planAttack, planCastSpell, planFalling, planOffhandAttack, planWeaponMastery Graze, planTrap, concentration-aura damage, recurring damage) consults the slice-111 `interceptFatalDamage` helper after `mitigateDamage` and emits a paired ConditionRemoved when the intercept fires. Known limitation: rider-emitted DamageApplied events from the trigger dispatcher (Sneak Attack, smite damage, Spirit Shroud rider, Fire Shield retaliation) do NOT consult the intercept — they fire before the main damage event in commit order, and if a rider alone is enough to drop the target, Death Ward stays applied and the target drops normally. A future slice can refactor the dispatcher to apply each fired trigger's events to a running draft before evaluating the next.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "PreventFatalDamage" }
       ]
     },
     {

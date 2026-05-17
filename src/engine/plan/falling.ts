@@ -6,6 +6,7 @@ import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-eco
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import type { ULID } from '../ids-utils.js';
 import type { Character } from '../../schemas/runtime/character.js';
@@ -110,21 +111,30 @@ export const planFalling = (
     characters: state.characters,
   });
   const at = intent.at ?? nowIso();
+  const damageAppliedId = newEventId() as ULID;
+  const intercept = interceptFatalDamage({
+    state,
+    content,
+    targetId: intent.characterId,
+    mitigatedComponents: mitigated,
+    causedByEventId: damageAppliedId,
+    at,
+  });
   const damageApplied: DamageAppliedEvent = {
-    id: newEventId() as ULID,
+    id: damageAppliedId,
     at,
     type: 'DamageApplied',
     targetId: intent.characterId,
-    components: mitigated,
+    components: intercept.components,
     source: `falling ${intent.distanceFeet} ft`,
   };
   const concentrationBreak = planConcentrationBreakOnDrop(
     character,
-    mitigated,
+    intercept.components,
     damageApplied.id,
     at,
   );
-  const tail = [damageApplied, ...concentrationBreak];
+  const tail = [damageApplied, ...intercept.extraEvents, ...concentrationBreak];
   return slowFallReactionConsumed !== undefined
     ? [slowFallReactionConsumed, ...tail]
     : tail;

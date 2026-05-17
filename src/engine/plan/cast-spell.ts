@@ -47,6 +47,8 @@ import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
 import { isImmuneToCondition } from '../../derive/condition-immunity.js';
 import { isHealingBlocked } from '../../derive/healing-block.js';
@@ -359,19 +361,28 @@ const planAttackMechanic = (
       rawComponents: [{ amount: Math.max(0, damageTotal), type: damageType }],
       characters: state.characters,
     });
+    const intercept = interceptFatalDamage({
+      state: applyAll(state, events),
+      content,
+      targetId,
+      mitigatedComponents: mitigated,
+      causedByEventId: damageRolled.id,
+      at,
+    });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,
       at,
       type: 'DamageApplied',
       targetId,
-      components: mitigated,
+      components: intercept.components,
       causedByEventId: damageRolled.id,
       sourceCharacterId: intent.characterId as ULID,
       source: spell.id,
     };
     events.push(damageApplied);
+    events.push(...intercept.extraEvents);
     events.push(
-      ...planConcentrationBreakOnDrop(target, mitigated, damageApplied.id, at),
+      ...planConcentrationBreakOnDrop(target, intercept.components, damageApplied.id, at),
     );
   }
   return events;
@@ -478,19 +489,28 @@ const planSaveMechanic = (
           rawComponents: [{ amount: finalAmount, type: mechanic.damageType }],
           characters: state.characters,
         });
+        const intercept = interceptFatalDamage({
+          state: applyAll(state, events),
+          content,
+          targetId,
+          mitigatedComponents: mitigated,
+          causedByEventId: saveEvent.id,
+          at,
+        });
         const damageApplied: DamageAppliedEvent = {
           id: newEventId() as ULID,
           at,
           type: 'DamageApplied',
           targetId,
-          components: mitigated,
+          components: intercept.components,
           causedByEventId: saveEvent.id,
           sourceCharacterId: intent.characterId as ULID,
           source: spell.id,
         };
         events.push(damageApplied);
+        events.push(...intercept.extraEvents);
         events.push(
-          ...planConcentrationBreakOnDrop(target, mitigated, damageApplied.id, at),
+          ...planConcentrationBreakOnDrop(target, intercept.components, damageApplied.id, at),
         );
       }
     }
@@ -801,23 +821,32 @@ const planAutoHitMechanic = (
       rawComponents: [{ amount: raw, type: mechanic.damageType }],
       characters: state.characters,
     });
+    const intercept = interceptFatalDamage({
+      state: applyAll(state, events),
+      content,
+      targetId,
+      mitigatedComponents: mitigated,
+      causedByEventId: declaredEventId,
+      at,
+    });
     const damageApplied: DamageAppliedEvent = {
       id: newEventId() as ULID,
       at,
       type: 'DamageApplied',
       targetId,
-      components: mitigated,
+      components: intercept.components,
       causedByEventId: declaredEventId as ULID,
       sourceCharacterId: intent.characterId as ULID,
       source: `${spell.id} (dart ${i + 1})`,
     };
     events.push(damageApplied);
+    events.push(...intercept.extraEvents);
     if (
       target.concentrationEffectId !== undefined &&
       !brokenConcentrationFor.has(targetId)
     ) {
       const hpBefore = simulatedHp.get(targetId) ?? target.hp.current;
-      const dartTotal = mitigated.reduce((s, c) => s + c.amount, 0);
+      const dartTotal = intercept.components.reduce((s, c) => s + c.amount, 0);
       const hpAfter = Math.max(-target.hp.max, hpBefore - dartTotal);
       simulatedHp.set(targetId, hpAfter);
       if (hpBefore > 0 && hpAfter <= 0) {

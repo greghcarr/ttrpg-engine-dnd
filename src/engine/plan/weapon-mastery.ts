@@ -16,6 +16,8 @@ import type { ConditionAppliedEvent, DamageAppliedEvent } from '../../schemas/ev
 import type { CombatantMovedEvent } from '../../schemas/events/movement.js';
 import type { SaveRolledEvent } from '../../schemas/events/checks.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 
 const UNARMED_DC_BASE = 8;
 const CELL_SIZE_FEET = 5;
@@ -176,14 +178,24 @@ export const planWeaponMastery = (
       const damageType = weapon.damageType;
       const grazeAmount = Math.max(0, abilityModifier(attacker.abilityScores.STR));
       if (grazeAmount > 0) {
+        const grazeDamageId = newEventId() as ULID;
+        const intercept = interceptFatalDamage({
+          state: applyAll(state, events),
+          content,
+          targetId: intent.targetId,
+          mitigatedComponents: [{ amount: grazeAmount, type: damageType, rawAmount: grazeAmount }],
+          causedByEventId: grazeDamageId,
+          at,
+        });
         const grazeDamage: DamageAppliedEvent = {
-          id: newEventId() as ULID,
+          id: grazeDamageId,
           at,
           type: 'DamageApplied',
           targetId: intent.targetId,
-          components: [{ amount: grazeAmount, type: damageType, rawAmount: grazeAmount }],
+          components: intercept.components,
         };
         events.push(grazeDamage);
+        events.push(...intercept.extraEvents);
         events.push(
           ...planConcentrationBreakOnDrop(target, grazeDamage.components, grazeDamage.id, at),
         );

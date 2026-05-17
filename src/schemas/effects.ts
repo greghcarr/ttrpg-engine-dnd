@@ -240,6 +240,12 @@ export type Effect =
   // consults this when computing fall damage; presence zeroes the
   // outgoing DamageApplied.
   | { kind: 'GrantFallingProtection' }
+  // Slice 111. When the bearing condition lives on a creature and
+  // incoming damage would drop HP to 0 or below, the damage is
+  // reduced so HP lands at 1 and the bearing condition is removed.
+  // Canonical user: Death Ward. Future users: Half-Orc Relentless
+  // Endurance, Aura of Life.
+  | { kind: 'PreventFatalDamage' }
   | { kind: 'Custom'; handlerId: string; params?: unknown };
 
 export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
@@ -438,6 +444,15 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantFallingProtection'),
     }),
     z.object({
+      // Slice 111. Marker primitive. When the bearing condition lives
+      // on a creature and incoming damage would drop their HP to 0 or
+      // below, the damage is reduced so HP lands at 1 and the bearing
+      // condition is removed. Canonical user: Death Ward (PHB 2024).
+      // Future users: Half-Orc Relentless Endurance, Aura of Life
+      // floor, Beacon of Hope's death-save advantage variant.
+      kind: z.literal('PreventFatalDamage'),
+    }),
+    z.object({
       kind: z.literal('Custom'),
       handlerId: z.string(),
       params: z.unknown().optional(),
@@ -481,5 +496,6 @@ export const EFFECT_KINDS = [
   'ImposeDisadvantageOnAttackers',
   'GrantAura',
   'GrantFallingProtection',
+  'PreventFatalDamage',
   'Custom',
 ] as const satisfies ReadonlyArray<EffectKind>;

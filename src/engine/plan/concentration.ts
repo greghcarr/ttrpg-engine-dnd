@@ -11,6 +11,8 @@ import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { computeSavingThrow } from '../../derive/save.js';
 import { computeSpellSaveDC } from '../../derive/spell-dc.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 import { isImmuneToCondition } from '../../derive/condition-immunity.js';
 import { D20_SIDES } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
@@ -320,16 +322,26 @@ export const planTickAura = (
           rawComponents: [{ amount: final, type: aura.damageType }],
           characters: state.characters,
         });
+        const damageId = newEventId() as ULID;
+        const intercept = interceptFatalDamage({
+          state: applyAll(state, events),
+          content,
+          targetId,
+          mitigatedComponents: mitigated,
+          causedByEventId: damageId,
+          at,
+        });
         events.push({
-          id: newEventId() as ULID,
+          id: damageId,
           at,
           type: 'DamageApplied',
           targetId: targetId as ULID,
-          components: mitigated,
+          components: intercept.components,
           causedByEventId,
           sourceCharacterId: intent.casterId as ULID,
           source: spell.id,
         });
+        events.push(...intercept.extraEvents);
       }
     }
 
@@ -426,17 +438,27 @@ export const planTickMovementDamage = (
     rawComponents: [{ amount: rawDamage, type: mechanic.damageType }],
     characters: state.characters,
   });
+  const damageId = newEventId() as ULID;
+  const intercept = interceptFatalDamage({
+    state,
+    content,
+    targetId: intent.targetId,
+    mitigatedComponents: mitigated,
+    causedByEventId: damageId,
+    at,
+  });
   return [
     {
-      id: newEventId() as ULID,
+      id: damageId,
       at,
       type: 'DamageApplied',
       targetId: intent.targetId as ULID,
-      components: mitigated,
+      components: intercept.components,
       causedByEventId: effect.startedAtEventId as ULID,
       sourceCharacterId: intent.casterId as ULID,
       source: spell.id,
     },
+    ...intercept.extraEvents,
   ];
 };
 
@@ -543,17 +565,27 @@ export const planTickRecurring = (
     rawComponents: [{ amount, type: mechanic.damageType }],
     characters: state.characters,
   });
+  const damageId = newEventId() as ULID;
+  const intercept = interceptFatalDamage({
+    state,
+    content,
+    targetId: intent.targetId,
+    mitigatedComponents: mitigated,
+    causedByEventId: damageId,
+    at,
+  });
   return [
     {
-      id: newEventId() as ULID,
+      id: damageId,
       at,
       type: 'DamageApplied',
       targetId: intent.targetId as ULID,
-      components: mitigated,
+      components: intercept.components,
       causedByEventId,
       sourceCharacterId: intent.casterId as ULID,
       source: spell.id,
     },
+    ...intercept.extraEvents,
   ];
 };
 

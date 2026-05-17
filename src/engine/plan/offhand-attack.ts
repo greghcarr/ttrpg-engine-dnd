@@ -17,6 +17,8 @@ import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { abilityModifier } from '../../derive/ability.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { applyAll } from '../apply.js';
 import { planConcentrationBreakOnDrop } from './concentration.js';
 import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import type { ULID } from '../ids-utils.js';
@@ -180,17 +182,25 @@ export const planOffHandAttack = (
     rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
     characters: state.characters,
   });
+  const intercept = interceptFatalDamage({
+    state: applyAll(state, [...economyEvents, attackRolled, damageRolled]),
+    content,
+    targetId: intent.targetId,
+    mitigatedComponents: mitigated,
+    causedByEventId: damageRolled.id,
+    at,
+  });
   const damageApplied: DamageAppliedEvent = {
     id: newEventId() as ULID,
     at,
     type: 'DamageApplied',
     targetId: intent.targetId,
-    components: mitigated,
+    components: intercept.components,
     causedByEventId: damageRolled.id,
   };
   const concentrationBreak = planConcentrationBreakOnDrop(
     target,
-    mitigated,
+    intercept.components,
     damageApplied.id,
     at,
   );
@@ -200,6 +210,7 @@ export const planOffHandAttack = (
     attackRolled,
     damageRolled,
     damageApplied,
+    ...intercept.extraEvents,
     ...concentrationBreak,
   ];
 };
