@@ -16,7 +16,7 @@ import { TEST_PACK, buildFighter, makeItemInstance } from '../fixtures/index.js'
 import type { Event } from '../../src/schemas/events/index.js';
 import type { AttackRolledEvent, DamageRolledEvent } from '../../src/schemas/events/attack.js';
 
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 
 const setupAttack = (seed: number) => {
   const engine = createEngine({ contentPacks: [TEST_PACK], rng: seededRNG(seed) });

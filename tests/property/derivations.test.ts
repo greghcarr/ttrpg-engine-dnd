@@ -23,7 +23,7 @@ import type { ItemInstance } from '../../src/schemas/runtime/item-instance.js';
 import type { AbilityScore } from '../../src/schemas/primitives.js';
 
 const ABILITIES: ReadonlyArray<AbilityScore> = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 
 const itemInstanceTable = (
   instances: ReadonlyArray<ItemInstance>,

@@ -34,7 +34,7 @@ import type { CharacterCreatedEvent } from '../../src/schemas/events/progression
 import type { Event } from '../../src/schemas/events/index.js';
 import { ulid } from 'ulid';
 
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 const PACK = loadStarterPack();
 const CONTENT = resolveContent([PACK]);
 

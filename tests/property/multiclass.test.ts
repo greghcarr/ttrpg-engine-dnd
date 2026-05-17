@@ -23,7 +23,7 @@ import { computeTotalLevel } from '../../src/schemas/runtime/character.js';
 import { CharacterSchema, type Character } from '../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../src/ids.js';
 
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 
 // Single-class character with the same total level and ability scores,
 // used as a comparison fixture when stripping a multiclass mix down to

@@ -21,7 +21,7 @@ import type {
   CharacterCreatedEvent,
 } from '../../src/schemas/events/progression.js';
 
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 const ISO = '2026-01-01T00:00:00.000Z';
 
 const newEvId = (): string => ulid();

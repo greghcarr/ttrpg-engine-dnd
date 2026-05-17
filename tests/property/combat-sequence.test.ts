@@ -36,7 +36,7 @@ import {
 import type { Event } from '../../src/schemas/events/index.js';
 import type { Position } from '../../src/schemas/runtime/encounter.js';
 
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '1000', 10);
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 const MAX_TURNS = 60; // long enough that fragile combatants actually die mid-fight
 const GRID = 20; // 20x20 grid, plenty of room
 

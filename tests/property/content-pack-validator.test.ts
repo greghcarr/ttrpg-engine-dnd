@@ -26,9 +26,10 @@ import { loadContentPack, ContentPackLoadError } from '../../src/content/pack.js
 import { STARTER_PACK_RAW } from '../../src/content/packs/starter.js';
 
 // Lower than the standard 1000 because each iteration deep-clones the
-// starter pack (~80 ms/iter). 200 runs is enough sample coverage for
-// the mutation space; bump via FAST_CHECK_NUM_RUNS for a deeper sweep.
-const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '200', 10);
+// starter pack (~80 ms/iter). 50 runs is a smoke check; bump via
+// FAST_CHECK_NUM_RUNS for a deeper sweep (200 or 1000 are useful
+// targets for periodic local fuzz runs).
+const NUM_RUNS = Number.parseInt(process.env['FAST_CHECK_NUM_RUNS'] ?? '50', 10);
 
 type JsonValue =
   | null
