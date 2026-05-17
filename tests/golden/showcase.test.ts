@@ -1145,6 +1145,7 @@ describe('golden: showcase party adventure (the Stoneheart Saga)', () => {
         targetAC: 12,
         hit: true,
         critical: true,
+        attackKind: 'melee',
       } satisfies AttackRolledEvent,
       {
         id: slagCritRollId,

@@ -358,6 +358,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     targetAC: acResult.total,
     hit,
     critical,
+    attackKind: weaponDef.attackKind,
     ...(attackerHasAllyAdjacentToTarget !== undefined
       ? { attackerHasAllyAdjacentToTarget }
       : {}),

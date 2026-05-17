@@ -140,6 +140,7 @@ export const planOffHandAttack = (
     targetAC: acResult.total,
     hit,
     critical,
+    attackKind: weaponDef.attackKind,
   };
 
   if (!hit) {

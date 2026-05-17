@@ -189,4 +189,56 @@ describe('Armor of Agathys', () => {
     }
     throw new Error('no hit landed in 80 seeds for AoA zero-temp-HP test');
   });
+
+  it('does NOT retaliate against a ranged hit (slice 123)', () => {
+    // Ward + temp HP both present, but the attacker wields a shortbow.
+    // The slice-123 `event.attackKind === melee` filter clause should
+    // suppress the rider on every hit.
+    for (let seed = 1; seed < 80; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const bow = makeItemInstance('shortbow');
+      const warlock = buildWarlock();
+      const attacker = buildAttacker(bow.id);
+      let campaign: Campaign = engine.createCampaign({ name: `aoa-ranged-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: bow },
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: warlock } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: attacker } satisfies CharacterCreatedEvent,
+      ]);
+      const seedTempHp: TempHPGrantedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'TempHPGranted',
+        targetId: warlock.id,
+        amount: 5,
+        source: 'armor-of-agathys',
+      };
+      const seedWard: ConditionAppliedEvent = {
+        id: eventId(),
+        at: isoTimestamp(),
+        type: 'ConditionApplied',
+        targetId: warlock.id,
+        conditionId: 'armor-of-agathys-active',
+        appliedConditionId: newAppliedConditionId(),
+      };
+      campaign = commit(campaign, [seedTempHp, seedWard]);
+
+      const attackEvents = engine.plan.attack(campaign.state, {
+        attackerId: attacker.id,
+        targetId: warlock.id,
+        weaponInstanceId: bow.id,
+      }).events;
+      const rolled = attackEvents.find((e): e is AttackRolledEvent => e.type === 'AttackRolled');
+      if (rolled?.hit !== true) continue;
+      const retaliation = attackEvents.find(
+        (e): e is DamageAppliedEvent =>
+          e.type === 'DamageApplied'
+          && e.targetId === attacker.id
+          && e.components.some((c) => c.type === 'cold'),
+      );
+      expect(retaliation).toBeUndefined();
+      return;
+    }
+    throw new Error('no ranged hit landed in 80 seeds for AoA ranged test');
+  });
 });

@@ -2994,7 +2994,7 @@
     {
       "id": "armor-of-agathys-active",
       "name": "Armor of Agathys",
-      "description": "Up to 1 hour (Armor of Agathys spell): while the bearer has Temporary Hit Points, any creature that hits them with a melee attack takes 5 cold damage. The temp HP itself is granted by the spell's `temp-hp` mechanic at cast time (5 base + 5 per slot level above 1); the rider here only fires while the bearer's temp HP is > 0, gated by the slice-122 `bearer.tempHp` fact + `gt` predicate. Approximation: the engine doesn't track temp-HP provenance, so the gate fires for any temp HP the bearer holds — broader than RAW which scopes it to the AoA-granted temp HP specifically. RAW also gates the retaliation on melee attacks; the dispatcher doesn't have an `attackKind` fact on AttackRolled today, so the rider fires on every weapon hit (matching the existing Fire Shield approximation).",
+      "description": "Up to 1 hour (Armor of Agathys spell): while the bearer has Temporary Hit Points, any creature that hits them with a melee attack takes 5 cold damage. The temp HP itself is granted by the spell's `temp-hp` mechanic at cast time (5 base + 5 per slot level above 1); the rider here only fires while the bearer's temp HP is > 0, gated by the slice-122 `bearer.tempHp` fact + `gt` predicate. Approximation: the engine doesn't track temp-HP provenance, so the gate fires for any temp HP the bearer holds (broader than RAW which scopes it to the AoA-granted temp HP specifically). Slice 123 added the `event.attackKind` fact, so the rider now correctly gates on melee-only attacks; thrown weapons (dagger, handaxe) still classify as melee here since the engine doesn't track thrown-vs-melee-strike intent.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -3003,7 +3003,7 @@
           "id": "armor-of-agathys-retaliation",
           "trigger": {
             "eventType": "AttackRolled",
-            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "gt", "path": "bearer.tempHp", "value": 0 }] }
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "gt", "path": "bearer.tempHp", "value": 0 }, { "kind": "eq", "path": "event.attackKind", "value": "melee" }] }
           },
           "actions": [{ "kind": "AddDamageToAttacker", "dice": "0d6+5", "damageType": "cold" }]
         }
@@ -3012,7 +3012,7 @@
     {
       "id": "fire-shield-warm-active",
       "name": "Fire Shield: Warm",
-      "description": "Caster has Resistance to Cold damage, and any creature that hits caster with a weapon attack takes 2d8 fire damage. RAW gates the retaliation on 'within 5 ft of you' and 'melee attack' — neither is enforced today (the engine doesn't model the 5-ft gate consistently, and the dispatcher doesn't have an attackKind fact). The rider fires on every weapon hit to the bearer (broader than RAW). Picked at cast time when the caster chooses the 'warm' variant of Fire Shield.",
+      "description": "Caster has Resistance to Cold damage, and any creature that hits caster with a melee attack takes 2d8 fire damage. RAW also gates the retaliation on 'within 5 ft of you'; the engine doesn't model the 5-ft gate consistently so the rider fires on every melee hit to the bearer (slightly broader than RAW). Slice 123 added the `event.attackKind` melee gate. Picked at cast time when the caster chooses the 'warm' variant of Fire Shield.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -3022,7 +3022,7 @@
           "id": "fire-shield-warm-retaliation",
           "trigger": {
             "eventType": "AttackRolled",
-            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackKind", "value": "melee" }] }
           },
           "actions": [{ "kind": "AddDamageToAttacker", "dice": "2d8", "damageType": "fire" }]
         }
@@ -3031,7 +3031,7 @@
     {
       "id": "fire-shield-chill-active",
       "name": "Fire Shield: Chill",
-      "description": "Caster has Resistance to Fire damage, and any creature that hits caster with a weapon attack takes 2d8 cold damage. Same RAW caveats as the warm variant (5-ft gate, melee gate both unmodeled). Picked at cast time when the caster chooses the 'chill' variant of Fire Shield.",
+      "description": "Caster has Resistance to Fire damage, and any creature that hits caster with a melee attack takes 2d8 cold damage. Same RAW caveats as the warm variant (5-ft gate unmodeled). Slice 123 added the `event.attackKind` melee gate. Picked at cast time when the caster chooses the 'chill' variant of Fire Shield.",
       "stackable": false,
       "endsOn": [],
       "effects": [
@@ -3041,7 +3041,7 @@
           "id": "fire-shield-chill-retaliation",
           "trigger": {
             "eventType": "AttackRolled",
-            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }] }
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackKind", "value": "melee" }] }
           },
           "actions": [{ "kind": "AddDamageToAttacker", "dice": "2d8", "damageType": "cold" }]
         }

@@ -5,6 +5,9 @@ import { EventEnvelopeSchema } from './envelope.js';
 export const AttackAdvantageSchema = z.enum(['none', 'advantage', 'disadvantage']);
 export type AttackAdvantage = z.infer<typeof AttackAdvantageSchema>;
 
+export const AttackKindSchema = z.enum(['melee', 'ranged']);
+export type AttackKind = z.infer<typeof AttackKindSchema>;
+
 export const AttackRolledEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('AttackRolled'),
   attackerId: ULIDSchema,
@@ -17,6 +20,13 @@ export const AttackRolledEventSchema = EventEnvelopeSchema.extend({
   targetAC: z.number().int(),
   hit: z.boolean(),
   critical: z.boolean(),
+  // Mirror of WeaponDefinition.attackKind for the swung weapon. Surfaced
+  // on the event so OnEvent rider filters (Armor of Agathys, Fire Shield)
+  // can gate on melee-only retaliation via the `event.attackKind` fact.
+  // Thrown weapons (dagger, handaxe) classify as 'melee' here — the
+  // engine doesn't model whether a thrown-capable weapon was hurled or
+  // jabbed this turn. Slice 123.
+  attackKind: AttackKindSchema,
   // True when any other positioned, non-incapacitated combatant was
   // within 5 ft of the target at attack time. Surfaced so content
   // predicates (e.g. Rogue Sneak Attack's "ally adjacent" trigger

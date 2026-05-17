@@ -44,6 +44,7 @@ describe('Attack chain reducers', () => {
       targetAC: 14,
       hit: true,
       critical: false,
+      attackKind: 'melee',
     };
     const next = apply(state, event);
     expect(next.characters[targetId]?.hp.current).toBe(20);

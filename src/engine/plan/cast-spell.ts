@@ -325,6 +325,12 @@ const planAttackMechanic = (
       targetAC: targetAC.total,
       hit,
       critical: isCrit,
+      // Every currently-wired PHB 2024 spell attack is a ranged spell
+      // attack (Eldritch Blast, Fire Bolt, Inflict Wounds, Chromatic
+      // Orb, etc.). When the first melee spell attack ships, add a
+      // `meleeSpellAttack?: boolean` field on SpellAttackMechanicSchema
+      // and branch here.
+      attackKind: 'ranged',
       causedByEventId: declaredEventId as ULID,
     };
     events.push(attackEvent);

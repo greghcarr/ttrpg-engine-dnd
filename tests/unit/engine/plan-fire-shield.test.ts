@@ -30,6 +30,9 @@ const PACK = loadStarterPack();
 const longsword = (): ItemInstance =>
   ItemInstanceSchema.parse({ id: newItemInstanceId(), definitionId: 'longsword' });
 
+const shortbow = (): ItemInstance =>
+  ItemInstanceSchema.parse({ id: newItemInstanceId(), definitionId: 'shortbow' });
+
 const buildWizard = (): Character =>
   CharacterSchema.parse({
     id: newCharacterId(),
@@ -168,5 +171,46 @@ describe('Fire Shield retaliation via AddDamageToAttacker', () => {
       return;
     }
     throw new Error('no seed produced a miss against the Fire Shield bearer');
+  });
+
+  it('does NOT retaliate against a ranged hit (slice 123)', () => {
+    // Same scene as the warm-variant retaliation test, but the attacker
+    // wields a shortbow (ranged). The slice-123 `event.attackKind`
+    // filter clause should suppress the rider on every hit.
+    for (let seed = 1; seed < 60; seed += 1) {
+      const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(seed) });
+      const bow = shortbow();
+      const wizard = buildWizard();
+      const attacker = buildAttacker(bow.id);
+      let campaign: Campaign = engine.createCampaign({ name: `fire-shield-ranged-${seed}` });
+      campaign = commit(campaign, [
+        { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: bow },
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: wizard } satisfies CharacterCreatedEvent,
+        { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: attacker } satisfies CharacterCreatedEvent,
+      ]);
+      const castEvents = engine.plan.castSpell(campaign.state, {
+        characterId: wizard.id,
+        spellId: 'fire-shield',
+        slotLevel: 4,
+        targetIds: [wizard.id],
+        casterChoice: { kind: 'variant', value: 'warm' },
+      }).events;
+      campaign = commit(campaign, castEvents);
+
+      const attackEvents = engine.plan.attack(campaign.state, {
+        attackerId: attacker.id,
+        targetId: wizard.id,
+        weaponInstanceId: bow.id,
+      }).events;
+      const rolled = attackEvents.find((e): e is AttackRolledEvent => e.type === 'AttackRolled');
+      if (rolled?.hit !== true) continue;
+      const retaliation = attackEvents.find(
+        (e): e is DamageAppliedEvent =>
+          e.type === 'DamageApplied' && (e as DamageAppliedEvent).targetId === attacker.id,
+      );
+      expect(retaliation).toBeUndefined();
+      return;
+    }
+    throw new Error('no seed produced a ranged hit against the Fire Shield bearer');
   });
 });

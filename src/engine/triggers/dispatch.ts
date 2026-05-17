@@ -61,6 +61,7 @@ const buildEventFacts = (
     facts.set('event.targetIsSelf', event.targetId === characterId);
     facts.set('event.hit', event.hit);
     facts.set('event.critical', event.critical);
+    facts.set('event.attackKind', event.attackKind);
     facts.set('event.used', event.used);
     facts.set('event.weaponInstanceId', event.weaponInstanceId);
     facts.set(
