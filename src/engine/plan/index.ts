@@ -70,12 +70,14 @@ export {
   planDisengage,
   planDodge,
   planMistyStep,
+  planThunderStep,
   chebyshevDistance,
   type MoveIntent,
   type DashIntent,
   type DisengageIntent,
   type DodgeIntent,
   type MistyStepIntent,
+  type ThunderStepIntent,
 } from './movement.js';
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planSacredWeapon, type SacredWeaponIntent } from './sacred-weapon.js';

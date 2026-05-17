@@ -11,7 +11,17 @@ import type {
 } from '../../schemas/events/movement.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
 import type { SpellCastDeclaredEvent, SpellSlotConsumedEvent } from '../../schemas/events/spellcasting.js';
-import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
+import type { ConditionAppliedEvent, DamageAppliedEvent } from '../../schemas/events/combat.js';
+import type { SaveRolledEvent } from '../../schemas/events/checks.js';
+import type { Character } from '../../schemas/runtime/character.js';
+import type { RNG } from '../../rng/index.js';
+import { rollDie, rollExpression } from '../../rng/dice.js';
+import { D20_SIDES } from '../../internal/constants.js';
+import { computeSavingThrow } from '../../derive/save.js';
+import { computeSpellSaveDC } from '../../derive/spell-dc.js';
+import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
+import { mitigateDamage } from '../../derive/damage-mitigation.js';
+import { applyAll } from '../apply.js';
 import { newAppliedConditionId } from '../../ids.js';
 import { newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
@@ -415,6 +425,307 @@ export const planMistyStep = (
     feetTraveled: 0,
   };
   return [declared, slotConsumed, bonusConsumed, moved];
+};
+
+const THUNDER_STEP_RANGE_FEET = 90;
+const THUNDER_STEP_MIN_SLOT_LEVEL = 3;
+const THUNDER_STEP_AOE_RADIUS_FEET = 10;
+const THUNDER_STEP_ALLY_PROXIMITY_FEET = 5;
+const THUNDER_STEP_BASE_DAMAGE_DICE = '3d10';
+const THUNDER_STEP_DICE_PER_EXTRA_SLOT = 1;
+const THUNDER_STEP_SLOT_DIE_SIDES = 10;
+const THUNDER_STEP_DAMAGE_TYPE = 'thunder';
+
+export interface ThunderStepIntent {
+  readonly type: 'ThunderStep';
+  readonly casterId: string;
+  readonly to: Position;
+  readonly slotLevel?: number;
+  // Optional second teleportee. RAW: "You and one willing creature you
+  // can see within 5 feet of you teleport up to 90 feet to unoccupied
+  // spaces you can see." The ally must be a combatant currently within
+  // 5 ft of the caster; the ally's destination is the caller's choice
+  // (a separate unoccupied space, also within 90 ft of the origin).
+  readonly ally?: {
+    readonly combatantId: string;
+    readonly to: Position;
+  };
+  readonly at?: string;
+}
+
+const findCastingClassForCaster = (
+  caster: Character,
+  content: ResolvedContent,
+): string => {
+  for (const enrollment of caster.classes) {
+    const cls = content.classes.get(enrollment.classId);
+    if (cls?.spellcasting !== undefined) return enrollment.classId;
+  }
+  throw new Error(`Caster ${caster.id} has no spellcasting class for Thunder Step`);
+};
+
+const resolveDestination = (
+  state: CampaignState,
+  encounterId: string,
+  origin: Position,
+  destination: Position,
+  selfCombatantId: string,
+  alsoVacatingCombatantId: string | undefined,
+  label: string,
+): void => {
+  const distance = chebyshevDistance(origin, destination);
+  if (distance > THUNDER_STEP_RANGE_FEET) {
+    throw new Error(
+      `Thunder Step ${label} destination is ${distance}ft from caster's origin (max ${THUNDER_STEP_RANGE_FEET}ft)`,
+    );
+  }
+  const blocker = state.encounters[encounterId]?.combatants.find(
+    (c) =>
+      c.combatantId !== selfCombatantId &&
+      c.combatantId !== alsoVacatingCombatantId &&
+      c.position !== undefined &&
+      c.position.x === destination.x &&
+      c.position.y === destination.y,
+  );
+  if (blocker !== undefined) {
+    const occupier = state.characters[blocker.combatantId];
+    const name = occupier?.name ?? blocker.combatantId;
+    throw new Error(
+      `Thunder Step ${label} destination (${destination.x},${destination.y}) is occupied by ${name}`,
+    );
+  }
+};
+
+/**
+ * RAW 2024 Thunder Step: 3rd-level conjuration, Action, range Self.
+ * Caster + one willing creature within 5 ft teleport up to 90 ft to
+ * unoccupied spaces. Each creature within 10 ft of the origin square
+ * (caster and ally excluded) makes a CON save against the caster's
+ * spell save DC, taking 3d10 thunder on a failed save or half on
+ * success. Higher levels: +1d10 per slot above 3rd.
+ *
+ * Event order: SpellCastDeclared, SpellSlotConsumed, ActionEconomyConsumed
+ * (action), SaveRolled + DamageApplied per creature within the AoE,
+ * CombatantMoved (caster), optional CombatantMoved (ally).
+ */
+export const planThunderStep = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: ThunderStepIntent,
+): ReadonlyArray<Event> => {
+  const caster = state.characters[intent.casterId];
+  invariant(caster !== undefined, `Caster ${intent.casterId} not found`);
+  const slotLevel = intent.slotLevel ?? THUNDER_STEP_MIN_SLOT_LEVEL;
+  invariant(
+    slotLevel >= THUNDER_STEP_MIN_SLOT_LEVEL,
+    'Thunder Step is a 3rd-level spell',
+  );
+  invariant(
+    caster.knownSpells.includes('thunder-step') || caster.preparedSpells.includes('thunder-step'),
+    `Caster ${intent.casterId} does not know Thunder Step`,
+  );
+
+  const { encounterId, combatant, isActive } = findCombatant(state, intent.casterId);
+  if (!isActive) {
+    throw new Error('Only the active combatant may cast Thunder Step on their turn');
+  }
+  assertActorCanAct(caster, 'cast Thunder Step');
+  if (combatant.position === undefined) {
+    throw new Error('Combatant has no position set');
+  }
+  if (combatant.turnUsage.actionUsed) {
+    throw new Error('Action already used this turn');
+  }
+
+  const origin = combatant.position;
+
+  // RAW: ally must be a willing creature within 5 ft of the caster
+  // before the teleport. Look up their position from the encounter.
+  let allyCombatant: Combatant | undefined;
+  if (intent.ally !== undefined) {
+    allyCombatant = state.encounters[encounterId]?.combatants.find(
+      (c) => c.combatantId === intent.ally!.combatantId,
+    );
+    if (allyCombatant === undefined || allyCombatant.position === undefined) {
+      throw new Error(
+        `Thunder Step ally ${intent.ally.combatantId} is not in the active encounter or has no position`,
+      );
+    }
+    const allyDistance = chebyshevDistance(origin, allyCombatant.position);
+    if (allyDistance > THUNDER_STEP_ALLY_PROXIMITY_FEET) {
+      throw new Error(
+        `Thunder Step ally is ${allyDistance}ft from caster (RAW: must be within ${THUNDER_STEP_ALLY_PROXIMITY_FEET}ft)`,
+      );
+    }
+  }
+
+  resolveDestination(state, encounterId, origin, intent.to, intent.casterId, allyCombatant?.combatantId, 'caster');
+  if (intent.ally !== undefined && allyCombatant !== undefined) {
+    resolveDestination(
+      state,
+      encounterId,
+      origin,
+      intent.ally.to,
+      allyCombatant.combatantId,
+      intent.casterId,
+      'ally',
+    );
+    if (intent.ally.to.x === intent.to.x && intent.ally.to.y === intent.to.y) {
+      throw new Error('Thunder Step ally cannot teleport to the same space as the caster');
+    }
+  }
+
+  const at = intent.at ?? nowIso();
+  const targetIds: ULID[] = [intent.casterId as ULID];
+  if (intent.ally !== undefined) targetIds.push(intent.ally.combatantId as ULID);
+  const declared: SpellCastDeclaredEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellCastDeclared',
+    characterId: intent.casterId,
+    spellId: 'thunder-step',
+    slotLevel,
+    slotSource: 'standard',
+    targetIds,
+    castAsRitual: false,
+  };
+  const slotConsumed: SpellSlotConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'SpellSlotConsumed',
+    characterId: intent.casterId,
+    slotLevel,
+  };
+  const actionConsumed: ActionEconomyConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ActionEconomyConsumed',
+    encounterId,
+    combatantId: intent.casterId,
+    kind: 'action',
+  };
+  const events: Event[] = [declared, slotConsumed, actionConsumed];
+
+  // Per PHB 2024 "Areas of Effect": damage is rolled once for the
+  // spell and applied to every affected creature (halved on save).
+  const castingClassId = findCastingClassForCaster(caster, content);
+  const dcResult = computeSpellSaveDC({
+    character: caster,
+    itemInstances: state.itemInstances,
+    content,
+    classId: castingClassId,
+    characters: state.characters,
+  });
+  const extraSlots = slotLevel - THUNDER_STEP_MIN_SLOT_LEVEL;
+  const baseRolled = rollExpression(THUNDER_STEP_BASE_DAMAGE_DICE, rng);
+  let bonusTotal = 0;
+  for (let i = 0; i < extraSlots * THUNDER_STEP_DICE_PER_EXTRA_SLOT; i++) {
+    bonusTotal += rollDie(THUNDER_STEP_SLOT_DIE_SIDES, rng);
+  }
+  const fullDamage = baseRolled.total + bonusTotal;
+  const halfDamage = Math.floor(fullDamage / 2);
+
+  const allyId = intent.ally?.combatantId;
+  const affectedCombatants = state.encounters[encounterId]?.combatants.filter((c) => {
+    if (c.combatantId === intent.casterId) return false;
+    if (allyId !== undefined && c.combatantId === allyId) return false;
+    if (c.position === undefined) return false;
+    return chebyshevDistance(origin, c.position) <= THUNDER_STEP_AOE_RADIUS_FEET;
+  }) ?? [];
+
+  let stagedState = applyAll(state, events);
+  for (const aff of affectedCombatants) {
+    const target = state.characters[aff.combatantId];
+    if (target === undefined) continue;
+    const saveDerivation = computeSavingThrow({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      ability: 'CON',
+      characters: state.characters,
+    });
+    const d20 = rollDie(D20_SIDES, rng);
+    const total = d20 + saveDerivation.total;
+    const success = total >= dcResult.total;
+    const saveEvent: SaveRolledEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'SaveRolled',
+      targetId: aff.combatantId as ULID,
+      ability: 'CON',
+      dc: dcResult.total,
+      d20: [d20],
+      used: 'none',
+      bonus: saveDerivation.total,
+      total,
+      success,
+      breakdown: [...saveDerivation.breakdown],
+    };
+    events.push(saveEvent);
+    stagedState = applyAll(stagedState, [saveEvent]);
+
+    const rawAmount = success ? halfDamage : fullDamage;
+    if (rawAmount <= 0) continue;
+    const mitigated = mitigateDamage({
+      character: target,
+      itemInstances: state.itemInstances,
+      content,
+      rawComponents: [{ amount: rawAmount, type: THUNDER_STEP_DAMAGE_TYPE }],
+      characters: state.characters,
+      sourceIsMagical: true,
+    });
+    const intercept = interceptFatalDamage({
+      state: stagedState,
+      content,
+      targetId: aff.combatantId,
+      mitigatedComponents: mitigated,
+      causedByEventId: saveEvent.id,
+      at,
+    });
+    const damage: DamageAppliedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'DamageApplied',
+      targetId: aff.combatantId as ULID,
+      components: intercept.components,
+      sourceCharacterId: intent.casterId as ULID,
+      source: 'spell:thunder-step',
+      causedByEventId: saveEvent.id,
+    };
+    events.push(damage);
+    events.push(...intercept.extraEvents);
+    stagedState = applyAll(stagedState, [damage, ...intercept.extraEvents]);
+  }
+
+  const casterMoved: CombatantMovedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'CombatantMoved',
+    encounterId,
+    combatantId: intent.casterId,
+    fromPosition: { ...origin },
+    toPosition: { ...intent.to },
+    // RAW: teleportation doesn't consume the caster's normal movement.
+    feetTraveled: 0,
+  };
+  events.push(casterMoved);
+
+  if (intent.ally !== undefined && allyCombatant !== undefined) {
+    const allyMoved: CombatantMovedEvent = {
+      id: newEventId() as ULID,
+      at,
+      type: 'CombatantMoved',
+      encounterId,
+      combatantId: intent.ally.combatantId,
+      fromPosition: { ...allyCombatant.position! },
+      toPosition: { ...intent.ally.to },
+      feetTraveled: 0,
+    };
+    events.push(allyMoved);
+  }
+
+  return events;
 };
 
 export interface DodgeIntent {

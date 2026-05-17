@@ -47,6 +47,7 @@ import {
   planDisengage,
   planDodge,
   planMistyStep,
+  planThunderStep,
   planActionSurge,
   planSacredWeapon,
   planMagicWeapon,
@@ -131,6 +132,7 @@ import {
   type DisengageIntent,
   type DodgeIntent,
   type MistyStepIntent,
+  type ThunderStepIntent,
   type ActionSurgeIntent,
   type SacredWeaponIntent,
   type MagicWeaponIntent,
@@ -243,6 +245,7 @@ export interface Engine {
     disengage(state: CampaignState, intent: Omit<DisengageIntent, 'type'>): PlanResult;
     dodge(state: CampaignState, intent: Omit<DodgeIntent, 'type'>): PlanResult;
     mistyStep(state: CampaignState, intent: Omit<MistyStepIntent, 'type'>): PlanResult;
+    thunderStep(state: CampaignState, intent: Omit<ThunderStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     sacredWeapon(state: CampaignState, intent: Omit<SacredWeaponIntent, 'type'>): PlanResult;
     magicWeapon(state: CampaignState, intent: Omit<MagicWeaponIntent, 'type'>): PlanResult;
@@ -450,6 +453,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     mistyStep(state, intent) {
       return { events: planMistyStep(state, content, { type: 'MistyStep', ...intent }) };
+    },
+    thunderStep(state, intent) {
+      return { events: planThunderStep(state, content, rng, { type: 'ThunderStep', ...intent }) };
     },
     actionSurge(state, intent) {
       return { events: planActionSurge(state, content, { type: 'ActionSurge', ...intent }) };

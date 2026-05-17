@@ -271,7 +271,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'summon-lesser-demons': { kind: 'summon' },
   'summon-shadowspawn': { kind: 'summon' },
   'summon-undead': { kind: 'summon' },
-  'thunder-step': { kind: 'skip', reason: 'teleport + area thunder damage; multi-mechanic spell with dedicated planner pattern not yet implemented' },
+  'thunder-step': { kind: 'skip', reason: 'has dedicated planThunderStep (action, teleport caster + ally, AoE thunder damage on origin)' },
   'tongues': { kind: 'skip', reason: 'utility (language understanding), narrative only' },
   'water-breathing': { kind: 'skip', reason: 'utility (breathe underwater), narrative only' },
   'water-walk': { kind: 'skip', reason: 'utility (walk on water), narrative only' },
