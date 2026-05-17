@@ -119,12 +119,32 @@ export const planTickRecurringSave = (
     content,
     ability: conditionDef.recurringSave.ability,
     characters: state.characters,
+    // Slice 133: conditions with a recurringSave entry are spell-
+    // applied (Hold Person, Hold Monster, Hideous Laughter, Confusion,
+    // Bestow Curse's inactive-turn variant), so the recurring save
+    // counts as a magical effect.
+    sourceIsMagical: true,
   });
 
-  const d20 = rollDie(D20_SIDES, rng);
-  const total = d20 + saveDerivation.total;
-  const success = total >= dcResult.total;
+  // Slice 133: honor save advantage / disadvantage. The recurring
+  // path now rolls 2d20 take-max / take-min when applicable.
   const at = intent.at ?? nowIso();
+  const rolls: number[] = [rollDie(D20_SIDES, rng)];
+  if (saveDerivation.hasAdvantage || saveDerivation.hasDisadvantage) {
+    rolls.push(rollDie(D20_SIDES, rng));
+  }
+  const used = saveDerivation.hasAdvantage
+    ? 'advantage'
+    : saveDerivation.hasDisadvantage
+      ? 'disadvantage'
+      : 'none';
+  const usedD20 = saveDerivation.hasAdvantage
+    ? Math.max(...rolls)
+    : saveDerivation.hasDisadvantage
+      ? Math.min(...rolls)
+      : rolls[0]!;
+  const total = usedD20 + saveDerivation.total;
+  const success = total >= dcResult.total;
 
   const events: Event[] = [];
   const saveEvent: SaveRolledEvent = {
@@ -134,8 +154,8 @@ export const planTickRecurringSave = (
     targetId: intent.targetId as ULID,
     ability: conditionDef.recurringSave.ability,
     dc: dcResult.total,
-    d20: [d20],
-    used: 'none',
+    d20: rolls,
+    used,
     bonus: saveDerivation.total,
     total,
     success,

@@ -74,9 +74,30 @@ export const planTriggerTrap = (
     content,
     ability: trap.payload.saveAbility,
     characters: state.characters,
+    // Slice 133: starter-pack traps are spell-armed (Glyph of Warding's
+    // Explosive Runes, Cordon of Arrows), so the triggering save
+    // counts as a magical effect for Magic Resistance / Holy Aura /
+    // similar purposes. Future non-spell traps would pass false.
+    sourceIsMagical: true,
   });
-  const d20 = rollDie(D20_SIDES, rng);
-  const total = d20 + saveDerivation.total;
+  // Slice 133: honor save advantage / disadvantage flags (Magic
+  // Resistance, Foresight, Holy Aura, etc.). Pre-slice 133 the trap
+  // path always rolled a single d20, dropping these signals.
+  const rolls: number[] = [rollDie(D20_SIDES, rng)];
+  if (saveDerivation.hasAdvantage || saveDerivation.hasDisadvantage) {
+    rolls.push(rollDie(D20_SIDES, rng));
+  }
+  const used = saveDerivation.hasAdvantage
+    ? 'advantage'
+    : saveDerivation.hasDisadvantage
+      ? 'disadvantage'
+      : 'none';
+  const usedD20 = saveDerivation.hasAdvantage
+    ? Math.max(...rolls)
+    : saveDerivation.hasDisadvantage
+      ? Math.min(...rolls)
+      : rolls[0]!;
+  const total = usedD20 + saveDerivation.total;
   const success = total >= trap.payload.saveDC;
   const saveEvent: SaveRolledEvent = {
     id: newEventId() as ULID,
@@ -85,8 +106,8 @@ export const planTriggerTrap = (
     targetId: intent.triggeringCharacterId as ULID,
     ability: trap.payload.saveAbility,
     dc: trap.payload.saveDC,
-    d20: [d20],
-    used: 'none',
+    d20: rolls,
+    used,
     bonus: saveDerivation.total,
     total,
     success,

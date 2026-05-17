@@ -701,6 +701,9 @@ export const planSanctuaryWardSave = (
     ability: 'WIS',
     pendingChoices: state.pendingChoices,
     characters: state.characters,
+    // Slice 133: Sanctuary is a spell; the attacker's ward-bypass
+    // save counts as a magical effect for Magic Resistance purposes.
+    sourceIsMagical: true,
   });
   const useAdv: 'advantage' | 'disadvantage' | 'none' = saveDerivation.hasAdvantage
     ? saveDerivation.hasDisadvantage
