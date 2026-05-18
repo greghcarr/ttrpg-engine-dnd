@@ -21,6 +21,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "bard L9 expertise-bard-9",
   "bard L10 bardic-inspiration-d10",
   "bard L15 bardic-inspiration-d12",
+  "bard L20 words-of-creation",
   "cleric L1 divine-order",
   "cleric L2 channel-divinity",
   "cleric L6 channel-divinity-cleric-2",
@@ -100,6 +101,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "sorcerer L2 metamagic",
   "sorcerer L5 sorcerous-restoration",
   "sorcerer L7 sorcery-incarnate",
+  "warlock L9 contact-patron",
   "wizard L1 arcane-recovery",
   "wizard L2 scholar",
 ]

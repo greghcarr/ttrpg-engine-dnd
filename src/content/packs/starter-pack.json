@@ -323,7 +323,7 @@
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [{ "id": "eldritch-invocations-5", "name": "Eldritch Invocations (5 known)", "effects": [] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "9": { "proficiencyBonus": 4, "features": [{ "id": "eldritch-invocations-6", "name": "Eldritch Invocations (6 known)", "effects": [] }], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [{ "id": "eldritch-invocations-6", "name": "Eldritch Invocations (6 known)", "effects": [] }, { "id": "contact-patron", "name": "Contact Patron", "effects": [{ "kind": "GrantSpell", "spellId": "contact-other-plane", "preparation": "oncePerLongRest" }] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "11": { "proficiencyBonus": 4, "features": [{ "id": "mystic-arcanum-6", "name": "Mystic Arcanum (6th level)", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [{ "id": "eldritch-invocations-7", "name": "Eldritch Invocations (7 known)", "effects": [] }], "columns": {} },
@@ -448,7 +448,7 @@
         "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [{ "id": "superior-inspiration", "name": "Superior Inspiration", "effects": [] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [{ "id": "words-of-creation", "name": "Words of Creation", "effects": [{ "kind": "GrantSpell", "spellId": "power-word-heal", "preparation": "always-prepared" }] }], "columns": {} }
       },
       "spellcasting": { "ability": "CHA", "type": "full" }
     },

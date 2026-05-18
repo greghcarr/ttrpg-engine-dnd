@@ -87,7 +87,7 @@ These don't appear in the "missing from pack" lists below.
 
 Filtering out the recurring patterns above, the genuinely-missing main-class features are concentrated in 2024 PHB updates the pack hasn't caught up with yet:
 
-- **Bard**: Words of Creation (L20)
+- **Bard**: ~~Words of Creation (L20)~~ (slice 216: always-prepared Power Word Heal via GrantSpell; the second-target arm stays consumer-driven via the spell planner's existing targetIds array)
 - **Cleric**: ~~Divine Order (L1)~~ (slice 214: 2-option OfferChoice; Protector grants martial weapon + heavy armor proficiency, Thaumaturge grants Guidance cantrip + WIS-mod bonus on Arcana/Religion checks. RAW lets the cantrip be any cleric cantrip; the pack hardcodes Guidance to avoid a nested OfferChoice for now), Greater Divine Intervention (L20)
 - **Druid**: ~~Primal Order (L1)~~ (slice 215: 2-option OfferChoice mirroring Cleric Divine Order; Magician grants Druidcraft + WIS-mod bonus on Arcana/Nature, Warden grants martial weapon + medium armor proficiency. Magician cantrip hardcoded to Druidcraft pending nested-OfferChoice verification)
 - **Monk**: Heightened Focus (L10), ~~Self-Restoration (L10)~~ (slice 202: wired via `planSelfRestoration` + `GrantSelfRestoration` marker; food / water Exhaustion arm consumer-side), ~~Disciplined Survivor (L14)~~ (slice 203: 4 GrantProficiency entries on saves; same slice fixed a save-proficiency effect-stack bug that had silently inerted Slippery Mind too), ~~Superior Defense (L18)~~ (slice 209: dedicated planSuperiorDefense + superior-defense-active condition with 12 GrantResistance entries covering every non-Force damage type)
@@ -95,7 +95,7 @@ Filtering out the recurring patterns above, the genuinely-missing main-class fea
 - **Ranger**: ~~Expertise (L9)~~ (slice 208: pure content; OfferChoice over the 8 ranger skills, mirrors Rogue Expertise), Precise Hunter (L17)
 - **Rogue**: ~~Uncanny Dodge (L5)~~ (slice 200: wired as a dedicated reaction planner + `GrantUncannyDodge` marker, compensating-Healed pattern), ~~Elusive (L18)~~ (slice 199: wired via the new `CancelAdvantageOnAttackers` primitive, predicate-gated on `bearerHasIncapacitated`)
 - **Sorcerer**: ~~Sorcery Incarnate (L7)~~ (slice 201: alternative-cost arm wired via `planInnateSorcery` + `GrantInnateSorcerySpendAlternative` marker; doubled-metamagic arm deferred pending once-per-spell metamagic enforcement)
-- **Warlock**: Contact Patron (L9)
+- **Warlock**: ~~Contact Patron (L9)~~ (slice 216: oncePerLongRest GrantSpell of contact-other-plane; the auto-succeed-on-save arm stays consumer-driven since the engine doesn't force-pass saves keyed on specific feature sources)
 
 About 17 main-class features at slice 196; slice 199 closed Rogue L18 Elusive (`CancelAdvantageOnAttackers` primitive), slice 200 closed Rogue L5 Uncanny Dodge (dedicated reaction planner + `GrantUncannyDodge` marker), slice 201 closed Sorcerer L7 Sorcery Incarnate's alternative-cost arm (`planInnateSorcery` + `GrantInnateSorcerySpendAlternative` marker), slice 202 closed Monk L10 Self-Restoration (`planSelfRestoration` + `GrantSelfRestoration` marker), and slice 203 closed Monk L14 Disciplined Survivor (4 GrantProficiency entries + a fix to the save-derivation effect-stack path that incidentally unstuck Slippery Mind). 12 remaining (the doubled-metamagic arm of Sorcery Incarnate is deferred to a future metamagic-tracking slice).
 

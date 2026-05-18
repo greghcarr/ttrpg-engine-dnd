@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Bard L20 Words of Creation + Warlock L9 Contact Patron (slice 216)**
+
+Two pure-content GrantSpell wires cashing in slice 212's engine consumer:
+
+- **Bard L20 Words of Creation**: `GrantSpell spellId=power-word-heal preparation=always-prepared`. RAW: "You always have the Power Word Heal spell prepared. When you cast that spell, you can target a second creature with it, if that creature is within 60 feet of the first target." The first arm wires here; the second-target arm stays consumer-driven (the spell planner already accepts multi-target `targetIds: string[]`).
+- **Warlock L9 Contact Patron**: `GrantSpell spellId=contact-other-plane preparation=oncePerLongRest`. RAW: "you can cast the Contact Other Plane spell, requiring no spell slot, and you automatically succeed on the spell's saving throw. Once you do so, you can't cast the spell in this way again until you finish a Long Rest." The slot-free cast wires via the `oncePerLongRest` preparation; the auto-succeed-on-save arm stays consumer-driven (the engine doesn't currently force-pass saves keyed on specific feature sources).
+
+Closes two more main-class features. No engine changes; both rely on slice 212's GrantSpell consumer.
+
+Tests: 4-case derive test in [tests/unit/engine/grant-spell-extra-features.test.ts](tests/unit/engine/grant-spell-extra-features.test.ts) verifying L20 bard / L19 baseline + L9 warlock / L8 baseline.
+
 **Content: Druid L1 Primal Order (slice 215)**
 
 Mirror of slice 214's Cleric Divine Order, scoped to the druid. 2-option `OfferChoice`:
