@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: planSelfRestoration + Monk L10 Self-Restoration (slice 202)**
+
+Adds `engine.plan.selfRestoration` for the Monk L10 condition-shed ability plus a `GrantSelfRestoration` marker primitive (42 to 43 EFFECT_KINDS). RAW (SRD 5.2.1): "Through sheer force of will, you can remove one of the following conditions from yourself at the end of each of your turns: Charmed, Frightened, or Poisoned."
+
+The planner enforces the fixed three-condition set (any other id throws), gates on the marker, verifies the bearer currently carries the named condition, then emits a single `ConditionRemoved`. No resource cost, no action cost, no save. The "forgoing food and drink doesn't give Exhaustion" arm of the same feature is consumer-side narrative state (the engine doesn't model food / water).
+
+Canonical user: Monk L10 Self-Restoration, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json). Closes another of the missing main-class features in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) (~13 remaining after slices 199-202).
+
+Tests: 5-case planner test in [tests/unit/engine/plan-self-restoration.test.ts](tests/unit/engine/plan-self-restoration.test.ts) (charmed-remove, frightened+poisoned-double, out-of-set-throw, not-currently-affected-throw, no-feature-throw); accumulator marker test in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s202-self-restoration.test.ts](tests/golden/s202-self-restoration.test.ts).
+
 **Engine: planInnateSorcery + Sorcerer L7 Sorcery Incarnate (slice 201)**
 
 Adds an `engine.plan.innateSorcery` planner for activating Innate Sorcery, plus a `GrantInnateSorcerySpendAlternative` marker primitive (41 to 42 EFFECT_KINDS) and a new `innate-sorcery-active` condition. The planner accepts either of two cost paths:

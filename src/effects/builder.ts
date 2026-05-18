@@ -115,6 +115,7 @@ export class EffectAccumulator {
   private evasionFlag: boolean = false;
   private uncannyDodgeFlag: boolean = false;
   private innateSorcerySpendAlternativeFlag: boolean = false;
+  private selfRestorationFlag: boolean = false;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -466,6 +467,14 @@ export class EffectAccumulator {
   hasInnateSorcerySpendAlternative(): boolean {
     return this.innateSorcerySpendAlternativeFlag;
   }
+  // Slice 202: marker that gates `planSelfRestoration`. Set by Monk
+  // L10 Self-Restoration via the `GrantSelfRestoration` effect.
+  markSelfRestoration(): void {
+    this.selfRestorationFlag = true;
+  }
+  hasSelfRestoration(): boolean {
+    return this.selfRestorationFlag;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -602,6 +611,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantInnateSorcerySpendAlternative':
       acc.markInnateSorcerySpendAlternative();
+      return;
+    case 'GrantSelfRestoration':
+      acc.markSelfRestoration();
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

@@ -51,6 +51,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "monk L5 extra-attack-monk",
   "monk L5 stunning-strike",
   "monk L7 evasion-monk",
+  "monk L10 self-restoration",
   "paladin L1 lay-on-hands",
   "paladin L2 fighting-style-paladin",
   "paladin L3 channel-divinity-paladin",

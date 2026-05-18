@@ -82,6 +82,7 @@ export {
 export { planActionSurge, type ActionSurgeIntent } from './action-surge.js';
 export { planSacredWeapon, type SacredWeaponIntent } from './sacred-weapon.js';
 export { planInnateSorcery, type InnateSorceryIntent } from './innate-sorcery.js';
+export { planSelfRestoration, type SelfRestorationIntent } from './self-restoration.js';
 export { planMagicWeapon, type MagicWeaponIntent } from './magic-weapon.js';
 export { planElementalWeapon, type ElementalWeaponIntent } from './elemental-weapon.js';
 export { planRecklessAttack, type RecklessAttackIntent } from './reckless-attack.js';

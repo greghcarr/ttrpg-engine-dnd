@@ -269,6 +269,15 @@ export type Effect =
   // double-metamagic arm of the same feature is deferred (needs
   // once-per-spell metamagic enforcement first).
   | { kind: 'GrantInnateSorcerySpendAlternative' }
+  // Slice 202. Marker primitive that gates `planSelfRestoration`,
+  // RAW Monk L10 Self-Restoration: "you can remove one of the
+  // following conditions from yourself at the end of each of your
+  // turns: Charmed, Frightened, or Poisoned." The planner removes
+  // the named condition unconditionally (no save, no resource cost)
+  // when the bearer has the marker. The "food and drink doesn't
+  // give Exhaustion" arm of the same feature is consumer-side
+  // narrative state (the engine doesn't model food / water).
+  | { kind: 'GrantSelfRestoration' }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -514,6 +523,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantInnateSorcerySpendAlternative'),
     }),
     z.object({
+      kind: z.literal('GrantSelfRestoration'),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -587,6 +599,7 @@ export const EFFECT_KINDS = [
   'CancelAdvantageOnAttackers',
   'GrantUncannyDodge',
   'GrantInnateSorcerySpendAlternative',
+  'GrantSelfRestoration',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',

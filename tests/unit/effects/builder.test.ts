@@ -282,6 +282,17 @@ describe('EffectAccumulator', () => {
     expect(acc.hasInnateSorcerySpendAlternative()).toBe(true);
   });
 
+  it('GrantSelfRestoration marker propagates via hasSelfRestoration()', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.hasSelfRestoration()).toBe(false);
+    applyEffectToBuilder(
+      { kind: 'GrantSelfRestoration' },
+      acc,
+      { source: 'monk-l10' },
+    );
+    expect(acc.hasSelfRestoration()).toBe(true);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,
