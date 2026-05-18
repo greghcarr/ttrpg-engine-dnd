@@ -6,7 +6,7 @@ import { loadStarterPack } from '../../../src/content/packs/starter.js';
 import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../../src/ids.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
-import type { HealedEvent } from '../../../src/schemas/events/combat.js';
+import type { ConditionAppliedEvent, HealedEvent } from '../../../src/schemas/events/combat.js';
 import type { ItemConsumedEvent } from '../../../src/schemas/events/inventory.js';
 import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
 
@@ -137,6 +137,53 @@ describe('planConsumeItem (slice 235)', () => {
         instanceId: potion.id,
       }),
     ).toThrow(/not in.*inventory/);
+  });
+
+  it('drinking a Potion of Climbing applies the spider-climbing-active condition', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(241) });
+    const potion = makeItemInstance('potion-of-climbing');
+    const baseHero = buildHero(20);
+    const hero: Character = { ...baseHero, inventory: [potion.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'climbing-potion' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.consumeItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: potion.id,
+    });
+    const condApplied = events.find(
+      (e) => e.type === 'ConditionApplied' && (e as ConditionAppliedEvent).conditionId === 'spider-climbing-active',
+    ) as ConditionAppliedEvent | undefined;
+    expect(condApplied).toBeDefined();
+    expect(condApplied!.targetId).toBe(hero.id);
+    expect(condApplied!.sourceCharacterId).toBe(hero.id);
+    // The instance is still retired regardless of action kind.
+    expect(events.some((e) => e.type === 'ItemConsumed')).toBe(true);
+  });
+
+  it('drinking a Potion of Water Breathing applies the water-breathing-active condition', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(242) });
+    const potion = makeItemInstance('potion-of-water-breathing');
+    const baseHero = buildHero(20);
+    const hero: Character = { ...baseHero, inventory: [potion.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'water-breathing-potion' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.consumeItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: potion.id,
+      }).events,
+    );
+    const applied = campaign.state.characters[hero.id]!.appliedConditions.find(
+      (c) => c.conditionId === 'water-breathing-active',
+    );
+    expect(applied).toBeDefined();
   });
 
   it('throws when the item is not a consumable', () => {

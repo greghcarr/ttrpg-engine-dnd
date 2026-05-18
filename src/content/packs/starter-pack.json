@@ -2083,7 +2083,7 @@
     { "id": "stinking-cloud", "name": "Stinking Cloud", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "a rotten egg" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "targeting": { "shape": "sphere", "size": 20 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 20, "saveAbility": "CON", "halfOnSuccess": false, "conditionOnFail": "poisoned" }] },
     { "id": "thunder-step", "name": "Thunder Step", "level": 3, "school": "conjuration", "castingTime": "Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
     { "id": "tongues", "name": "Tongues", "level": 3, "school": "divination", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "material": "a miniature ziggurat" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "cleric", "sorcerer", "warlock", "wizard"], "mechanicalEffects": [] },
-    { "id": "water-breathing", "name": "Water Breathing", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a short reed" }, "duration": "24 hours", "concentration": false, "ritual": true, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
+    { "id": "water-breathing", "name": "Water Breathing", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a short reed" }, "duration": "24 hours", "concentration": false, "ritual": true, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "water-breathing-active" }] },
     { "id": "water-walk", "name": "Water Walk", "level": 3, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a piece of cork" }, "duration": "1 hour", "concentration": false, "ritual": true, "classes": ["cleric", "druid", "ranger", "sorcerer"], "mechanicalEffects": [] },
     { "id": "wind-wall", "name": "Wind Wall", "level": 3, "school": "evocation", "castingTime": "Action", "range": "120 feet", "components": { "verbal": true, "somatic": true, "material": "a fan and a feather" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["druid", "ranger"], "mechanicalEffects": [] },
     { "id": "antilife-shell", "name": "Antilife Shell", "level": 5, "school": "abjuration", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["druid"], "mechanicalEffects": [] },
@@ -2328,7 +2328,7 @@
     { "id": "decanter-of-endless-water", "itemKind": "magic", "name": "Decanter of Endless Water", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "belt-of-hill-giant-strength", "itemKind": "magic", "name": "Belt of Hill Giant Strength", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "OverrideAbilityScore", "ability": "STR", "value": 21 }] },
     { "id": "sending-stones", "itemKind": "magic", "name": "Sending Stones", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
-    { "id": "potion-of-climbing", "itemKind": "consumable", "name": "Potion of Climbing", "onConsume": [], "description": "Grants a climb speed equal to walking speed for 1 hour. Stacks with similar effects only by extending duration." },
+    { "id": "potion-of-climbing", "itemKind": "consumable", "name": "Potion of Climbing", "onConsume": [{ "kind": "ApplyCondition", "conditionId": "spider-climbing-active" }], "description": "Grants a climb speed equal to walking speed for 1 hour. Stacks with similar effects only by extending duration. (Duration consumer-managed.)" },
     { "id": "potion-of-animal-friendship", "itemKind": "consumable", "name": "Potion of Animal Friendship", "onConsume": [], "description": "Cast Animal Friendship (save DC 13) for 1 hour when consumed." },
     { "id": "potion-of-growth", "itemKind": "consumable", "name": "Potion of Growth", "onConsume": [], "description": "Enlarge effect (as the Enlarge/Reduce spell, enlarge option) for 1d4 hours when consumed." },
     { "id": "potion-of-heroism", "itemKind": "consumable", "name": "Potion of Heroism", "onConsume": [], "description": "Grants 10 temporary hit points and the effects of Bless (no concentration required) for 1 hour." },
@@ -2382,7 +2382,7 @@
     { "id": "wand-of-magic-detection", "itemKind": "magic", "name": "Wand of Magic Detection", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
     { "id": "wand-of-fireballs", "itemKind": "magic", "name": "Wand of Fireballs", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-wonder", "itemKind": "magic", "name": "Wand of Wonder", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
-    { "id": "potion-of-water-breathing", "itemKind": "consumable", "name": "Potion of Water Breathing", "onConsume": [], "description": "Grants the ability to breathe water for 1 hour when consumed." },
+    { "id": "potion-of-water-breathing", "itemKind": "consumable", "name": "Potion of Water Breathing", "onConsume": [{ "kind": "ApplyCondition", "conditionId": "water-breathing-active" }], "description": "Grants the ability to breathe water for 1 hour when consumed. (Duration consumer-managed.)" },
     { "id": "potion-of-fire-breath", "itemKind": "consumable", "name": "Potion of Fire Breath", "onConsume": [], "description": "After consuming, use a bonus action to exhale fire at a target within 30 ft for 4d6 fire damage (DC 13 DEX save for half), up to three times within 1 hour. The potion's effect ends after the third exhale or when the hour passes." },
     { "id": "potion-of-hill-giant-strength", "itemKind": "consumable", "name": "Potion of Hill Giant Strength", "onConsume": [], "description": "STR becomes 21 for 1 hour when consumed. No effect if the consumer's STR is already 21 or higher." },
     { "id": "oil-of-slipperiness", "itemKind": "consumable", "name": "Oil of Slipperiness", "onConsume": [], "description": "Coats a creature or a 10-ft-square surface. On a creature, grants the effect of the Freedom of Movement spell for 8 hours. On a surface, the area is difficult terrain and creatures within must succeed on DC 10 DEX save or fall prone, for 8 hours." },
@@ -7987,6 +7987,14 @@
       "effects": [
         { "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }
       ]
+    },
+    {
+      "id": "water-breathing-active",
+      "name": "Water Breathing",
+      "description": "Slice 236. Bearer can breathe underwater for the duration. The engine doesn't model breathing mechanics; this condition is a narrative tag the consumer reads to know the bearer is unaffected by underwater drowning. Applied by Potion of Water Breathing (1 hour, consumer-managed) and the Water Breathing spell (24 hours, consumer-managed).",
+      "stackable": false,
+      "endsOn": [],
+      "effects": []
     },
     {
       "id": "hexed-active",

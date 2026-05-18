@@ -2,7 +2,8 @@ import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type { ResolvedContent } from '../../content/pack.js';
 import type { Event } from '../../schemas/events/index.js';
 import type { ItemConsumedEvent } from '../../schemas/events/inventory.js';
-import type { HealedEvent } from '../../schemas/events/combat.js';
+import type { ConditionAppliedEvent, HealedEvent } from '../../schemas/events/combat.js';
+import { newAppliedConditionId } from '../../ids.js';
 import type { RNG } from '../../rng/index.js';
 import { rollExpression } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
@@ -77,6 +78,22 @@ export const planConsumeItem = (
         source: `item:${def.id}`,
       };
       events.push(healed);
+    } else if (action.kind === 'ApplyCondition') {
+      // Slice 236: stamp `sourceCharacterId` to the consumer so the
+      // condition can be traced back to who drank / fed the potion
+      // (useful for "your potion's effects" auras + cleanup at long
+      // rest). No `expiresOnRound` — minute/hour durations are
+      // consumer-managed (see ConsumeActionSchema doc comment).
+      const condApplied: ConditionAppliedEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'ConditionApplied',
+        targetId: targetId as ULID,
+        conditionId: action.conditionId,
+        appliedConditionId: newAppliedConditionId(),
+        sourceCharacterId: intent.characterId as ULID,
+      };
+      events.push(condApplied);
     }
   }
 

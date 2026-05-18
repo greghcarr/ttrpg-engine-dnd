@@ -4,6 +4,33 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: `ApplyCondition` consume-action + buff-potion wires (slice 236)**
+
+Extends slice 235's `ConsumeAction` union with `ApplyCondition { conditionId }`. The planner now dispatches on the new kind by emitting `ConditionApplied` (with `sourceCharacterId` set to the consumer so the condition can be traced back to who drank or fed the potion). Unblocks the buff-potion cohort.
+
+**Plumbing**:
+
+- New `ApplyCondition` variant on `ConsumeActionSchema` in [src/schemas/content/item.ts](src/schemas/content/item.ts).
+- `planConsumeItem` extended with the `ApplyCondition` branch — emits ConditionApplied per action, ends with ItemConsumed.
+
+**Content wired**:
+
+- **Potion of Climbing** → `ApplyCondition spider-climbing-active` (reuses the existing condition's `ModifySpeed climb set 30`).
+- **Potion of Water Breathing** → `ApplyCondition water-breathing-active` (new narrative-only condition; engine doesn't model breathing mechanics so the condition is a tag).
+- **Water Breathing spell** (L3 Transmutation) — same condition, wired with the existing `buff` spell mechanic. The spell had been schema-only since alpha.5; now applies the same condition the potion does.
+
+**Future SRD users this unblocks** (content-only follow-ups, no engine work needed): Potion of Speed (existing `haste` condition), Potion of Heroism (compose `heroic-active` + temp HP), Potion of Invisibility (existing `invisible` condition), Potion of Flying (needs a `flying-active` condition similar to Spider Climbing).
+
+**Documented deferrals**: minute/hour potion durations are still consumer-managed (engine's auto-expiry primitive from slices 102/109 is round-based and source-keyed; doesn't fit potion timing today).
+
+Pre-commit Uncle Bob audit:
+- Names: `ApplyCondition` mirrors the existing TriggerAction shape but lives in a separate union (different semantic, different unions).
+- DRY: condition definitions are reused — Potion of Climbing piggybacks on `spider-climbing-active` (same effect set as Spider Climb the spell). Water Breathing spell + potion share the new `water-breathing-active`.
+- SRP: planner branch is one if-else case in the same per-action loop.
+- Magic numbers: none added.
+
+Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) — Potion of Climbing applies `spider-climbing-active` with consumer as source; Potion of Water Breathing applies `water-breathing-active` after commit. Updated spell-coverage expectations for Water Breathing from `'skip'` to `'buff'`. 1620 pass, 208 skipped. tsc clean.
+
 **Engine: `ConsumeItem` planner + Potions of Healing wired (slice 235)**
 
 The single biggest single-slice leverage move for SRD mechanical depth: consumables now consume. The engine had heal / save / buff effects implemented but no mechanism to actually fire them from inventory. This slice adds the missing primitive.

@@ -247,7 +247,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'stinking-cloud': { kind: 'skip', reason: 'aura-damage mechanic (condition-only via conditionOnFail: poisoned); fires via engine.plan.tickAura per-turn, not on cast' },
   'thunder-step': { kind: 'skip', reason: 'has dedicated planThunderStep (action, teleport caster + ally, AoE thunder damage on origin)' },
   'tongues': { kind: 'skip', reason: 'utility (language understanding), narrative only' },
-  'water-breathing': { kind: 'skip', reason: 'utility (breathe underwater), narrative only' },
+  'water-breathing': { kind: 'buff', conditionId: 'water-breathing-active' },
   'water-walk': { kind: 'skip', reason: 'utility (walk on water), narrative only' },
   'wind-wall': { kind: 'skip', reason: 'area STR save with object deflection; area-effect mechanic not modeled' },
   // Slice 223: SRD 5.2.1 completion sweep. 15 entries that were

@@ -69,14 +69,23 @@ export type MagicItem = z.infer<typeof MagicItemSchema>;
 // Slice 235: consumable-on-consume action set. Distinct from
 // TriggerAction (which fires from OnEvent riders): consumption is a
 // deliberate consumer-initiated act, not an event-triggered ride.
-// Starts small with Heal (Potions of Healing); future entries will
-// add ApplyCondition (for buff potions like Climbing / Heroism /
-// Resistance) and CastSpell (for spell-scroll consumption).
+// Slice 236 added ApplyCondition (for buff potions). Future
+// entries will add CastSpell (for spell-scroll consumption).
+//
+// Duration on ApplyCondition: the engine's auto-expiry primitive
+// (slice 102 / 109) is round-based and source-keyed. Minute-based
+// or hour-based potion durations are consumer-managed today —
+// the planner emits ConditionApplied without expiresOnRound and
+// the consumer removes it when the in-fiction timer runs out.
 export const ConsumeActionSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('Heal'),
     dice: DiceExpressionSchema.optional(),
     flatAmount: z.number().int().min(0).optional(),
+  }),
+  z.object({
+    kind: z.literal('ApplyCondition'),
+    conditionId: z.string(),
   }),
 ]);
 export type ConsumeAction = z.infer<typeof ConsumeActionSchema>;
