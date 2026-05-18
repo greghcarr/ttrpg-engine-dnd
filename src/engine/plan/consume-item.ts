@@ -1,0 +1,94 @@
+import type { CampaignState } from '../../schemas/runtime/campaign.js';
+import type { ResolvedContent } from '../../content/pack.js';
+import type { Event } from '../../schemas/events/index.js';
+import type { ItemConsumedEvent } from '../../schemas/events/inventory.js';
+import type { HealedEvent } from '../../schemas/events/combat.js';
+import type { RNG } from '../../rng/index.js';
+import { rollExpression } from '../../rng/dice.js';
+import { newEventId } from '../../ids.js';
+import { nowIso } from '../../internal/clock.js';
+import type { ULID } from '../ids-utils.js';
+
+export interface ConsumeItemIntent {
+  readonly type: 'ConsumeItem';
+  readonly characterId: string;
+  readonly instanceId: string;
+  // Defaults to characterId when omitted: drinking your own potion.
+  // When set to another character, models "feed a potion to an
+  // adjacent ally" (Magic action per RAW).
+  readonly targetId?: string;
+  readonly at?: string;
+}
+
+/**
+ * Slice 235. Consumes a `consumable` item from a character's
+ * inventory: walks the item's `onConsume` action list, emits the
+ * corresponding effect events (Healed for Heal actions; future
+ * slices add ApplyCondition and CastSpell branches), then emits an
+ * ItemConsumed event that the reducer uses to remove the instance
+ * from inventory + state.itemInstances.
+ *
+ * Canonical user: Potions of Healing (Healing / Greater / Superior /
+ * Supreme), wired with `{ kind: 'Heal', dice, flatAmount }` entries.
+ *
+ * Validation:
+ * - Instance exists in state.itemInstances and in the character's
+ *   inventory.
+ * - Instance's definition is itemKind = 'consumable'.
+ *
+ * RAW deviations to be tightened later: no action-economy cost
+ * (drinking a potion is a Magic action in combat); no range check
+ * when targetId !== characterId (engine doesn't model position).
+ */
+export const planConsumeItem = (
+  state: CampaignState,
+  content: ResolvedContent,
+  rng: RNG,
+  intent: ConsumeItemIntent,
+): ReadonlyArray<Event> => {
+  const character = state.characters[intent.characterId];
+  if (!character) throw new Error(`Unknown character ${intent.characterId}`);
+  if (!character.inventory.includes(intent.instanceId)) {
+    throw new Error(`Item ${intent.instanceId} not in ${character.name}'s inventory`);
+  }
+  const instance = state.itemInstances[intent.instanceId];
+  if (!instance) throw new Error(`Unknown item instance ${intent.instanceId}`);
+  const def = content.items.get(instance.definitionId);
+  if (!def) throw new Error(`Unknown item definition ${instance.definitionId}`);
+  if (def.itemKind !== 'consumable') {
+    throw new Error(`Item ${def.id} is not a consumable (itemKind: ${def.itemKind})`);
+  }
+
+  const at = intent.at ?? nowIso();
+  const targetId = intent.targetId ?? intent.characterId;
+  const events: Event[] = [];
+
+  for (const action of def.onConsume) {
+    if (action.kind === 'Heal') {
+      const diceTotal = action.dice !== undefined ? rollExpression(action.dice, rng).total : 0;
+      const flat = action.flatAmount ?? 0;
+      const amount = diceTotal + flat;
+      const healed: HealedEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'Healed',
+        targetId: targetId as ULID,
+        amount,
+        source: `item:${def.id}`,
+      };
+      events.push(healed);
+    }
+  }
+
+  const consumed: ItemConsumedEvent = {
+    id: newEventId() as ULID,
+    at,
+    type: 'ItemConsumed',
+    characterId: intent.characterId as ULID,
+    instanceId: intent.instanceId as ULID,
+    definitionId: instance.definitionId,
+    targetId: targetId as ULID,
+  };
+  events.push(consumed);
+  return events;
+};

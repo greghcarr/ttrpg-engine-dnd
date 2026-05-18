@@ -4,6 +4,54 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `ConsumeItem` planner + Potions of Healing wired (slice 235)**
+
+The single biggest single-slice leverage move for SRD mechanical depth: consumables now consume. The engine had heal / save / buff effects implemented but no mechanism to actually fire them from inventory. This slice adds the missing primitive.
+
+**Plumbing**:
+
+- New `ConsumeAction` discriminated union in [src/schemas/content/item.ts](src/schemas/content/item.ts). Distinct from `Effect` (passive grants) and `TriggerAction` (event-fired): consumption is a deliberate consumer-initiated act with its own semantic. Starts with one action kind, `Heal { dice?, flatAmount? }`. Future entries will add `ApplyCondition` (buff potions: Climbing, Resistance, Heroism) and `CastSpell` (spell scrolls, spell-storing potions).
+- `ConsumableSchema.onConsume` retyped from `EffectSchema[]` to `ConsumeActionSchema[]`. No existing pack entries had non-empty arrays so no migration needed.
+- New `ItemConsumed` event in [src/schemas/events/inventory.ts](src/schemas/events/inventory.ts) carrying `characterId / instanceId / definitionId / targetId`.
+- New `applyItemConsumed` reducer: removes the instance from the consumer's inventory and from `state.itemInstances`. Wired into [src/engine/apply.ts](src/engine/apply.ts).
+- New `planConsumeItem` planner in [src/engine/plan/consume-item.ts](src/engine/plan/consume-item.ts). Validates the instance is in inventory + the definition is `itemKind: 'consumable'`, walks `onConsume` actions emitting one event per action (Healed for Heal), ends with the ItemConsumed event. Exposed via `engine.plan.consumeItem({ characterId, instanceId, targetId? })`.
+- Transcript formatter extended with an `ItemConsumed` case.
+
+**Content wired (4 canonical users — Potions of Healing table)**:
+
+| Item | Rarity | onConsume |
+|---|---|---|
+| Potion of Healing | Common | `Heal 2d4+2` |
+| Potion of Greater Healing | Uncommon | `Heal 4d4+4` |
+| Potion of Superior Healing | Rare | `Heal 8d4+8` |
+| Potion of Supreme Healing | Very Rare | `Heal 10d4+20` (also retyped from `magic` to `consumable`) |
+
+**Side cleanup (Belt of *Giant Strength rarity drift)**: closes the slice-229 backlog row. Pack rarities now match SRD 5.2.1 exactly:
+
+- Belt of Hill Giant Strength: rare → **uncommon**
+- Belt of Stone / Frost Giant Strength: very-rare → **rare**
+- Belt of Fire Giant Strength: very-rare → **rare**
+- Belt of Cloud Giant Strength: legendary → **very-rare**
+- Belt of Storm Giant Strength: legendary (unchanged)
+
+The drift audit's name-lookup logic doesn't catch variant-unrolled entries that don't match the SRD parent name; flagged in the backlog under "Audit: variant-unroll rarity validation."
+
+**RAW deviations to be tightened later**:
+
+- No action-economy cost (RAW: drinking a potion is a Magic action in combat).
+- No range check when `targetId !== characterId` (engine doesn't model position).
+
+**Future SRD users this unblocks**: every consumable in the pack that has a heal mechanic. The next slice can extend `ConsumeAction` with `ApplyCondition` to wire Potion of Climbing / Heroism / Resistance / Speed / etc., and again with `CastSpell` to wire the spell-scroll family.
+
+Pre-commit Uncle Bob audit:
+- Names: ConsumeItem / ConsumeAction / planConsumeItem / ItemConsumed all descriptive.
+- DRY: `onConsume` action shape is purpose-built (not overloading Effect or TriggerAction). Different semantic, different union.
+- SRP: schema / event / reducer / planner / engine surface — each does one thing.
+- Magic numbers: heal dice all SRD-derived (Potions of Healing table).
+- Tests assert mechanical outcomes (heal amount in expected range, instance retirement, throw conditions).
+
+Tests: 6-case planner test in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) covering Healing potion happy path, Supreme variant range, instance retirement post-commit, feed-to-ally targeting, inventory-validation throw, wrong-kind-rejection throw. 1617 pass, 209 skipped. tsc clean.
+
 **Engine: `SpawnCreature` TriggerAction + Troll Loathsome Limbs (slice 233)**
 
 Completes the Troll → Troll Limb arc started in slices 226 + 232. New TriggerAction kind that spawns a Character instance from a content statblock when an OnEvent rider fires. Canonical user: Troll's Loathsome Limbs trait. After this slice, hitting a Troll with 15+ slashing damage actually emits a CharacterCreated event for a Troll Limb — for the first time since alpha.5, the Troll behaves in combat the way the SRD describes.

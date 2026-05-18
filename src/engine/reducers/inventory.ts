@@ -5,6 +5,7 @@ import type {
   ItemAttunedEvent,
   ItemBuffAppliedEvent,
   ItemBuffRemovedEvent,
+  ItemConsumedEvent,
   ItemEquippedEvent,
   ItemUnattunedEvent,
   ItemUnequippedEvent,
@@ -112,4 +113,20 @@ export const applyItemBuffRemoved = (
   const instance = state.itemInstances[event.instanceId];
   if (instance === undefined) return;
   instance.temporaryBuff = undefined;
+};
+
+// Slice 235. Consumes an item: removes the instance from the
+// consumer's inventory and from state.itemInstances. The planner
+// emits the item's onConsume effects (Healed, etc.) before this
+// event in the chain, so by the time we reach the reducer the
+// mechanical effects have already landed; this just retires the
+// instance.
+export const applyItemConsumed = (
+  state: Draft<CampaignState>,
+  event: ItemConsumedEvent,
+): void => {
+  const character = state.characters[event.characterId];
+  invariant(character !== undefined, `Character ${event.characterId} not found`);
+  character.inventory = character.inventory.filter((id) => id !== event.instanceId);
+  delete state.itemInstances[event.instanceId];
 };

@@ -258,6 +258,13 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       return `${itemName(stateBefore, content, event.instanceId)} gains +${event.attackBonus} attack / +${event.damageBonus} damage (${event.source ?? 'spell'}).`;
     case 'ItemBuffRemoved':
       return `${itemName(stateBefore, content, event.instanceId)} loses its temporary buff.`;
+    case 'ItemConsumed': {
+      const consumer = characterName(stateBefore, event.characterId);
+      const targetName = characterName(stateBefore, event.targetId);
+      const item = content.items.get(event.definitionId)?.name ?? event.definitionId;
+      const target = event.targetId === event.characterId ? consumer : targetName;
+      return `**${consumer}** consumed ${item}${target !== consumer ? ` (on ${target})` : ''}.`;
+    }
     case 'PartyCreated': {
       const members = event.memberIds.length === 0
         ? 'no members'

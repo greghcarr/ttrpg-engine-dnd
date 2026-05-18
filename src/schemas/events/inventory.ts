@@ -59,3 +59,20 @@ export const ItemBuffRemovedEventSchema = EventEnvelopeSchema.extend({
   instanceId: ULIDSchema,
 });
 export type ItemBuffRemovedEvent = z.infer<typeof ItemBuffRemovedEventSchema>;
+
+// Slice 235: a consumable item is consumed by a character. The
+// reducer removes the instance from the character's inventory and
+// from state.itemInstances. The planner emits the item's
+// onConsume effects (Healed events, etc.) before this event in the
+// chain. `targetId` is the recipient of those effects (defaults to
+// the consumer when the consumer drinks the potion themselves; can
+// be a different character when one character feeds a potion to
+// another, as RAW permits).
+export const ItemConsumedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ItemConsumed'),
+  characterId: ULIDSchema,
+  instanceId: ULIDSchema,
+  definitionId: z.string(),
+  targetId: ULIDSchema,
+});
+export type ItemConsumedEvent = z.infer<typeof ItemConsumedEventSchema>;

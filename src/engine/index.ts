@@ -55,6 +55,7 @@ import {
   planSuperiorDefense,
   planPaladinsSmite,
   planDivineIntervention,
+  planConsumeItem,
   planMagicWeapon,
   planElementalWeapon,
   planRecklessAttack,
@@ -173,6 +174,7 @@ import {
   type SuperiorDefenseIntent,
   type PaladinsSmiteIntent,
   type DivineInterventionIntent,
+  type ConsumeItemIntent,
   type MagicWeaponIntent,
   type ElementalWeaponIntent,
   type RecklessAttackIntent,
@@ -291,6 +293,7 @@ export interface Engine {
     superiorDefense(state: CampaignState, intent: Omit<SuperiorDefenseIntent, 'type'>): PlanResult;
     paladinsSmite(state: CampaignState, intent: Omit<PaladinsSmiteIntent, 'type'>): PlanResult;
     divineIntervention(state: CampaignState, intent: Omit<DivineInterventionIntent, 'type'>): PlanResult;
+    consumeItem(state: CampaignState, intent: Omit<ConsumeItemIntent, 'type'>): PlanResult;
     magicWeapon(state: CampaignState, intent: Omit<MagicWeaponIntent, 'type'>): PlanResult;
     elementalWeapon(state: CampaignState, intent: Omit<ElementalWeaponIntent, 'type'>): PlanResult;
     recklessAttack(state: CampaignState, intent: Omit<RecklessAttackIntent, 'type'>): PlanResult;
@@ -541,6 +544,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
           ...intent,
         }),
       };
+    },
+    consumeItem(state, intent) {
+      return { events: planConsumeItem(state, content, rng, { type: 'ConsumeItem', ...intent }) };
     },
     magicWeapon(state, intent) {
       return { events: planMagicWeapon(state, content, { type: 'MagicWeapon', ...intent }) };

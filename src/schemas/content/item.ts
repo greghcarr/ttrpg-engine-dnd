@@ -66,9 +66,24 @@ export const MagicItemSchema = ItemBaseSchema.extend({
 });
 export type MagicItem = z.infer<typeof MagicItemSchema>;
 
+// Slice 235: consumable-on-consume action set. Distinct from
+// TriggerAction (which fires from OnEvent riders): consumption is a
+// deliberate consumer-initiated act, not an event-triggered ride.
+// Starts small with Heal (Potions of Healing); future entries will
+// add ApplyCondition (for buff potions like Climbing / Heroism /
+// Resistance) and CastSpell (for spell-scroll consumption).
+export const ConsumeActionSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('Heal'),
+    dice: DiceExpressionSchema.optional(),
+    flatAmount: z.number().int().min(0).optional(),
+  }),
+]);
+export type ConsumeAction = z.infer<typeof ConsumeActionSchema>;
+
 export const ConsumableSchema = ItemBaseSchema.extend({
   itemKind: z.literal('consumable'),
-  onConsume: z.array(EffectSchema).default([]),
+  onConsume: z.array(ConsumeActionSchema).default([]),
   description: z.string().optional(),
 });
 export type Consumable = z.infer<typeof ConsumableSchema>;

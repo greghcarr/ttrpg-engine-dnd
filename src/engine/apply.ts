@@ -40,6 +40,7 @@ import {
   applyItemAttuned,
   applyItemBuffApplied,
   applyItemBuffRemoved,
+  applyItemConsumed,
   applyItemEquipped,
   applyItemUnattuned,
   applyItemUnequipped,
@@ -343,6 +344,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemBuffRemoved':
         applyItemBuffRemoved(draft, event);
+        break;
+      case 'ItemConsumed':
+        applyItemConsumed(draft, event);
         break;
       case 'PartyCreated':
         applyPartyCreated(draft, event);
