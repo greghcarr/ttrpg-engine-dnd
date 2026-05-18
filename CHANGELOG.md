@@ -4,6 +4,67 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Infra: SRD 5.2.1 markdown as git submodule (slice 245)**
+
+Closes the blocker that prevented a fresh contributor from doing SRD-aligned content work. Previously `references/srd-markdown/` was gitignored and lived only on Greg's machine; a stranger cloning the repo had no documented path to obtain it. Now the directory lands as a git submodule pointing at [`github.com/greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown) (CC-BY-4.0, derived from the Wizards-released SRD 5.2.1).
+
+Contributors clone with `git clone --recurse-submodules` (or `git submodule update --init --recursive` post-clone) to populate the directory. The submodule is reference-only: the engine code under `src/` doesn't import from it at build or run time, no SRD-derived text is embedded in the published package, and the build / test pipeline still runs green without the submodule populated (the SRD drift audit skips itself when the directory is absent).
+
+Plumbing:
+
+- New `.gitmodules` at repo root registers `references/srd-markdown` → upstream URL. Submodule pinned at commit `1b4b99d` (master HEAD at the time of slice 245).
+- [.gitignore](.gitignore) — the previous blanket `references/` ignore is replaced with a whitelist: `references/*` ignored, `!references/srd-markdown` un-ignored. Keeps the PDF source + Greg's local extraction artifacts out, lets the submodule pointer in.
+- [NOTICE](NOTICE) gains section 3 documenting the submodule attribution + CC-BY-4.0 inheritance from the upstream repo's own LICENSE file. Trademarks section renumbered to 4.
+- [CLAUDE.md](CLAUDE.md) "SRD is canon" section: the prior "ask the user to symlink it from the primary worktree" instruction (which only worked for Greg) is replaced with the submodule clone / update commands. The "SRD source of truth" detail section below it gets the same update.
+- [DEVELOPMENT.md](DEVELOPMENT.md) gains a "First-time setup" section above "Commands" with the `--recurse-submodules` clone command and the post-clone init command.
+- [README.md](README.md) Quick Start switches to `git clone --recurse-submodules` and explains what the flag pulls in.
+- [CONTRIBUTING.md](CONTRIBUTING.md) "Before you start" step 4 updated with the submodule init command.
+
+**Why a submodule rather than copying the markdown into the repo**: pure DRY. The upstream `dnd-5e-srd-markdown` repo is the canonical maintained copy; copying in would create a divergence trap (the engine repo would silently drift from upstream over time, and re-syncs would be heavy multi-MB-diff commits). Submodules let the engine pin to a known-good upstream commit while inheriting upstream improvements (typo fixes, formatting cleanups, new errata) explicitly when the maintainer chooses to bump.
+
+**What this unblocks for fresh contributors**: any content slice that needs to cite RAW. Specifically: spell wirings (slices like 239), monster statblock authoring, magic item wirings (slices 240-243), class feature audits, condition definitions, the SRD drift audit's gate. Previously, all of this required Greg's worktree.
+
+Pre-commit Uncle Bob audit:
+- Names: `references/srd-markdown/` matches the upstream repo's natural directory name (`dnd-5e-srd-markdown` would also have worked but `srd-markdown` is shorter and contextually clear inside a `references/` parent). The submodule registration in `.gitmodules` uses the same `references/srd-markdown` path as the project tree (no surprise indirection).
+- DRY: submodule chosen specifically to avoid the duplicate-content drift trap. The license attribution lives at the upstream repo's own LICENSE; NOTICE points there rather than embedding it (which would also drift).
+- SRP: each file edited has one job. `.gitmodules` registers the submodule. `.gitignore` whitelists. NOTICE attributes. CLAUDE.md / DEVELOPMENT.md / CONTRIBUTING.md / README.md each update their own contributor-facing surface with the new clone command. None of the docs cross-define what another doc owns.
+- Magic numbers: the pinned submodule commit `1b4b99d` is the only "magic number" — it's documented in the CHANGELOG and the submodule's own log lets a reviewer verify it matches the upstream `master` branch HEAD at slice time. Future submodule bumps will be explicit slice commits, not silent drift.
+- at-threading: N/A (no events).
+- Mechanical outcomes asserted: `git clone --recurse-submodules` on a fresh checkout populates `references/srd-markdown/` with the SRD markdown files (verifiable by `ls references/srd-markdown/*.md` after init). The build / test pipeline runs green both with and without the submodule populated (the drift audit's self-skip is the gate). The PDF source stays out of the repo (heavy, not the canonical surface).
+- Tests: no new test code. The existing SRD drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) now has a discoverable populate-path for fresh contributors; this slice doesn't change its behavior, just removes the friction that prevented it from running on someone else's machine.
+
+**Docs + workflow: onboarding refresh + dev-branch convention (slice 244)**
+
+Pure documentation and workflow change; no engine or content surface touched. Two motivations:
+
+1. Establish a `main` + `dev` branch convention so slice work lands on `dev` and `main` stays at clean release checkpoints. Previously slice work was committed directly to `main`. The transition: `dev` was branched off `main` at slice 243 (commit `7b9a747`); going forward, slice commits land on `dev`. The user (Greg) merges `dev` into `main` on his cadence.
+2. Make the working norms discoverable by any AI agent (or human contributor) opening the repo cold. Previously several load-bearing norms lived only in the project author's personal global config or in the AI agent's per-session memory; now they live in the repo's tracked docs.
+
+Changes:
+
+- [CLAUDE.md](CLAUDE.md) — new top-level sections: "Quality bar" (states the *incorrect code is worse than no code* standard), "Fresh-agent quickstart" (the order-of-operations for any new agent / contributor), "Working norms" (branch structure, commit-don't-push, SRD-as-canon, slice cadence, pre-commit Uncle Bob audit, doc updates per slice, pre-commit checks). The "Library-quality bar (internal working note)" section is reframed as "Engineering standards" with the public-vs-internal framing kept intact.
+- [DEVELOPMENT.md](DEVELOPMENT.md) — Branches section expanded with the working flow (start on dev, commit early, pre-commit checks, never touch main without explicit instruction) plus branch-from rules (parallel worktrees target dev).
+- [CONTRIBUTING.md](CONTRIBUTING.md) — new "Quality bar" section up top, new "Working with an AI agent" section pointing agents to CLAUDE.md's fresh-agent quickstart, and the existing "Commit and PR style" section gains the dev-branch + Uncle Bob audit conventions.
+- [README.md](README.md) — "Contributing" section rewritten as a pointer to CLAUDE.md / CONTRIBUTING.md / DEVELOPMENT.md / starter-pack-gaps.md / slice-template.md; test count refreshed to 1643 / 244 files.
+
+What the new norms surface that wasn't previously tracked in the repo:
+
+- The "commit, don't push" rule, previously only in the project author's `~/.claude/CLAUDE.md` (Claude Code's user-level config). Now load-bearing in the project's CLAUDE.md so any agent or human picks it up automatically.
+- The Uncle Bob pre-commit audit checklist (names, DRY, SRP, magic numbers, at-threading, mechanical outcomes asserted, tests). Previously only in the AI agent's per-session memory and applied informally; now mandatory and codified.
+- The branch convention (slice work → `dev`; `main` is for stable releases). Previously the repo had a 2-line mention in DEVELOPMENT.md; now load-bearing.
+- The SRD-is-canon rule, previously implicit; now explicit with the do-not-WebFetch reminder.
+- The fresh-agent quickstart, a 5-step onboarding sequence for any new contributor.
+
+Why this matters: previously, the conventions that kept code quality high were partly stored in environments outside the repo (the author's personal Claude config, an AI agent's session memory). A fresh AI agent or new human contributor would not see them and could ship correct-looking but rule-incorrect code. The repo's documentation now stands alone as the single source of working norms.
+
+Pre-commit Uncle Bob audit:
+- Names: section headers are intention-revealing ("Quality bar", "Fresh-agent quickstart", "Working norms"). Document-level naming follows the existing convention of CLAUDE.md / CONTRIBUTING.md / DEVELOPMENT.md.
+- DRY: the same norms appear in multiple docs at different framings (CLAUDE.md detailed, CONTRIBUTING.md contributor-focused, DEVELOPMENT.md command-focused). This is deliberate — each doc has a distinct audience and the conventions are load-bearing enough to repeat the key pointers. Cross-references via markdown links keep them in sync.
+- SRP: each doc has one job. CLAUDE.md is the agent / author working manual. CONTRIBUTING.md is the contributor-facing onboarding. DEVELOPMENT.md is the command + branch reference. README.md stays public-facing.
+- No magic numbers introduced. No engine code touched.
+- Tests: no test changes. tsc and full vitest suite remain green (verified pre-commit).
+- Mechanical outcomes: the working norms are now discoverable by a fresh agent on the first read; the branch convention is committed to dev; the Uncle Bob audit shape is documented in three places (CLAUDE.md as primary, CONTRIBUTING.md as link, slice-template.md unchanged but unchanged-and-still-correct on the audit step).
+
 **Engine: action-selector + per-action chargesCost + Staff of Healing (slice 243)**
 
 Generalizes slice 240's UseItem from "fire all onUse actions, charge 1 per use" to "fire one of N onUse actions (consumer-selected), charge that action's chargesCost." Two new fields on each `UseAction` variant: `actionId` (consumer-facing selector) and `chargesCost` (defaults to 1). One new field on `UseItemIntent`: `actionId` (matches against the action's `actionId`; required for multi-action items, optional for single-action items).

@@ -16,4 +16,11 @@ coverage/
 !.env*.example
 *.tsbuildinfo
 .claude/
-references/
+# `references/` holds local-only reference material (the SRD PDF
+# source, scratch extractions, etc.). The only canonical surface is
+# the SRD 5.2.1 markdown at `references/srd-markdown/`, which lands
+# as a git submodule (see .gitmodules and CLAUDE.md "SRD is canon").
+# Whitelist the submodule, ignore everything else under references/.
+references/*
+!references/srd-markdown
+!references/srd-markdown/

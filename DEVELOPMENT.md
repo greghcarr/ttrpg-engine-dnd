@@ -2,8 +2,42 @@
 
 ## Branches
 
-- `main`: releasable, tagged.
-- `dev`: daily work, merges to `main` on release.
+Two long-lived branches:
+
+- `main`: stable, releasable, tagged. Slice work **never** lands directly here. Treat it as the "what a fresh clone should see" reference.
+- `dev`: daily slice work. All slice commits land here first. Periodically merged into `main` when a coherent group of slices is ready to ship.
+
+### Working flow
+
+1. Start a session by checking out (or creating) `dev`: `git checkout dev` (or `git checkout -b dev` if it doesn't exist yet locally).
+2. Do slice work on `dev`. One slice per commit; commit early and often.
+3. Pre-commit checks: `npx tsc --noEmit && npx vitest run`. Both must be green.
+4. After a slice commits cleanly, surface it to whoever is steering the session (typically the user). They decide when `dev` rolls into `main`.
+5. Never push or merge to `main` without explicit instruction. See [CLAUDE.md](CLAUDE.md#commit-dont-push) for the full git-safety rules.
+
+### Branch-from rules
+
+- Slices generally branch off `dev` (or commit directly to it for small slices). For a larger refactor that may want extra review before merging into `dev`, create a feature branch off `dev` and merge back when ready.
+- For parallel engine + content authoring, see [docs/parallel-authoring.md](docs/parallel-authoring.md). Worktrees still target `dev` (or per-worktree feature branches that merge to `dev`).
+- Never create branches that target `main` directly.
+
+## First-time setup
+
+Clone with submodules so the SRD markdown comes along:
+
+```
+git clone --recurse-submodules https://github.com/greghcarr/ttrpg-engine-dnd.git
+cd ttrpg-engine-dnd
+npm install
+```
+
+If you cloned without `--recurse-submodules`, populate the submodule afterward:
+
+```
+git submodule update --init --recursive
+```
+
+`references/srd-markdown/` is the canonical SRD 5.2.1 source (CC-BY-4.0). All content audits, drift checks, and RAW citations point at it. See [CLAUDE.md](CLAUDE.md#srd-is-canon-use-the-local-clone) for why web lookups are off the table.
 
 ## Commands
 

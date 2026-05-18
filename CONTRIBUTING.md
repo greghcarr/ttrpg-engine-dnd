@@ -2,11 +2,23 @@
 
 Thanks for your interest. This engine is built to be the foundation that other D&D 5.5e tools rely on, so contributions are held to a higher bar than typical app code.
 
+## Quality bar
+
+**Incorrect code is worse than no code.** A subtly-wrong rule implementation that *looks* correct will mislead downstream tools and tables for months. If you cannot make a change correct, leave it deferred with a tracked row in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) and document the RAW deviation in the slice's CHANGELOG entry.
+
 ## Before you start
 
-- Read [README.md](README.md) for the goal and roadmap.
-- Read [CLAUDE.md](CLAUDE.md) for architecture (locked) and conventions.
-- Read [DEVELOPMENT.md](DEVELOPMENT.md) for the dev workflow and house rules.
+1. Read [README.md](README.md) for the user-facing pitch and roadmap.
+2. Read [CLAUDE.md](CLAUDE.md). This is the working manual: quality bar, branch structure, commit conventions, SRD canon, slice cadence, Uncle Bob pre-commit audit, architecture (locked).
+3. Read [DEVELOPMENT.md](DEVELOPMENT.md) for the branch flow, dev commands, and house rules.
+4. Confirm `references/srd-markdown/` is populated in your worktree. SRD lookups happen there, not on the web. If you cloned without `--recurse-submodules`, run `git submodule update --init --recursive` to populate it. See [DEVELOPMENT.md](DEVELOPMENT.md#first-time-setup).
+
+## Working with an AI agent (Claude Code or similar)
+
+The repo is set up so that any AI coding agent pointed at it picks up the working manual ([CLAUDE.md](CLAUDE.md)) automatically. If you are an agent reading this file, follow the "Fresh-agent quickstart" in [CLAUDE.md](CLAUDE.md) first. Two rules are load-bearing and apply to every commit regardless of who or what made the change:
+
+- **Commit, don't push.** `git commit` is local-only. Never `git push`, amend, force-push, or rewrite history without explicit instruction from a human collaborator.
+- **Slice work goes to `dev`, never to `main`.** See [DEVELOPMENT.md](DEVELOPMENT.md#branches) for the branch flow.
 
 ## Scope: what this engine does and does not do
 
@@ -73,8 +85,10 @@ CI gates: typecheck, 80% line coverage on `src/engine/`, `src/derive/`, `src/eff
 
 ## Commit and PR style
 
-- One coherent change per PR. Big features land as a series of merged-quickly slices.
-- Commit messages: imperative mood, summary line under 72 chars, optional paragraph for the why.
+- One coherent change per commit. One slice per commit. Big features land as a series of slices.
+- Slice commits land on `dev`, never directly on `main`. See [DEVELOPMENT.md](DEVELOPMENT.md#branches).
+- Commit messages: imperative mood, summary line under 72 chars, paragraph body explaining the *why*.
+- Engine slices include a **pre-commit Uncle Bob audit** in the commit body (names, DRY, SRP, magic numbers, at-threading, mechanical outcomes asserted, tests). See [CLAUDE.md](CLAUDE.md#pre-commit-uncle-bob-audit) for the checklist.
 - PRs should include: what changed, why, what tests cover it, anything reviewers should look at closely.
 
 ## Reporting bugs

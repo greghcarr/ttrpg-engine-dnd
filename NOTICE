@@ -50,7 +50,33 @@ authors. See `docs/content-attribution.md` for an item-by-item audit and
 guidance for consumers extending the pack.
 
 ==============================================================================
-3. Trademarks
+3. SRD 5.2.1 reference markdown (CC BY 4.0, git submodule)
+==============================================================================
+
+The directory `references/srd-markdown/` is a git submodule pointing at:
+
+    https://github.com/greghcarr/dnd-5e-srd-markdown
+
+That repository contains the complete SRD 5.2.1 in Markdown form, derived
+from the Wizards of the Coast SRD 5.2.1 release and licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0). Its own
+LICENSE file (visible after running `git submodule update --init --recursive`)
+carries the authoritative attribution and license text.
+
+The submodule is the contributor's source of truth for SRD lookups. Engine
+slices and content audits cite paths under `references/srd-markdown/`; the
+SRD drift audit at `tests/audit/srd-drift.test.ts` parses these files.
+
+The submodule is reference material only. The engine code under `src/` does
+not import from it at build or run time, and no SRD-derived text is embedded
+in the published package. Contributors who clone the repo without
+`--recurse-submodules` will have an empty `references/srd-markdown/`
+directory; they can populate it post-clone with `git submodule update --init
+--recursive`. The engine still builds and tests pass without the submodule
+populated; the SRD drift audit skips itself when the directory is absent.
+
+==============================================================================
+4. Trademarks
 ==============================================================================
 
 "Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of
