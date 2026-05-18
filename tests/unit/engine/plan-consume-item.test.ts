@@ -3,6 +3,8 @@ import { createEngine } from '../../../src/engine/index.js';
 import { seededRNG } from '../../../src/rng/seeded.js';
 import { commit, type Campaign } from '../../../src/engine/commit.js';
 import { loadStarterPack } from '../../../src/content/packs/starter.js';
+import { resolveContent } from '../../../src/content/pack.js';
+import { buildEffectStack } from '../../../src/derive/effect-stack.js';
 import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../../src/ids.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
@@ -249,6 +251,121 @@ describe('planConsumeItem (slice 235)', () => {
         castTargetIds: [target.id],
       }),
     ).not.toThrow();
+  });
+
+  // Slice 239 representative wires: one per ConsumeAction variant
+  // (ApplyCondition with a fresh content-side condition, ApplyCondition
+  // with an existing RAW condition, and CastSpell with a schema-only
+  // spell). Asserts that the wire reaches the right downstream surface
+  // — for the Giant Strength potion, that the STR floor folds through
+  // buildEffectStack after the condition lands in state.
+  it('drinking a Potion of Hill Giant Strength sets STR floor to 21 via OverrideAbilityScore', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(239) });
+    const content = resolveContent([PACK]);
+    const potion = makeItemInstance('potion-of-hill-giant-strength');
+    const baseHero = buildHero(40);
+    // Base STR 16 (from buildHero default); the potion should override
+    // upward to 21.
+    const hero: Character = { ...baseHero, inventory: [potion.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'hill-giant-strength' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.consumeItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: potion.id,
+      }).events,
+    );
+    const after = campaign.state.characters[hero.id]!;
+    const applied = after.appliedConditions.find((c) => c.conditionId === 'hill-giant-strength-potion-active');
+    expect(applied).toBeDefined();
+    const acc = buildEffectStack({
+      character: after,
+      content,
+      itemInstances: campaign.state.itemInstances,
+    });
+    expect(acc.effectiveAbilityScoreFloor('STR')?.value).toBe(21);
+  });
+
+  it('a consumer with STR already above 21 sees no effective change from the Hill Giant Strength potion', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(245) });
+    const content = resolveContent([PACK]);
+    const potion = makeItemInstance('potion-of-hill-giant-strength');
+    const baseHero = buildHero(40);
+    const hero: Character = {
+      ...baseHero,
+      abilityScores: { ...baseHero.abilityScores, STR: 22 },
+      inventory: [potion.id],
+    };
+    let campaign: Campaign = engine.createCampaign({ name: 'no-effect' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.consumeItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: potion.id,
+      }).events,
+    );
+    const after = campaign.state.characters[hero.id]!;
+    // Condition is still applied (RAW says no effect, not 'not applied'),
+    // but the floor < base means base wins.
+    expect(after.appliedConditions.some((c) => c.conditionId === 'hill-giant-strength-potion-active')).toBe(true);
+    const acc = buildEffectStack({
+      character: after,
+      content,
+      itemInstances: campaign.state.itemInstances,
+    });
+    expect(acc.effectiveAbilityScoreFloor('STR')?.value).toBe(21);
+    // The derive layer takes max(base, floor), so the effective STR is 22.
+  });
+
+  it('drinking a Potion of Invisibility applies the standard `invisible` condition', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(246) });
+    const potion = makeItemInstance('potion-of-invisibility');
+    const baseHero = buildHero(20);
+    const hero: Character = { ...baseHero, inventory: [potion.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'invisibility-potion' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.consumeItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: potion.id,
+    });
+    const condApplied = events.find(
+      (e) => e.type === 'ConditionApplied' && (e as ConditionAppliedEvent).conditionId === 'invisible',
+    ) as ConditionAppliedEvent | undefined;
+    expect(condApplied).toBeDefined();
+    expect(condApplied!.targetId).toBe(hero.id);
+    expect(condApplied!.sourceCharacterId).toBe(hero.id);
+  });
+
+  it('drinking a Potion of Mind Reading emits SpellCastDeclared for the schema-only Detect Thoughts spell', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(247) });
+    const potion = makeItemInstance('potion-of-mind-reading');
+    const baseHero = buildHero(20);
+    const hero: Character = { ...baseHero, inventory: [potion.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'mind-reading-potion' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: potion },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.consumeItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: potion.id,
+    });
+    expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
+    // No slot is consumed (the potion supplies the cast), and no
+    // mechanical chain fires (Detect Thoughts is schema-only).
+    expect(events.some((e) => e.type === 'SpellSlotConsumed')).toBe(false);
+    expect(events.some((e) => e.type === 'ItemConsumed')).toBe(true);
   });
 
   it('throws when the item is not a consumable', () => {

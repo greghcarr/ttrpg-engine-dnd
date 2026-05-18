@@ -2329,10 +2329,34 @@
     { "id": "belt-of-hill-giant-strength", "itemKind": "magic", "name": "Belt of Hill Giant Strength", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "OverrideAbilityScore", "ability": "STR", "value": 21 }] },
     { "id": "sending-stones", "itemKind": "magic", "name": "Sending Stones", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "potion-of-climbing", "itemKind": "consumable", "name": "Potion of Climbing", "onConsume": [{ "kind": "ApplyCondition", "conditionId": "spider-climbing-active" }], "description": "Grants a climb speed equal to walking speed for 1 hour. Stacks with similar effects only by extending duration. (Duration consumer-managed.)" },
-    { "id": "potion-of-animal-friendship", "itemKind": "consumable", "name": "Potion of Animal Friendship", "onConsume": [], "description": "Cast Animal Friendship (save DC 13) for 1 hour when consumed." },
-    { "id": "potion-of-growth", "itemKind": "consumable", "name": "Potion of Growth", "onConsume": [], "description": "Enlarge effect (as the Enlarge/Reduce spell, enlarge option) for 1d4 hours when consumed." },
-    { "id": "potion-of-heroism", "itemKind": "consumable", "name": "Potion of Heroism", "onConsume": [], "description": "Grants 10 temporary hit points and the effects of Bless (no concentration required) for 1 hour." },
-    { "id": "potion-of-mind-reading", "itemKind": "consumable", "name": "Potion of Mind Reading", "onConsume": [], "description": "Cast Detect Thoughts (save DC 13) for 10 minutes when consumed." },
+    {
+      "id": "potion-of-animal-friendship",
+      "itemKind": "consumable",
+      "name": "Potion of Animal Friendship",
+      "onConsume": [
+        { "kind": "CastSpell", "spellId": "animal-friendship", "slotLevel": 1, "castingClassId": "wizard" }
+      ],
+      "description": "Cast Animal Friendship (save DC 13) for 1 hour when consumed. Animal Friendship is currently schema-only in the engine, so the cast records a SpellCastDeclared but no mechanical save/charm chain fires; the consumer narrates the in-fiction outcome."
+    },
+    {
+      "id": "potion-of-growth",
+      "itemKind": "consumable",
+      "name": "Potion of Growth",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "enlarged-active" }
+      ],
+      "description": "Enlarge effect (as the Enlarge/Reduce spell, enlarge option) for 1d4 hours when consumed. (Duration consumer-managed.)"
+    },
+    { "id": "potion-of-heroism", "itemKind": "consumable", "name": "Potion of Heroism", "onConsume": [], "description": "Grants 10 temporary hit points and the effects of Bless (no concentration required) for 1 hour. Deferred: needs a flat-temp-HP ConsumeAction variant + a Bless-style condition shape." },
+    {
+      "id": "potion-of-mind-reading",
+      "itemKind": "consumable",
+      "name": "Potion of Mind Reading",
+      "onConsume": [
+        { "kind": "CastSpell", "spellId": "detect-thoughts", "slotLevel": 2, "castingClassId": "wizard" }
+      ],
+      "description": "Cast Detect Thoughts (save DC 13) for 10 minutes when consumed. Detect Thoughts is currently schema-only in the engine, so the cast records a SpellCastDeclared but no mechanical save/probe chain fires; the consumer narrates the in-fiction outcome."
+    },
     { "id": "potion-of-resistance", "itemKind": "consumable", "name": "Potion of Resistance", "onConsume": [], "description": "Resistance to one damage type (acid, cold, fire, force, lightning, necrotic, poison, psychic, radiant, or thunder) chosen at consume time, for 1 hour." },
     { "id": "gloves-of-missile-snaring", "itemKind": "magic", "name": "Gloves of Missile Snaring", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "lantern-of-revealing", "itemKind": "magic", "name": "Lantern of Revealing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
@@ -2384,11 +2408,51 @@
     { "id": "wand-of-wonder", "itemKind": "magic", "name": "Wand of Wonder", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "potion-of-water-breathing", "itemKind": "consumable", "name": "Potion of Water Breathing", "onConsume": [{ "kind": "ApplyCondition", "conditionId": "water-breathing-active" }], "description": "Grants the ability to breathe water for 1 hour when consumed. (Duration consumer-managed.)" },
     { "id": "potion-of-fire-breath", "itemKind": "consumable", "name": "Potion of Fire Breath", "onConsume": [], "description": "After consuming, use a bonus action to exhale fire at a target within 30 ft for 4d6 fire damage (DC 13 DEX save for half), up to three times within 1 hour. The potion's effect ends after the third exhale or when the hour passes." },
-    { "id": "potion-of-hill-giant-strength", "itemKind": "consumable", "name": "Potion of Hill Giant Strength", "onConsume": [], "description": "STR becomes 21 for 1 hour when consumed. No effect if the consumer's STR is already 21 or higher." },
-    { "id": "oil-of-slipperiness", "itemKind": "consumable", "name": "Oil of Slipperiness", "onConsume": [], "description": "Coats a creature or a 10-ft-square surface. On a creature, grants the effect of the Freedom of Movement spell for 8 hours. On a surface, the area is difficult terrain and creatures within must succeed on DC 10 DEX save or fall prone, for 8 hours." },
-    { "id": "potion-of-invisibility", "itemKind": "consumable", "name": "Potion of Invisibility", "onConsume": [], "description": "Become invisible for 1 hour when consumed; effect ends early if the consumer attacks or casts a spell." },
-    { "id": "potion-of-flying", "itemKind": "consumable", "name": "Potion of Flying", "onConsume": [], "description": "Gain a flying speed equal to the consumer's walking speed for 1 hour. Falls if still aloft when the effect ends." },
-    { "id": "potion-of-speed", "itemKind": "consumable", "name": "Potion of Speed", "onConsume": [], "description": "Gain the effect of the Haste spell for 1 minute when consumed, no concentration required." },
+    {
+      "id": "potion-of-hill-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Hill Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "hill-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 21 for 1 hour when consumed. No effect if the consumer's STR is already 21 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229 (the same primitive the Belt of Hill Giant Strength uses). Duration consumer-managed."
+    },
+    {
+      "id": "oil-of-slipperiness",
+      "itemKind": "consumable",
+      "name": "Oil of Slipperiness",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "freedom-of-movement-active" }
+      ],
+      "description": "Coats a creature or a 10-ft-square surface. On a creature, grants the effect of the Freedom of Movement spell for 8 hours. On a surface, the area is difficult terrain and creatures within must succeed on DC 10 DEX save or fall prone, for 8 hours. Wired arm is the creature-applied Freedom of Movement effect (consumer chooses the target, defaults to consumer). Surface-application is consumer-managed terrain. (Duration consumer-managed.)"
+    },
+    {
+      "id": "potion-of-invisibility",
+      "itemKind": "consumable",
+      "name": "Potion of Invisibility",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "invisible" }
+      ],
+      "description": "Become invisible for 1 hour when consumed; effect ends early if the consumer attacks or casts a spell. Wired arm is the Invisible condition application; the end-on-attack rider is the same shape as the Invisibility spell's deferral (would attach an OnEvent rider on the `invisible` condition gated by attackerIsSelf). Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-flying",
+      "itemKind": "consumable",
+      "name": "Potion of Flying",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "flying-active" }
+      ],
+      "description": "Gain a flying speed equal to the consumer's walking speed for 1 hour. Falls if still aloft when the effect ends. Wired arm uses the existing `flying-active` condition (60 ft fly speed, fixed); RAW is consumer's walking speed (engine over-grants for slow consumers and under-grants for fast ones). Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-speed",
+      "itemKind": "consumable",
+      "name": "Potion of Speed",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "hasted-active" }
+      ],
+      "description": "Gain the effect of the Haste spell for 1 minute when consumed, no concentration required. Wired arm applies the existing `hasted-active` condition (speed x2, +2 AC, advantage on DEX saves, +1 extra action). Duration consumer-managed."
+    },
     { "id": "oil-of-sharpness", "itemKind": "consumable", "name": "Oil of Sharpness", "onConsume": [], "description": "Coats a piercing or slashing weapon (or up to 5 pieces of ammunition); the weapon gains +3 to attack and damage rolls and is treated as magical for 1 hour." },
     { "id": "spell-scroll-of-fire-bolt", "itemKind": "consumable", "name": "Spell Scroll of Fire Bolt", "onConsume": [{ "kind": "CastSpell", "spellId": "fire-bolt", "slotLevel": 0, "castingClassId": "wizard" }], "description": "Common spell scroll. Cast Fire Bolt (cantrip) with a spell attack bonus of +5; scroll crumbles after a single use. Non-class-list casters must succeed on a DC 10 INT or WIS check (consumer choice) to read." },
     { "id": "spell-scroll-of-magic-missile", "itemKind": "consumable", "name": "Spell Scroll of Magic Missile", "onConsume": [{ "kind": "CastSpell", "spellId": "magic-missile", "slotLevel": 1, "castingClassId": "wizard" }], "description": "Common spell scroll. Cast Magic Missile at 1st level; scroll crumbles after a single use. Non-class-list casters must succeed on a DC 11 INT or WIS check to read." },
@@ -2419,11 +2483,51 @@
     { "id": "belt-of-fire-giant-strength", "itemKind": "magic", "name": "Belt of Fire Giant Strength", "rarity": "rare", "requiresAttunement": true, "effects": [{ "kind": "OverrideAbilityScore", "ability": "STR", "value": 25 }] },
     { "id": "belt-of-cloud-giant-strength", "itemKind": "magic", "name": "Belt of Cloud Giant Strength", "rarity": "very-rare", "requiresAttunement": true, "effects": [{ "kind": "OverrideAbilityScore", "ability": "STR", "value": 27 }] },
     { "id": "belt-of-storm-giant-strength", "itemKind": "magic", "name": "Belt of Storm Giant Strength", "rarity": "legendary", "requiresAttunement": true, "effects": [{ "kind": "OverrideAbilityScore", "ability": "STR", "value": 29 }] },
-    { "id": "potion-of-stone-giant-strength", "itemKind": "consumable", "name": "Potion of Stone Giant Strength", "onConsume": [], "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher." },
-    { "id": "potion-of-frost-giant-strength", "itemKind": "consumable", "name": "Potion of Frost Giant Strength", "onConsume": [], "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher." },
-    { "id": "potion-of-fire-giant-strength", "itemKind": "consumable", "name": "Potion of Fire Giant Strength", "onConsume": [], "description": "STR becomes 25 for 1 hour when consumed. No effect if the consumer's STR is already 25 or higher." },
-    { "id": "potion-of-cloud-giant-strength", "itemKind": "consumable", "name": "Potion of Cloud Giant Strength", "onConsume": [], "description": "STR becomes 27 for 1 hour when consumed. No effect if the consumer's STR is already 27 or higher." },
-    { "id": "potion-of-storm-giant-strength", "itemKind": "consumable", "name": "Potion of Storm Giant Strength", "onConsume": [], "description": "STR becomes 29 for 1 hour when consumed. No effect if the consumer's STR is already 29 or higher." },
+    {
+      "id": "potion-of-stone-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Stone Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "stone-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229. Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-frost-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Frost Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "frost-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 23 for 1 hour when consumed. No effect if the consumer's STR is already 23 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229. Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-fire-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Fire Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "fire-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 25 for 1 hour when consumed. No effect if the consumer's STR is already 25 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229. Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-cloud-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Cloud Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "cloud-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 27 for 1 hour when consumed. No effect if the consumer's STR is already 27 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229. Duration consumer-managed."
+    },
+    {
+      "id": "potion-of-storm-giant-strength",
+      "itemKind": "consumable",
+      "name": "Potion of Storm Giant Strength",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "storm-giant-strength-potion-active" }
+      ],
+      "description": "STR becomes 29 for 1 hour when consumed. No effect if the consumer's STR is already 29 or higher. Wired arm uses OverrideAbilityScore floor semantics from slice 229. Duration consumer-managed."
+    },
     { "id": "robe-of-the-archmagi", "itemKind": "magic", "name": "Robe of the Archmagi", "rarity": "legendary", "requiresAttunement": true, "attunementCondition": "Sorcerer, Warlock, or Wizard", "effects": [] },
     { "id": "robe-of-eyes", "itemKind": "magic", "name": "Robe of Eyes", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-displacement", "itemKind": "magic", "name": "Cloak of Displacement", "rarity": "rare", "requiresAttunement": true, "effects": [] },
@@ -2526,7 +2630,15 @@
     { "id": "priests-pack", "itemKind": "gear", "name": "Priest's Pack", "description": "Contains: Backpack, Blanket, Holy Water, Lamp, 7 days of Rations, Robe, and Tinderbox." },
     { "id": "scholars-pack", "itemKind": "gear", "name": "Scholar's Pack", "description": "Contains: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox." },
     { "id": "net", "itemKind": "gear", "name": "Net", "description": "Thrown as part of the Attack action (range 15 ft); target makes a Dexterity saving throw (DC 8 + Dexterity modifier + Proficiency Bonus) or has the Restrained condition until it escapes. Targets Huge or larger succeed automatically. Escape: DC 10 Strength (Athletics) check (action) by the target or a creature within 5 ft. Destroying the Net (AC 10, 5 HP, Immunity to Bludgeoning, Poison, and Psychic damage) also frees the target." },
-    { "id": "potion-of-diminution", "itemKind": "consumable", "name": "Potion of Diminution", "onConsume": [], "description": "When drunk, the bearer gains the 'reduce' effect of the Enlarge / Reduce spell for 1d4 hours, no concentration required." },
+    {
+      "id": "potion-of-diminution",
+      "itemKind": "consumable",
+      "name": "Potion of Diminution",
+      "onConsume": [
+        { "kind": "ApplyCondition", "conditionId": "reduced-active" }
+      ],
+      "description": "When drunk, the bearer gains the 'reduce' effect of the Enlarge / Reduce spell for 1d4 hours, no concentration required. (Duration consumer-managed.)"
+    },
     { "id": "potion-of-poison", "itemKind": "consumable", "name": "Potion of Poison", "onConsume": [], "description": "Appears as a Potion of Healing or another beneficial potion (Identify reveals its true nature). On drinking: 4d6 Poison damage and DC 13 Constitution saving throw or have the Poisoned condition for 1 hour." },
     { "id": "potion-of-vitality", "itemKind": "consumable", "name": "Potion of Vitality", "onConsume": [], "description": "When drunk, removes any Exhaustion levels and ends the Poisoned condition on the drinker. For the next 24 hours, the drinker regains the maximum HP for any Hit Point Die spent." },
     { "id": "perfume", "itemKind": "consumable", "name": "Perfume", "onConsume": [], "description": "A 4-ounce vial. After applying Perfume to yourself, the bearer has Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 ft for 1 hour." },
@@ -7995,6 +8107,66 @@
       "stackable": false,
       "endsOn": [],
       "effects": []
+    },
+    {
+      "id": "hill-giant-strength-potion-active",
+      "name": "Hill Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 21 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229): the score replaces only when the bearer's existing STR is lower, matching RAW's 'no effect if already higher.' Applied exclusively by Potion of Hill Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 21 }
+      ]
+    },
+    {
+      "id": "stone-giant-strength-potion-active",
+      "name": "Stone Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 23 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229). Applied exclusively by Potion of Stone Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 23 }
+      ]
+    },
+    {
+      "id": "frost-giant-strength-potion-active",
+      "name": "Frost Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 23 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229). Applied exclusively by Potion of Frost Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 23 }
+      ]
+    },
+    {
+      "id": "fire-giant-strength-potion-active",
+      "name": "Fire Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 25 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229). Applied exclusively by Potion of Fire Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 25 }
+      ]
+    },
+    {
+      "id": "cloud-giant-strength-potion-active",
+      "name": "Cloud Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 27 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229). Applied exclusively by Potion of Cloud Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 27 }
+      ]
+    },
+    {
+      "id": "storm-giant-strength-potion-active",
+      "name": "Storm Giant Strength (Potion)",
+      "description": "Slice 239. Bearer's STR becomes 29 for the duration (1 hour RAW, consumer-managed). Uses OverrideAbilityScore's floor semantics (slice 229). Applied exclusively by Potion of Storm Giant Strength.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        { "kind": "OverrideAbilityScore", "ability": "STR", "value": 29 }
+      ]
     },
     {
       "id": "hexed-active",

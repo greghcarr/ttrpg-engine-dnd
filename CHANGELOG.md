@@ -4,6 +4,71 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: consumable-pack wiring sweep on existing ConsumeAction variants (slice 239)**
+
+Pure content sweep with no engine changes. Walks the 33 still-empty `onConsume` arrays on consumables in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) and wires the 14 that map cleanly onto the existing three `ConsumeAction` variants (`Heal` from slice 235, `ApplyCondition` from slice 236, `CastSpell` from slice 237). 6 new content-side conditions added (Giant Strength potion family) — each wraps the slice-229 `OverrideAbilityScore` floor-semantic primitive in a temporary condition for use via `ApplyCondition`.
+
+**Content wired (14 consumables)**:
+
+ApplyCondition (existing conditions, no new content):
+
+- **Potion of Growth** → `enlarged-active`
+- **Potion of Diminution** → `reduced-active`
+- **Potion of Invisibility** → `invisible` (the RAW condition)
+- **Potion of Flying** → `flying-active`
+- **Potion of Speed** → `hasted-active`
+- **Oil of Slipperiness** → `freedom-of-movement-active`
+
+ApplyCondition (six new conditions added in this slice, each carrying `OverrideAbilityScore { ability: 'STR', value: N }`):
+
+- **Potion of Hill Giant Strength** → `hill-giant-strength-potion-active` (STR 21)
+- **Potion of Stone Giant Strength** → `stone-giant-strength-potion-active` (STR 23)
+- **Potion of Frost Giant Strength** → `frost-giant-strength-potion-active` (STR 23)
+- **Potion of Fire Giant Strength** → `fire-giant-strength-potion-active` (STR 25)
+- **Potion of Cloud Giant Strength** → `cloud-giant-strength-potion-active` (STR 27)
+- **Potion of Storm Giant Strength** → `storm-giant-strength-potion-active` (STR 29)
+
+CastSpell (schema-only target spells; the cast records `SpellCastDeclared` for journal / replay but no mechanical chain fires):
+
+- **Potion of Animal Friendship** → `CastSpell animal-friendship 1 wizard`
+- **Potion of Mind Reading** → `CastSpell detect-thoughts 2 wizard`
+
+**RAW deviations documented on the wired entries**:
+
+- Duration always consumer-managed (engine's auto-expiry is round-based; potion durations are minute / hour-based per RAW). Same shape as the slice-236 wires.
+- Potion of Flying uses the fixed-60-ft `flying-active` condition, but RAW gives flying speed equal to the consumer's walking speed. Same condition as the `fly` spell.
+- Potion of Invisibility doesn't enforce the RAW "ends on attack or spell" clause. Same deferral as the `invisibility` spell.
+- CastSpell potions use `castingClassId: 'wizard'` for parity with scroll wirings; the engine computes DC / attack from the consumer's INT, not the RAW fixed DC 13. Same deferral as scrolls.
+- Giant Strength potions apply the same `OverrideAbilityScore` floor as the matching Belt items: when the consumer's STR is already at or above the target, the condition is still applied (RAW says "no effect") but the floor < base means the base wins — no functional change.
+
+**Deferred (need a primitive or shape this slice doesn't add)**:
+
+- **Potion of Heroism** — needs a flat-temp-HP `ConsumeAction` variant + a Bless-style condition; partial wire via `heroic-active` would over-grant the recurring temp HP from slice 79.
+- **Potion of Resistance** — needs the chooser-at-creation variant pattern (already in the deferred-primitives backlog).
+- **Potion of Fire Breath** — needs an Attack / AoE `ConsumeAction` variant.
+- **Potion of Poison** — needs a save + damage + condition combined action.
+- **Potion of Vitality** — needs a multi-condition-remove `ConsumeAction` variant.
+- **Antitoxin** — needs a per-source `SetAdvantage` predicate (advantage on saves vs Poisoned), same shape as the deferred Mantle of Spell Resistance row.
+- **Oil of Sharpness** — needs an ItemBuff `ConsumeAction` variant (parallel to `planElementalWeapon`'s item-buff mechanic).
+- **Holy Water**, **Acid**, **Alchemist's Fire** — need a thrown-attack `ConsumeAction` variant.
+- **Ball Bearings**, **Caltrops** — need a terrain-placement action.
+- **Oil** — multi-use item (thrown, poured), not a single onConsume action.
+- **Poison Basic** — ItemBuff + on-hit rider (apply-poison-to-weapon).
+- **Perfume** — needs a skill-discriminated `SetAdvantage` (advantage on Persuasion checks specifically).
+- **Spell Scroll of Misty Step**, **Spell Scroll of Wish** — already documented in slice 237 (dedicated-planner spells need a scroll-to-planner dispatch layer).
+
+**Future SRD users this unblocks**: any future consumable whose effect maps to a single existing condition or a CastSpell. The slice-235/236/237 plumbing handles them as pure JSON edits.
+
+Pre-commit Uncle Bob audit:
+- No engine code touched. Pure JSON sweep + new content-side conditions reusing the slice-229 primitive.
+- Names: Giant Strength conditions follow the `{type}-giant-strength-potion-active` convention to disambiguate from the permanent Belt items.
+- DRY: each Giant Strength condition wraps a single `OverrideAbilityScore` effect, the same primitive that Belt of X Giant Strength uses on its permanent `effects` array. No new effect kinds.
+- SRP: each new condition carries exactly one ability override.
+- Magic numbers: STR values (21 / 23 / 23 / 25 / 27 / 29) are SRD-derived (the matching Giant CR ladder).
+- Mechanical outcomes asserted: condition lands on the consumer, OverrideAbilityScore floor folds through `buildEffectStack`, RAW "no effect if already higher" preserved via the floor semantics.
+
+Tests: 4 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) — Potion of Hill Giant Strength applies the STR floor through `buildEffectStack`; a consumer with STR 22 sees no functional change; Potion of Invisibility lands the `invisible` condition; Potion of Mind Reading emits SpellCastDeclared for the schema-only Detect Thoughts spell. 14 total cases in the file.
+
 **Content: `CastSpell` consume-action + spell-scroll wires (slice 237)**
 
 Extends slice 235's ConsumeAction union with `CastSpell { spellId, slotLevel, castingClassId? }`. The planner branch delegates to `planCastSpell` with slice-219's `noSlotCost: true` + slice-220's `ignorePreparation: true` — the scroll supplies the slot, the scroll-knowledge bypasses the prepared-spells gate. Single small primitive that builds entirely on existing foundations.
