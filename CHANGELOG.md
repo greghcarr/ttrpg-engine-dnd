@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: Fighter Indomitable + Druid Wild Shape uses (slice 176)**
+
+SRD 5.2.1 value-drift sweep continued.
+
+- Fighter Indomitable: pack had `indomitable-3` (third long-rest use) at L20. SRD 5.2.1 says "three times before a Long Rest starting at level 17"; pack was off by three levels. Moved `indomitable-3` from L20 to L17 (now sharing the L17 row with `action-surge-2`). L20 now has only `extra-attack-3`.
+- Druid Wild Shape uses: pack progression 2/3/4/5/6 at L2/L5/L9/L13/L17 didn't match the SRD 5.2.1 Druid Features table (2 at L2-L5, 3 at L6-L16, 4 at L17-L20). Net edits: dropped L5 `wild-shape-uses-3` (L2's 2 still applies through L5), moved the L6 step from L9 to L6 (RAW), dropped L9 / L13 entries (no Wild Shape bump at those levels), changed L17 from max=6 to max=4 (RAW cap).
+
+Snapshot: features wired-class-features refreshed.
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: Monk Ki + Sorcerer Sorcery Points linear scaling (slice 175)**
 
 SRD 5.2.1 follow-up to slice 174. Both Monk Focus Points (Ki) and Sorcerer Sorcery Points scale linearly with class level per the Monk Features and Sorcerer Features tables (Ki = Monk level at L2+; Sorcery Points = Sorcerer level at L2+). The pack modeled both with hardcoded multi-tier grants at L2/L5/L10/L15/L20 (Monk) and L2/L5/L10/L15/L17/L20 (Sorcerer), which produced correct totals only at the granted levels and stale-low totals in between (e.g., L3 Monk had 2 Ki instead of 3).
