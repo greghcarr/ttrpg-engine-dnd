@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: SRD 5.2.1 variant-parent unrolls + slice-224 dup cleanup (slice 225)**
+
+Closes the last Tier-1 pure-JSON gap for SRD compliance: the 4 multi-rarity SRD parents (Figurine of Wondrous Power, Potion of Giant Strength, Potions of Healing, Spell Scroll) each get explicit variant unrolls so the pack covers every SRD-listed variant by name. Also cleans up 15 duplicate entries inadvertently created by slice 224.
+
+**Cleanup**: slice 224 added 15 `-srd` magic-itemKind entries for potions / oils that already existed in the pack as `consumable` itemKind (Potion of Climbing, Potion of Growth, Potion of Heroism, Potion of Invisibility, Potion of Mind Reading, Potion of Poison, Potion of Resistance, Potion of Speed, Potion of Vitality, Potion of Water Breathing, Potion of Animal Friendship, Potion of Diminution, Potion of Flying, Oil of Sharpness, Oil of Slipperiness). Surgically removed the 15 duplicates; the original consumable entries (which carry richer description text + onConsume hooks) remain canonical.
+
+**Variant unrolls added** (20 new entries):
+
+- **Potions of Healing** (1 new): Supreme Healing (Very Rare). Greater + Superior already in pack as consumables; base Potion of Healing also already present.
+- **Potion of Giant Strength** (5 new): Frost / Stone / Fire (all Rare), Cloud (Very Rare), Storm (Legendary). Hill (Uncommon) already in pack.
+- **Figurine of Wondrous Power** (9 new): Bronze Griffon / Ebony Fly / Golden Lions / Ivory Goats / Marble Elephant / Onyx Dog / Serpentine Owl (Rare), Obsidian Steed (Very Rare), Silver Raven (Uncommon).
+- **Spell Scroll** (10 new): Cantrip / 1st Level (Common), 2nd / 3rd (Uncommon), 4th / 5th (Rare), 6th / 7th / 8th (Very Rare), 9th (Legendary). The 9 named-by-spell consumables (Spell Scroll of Fire Bolt, Magic Missile, etc.) remain in pack as descriptive variants alongside the new level-keyed canonicals.
+
+**Coverage**: pack magic-item count 271 → 276 (after net +20 −15). SRD 5.2.1 magic-item pack-presence is now **complete** at the canonical-variant level. Every SRD H4 entry has at least one pack representation.
+
+Tests: 1587 pass, 209 skipped. Drift audit green on all 276 magic items. tsc clean. No engine changes; no schema changes.
+
 **Content: SRD 5.2.1 magic-item pack-completion sweep (slice 224)**
 
 Pure-content bulk addition: 149 SRD 5.2.1 magic-item entries that were SRD-listed but missing from the pack. Each entry ships in the existing minimal schema-only shape (`{ id, itemKind: 'magic', name, rarity, requiresAttunement, effects: [] }`); rarity and attunement are parsed directly from each item's SRD type-line and match the drift audit's automated check.
