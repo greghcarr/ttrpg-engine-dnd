@@ -75,11 +75,12 @@ arcane-gate, aura-of-purity, aura-of-vitality, blinding-smite, branding-smite, c
 
 The audit covered spell names (case-insensitive against SRD H4 entries in `references/srd-markdown/spells.md`) and the variant/rename mapping. It does **not** verify:
 
-- Spell level (pack `level` vs SRD level)
 - Casting time, range, duration, components (pack vs SRD)
 - Damage / save / scaling specifics (pack `mechanicalEffects` vs SRD body text)
 
-A follow-up audit could apply the same scripted pattern to those secondary fields.
+Slice 177 closed the spell-level and spell-school gaps from the original audit. Level: zero drift across the surviving 336 spells. School: 13 drifts fixed (Acid Splash, Dancing Lights, Divine Favor, Earthquake, Etherealness, Flaming Sphere, Giant Insect, Glibness, Heal, Mass Cure Wounds, Mass Heal, Power Word Heal, Reincarnate). Most were 2014 PHB schools that SRD 5.2.1 reclassified; the largest cluster is the Heal family (Heal / Mass Cure Wounds / Mass Heal) moving from evocation to abjuration.
+
+A follow-up audit could apply the same scripted pattern to the remaining secondary fields (range, duration, components, mechanical specifics).
 
 ## Re-running the audit
 

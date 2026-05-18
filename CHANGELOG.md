@@ -4,6 +4,29 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell schools (slice 177)**
+
+Audit pass over every spell in the pack against SRD 5.2.1 school + level. The slice-151 spell audit had explicitly deferred secondary fields including school; this slice closes that gap. 13 school drifts found and fixed; spell level had zero drift.
+
+Schools fixed (pack to SRD 5.2.1):
+- Acid Splash: conjuration to evocation (2014 was conjuration; 2024 PHB reclassified)
+- Dancing Lights: evocation to illusion
+- Divine Favor: evocation to transmutation
+- Earthquake: evocation to transmutation
+- Etherealness: transmutation to conjuration
+- Flaming Sphere: evocation to conjuration
+- Giant Insect: transmutation to conjuration
+- Glibness: transmutation to enchantment
+- Heal: evocation to abjuration
+- Mass Cure Wounds: evocation to abjuration
+- Mass Heal: evocation to abjuration
+- Power Word Heal: evocation to enchantment
+- Reincarnate: transmutation to necromancy
+
+Most are 2014-PHB-flavored schools that the 2024 PHB / SRD 5.2.1 reclassified (the Heal family moving from evocation to abjuration is the most visible cluster).
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: Fighter Indomitable + Druid Wild Shape uses (slice 176)**
 
 SRD 5.2.1 value-drift sweep continued.
