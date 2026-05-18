@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.9, 8 SRD 5.2.1 adventuring packs + Component Pouch**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new `itemKind: 'gear'` entries: the seven canonical adventuring packs plus Component Pouch (a spellcasting-focus substitute rather than a focus itself).
+
+- New ids: `burglars-pack`, `component-pouch`, `diplomats-pack`, `dungeoneers-pack`, `entertainers-pack`, `explorers-pack`, `priests-pack`, `scholars-pack`. Source: equipment.md lines 1346, 1386, 1398, 1435, 1439, 1443, 1602, 1632.
+- Cohort theme: bundled equipment + spellcaster utility. Packs are SRD multi-item bundles whose entire identity is "what's inside"; Component Pouch joins this batch because it's the most-spellcaster-adjacent gear entry remaining (RAW: holds a spellcaster's Material components).
+- Departure from gear-stub convention: all 8 ship with the `description` field populated, unlike the pure-stub `{ id, itemKind, name }` shape used by batches 4.1 / 4.3 to 4.8 and the alpha.5 seed gear. Reason: a "Burglar's Pack" entry without a contents list is meaningless to a consumer; the whole point of pack entries is the bundle composition. Descriptions are SRD-verbatim contents lists matching equipment.md text exactly.
+- The SRD descriptions in the contents lists use informal short names that differ from the pack's canonical name field in three places: "Hooded Lantern" / "Bullseye Lantern" (canonical: "Lantern, Hooded" / "Lantern, Bullseye"), "Map or Scroll Cases" (canonical: "Case, Map or Scroll"), and "Fine Clothes" (canonical: "Clothes, Fine"). The descriptions are kept SRD-verbatim rather than canonicalized; consumer code that wants to resolve description references to ids can name-match either form.
+- Diplomat's Pack references Perfume in its contents list. Perfume is an SRD-canonical entry (equipment.md line 1578) that has not been authored as a standalone item in any prior batch; will land in a future "narrative-utility scraps" batch alongside the remaining unship SRD entries.
+- Component Pouch description matches SRD verbatim ("Watertight pouch filled with compartments that hold all the free Material components of your spells").
+
+Coverage bump: items 280 to 288 total, gear 63 to 71. Adventuring-gear catalog walk now effectively complete: only 4 SRD 5.2.1 H4 entries remain unship across the equipment.md catalog (the three deferred-with-reason focus subforms from batch 4.8 plus the Ammunition Varies entry). Plus the Net (1 GP) simple-ranged weapon and three SRD-listed potions (Diminution, Poison, Vitality) on the consumables / weapons sides.
+
 **Content authoring: items batch 4.8, 8 SRD 5.2.1 spellcasting-focus subforms**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries spanning the three SRD spellcasting-focus families.

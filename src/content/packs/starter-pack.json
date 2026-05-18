@@ -2121,7 +2121,15 @@
     { "id": "druidic-focus-yew-wand", "itemKind": "gear", "name": "Druidic Focus, Yew Wand" },
     { "id": "holy-symbol-amulet", "itemKind": "gear", "name": "Holy Symbol, Amulet" },
     { "id": "holy-symbol-emblem", "itemKind": "gear", "name": "Holy Symbol, Emblem" },
-    { "id": "holy-symbol-reliquary", "itemKind": "gear", "name": "Holy Symbol, Reliquary" }
+    { "id": "holy-symbol-reliquary", "itemKind": "gear", "name": "Holy Symbol, Reliquary" },
+    { "id": "burglars-pack", "itemKind": "gear", "name": "Burglar's Pack", "description": "Contains: Backpack, Ball Bearings, Bell, 10 Candles, Crowbar, Hooded Lantern, 7 flasks of Oil, 5 days of Rations, Rope, Tinderbox, and Waterskin." },
+    { "id": "component-pouch", "itemKind": "gear", "name": "Component Pouch", "description": "Watertight pouch filled with compartments that hold all the free Material components of your spells." },
+    { "id": "diplomats-pack", "itemKind": "gear", "name": "Diplomat's Pack", "description": "Contains: Chest, Fine Clothes, Ink, 5 Ink Pens, Lamp, 2 Map or Scroll Cases, 4 flasks of Oil, 5 sheets of Paper, 5 sheets of Parchment, Perfume, and Tinderbox." },
+    { "id": "dungeoneers-pack", "itemKind": "gear", "name": "Dungeoneer's Pack", "description": "Contains: Backpack, Caltrops, Crowbar, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin." },
+    { "id": "entertainers-pack", "itemKind": "gear", "name": "Entertainer's Pack", "description": "Contains: Backpack, Bedroll, Bell, Bullseye Lantern, 3 Costumes, Mirror, 8 flasks of Oil, 9 days of Rations, Tinderbox, and Waterskin." },
+    { "id": "explorers-pack", "itemKind": "gear", "name": "Explorer's Pack", "description": "Contains: Backpack, Bedroll, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin." },
+    { "id": "priests-pack", "itemKind": "gear", "name": "Priest's Pack", "description": "Contains: Backpack, Blanket, Holy Water, Lamp, 7 days of Rations, Robe, and Tinderbox." },
+    { "id": "scholars-pack", "itemKind": "gear", "name": "Scholar's Pack", "description": "Contains: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox." }
   ],
   "monsters": [
     {
