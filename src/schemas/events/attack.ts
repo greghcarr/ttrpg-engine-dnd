@@ -36,6 +36,14 @@ export const AttackRolledEventSchema = EventEnvelopeSchema.extend({
   // hostility models can layer additional predicates. Undefined when
   // attacker/target positions are unknown.
   attackerHasAllyAdjacentToTarget: z.boolean().optional(),
+  // Slice 206: true when the attack was emitted via planOpportunityAttack,
+  // false otherwise. Surfaced so predicates can scope to OAs without
+  // having to inspect the planner. Canonical user: Hunter L7 Defensive
+  // Tactics (Escape the Horde arm) — `ImposeDisadvantageOnAttackers`
+  // gated on `event.isOpportunityAttack === true`. Undefined on older
+  // event logs (pre-slice 206); reducers and predicates treat the
+  // missing case as `false`.
+  isOpportunityAttack: z.boolean().optional(),
 });
 export type AttackRolledEvent = z.infer<typeof AttackRolledEventSchema>;
 

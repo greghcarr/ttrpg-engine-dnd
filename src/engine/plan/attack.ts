@@ -261,6 +261,12 @@ export interface ResolveAttackInput {
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
   readonly cover?: CoverKind;
   readonly at: string;
+  // Slice 206: set true when the attack is an opportunity attack
+  // (called from planOpportunityAttack). Surfaced on the emitted
+  // AttackRolled.isOpportunityAttack field and threaded into the
+  // attackerFacts map so predicates (Hunter Escape the Horde, future
+  // OA-specific riders) can scope to OAs without sniffing the planner.
+  readonly isOpportunityAttack?: boolean;
 }
 
 export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> => {
@@ -399,6 +405,9 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // fiend / undead). Entries with no predicate apply unconditionally.
   const attackerFacts = new Map<string, unknown>([
     ['attackerCreatureType', getCreatureType(attacker, content)],
+    // Slice 206: surfaces opportunity-attack-ness to predicate-gated
+    // ImposeDisadvantageOnAttackers entries (Hunter Escape the Horde).
+    ['event.isOpportunityAttack', input.isOpportunityAttack === true],
   ]);
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers(attackerFacts)
@@ -531,6 +540,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     ...(attackerHasAllyAdjacentToTarget !== undefined
       ? { attackerHasAllyAdjacentToTarget }
       : {}),
+    ...(input.isOpportunityAttack === true ? { isOpportunityAttack: true } : {}),
   };
 
   const stateAfterAttack = applyAll(state, [attackRolled]);

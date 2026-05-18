@@ -83,6 +83,7 @@ export const planOpportunityAttack = (
     weaponInstanceId: intent.weaponInstanceId,
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
     at,
+    isOpportunityAttack: true,
   });
   return [reactionConsumed, ...resolution];
 };

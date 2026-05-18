@@ -940,7 +940,19 @@
           {
             "id": "defensive-tactics",
             "name": "Defensive Tactics",
-            "effects": []
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "defensive-tactics",
+                "prompt": "Choose Escape the Horde (opportunity attacks against you have Disadvantage) or Multiattack Defense (deferred-stub: needs a per-attacker turn-bound condition not yet wired).",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "escape-the-horde", "label": "Escape the Horde", "effects": [{ "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "event.isOpportunityAttack", "value": true } }] },
+                  { "id": "multiattack-defense", "label": "Multiattack Defense", "effects": [] }
+                ]
+              }
+            ]
           }
         ],
         "11": [

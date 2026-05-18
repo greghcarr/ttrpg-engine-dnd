@@ -68,6 +68,8 @@ const buildEventFacts = (
       'event.attackerHasAllyAdjacentToTarget',
       event.attackerHasAllyAdjacentToTarget ?? false,
     );
+    // Slice 206.
+    facts.set('event.isOpportunityAttack', event.isOpportunityAttack === true);
     facts.set(
       'event.attackerIsSource',
       appliedFrom?.sourceCharacterId !== undefined

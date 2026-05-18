@@ -4,6 +4,21 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: AttackRolled.isOpportunityAttack flag + Hunter L7 Escape the Horde (slice 206)**
+
+Adds an optional `isOpportunityAttack` boolean to [src/schemas/events/attack.ts](src/schemas/events/attack.ts)'s `AttackRolledEvent`. The field is stamped `true` only when the attack flows through `planOpportunityAttack`; regular attacks omit it (treated as `false` by predicates). The flag is also threaded into:
+
+- [src/engine/plan/attack.ts](src/engine/plan/attack.ts)'s `attackerFacts` map (so `ImposeDisadvantageOnAttackers` entries with a predicate can gate on OA-ness at attack-roll time).
+- [src/engine/triggers/dispatch.ts](src/engine/triggers/dispatch.ts)'s `buildEventFacts` (so OnEvent riders can filter triggers on `event.isOpportunityAttack`).
+
+`resolveAttack` gains an optional `isOpportunityAttack?: boolean` input; `planOpportunityAttack` passes `true` when calling `resolveAttack` so the flag flows through one path.
+
+Canonical user: Hunter L7 Defensive Tactics, Escape the Horde arm. The L7 feature now ships as a 2-option OfferChoice. Escape the Horde wires fully via `ImposeDisadvantageOnAttackers` gated on `{ kind: 'eq', path: 'event.isOpportunityAttack', value: true }`. The Multiattack Defense arm remains a deferred-stub (needs a per-attacker turn-bound `multiattack-defense-active` condition + the slice-103 attacker-side condition-applied flow; would unblock as a follow-up slice).
+
+Tests: 4-case planner test in [tests/unit/engine/plan-opportunity-attack-flag.test.ts](tests/unit/engine/plan-opportunity-attack-flag.test.ts) (OA stamps the flag; regular attacks don't; Hunter with Escape the Horde rolls OA disadvantage; Hunter with Escape the Horde does NOT impose disadvantage on regular attacks). Golden scenario with transcript at [tests/golden/s206-escape-the-horde.test.ts](tests/golden/s206-escape-the-horde.test.ts) walks the OA flow showing the `[disadvantage]` tag on the AttackRolled event.
+
+Pure event-field + predicate-fact slice; no new effect kind. EFFECT_KINDS stays at 44.
+
 **Engine: GrantMaxHealingDice + Life Domain L17 Supreme Healing (slice 205)**
 
 Adds the `GrantMaxHealingDice` marker primitive (43 to 44 EFFECT_KINDS). RAW (SRD 5.2.1): "When you would normally roll one or more dice to restore HP with a spell or Channel Divinity, you don't roll those dice; you use the highest possible value instead."
