@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.11 (Hag trio)**
+
+Three new SRD 5.2.1 statblocks: Sea Hag (CR 2), Green Hag (CR 3), Night Hag (CR 5). Closes the canonical SRD 5.2.1 Hag roster. Splits across two creature types: Sea + Green ship as Fey (roster moves from 4 to 6); Night ships as Fiend (roster moves from 16 to 17). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Night Hag wires Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 cohort moves from 27 to 28). Pack monster total moves from 161 to 164.
+
+Defers under existing engine gaps: Coven Magic on all three (once-per-long-rest spell-cast-from-list gated on "within 30 ft of two hag allies" — new ally-proximity predicate + per-long-rest budget primitive); Sea Hag Vile Appearance start-of-turn aura with creature-type predicate gate (Beast / Humanoid only); Sea Hag Death Glare Recharge 5-6 with HP-threshold-instant-0-HP branch (novel deferral); Night Hag Soul Bag attached-stateful-item-as-entity with 7-day-recreation lifecycle (extends Erinyes Magic Rope gap); Night Hag Nightmare Haunting 1/Day cross-plane spell-as-monster-action with HP-maximum-decrease + soul-trap + no-raise-from-dead riders (densest novel composite this batch); Night Hag Shape-Shift bonus action (folds into Vampire / Lycanthrope Shape-Shift gap); Green Hag Spellcasting envelope with WIS-keyed spellcasting (first non-INT hag Spellcasting list); Green Hag Claw 1d6 poison rider folds into the on-hit-poison-damage-rider gap.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.10 (Lycanthrope cohort)**
 
 Five new SRD 5.2.1 statblocks: Wererat (CR 2), Werewolf (CR 3), Wereboar (CR 4), Weretiger (CR 4), Werebear (CR 5). Closes the canonical SRD 5.2.1 Lycanthrope roster in a single batch and adds the first `subtype: "lycanthrope"` cohort to the pack. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Werebear is the first NG monster in the pack; Weretiger the first true-neutral non-Beast. Pack monster total moves from 156 to 161.
