@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.6 (Adult Metallic Dragon tier-up)**
+
+Five new SRD 5.2.1 statblocks: Adult Brass Dragon (CR 13), Adult Copper Dragon (CR 14), Adult Bronze Dragon (CR 15), Adult Silver Dragon (CR 16), Adult Gold Dragon (CR 17). Mirror of slice 1.18 (Adult Chromatics) for the Metallic ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) (non-lair stats only). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 27 to 32). Pack monster total moves from 136 to 141. Adult Gold at CR 17 with PB +6 ties with Adult Red as the second-highest-CR Adult-tier statblock in the pack.
+
+Defers under existing engine gaps: Multiattack on all five (with the doubled "multiattack-with-options" sub-shape — one Rend can be replaced by either a secondary breath use or a Spellcasting use); Legendary Resistance 3/Day on all five (folds into the existing gap alongside Adult Chromatics + Aboleth); full Legendary Action menus per color (3 uses/round, Pounce + a per-color signature action — Brass Blazing Light, Bronze Guiding Light + Thunderclap, Copper Giggling Magic + Mind Jolt, Silver Chill + Cold Gale, Gold Banish + Guiding Light); innate Spellcasting envelopes on all five (each at-will + 1/Day-each list includes a Shapechange-into-beast-or-humanoid at-will entry); secondary non-damaging breath weapons (Sleep / Slowing / Repulsion / Paralyzing / Weakening) folds into the slice-4.5 secondary-non-damaging-breath gap. Two novel mechanic deferrals from the Adult-tier legendary action menus: Copper Giggling Magic 1d6-subtract-from-D20-test debuff (first non-flat per-roll modifier in the pack) and Gold Banish temporary-removal-from-encounter (Incapacitated + transported-to-demiplane until start of attacker's next turn). On-hit elemental damage rider on Rend ships at Adult tier (1d8 per color), distinct from the Young Metallic's pure-slashing Rend.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.5 (Young Metallic Dragon opener)**
 
 Five new SRD 5.2.1 statblocks: Young Brass Dragon (CR 6), Young Copper Dragon (CR 7), Young Bronze Dragon (CR 8), Young Silver Dragon (CR 9), Young Gold Dragon (CR 10). Opens the Metallic Dragon ladder with the canonical Young tier, mirroring slice 1.17 (Young Chromatics). First non-Chromatic dragons in the pack; first cluster of Good-aligned Dragons (3 LG: Bronze, Silver, Gold; 2 CG: Brass, Copper). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 22 to 27). Pack monster total moves from 131 to 136.
