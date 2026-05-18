@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.10 (Lycanthrope cohort)**
+
+Five new SRD 5.2.1 statblocks: Wererat (CR 2), Werewolf (CR 3), Wereboar (CR 4), Weretiger (CR 4), Werebear (CR 5). Closes the canonical SRD 5.2.1 Lycanthrope roster in a single batch and adds the first `subtype: "lycanthrope"` cohort to the pack. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Werebear is the first NG monster in the pack; Weretiger the first true-neutral non-Beast. Pack monster total moves from 156 to 161.
+
+Defers under existing engine gaps: Multiattack on all five (with the multiattack-with-options pattern — two of one weapon attack with a one-attack Bite/Gore swap-in, same shape as the Metallic Dragon Multiattack-with-secondary-breath); Shape-Shift bonus action on all five (folds into the Vampire Shape-Shift gap with form-specific action availability — true / hybrid / animal form labels); Lycanthropy curse rider on the signature attack (CON save DC 11-14 vs cursed-on-drop-to-0-turn-into-the-same-lycanthrope-under-GM-control with 24-hour per-target immunity stamp on save success — densest single deferral in this batch, composite of on-hit-save-or-condition + on-drop-to-0-spawn-specific-statblock-with-set-HP + per-target 24-hour immunity stamp shared with Mummy Dreadful Glare / Adult Chromatic Frightful Presence). Wereboar Tusk Charge folds into the existing Charge / Pounce / Trampling Charge gap; Werewolf Pack Tactics adds the fifth pack-tactics user; Weretiger Prowl bonus action introduces an opportunity-attack-immunity-for-this-movement primitive (composite with inline Hide action). Form-specific speeds (Werebear bear-form 40-walk + climb 30; Wereboar / Weretiger / Werewolf animal-form 40-walk) are deferred under Shape-Shift; pack ships true-form speed (walk 30) only.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.9 (Vampire + mummy roster)**
 
 Five new SRD 5.2.1 statblocks: Mummy (CR 3), Vampire Familiar (CR 3), Vampire Spawn (CR 5), Vampire (CR 13), Mummy Lord (CR 15). First broad Undead expansion since the original seed; the Undead roster moves from 8 to 13 entries. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Mummy + Mummy Lord ship fire vulnerability + necrotic / poison damage immunity + the canonical five-condition Undead immunity profile (charmed / exhaustion / frightened / paralyzed / poisoned). All three Vampire variants ship necrotic damage resistance. Mummy Lord wires Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 cohort moves from 26 to 27, the first new MR user since batch 4.2). Vampire + Mummy Lord both ship Legendary Resistance 3/Day (gap now has 12 3/Day users). Pack monster total moves from 151 to 156.
