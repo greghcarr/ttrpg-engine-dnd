@@ -2165,7 +2165,8 @@
     { "id": "musical-horn", "itemKind": "tool", "name": "Horn", "category": "musical" },
     { "id": "musical-lyre", "itemKind": "tool", "name": "Lyre", "category": "musical" },
     { "id": "musical-pan-flute", "itemKind": "tool", "name": "Pan Flute", "category": "musical" },
-    { "id": "musical-shawm", "itemKind": "tool", "name": "Shawm", "category": "musical" }
+    { "id": "musical-shawm", "itemKind": "tool", "name": "Shawm", "category": "musical" },
+    { "id": "musical-viol", "itemKind": "tool", "name": "Viol", "category": "musical" }
   ],
   "monsters": [
     {

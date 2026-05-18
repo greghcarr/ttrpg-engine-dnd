@@ -4,6 +4,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.15, Viol (closes SRD Musical Instruments 10/10)**
+
+Single-entry closure batch. New id `musical-viol`, name "Viol", `category: 'musical'`. Source: equipment.md line 749. Closes the SRD 5.2.1 Musical Instrument variant catalog (10/10 shipped: Lute from alpha.5 + 8 from batch 4.14 + Viol from this batch).
+
+Coverage bump: items 324 to 325, tools 36 to 37. SRD 5.2.1 `## Tools` section is now fully shipped modulo the pre-existing alpha.5 miscategorization of `thieves-tools` / `herbalism-kit` (both still flagged as `category: 'artisan'` instead of `'other'`; awaits engine-session fix at merge time).
+
 **Content authoring: items batch 4.14, 8 SRD 5.2.1 Musical Instrument sub-forms**
 
 Continues the tools catalog walk against `references/srd-markdown/equipment.md`. Eight new `itemKind: 'tool'` entries with `category: 'musical'`, covering 8 of the 9 unship Musical Instrument variants from the SRD's multi-form Musical Instrument entry (line 749).
