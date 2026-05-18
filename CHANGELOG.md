@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell halfOnSuccess (slice 189)**
+
+Audited every save-and-damage spell's `halfOnSuccess` flag against the SRD body's "half as much damage on a successful save" phrasing. One drift:
+
+- weird: `halfOnSuccess: false` to `true`. SRD: "On a successful save, a target takes half as much damage only." Pack had it false from a misread of the spell's frightened-stage mechanic.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: more spell concentration / duration drift (slice 188)**
 
 Audited every pack spell's `concentration` flag against the SRD body's Duration line. Three additional drifts found beyond what slice 178 caught:
