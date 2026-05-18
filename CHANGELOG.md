@@ -4,6 +4,28 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: SRD 5.2.1 magic-item pack-completion sweep (slice 224)**
+
+Pure-content bulk addition: 149 SRD 5.2.1 magic-item entries that were SRD-listed but missing from the pack. Each entry ships in the existing minimal schema-only shape (`{ id, itemKind: 'magic', name, rarity, requiresAttunement, effects: [] }`); rarity and attunement are parsed directly from each item's SRD type-line and match the drift audit's automated check.
+
+**Coverage**: pack magic-item count jumps **122 → 271**. SRD 5.2.1 magic-item presence coverage climbs from ~46% to **~99%**. The drift audit (rarity + attunement) passes on every one of the 271 entries.
+
+**Highlights of what landed**: Animated Shield, Apparatus of the Crab variants, Belt of Dwarvenkind, Cloak of Arachnida / Cloak of Invisibility, Crystal Ball (all four variants: base + Mind Reading + Telepathy + True Seeing), the full +1/+2/+3 ammunition/armor/shield/weapon templates as SRD-canonical single entries (alongside the existing pack-split variants), the staff cohort (Staff of Fire / Frost / Power / the Magi / the Python / the Woodlands / Striking / Swarming Insects / Thunder and Lightning / Withering), Bag of Devouring / Tricks, Robe of Scintillating Colors / Stars, Rod of Absorption / Alertness / Lordly Might / Resurrection / Rulership / Security, the full Manual of * cohort (Bodily Health / Gainful Exercise / Golems / Quickness of Action), the full Talisman / Tome / Cube / Dust / Oil / Periapt families, plus iconic singletons like Sphere of Annihilation, Well of Many Worlds, Wings of Flying, and the legendary Defender / Luck Blade / Nine Lives Stealer named swords.
+
+**Deferred** (6 SRD entries; each requires variant-instance pack convention before it can be added as a single canonical line):
+
+- **Figurine of Wondrous Power** (10+ statblock-bearing variants: Bronze Griffon, Ebony Fly, etc.)
+- **Potion of Giant Strength** (6 rarity variants by giant type)
+- **Potions of Healing** (4 rarity variants: Healing / Greater / Superior / Supreme)
+- **Spell Scroll** (10 rarity-by-spell-level variants; the pack ships 9 named consumables under this umbrella)
+- **Giant Fly** + **Avatar of Death** are creature statblocks embedded in `magic-items.md` (Bag of Tricks fly variant; Deck of Many Things companion), not actually magic items themselves.
+
+The 4 variant-bearing parents (Figurine, Giant Strength Potion, Healing Potion, Spell Scroll) need each variant explicitly added; that's a content-only follow-up slice once the audit harness for variant naming is settled. The 2 statblock entries (Giant Fly, Avatar of Death) belong in `monsters` if anywhere.
+
+Net effect: the SRD 5.2.1 magic-item catalog is **substantially complete** at the pack-presence level. Mechanical wiring of the 149 new entries is a separate, much larger track (most need primitives like UseItem / ConsumeItem planners, OverrideAbilityScore, variant-instance pattern, WeaponCritRider, ItemSpellGrant; tracked in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md)).
+
+Tests: drift audit + spell-coverage tests + full suite pass after the bulk insert; **1587 tests, 209 skipped, 0 failed**. No engine changes; no schema changes.
+
 **Content: SRD 5.2.1 completion sweep — pure JSON wins (slice 223)**
 
 Pure content addition focused on closing the SRD 5.2.1 catalog with entries that need no engine work. Closes every SRD-listed entry that was missing from the pack and unblockable by JSON alone.
