@@ -1,4 +1,4 @@
-import type { Campaign, CampaignState, Engine, Event } from 'ttrpg-engine-dnd';
+import type { Campaign, CampaignState, Engine, Event } from 'dnd-srd-engine';
 
 // The shape of intents the demo dispatch loop knows about. Each variant
 // is a discriminated record keyed by `kind`; the host translates it

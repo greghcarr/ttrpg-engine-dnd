@@ -6,8 +6,8 @@
 // here and CI auto-covers it. The demo's scenario-picker reads the
 // same list and renders one option per entry.
 
-import type { Campaign, ContentPack, Engine } from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+import type { Campaign, ContentPack, Engine } from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 import { buildGoblinSkirmish } from './goblin-skirmish.js';
 import { buildFrightenedHalfling } from './frightened-halfling.js';
 import { buildMistyStepOccupied } from './misty-step-occupied.js';

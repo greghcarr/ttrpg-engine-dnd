@@ -142,12 +142,12 @@ const resolved = resolveContent([pack1, pack2]);
 const issues = validateCrossReferences(resolved);
 ```
 
-`loadStarterPack()` returns the bundled starter pack. `STARTER_PACK_RAW` exposes the underlying object if you need to inspect or extend it. `import('ttrpg-engine-dnd/starter-pack')` is a real subpath so browser consumers can code-split the starter content off the main bundle.
+`loadStarterPack()` returns the bundled starter pack. `STARTER_PACK_RAW` exposes the underlying object if you need to inspect or extend it. `import('dnd-srd-engine/starter-pack')` is a real subpath so browser consumers can code-split the starter content off the main bundle.
 
 ## RNG
 
 ```ts
-import { defaultRNG, seededRNG, throwOnCallRNG } from 'ttrpg-engine-dnd';
+import { defaultRNG, seededRNG, throwOnCallRNG } from 'dnd-srd-engine';
 ```
 
 `seededRNG(seed)` for deterministic tests. `throwOnCallRNG()` is the architectural canary: pass it into a replay to prove `apply()` never reaches for randomness.

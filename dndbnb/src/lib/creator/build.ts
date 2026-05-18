@@ -5,7 +5,7 @@ import {
   newCharacterId,
   type Character,
   type ResolvedContent,
-} from 'ttrpg-engine-dnd';
+} from 'dnd-srd-engine';
 import { abilityMod, computeFinalAbilities, type CreatorState } from './state';
 
 export const buildCharacter = (

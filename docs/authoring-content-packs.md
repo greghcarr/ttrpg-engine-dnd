@@ -1,6 +1,6 @@
 # Authoring content packs
 
-`ttrpg-engine-dnd` ships only the rules engine and a starter content pack. Any class feature past level 1, any subclass, any spell beyond the ~33 in the starter, any DMG magic item beyond the 9 included, any monster beyond the 6 statblocks — you write it yourself. This guide is the reference for doing that.
+`dnd-srd-engine` ships only the rules engine and a starter content pack. Any class feature past level 1, any subclass, any spell beyond the ~33 in the starter, any DMG magic item beyond the 9 included, any monster beyond the 6 statblocks — you write it yourself. This guide is the reference for doing that.
 
 It assumes you've already read [getting-started.md](getting-started.md) and [concepts.md](concepts.md). If you haven't, those explain what a content pack *is* and how it fits into the engine. This document is about *what to put in one*.
 
@@ -37,7 +37,7 @@ A content pack is one JSON file shaped like this:
 ## Loading and validation workflow
 
 ```ts
-import { loadContentPack, resolveContent, validateCrossReferences } from 'ttrpg-engine-dnd';
+import { loadContentPack, resolveContent, validateCrossReferences } from 'dnd-srd-engine';
 
 const raw = JSON.parse(fs.readFileSync('my-pack.json', 'utf-8'));
 

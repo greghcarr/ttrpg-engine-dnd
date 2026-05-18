@@ -35,7 +35,7 @@ import {
   type InitiativeRolledEvent,
   type ItemAcquiredEvent,
   type TurnStartedEvent,
-} from 'ttrpg-engine-dnd';
+} from 'dnd-srd-engine';
 
 export interface DownedWizardSession {
   readonly engine: Engine;

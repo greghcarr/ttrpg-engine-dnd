@@ -1,4 +1,4 @@
-ttrpg-engine-dnd
+dnd-srd-engine
 Copyright (c) 2026 Greg Carr
 
 This package contains two categories of material, governed by two licenses.
@@ -83,5 +83,5 @@ populated; the SRD drift audit skips itself when the directory is absent.
 the Coast LLC. This project is not affiliated with, endorsed by, or sponsored
 by Wizards of the Coast.
 
-The package name `ttrpg-engine-dnd` uses generic descriptive terms; "dnd" is
+The package name `dnd-srd-engine` uses generic descriptive terms; "dnd" is
 used in the lowercase descriptive sense, not as a trademark of any product.

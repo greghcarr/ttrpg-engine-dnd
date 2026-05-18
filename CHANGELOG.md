@@ -4,6 +4,62 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Rename: package and repo now `dnd-srd-engine` (slice 247)**
+
+The package was previously named `ttrpg-engine-dnd`. With the legacy alpha.0-alpha.5 takedown going through on npm, the name became unrecoverable. Renamed to `dnd-srd-engine` — clearer about scope (SRD 5.2.1, not full PHB / DMG / MM) and npm-available.
+
+What changed:
+
+- `package.json` `name`, `repository.url`, `homepage`, `bugs.url` updated.
+- `vite.config.ts` library name `DndSrdEngine` (was `TtrpgEngineDnd`) and bundle filename `dnd-srd-engine.${ext}` (was `ttrpg-engine-dnd.${ext}`).
+- Repo-wide global find-and-replace across 56 source / config / doc / consumer-app files. Two patterns: `ttrpg-engine-dnd` → `dnd-srd-engine` (lowercase-hyphenated) and `TtrpgEngineDnd` → `DndSrdEngine` (PascalCase).
+- `package-lock.json` regenerated via `npm install --package-lock-only` so the lockfile's own top-level `name` field matches.
+
+What stays:
+
+- The submodule URL `github.com/greghcarr/dnd-5e-srd-markdown` is unaffected (different repo, different purpose). The CC-BY-4.0 attribution inheritance is unchanged.
+- Historical CHANGELOG entries' wording was updated to reference the new name for consistency. Git history preserves the actual rename slice (this one); past slices' textual references now align with current state rather than perpetuating the old name.
+- The `dndbnb/` consumer app (also in this worktree) had its `ttrpg-engine-dnd` imports rewritten in the same sweep.
+
+Coordinated manual steps (after this slice commits and lands on origin):
+
+1. Rename the GitHub repo from `ttrpg-engine-dnd` to `dnd-srd-engine` (Settings → Repository name). GitHub auto-creates a redirect for the old URL.
+2. Update the local git remote: `git remote set-url origin https://github.com/greghcarr/dnd-srd-engine.git`.
+3. Rename the local working directory: `mv "Visual Studio Code/ttrpg-engine-dnd" "Visual Studio Code/dnd-srd-engine"`.
+4. (Bonus, intentional) the auto-memory directory at `~/.claude/projects/-Users-greghcarr-Documents-Visual-Studio-Code-ttrpg-engine-dnd/` becomes orphaned — a Claude Code session opened in the new directory will create a fresh memory dir, which aligns with the planned fresh-agent test.
+
+Pre-commit Uncle Bob audit:
+- Names: `dnd-srd-engine` reflects the engine's actual scope (D&D, SRD 5.2.1). `DndSrdEngine` follows the same TitleCase pattern as the prior `TtrpgEngineDnd`. No surprise.
+- DRY: a single global sed pass touched all 56 files at once instead of per-file edits, avoiding drift between references. Verified zero residuals via post-sweep grep.
+- SRP: pure rename slice. No semantic engine / content changes; the diff is purely identifier substitution + lockfile regeneration.
+- Magic numbers: N/A.
+- at-threading: N/A.
+- Mechanical outcomes asserted: tsc clean post-rename; full vitest suite (1643 tests) passes post-rename; package-lock.json's `name` field matches package.json's `name` field; no residual occurrences of the old name anywhere in the working tree (excluding the submodule, which is properly excluded from rename scope).
+- Tests: no new test code. Existing test suite is the gate (any broken import path or type reference would surface here).
+
+**Docs + infra: fresh-agent discovery polish (slice 246)**
+
+Closes the gaps surfaced by the Uncle Bob audit of slices 244-245's onboarding refresh. No engine or content surface touched; this is a "make the fresh-agent test actually succeed" slice.
+
+Six small fixes that compound:
+
+1. **CLAUDE.md branch-from inconsistency.** Slice 244 said "branch off `main` or off `dev` (both fine)"; that's wrong because branching off `main` loses recent `dev` work. Corrected to "branch off `dev`" with the rationale inline.
+2. **CLAUDE.md stale slice number.** The Goal section referenced "currently at slice 203"; we're far past that. Replaced the hardcoded number with a pointer to `git log --oneline | head -5` so the doc doesn't drift on every slice.
+3. **README primitive-count drift.** The why-this-engine section said "About 25 declarative primitives"; the architecture section said "fixed vocabulary of 43"; the actual `EFFECT_KINDS` catalog is currently 49. Both prose mentions now read "around 50" with an authoritative pointer to [src/schemas/effects.ts](src/schemas/effects.ts), so future drift only requires the count detail row to update.
+4. **CI submodule checkout.** [.github/workflows/ci.yml](.github/workflows/ci.yml) now passes `submodules: recursive` to `actions/checkout@v5`. Without this, the SRD drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) self-skips on every CI run and SRD regressions silently land green. This was the most consequential gap from the slice-245 submodule rollout.
+5. **AGENTS.md** at the repo root. Thin pointer to [CLAUDE.md](CLAUDE.md) so AI coding agents that don't auto-load `CLAUDE.md` (Codex CLI, Cursor, Continue, others) still find the working manual. Documents the cross-vendor agent-config conventions and explicitly tells an agent that can't read CLAUDE.md to refuse non-trivial changes.
+6. **.cursorrules** at the repo root. Cursor-specific entry point. Summarizes the seven load-bearing rules from CLAUDE.md (quality bar, commit-don't-push, dev-branch, SRD canon, slice cadence, Uncle Bob audit, pre-commit checks) and points to the full working manual.
+7. **docs/starter-pack-gaps.md** gains a "How to pick a slice" intro at the top. Previously opened with "Engine-internal accounting..." which was maintainer-voiced; now opens with a 5-step new-contributor flow that points back at [CLAUDE.md](CLAUDE.md) for the working norms, then explains the relationship between the "Future engine slices" and "Deferred primitives backlog" tables. The previous content-attribution.md cross-reference is preserved under a "Relationship to other docs" subhead.
+
+Pre-commit Uncle Bob audit:
+- Names: `AGENTS.md` matches the cross-vendor convention emerging from OpenAI Codex CLI and others; `.cursorrules` is Cursor's literal expected filename. Both are dot-or-uppercase to stand out at the repo root. No surprise naming.
+- DRY: AGENTS.md and .cursorrules are thin pointers to CLAUDE.md, not duplicates. Each file's content tells the agent "this is a pointer; the canonical source is CLAUDE.md." `.cursorrules` does inline a 7-rule summary because Cursor's read of `.cursorrules` is gated and brief — readers might not click through. That's a deliberate redundancy with an explicit "these seven are a summary, not a replacement" note at the bottom. The drift risk is one file (`.cursorrules`); flagged for an annual / per-major-rev sync check.
+- SRP: each new file has one job. AGENTS.md routes non-Claude agents. .cursorrules routes Cursor specifically. CI submodule flag enables the drift audit gate. CLAUDE.md and README edits each correct one specific staleness or inconsistency.
+- Magic numbers: README primitive-count update uses "around 50" with a pointer to the authoritative `EFFECT_KINDS` rather than embedding an exact count that would drift. CLAUDE.md drops its slice-number reference for the same drift-resistance reason.
+- at-threading: N/A (no events).
+- Mechanical outcomes asserted: CI's `submodules: recursive` will be verified by the next PR's CI run picking up the submodule (the SRD drift audit should now report results instead of self-skipping). Fresh-agent test on a clean clone will exercise AGENTS.md / `.cursorrules` discoverability.
+- Tests: no new test code. The existing SRD drift audit becomes an effective CI gate as a side effect of the checkout fix.
+
 **Infra: SRD 5.2.1 markdown as git submodule (slice 245)**
 
 Closes the blocker that prevented a fresh contributor from doing SRD-aligned content work. Previously `references/srd-markdown/` was gitignored and lived only on Greg's machine; a stranger cloning the repo had no documented path to obtain it. Now the directory lands as a git submodule pointing at [`github.com/greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown) (CC-BY-4.0, derived from the Wizards-released SRD 5.2.1).
@@ -1133,12 +1189,12 @@ Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four
 
 Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:
 
-- `package.json`: added `"private": true` to gate `npm publish` from accidentally running. Removed `prepublish:check`, `prepublishOnly`, and `release` scripts plus `publishConfig`. Kept `main` / `module` / `types` / `exports` / `files` so consumers cloning the repo and depending on it via `github:greghcarr/ttrpg-engine-dnd` get a clean resolver path.
-- `README.md`: "Quick start" + "Install" sections replaced with git-clone instructions; `Slice 36` history entry rewritten ("build packaging" rather than "npm publish prep"). `npm install ttrpg-engine-dnd@alpha` references removed.
-- `CLAUDE.md`: first-paragraph "Published on npm as `ttrpg-engine-dnd`" line replaced with a note that the package is now repo-only with `private: true`. The old "All three names aligned on 2026-05-12" line is gone (only two names — local dir + GitHub repo — apply now).
+- `package.json`: added `"private": true` to gate `npm publish` from accidentally running. Removed `prepublish:check`, `prepublishOnly`, and `release` scripts plus `publishConfig`. Kept `main` / `module` / `types` / `exports` / `files` so consumers cloning the repo and depending on it via `github:greghcarr/dnd-srd-engine` get a clean resolver path.
+- `README.md`: "Quick start" + "Install" sections replaced with git-clone instructions; `Slice 36` history entry rewritten ("build packaging" rather than "npm publish prep"). `npm install dnd-srd-engine@alpha` references removed.
+- `CLAUDE.md`: first-paragraph "Published on npm as `dnd-srd-engine`" line replaced with a note that the package is now repo-only with `private: true`. The old "All three names aligned on 2026-05-12" line is gone (only two names — local dir + GitHub repo — apply now).
 - `VERSIONING.md`: "Publish workflow" section renamed to "Release workflow" and rewritten; `npm run release` / `prepublishOnly` references replaced with a tag-and-push flow. Concrete-next-bumps table notes the alpha.0 and alpha.5 entries as originally-published-then-unpublished.
 - `docs/getting-started.md`: install section switched to a `package.json` git-ref snippet.
-- `docs/web-demo-plan.md`: risk table and history note no longer reference `npm install ttrpg-engine-dnd@latest`.
+- `docs/web-demo-plan.md`: risk table and history note no longer reference `npm install dnd-srd-engine@latest`.
 - `dndbnb/README.md`: subtitle link points at GitHub instead of npmjs.com.
 
 Tests: 1466 pass, tsc --noEmit clean, `npm run build` green.
@@ -2429,7 +2485,7 @@ The web demo lives under `/web/` and is not shipped in the npm tarball (excluded
 
 The third pre-alpha. Closes the engine-gap punch-list down to two ⚪ items (sanity and mass-combat variant rules, each its own slice), ships all three remaining layers of the testing standard (Layer 7 property tests with `fast-check`, Layer 8 feature-coverage matrix, Layer 9 public-API contract test), authors the first subclass content (12 of ~50, one per class at L3), wires five more class features at L1-5 (Barbarian Unarmored Defense + Danger Sense, Sorcerer Sorcerous Restoration, Paladin Lay on Hands, Wizard Arcane Recovery), wires the Bard's L3 Expertise + L5 Font of Inspiration, and lands a new `planDodge` plus an `ImposeDisadvantageOnAttackers` effect primitive so the Dodge action actually defends.
 
-Test count grew from 563 to 691 (128 new tests across 22 new files); all replay-equivalence, RNG-capture, and contract invariants still hold. Build now emits a separate `dist/starter-pack.{js,cjs,d.ts}` chunk so browser consumers can code-split the starter content off the main bundle (`import('ttrpg-engine-dnd/starter-pack')`).
+Test count grew from 563 to 691 (128 new tests across 22 new files); all replay-equivalence, RNG-capture, and contract invariants still hold. Build now emits a separate `dist/starter-pack.{js,cjs,d.ts}` chunk so browser consumers can code-split the starter content off the main bundle (`import('dnd-srd-engine/starter-pack')`).
 
 ### Added
 
@@ -2461,7 +2517,7 @@ Test count grew from 563 to 691 (128 new tests across 22 new files); all replay-
   Five smoke tests in `tests/unit/content/class-features-l1-5.test.ts` build PCs at the relevant levels and assert derivations land. Class-features-matrix split: 29 → 34 wired, 17 → 14 stub, 46 → 48 total at the content layer.
 - **Two more Bard class features wired** — Expertise (L3) grants `expertise` proficiency on Insight + Persuasion (fixed picks; OfferChoice-driven selection waits on a richer choice-resolution path). Font of Inspiration (L5) adds a `RecoverResource('bardic-inspiration', 'all', on short rest)` so the Bard's inspiration pool refreshes on short rest at L5+ per RAW 2024. Class-features-matrix split: 34 → 36 wired, 14 → 12 stub. Two smoke tests added: one verifies the effect-stack reports `expertise` on the chosen skills and not on others; one is a derivation completion check for the L5 Bard. Ranger Fighting Style (L2) attempted but reverted to stub — Archery's "+2 to ranged attacks" needs a conditional predicate the derivation evaluator doesn't yet populate facts for.
 - **`engine.plan.dodge`** — RAW 2024 Dodge action. Emits `ActionEconomyConsumed('action')` + `ConditionApplied('dodged')`. The new `dodged` condition carries two effects: a new `ImposeDisadvantageOnAttackers` primitive (mirror of `GrantAdvantageToAttackers`) and `SetAdvantage` on DEX saves. The attack planner now consults both the target's `grantsAdvantageToAttackers()` and `imposesDisadvantageOnAttackers()` and applies the 2024 advantage/disadvantage cancellation matrix: if a target both grants advantage and imposes disadvantage (e.g. Restrained + Dodged), the two cancel and the attack rolls with neither — matching RAW. Four smoke tests in `tests/unit/engine/plan-dodge.test.ts` cover the happy path, the disadvantage stack check, the not-active-combatant rejection, and the already-used-action rejection.
-- **Subpath export for the starter pack** — `import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack'` is now a real subpath. The Vite library config builds two entries (`src/index.ts` + `src/starter-pack.ts`) so the starter content JSON lands in its own chunk (~127 KB / 16 KB gzipped) separate from the main engine bundle (~208 KB / 47 KB gzipped). Browser consumers (the planned web demo, app dev servers) can `await import('ttrpg-engine-dnd/starter-pack')` only when they need the content, keeping the initial JS payload smaller.
+- **Subpath export for the starter pack** — `import { loadStarterPack } from 'dnd-srd-engine/starter-pack'` is now a real subpath. The Vite library config builds two entries (`src/index.ts` + `src/starter-pack.ts`) so the starter content JSON lands in its own chunk (~127 KB / 16 KB gzipped) separate from the main engine bundle (~208 KB / 47 KB gzipped). Browser consumers (the planned web demo, app dev servers) can `await import('dnd-srd-engine/starter-pack')` only when they need the content, keeping the initial JS payload smaller.
 - **Feature-coverage matrix** (Layer 8 of the testing standard in [CLAUDE.md](CLAUDE.md)). New `tests/coverage/features.test.ts` enumerates every notable 5.5e feature in the starter pack — 46 class features across 12 classes, all 9 weapon masteries, all 22 conditions, 30 feats by category (origin / general / fighting-style / epic-boon), every magic item with effects / charges — and snapshots each entry's wire status. `wired` means effects[] is populated and the engine derivations read them; `stub` means content has an entry but no effects yet (typically because expressing the feature needs engine work not yet done — Stunning Strike trigger, Reckless Attack timing, etc.). Current split: 29 wired class features / 17 stub. Asserts hard floors too (all six 2024 Fighting Styles ship; PHB's 15 canonical conditions all present; Rogue Sneak Attack scales at every odd level; every PHB-2024 mastery has at least one weapon in the pack). Doubles as the data-vs-code audit the standard names.
 - **Public API contract test** (Layer 9). `tests/contract/exports.test.ts` snapshots the alphabetized list of runtime exports plus a parsed list of every source-level export from the barrel (catches type-only export changes the runtime view misses). `tests/contract/types.test.ts` uses Vitest's built-in `expectTypeOf` to lock the load-bearing signatures: `createEngine`, `Engine.apply` / `applyAll` / `replay`, `Engine.commit` / `undo` / `redo`, every `Engine.plan.*` return type (PlanResult vs ShieldOutcome / PolymorphOutcome / SimulacrumOutcome / WishOutcome / ConsumeGuidanceOutcome / SpendHeroPointOutcome), plan-intent `type` discriminants, branded-ID nominal typing, the `Event` discriminated union's known members, and `serializeCampaign`/`loadCampaign`'s `Campaign ↔ string` round-trip. Writing the test surfaced a real consistency gap and fixed it: the recent additions (`CleaveIntent`, `ShieldIntent` / `ShieldOutcome`, `PolymorphIntent` / `PolymorphOutcome`, `WildShapeIntent`, `SimulacrumIntent` / `SimulacrumOutcome`, `WishIntent` / `WishOutcome`, `ConsumeGuidanceIntent` / `ConsumeGuidanceOutcome`, `MistyStepIntent`, `ExpireSpellDurationsIntent`, `TickAuraIntent`, `ForcedMarchIntent`, `GrantInitialHeroPointsIntent`, `SpendHeroPointIntent` / `SpendHeroPointOutcome`, `CastSpellIntent`, `CheckConcentrationIntent`, `MoveIntent`, `DashIntent`, `DisengageIntent`) were reachable via `engine.plan.*` but their named types weren't re-exported from `src/index.ts`. Now they are.
 - **`grittyRest` flag wired**: rest events carry `expectedDurationMinutes` (60/480 standard, 480/10080 gritty). The planner reads `state.settings.grittyRest` and stamps the right value.
@@ -2528,7 +2584,7 @@ Patch release. Documentation and attribution only; no API changes.
 - `NOTICE` file with full CC BY 4.0 attribution for SRD 5.2-derived starter-pack content. Shipped in the npm tarball alongside `LICENSE`.
 - `docs/content-attribution.md`: item-by-item audit of the starter content pack against SRD 5.2, flagging confidently-covered material, likely-covered items worth verifying for commercial use, and not-confirmed items (Bastions, Epic Boons).
 - `ContentPack` schema extended with optional `license`, `attribution`, and `derivedFrom` metadata fields. The starter pack carries `license: "CC-BY-4.0"` and a full attribution string.
-- npm package now also ships under name `ttrpg-engine-dnd` (renamed from `dnd-engine` because the original name was an unpublished squat on npm). GitHub repo renamed to match.
+- npm package now also ships under name `dnd-srd-engine` (renamed from `dnd-engine` because the original name was an unpublished squat on npm). GitHub repo renamed to match.
 
 ### Changed
 

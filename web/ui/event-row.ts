@@ -4,7 +4,7 @@
 // state-change), produces a one-line preview (type + key fields), and
 // renders the full JSON payload in a collapsed <details> below.
 
-import type { Event } from 'ttrpg-engine-dnd';
+import type { Event } from 'dnd-srd-engine';
 
 export type EventCategory = 'resolution' | 'encounter' | 'state-change';
 

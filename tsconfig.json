@@ -22,8 +22,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "ttrpg-engine-dnd": ["src/index.ts"],
-      "ttrpg-engine-dnd/starter-pack": ["src/starter-pack.ts"]
+      "dnd-srd-engine": ["src/index.ts"],
+      "dnd-srd-engine/starter-pack": ["src/starter-pack.ts"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "web/scenarios/**/*.ts"],

@@ -6,7 +6,7 @@
 // the engine grows the analogous table. Non-casters and classes that
 // gain spells at L2+ (paladin, ranger) have zero counts at L1.
 
-import type { AbilityScore } from 'ttrpg-engine-dnd';
+import type { AbilityScore } from 'dnd-srd-engine';
 
 export interface SpellCountsL1 {
   readonly cantrips: number;

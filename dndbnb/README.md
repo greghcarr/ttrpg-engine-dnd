@@ -1,6 +1,6 @@
 # dndbnb
 
-A D&D Beyond-style consumer app, powered by [ttrpg-engine-dnd](https://github.com/greghcarr/ttrpg-engine-dnd).
+A D&D Beyond-style consumer app, powered by [dnd-srd-engine](https://github.com/greghcarr/dnd-srd-engine).
 
 The source lives in this engine repo so engine changes are instantly reflected in dndbnb (no version-bump or publish cycle in between). The deploy workflow at [.github/workflows/deploy-dndbnb.yml](../.github/workflows/deploy-dndbnb.yml) pushes the built bundle to a sibling `greghcarr/dndbnb` repo's `gh-pages` branch, so the URL settles at https://greghcarr.github.io/dndbnb/.
 
@@ -45,7 +45,7 @@ npm run build:dndbnb     # production bundle to dist-dndbnb/ (uses dist/, run `n
 npm run preview:dndbnb   # serve the production bundle locally
 ```
 
-The dev alias maps `ttrpg-engine-dnd` and `ttrpg-engine-dnd/starter-pack` to local `src/`, so engine edits hot-reload into dndbnb. Production bundles import from the built `dist/`, so the deployed site runs the same code an npm consumer would.
+The dev alias maps `dnd-srd-engine` and `dnd-srd-engine/starter-pack` to local `src/`, so engine edits hot-reload into dndbnb. Production bundles import from the built `dist/`, so the deployed site runs the same code an npm consumer would.
 
 ## Source layout
 
@@ -87,8 +87,8 @@ After that, any push to `main` that touches `src/`, `dndbnb/`, `vite.dndbnb.conf
 dndbnb imports the engine as a package, not via relative paths:
 
 ```ts
-import { computeDerivedCharacter } from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+import { computeDerivedCharacter } from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 ```
 
 Vite's resolve.alias (see [vite.dndbnb.config.ts](../vite.dndbnb.config.ts)) rewrites these to local `src/` in dev and `dist/` in production. This keeps dndbnb honest about what's actually in the public API: if a function isn't exported from `src/index.ts`, dndbnb can't reach it.

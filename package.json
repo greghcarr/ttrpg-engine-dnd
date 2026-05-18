@@ -1,17 +1,17 @@
 {
-  "name": "ttrpg-engine-dnd",
+  "name": "dnd-srd-engine",
   "version": "0.1.0-alpha.5",
   "private": true,
   "description": "Standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only content model with effect-primitive vocabulary and code-handler escape hatch.",
   "type": "module",
-  "main": "./dist/ttrpg-engine-dnd.cjs",
-  "module": "./dist/ttrpg-engine-dnd.js",
+  "main": "./dist/dnd-srd-engine.cjs",
+  "module": "./dist/dnd-srd-engine.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/ttrpg-engine-dnd.js",
-      "require": "./dist/ttrpg-engine-dnd.cjs"
+      "import": "./dist/dnd-srd-engine.js",
+      "require": "./dist/dnd-srd-engine.cjs"
     },
     "./starter-pack": {
       "types": "./dist/starter-pack.d.ts",
@@ -73,12 +73,12 @@
   "author": "Greg Carr",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/greghcarr/ttrpg-engine-dnd.git"
+    "url": "git+https://github.com/greghcarr/dnd-srd-engine.git"
   },
   "bugs": {
-    "url": "https://github.com/greghcarr/ttrpg-engine-dnd/issues"
+    "url": "https://github.com/greghcarr/dnd-srd-engine/issues"
   },
-  "homepage": "https://github.com/greghcarr/ttrpg-engine-dnd#readme",
+  "homepage": "https://github.com/greghcarr/dnd-srd-engine#readme",
   "engines": {
     "node": ">=20"
   },

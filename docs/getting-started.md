@@ -8,7 +8,7 @@ The engine is not currently distributed through a package registry. Pin to the g
 
 ```jsonc
 "dependencies": {
-  "ttrpg-engine-dnd": "github:greghcarr/ttrpg-engine-dnd"
+  "dnd-srd-engine": "github:greghcarr/dnd-srd-engine"
 }
 ```
 
@@ -17,7 +17,7 @@ Peer dependencies (`zod`, `immer`, `ulid`) install transitively.
 ## 2. Create an engine with the starter pack
 
 ```ts
-import { createEngine, loadStarterPack, seededRNG } from 'ttrpg-engine-dnd';
+import { createEngine, loadStarterPack, seededRNG } from 'dnd-srd-engine';
 
 const engine = createEngine({
   contentPacks: [loadStarterPack()],
@@ -30,8 +30,8 @@ The starter pack ships in the package and includes all 12 PHB classes with full 
 ## 3. Build a character
 
 ```ts
-import { CharacterSchema, newCharacterId, newItemInstanceId, newEventId } from 'ttrpg-engine-dnd';
-import { commit } from 'ttrpg-engine-dnd';
+import { CharacterSchema, newCharacterId, newItemInstanceId, newEventId } from 'dnd-srd-engine';
+import { commit } from 'dnd-srd-engine';
 
 const alyx = CharacterSchema.parse({
   id: newCharacterId(),
@@ -118,7 +118,7 @@ All randomness was consumed inside `engine.plan.attack`. The events it returned 
 ## 6. Save and load
 
 ```ts
-import { replay, EventSchema } from 'ttrpg-engine-dnd';
+import { replay, EventSchema } from 'dnd-srd-engine';
 
 // Save: events are the durable artifact. State is computed.
 const saved = JSON.stringify({

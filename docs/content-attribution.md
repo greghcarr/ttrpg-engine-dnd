@@ -59,7 +59,7 @@ These entries reference 2024 PHB or DMG mechanics whose presence in SRD 5.2.1 th
 
 ## Trademarks
 
-"Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of the Coast LLC. This package is not affiliated with WotC. The package name `ttrpg-engine-dnd` uses generic descriptive terms; "dnd" appears in the lowercase descriptive sense, not as branding.
+"Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of the Coast LLC. This package is not affiliated with WotC. The package name `dnd-srd-engine` uses generic descriptive terms; "dnd" appears in the lowercase descriptive sense, not as branding.
 
 ## How to extend or replace the starter pack
 

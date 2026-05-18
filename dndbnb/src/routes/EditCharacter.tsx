@@ -26,8 +26,8 @@ import {
   type AbilityScore,
   type Character,
   type Spell,
-} from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+} from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 import { supabase } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { errorMessage } from '@/lib/errors';

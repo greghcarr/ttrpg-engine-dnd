@@ -9,7 +9,7 @@ For background on why the API is shaped this way, see [docs/concepts.md](concept
 The event log is the durable artifact. Save it to disk, a database, or a query string. Replay reconstructs everything.
 
 ```ts
-import { serializeCampaign, loadCampaign } from 'ttrpg-engine-dnd';
+import { serializeCampaign, loadCampaign } from 'dnd-srd-engine';
 
 // Save
 const json = serializeCampaign(campaign);
@@ -25,7 +25,7 @@ There is no "save state" step. State is computed; events are the truth.
 ## Undo and redo
 
 ```ts
-import { undo, redo } from 'ttrpg-engine-dnd';
+import { undo, redo } from 'dnd-srd-engine';
 
 campaign = undo(campaign);  // moves the cursor back one event; state recomputes
 campaign = redo(campaign);  // moves it forward
@@ -36,7 +36,7 @@ Committing new events after an undo discards the redo tail (standard text-editor
 ## Branch the timeline ("what if...")
 
 ```ts
-import { replay } from 'ttrpg-engine-dnd';
+import { replay } from 'dnd-srd-engine';
 
 const hypotheticalEvents = [...campaign.events, ...newPlannedEvents];
 const hypotheticalState = replay(hypotheticalEvents);
@@ -50,7 +50,7 @@ This is how you'd implement an AI DM evaluating "what happens if I cast Fireball
 The starter pack is JSON. The cleanest extension is to load it alongside your own pack:
 
 ```ts
-import { loadStarterPack, loadContentPack, resolveContent } from 'ttrpg-engine-dnd';
+import { loadStarterPack, loadContentPack, resolveContent } from 'dnd-srd-engine';
 
 const homebrew = loadContentPack({
   id: 'my-homebrew',
@@ -208,7 +208,7 @@ export const migrateV1ToV2 = (state: V1State): V2State => { ... };
 ## Validate a content pack before shipping
 
 ```ts
-import { loadContentPack, resolveContent, validateCrossReferences, ContentPackLoadError } from 'ttrpg-engine-dnd';
+import { loadContentPack, resolveContent, validateCrossReferences, ContentPackLoadError } from 'dnd-srd-engine';
 
 try {
   const pack = loadContentPack(json);
@@ -234,8 +234,8 @@ Shape errors throw `ContentPackLoadError` with path-pointed issues. Cross-refere
 You can write your own planners that consume RNG and return events:
 
 ```ts
-import type { CampaignState, Event } from 'ttrpg-engine-dnd';
-import { newEventId } from 'ttrpg-engine-dnd';
+import type { CampaignState, Event } from 'dnd-srd-engine';
+import { newEventId } from 'dnd-srd-engine';
 
 export const planMyHomebrewAction = (
   state: CampaignState,

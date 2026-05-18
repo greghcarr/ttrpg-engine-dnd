@@ -1,6 +1,6 @@
-# ttrpg-engine-dnd — working manual
+# dnd-srd-engine — working manual
 
-A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only library; consumers supply content packs. GitHub repo: `github.com/greghcarr/ttrpg-engine-dnd`. Not currently distributed via npm (the alpha.0-alpha.5 releases were unpublished in May 2026 on IP-cleanup grounds; see CHANGELOG).
+A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only library; consumers supply content packs. GitHub repo: `github.com/greghcarr/dnd-srd-engine`. Not currently distributed via npm (the alpha.0-alpha.5 releases were unpublished in May 2026 on IP-cleanup grounds; see CHANGELOG).
 
 **This file is the working manual.** It is auto-loaded into the context of any Claude Code instance opened in this repo. Read it end-to-end before opening anything else. The conventions below are non-negotiable; the architecture below is locked.
 
@@ -34,7 +34,7 @@ If anything in the working norms below conflicts with how you would normally ope
 - `main`: stable, releasable. Tagged versions live here. Never commit slice work directly to main.
 - `dev`: daily slice work. All slice commits land here first.
 - The user (Greg) merges `dev` into `main` on his cadence, typically when a coherent group of slices is ready to surface.
-- Branch off `main` or off `dev` (both fine for slices). Commit to `dev`. Do not push or merge to main yourself; surface the work and let the user decide.
+- Branch off `dev` (it has the latest slice work). Commit to `dev`. Do not push or merge to main yourself; surface the work and let the user decide. Branching off `main` would lose recent dev commits.
 - For multi-track parallel work (engine slices + content authoring), see [docs/parallel-authoring.md](docs/parallel-authoring.md). Worktrees still commit to `dev` (or to per-worktree feature branches that merge to `dev`).
 
 ### Commit, don't push
@@ -106,7 +106,7 @@ If a check fails, fix the cause. Never `--no-verify` or skip.
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 (slices 48 onward, currently at slice 203 with two parallel content lanes recently merged in) has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The exact slice count drifts; check `git log --oneline | head -5` for the latest. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
 
 ## SRD source of truth
 
@@ -144,7 +144,7 @@ For the slice cadence ("primitive + canonical user"), see the "Working norms" se
 
 ## System-agnostic core seam (forward-looking)
 
-ttrpg-engine-dnd has a conceptual split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. The seam is conceptual today, not enforced in code: several files that belong on the agnostic side already bake in D&D specifics. That's fine; Phase A was the right time to ship D&D shapes. The rule going forward is **stop the bleeding, don't fix the past.**
+dnd-srd-engine has a conceptual split between system-agnostic architecture and D&D-specific rules. Slice 47 (Phase F in the README roadmap) optionally extracts the agnostic layer into a `ttrpg-engine-core` package if multi-system support ever becomes a real goal. The seam is conceptual today, not enforced in code: several files that belong on the agnostic side already bake in D&D specifics. That's fine; Phase A was the right time to ship D&D shapes. The rule going forward is **stop the bleeding, don't fix the past.**
 
 **Genuinely clean today (keep that way):**
 - [src/ids.ts](src/ids.ts): branded strings, no D&D coupling.
@@ -263,7 +263,7 @@ Defers to [~/.claude/CLAUDE.md](../../../.claude/CLAUDE.md) (global) for the ful
 
 ## Parallel sessions
 
-When engine-slice work and content authoring (monsters, magic items) can both make useful progress, run them in parallel via two git worktrees: engine on `main` in the primary worktree, content on a sibling branch in `../ttrpg-engine-dnd-content`. Both worktrees share `.git` history but hold independent working files. See [docs/parallel-authoring.md](docs/parallel-authoring.md) for setup commands, the file-footprint rules each session must respect, the starter prompt for the content-session Claude chat, and merge/cleanup steps.
+When engine-slice work and content authoring (monsters, magic items) can both make useful progress, run them in parallel via two git worktrees: engine on `main` in the primary worktree, content on a sibling branch in `../dnd-srd-engine-content`. Both worktrees share `.git` history but hold independent working files. See [docs/parallel-authoring.md](docs/parallel-authoring.md) for setup commands, the file-footprint rules each session must respect, the starter prompt for the content-session Claude chat, and merge/cleanup steps.
 
 ## Slice workflow
 

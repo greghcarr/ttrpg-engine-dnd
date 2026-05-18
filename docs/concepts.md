@@ -78,7 +78,7 @@ A content pack is a JSON file with this shape:
 Each list is validated against its Zod schema (`SpeciesSchema`, `SpellSchema`, etc.). Cross-references are checked (a `background.originFeatId` must point at a real feat).
 
 ```ts
-import { loadContentPack, resolveContent, validateCrossReferences } from 'ttrpg-engine-dnd';
+import { loadContentPack, resolveContent, validateCrossReferences } from 'dnd-srd-engine';
 
 const pack = loadContentPack(myJson);             // Zod parse, throws on shape error
 const content = resolveContent([pack, otherPack]); // merge multiple packs

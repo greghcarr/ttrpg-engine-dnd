@@ -1,6 +1,6 @@
 # Trustworthiness Roadmap
 
-What it takes for `ttrpg-engine-dnd` to be safely usable for an unsupervised tabletop session against 5.5e (2024) rules. This is a planning doc, not a marketing one — pessimistic about current state, optimistic only about where the work is going.
+What it takes for `dnd-srd-engine` to be safely usable for an unsupervised tabletop session against 5.5e (2024) rules. This is a planning doc, not a marketing one — pessimistic about current state, optimistic only about where the work is going.
 
 Last calibrated: 2026-05-17, post-slice-196.
 
@@ -92,7 +92,7 @@ The two remaining ⚪ items (sanity and mass-combat variant rules) are deferred 
 
 ## Tier 4 — Replace the starter pack with the actual SRD
 
-**Goal:** ship `ttrpg-engine-dnd-srd-2024` (Slice 31 from the original Phase D plan, never done) as a separate package that supersedes the starter pack.
+**Goal:** ship `dnd-srd-engine-srd-2024` (Slice 31 from the original Phase D plan, never done) as a separate package that supersedes the starter pack.
 
 **Status:** **PARTIALLY ACHIEVED VIA THE STARTER PACK.** The split between "starter pack ships in the engine package" and "separate SRD package" remains the same as alpha.5, but the starter pack itself has filled out significantly:
 

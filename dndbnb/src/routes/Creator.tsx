@@ -8,8 +8,8 @@
 import { useMemo, useReducer, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BackLink } from '@/components/BackLink';
-import { SCHEMA_VERSION, resolveContent } from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+import { SCHEMA_VERSION, resolveContent } from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 import {
   STEP_LABELS,
   STEP_ORDER,

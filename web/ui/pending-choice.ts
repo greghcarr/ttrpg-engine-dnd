@@ -14,7 +14,7 @@
 // The resolver ships anyway so any future mode that does trigger one
 // gets a working UI for free.
 
-import type { PendingChoice } from 'ttrpg-engine-dnd';
+import type { PendingChoice } from 'dnd-srd-engine';
 import type { EngineHost } from '../engine-host.js';
 
 export interface PendingChoiceResolverOptions {

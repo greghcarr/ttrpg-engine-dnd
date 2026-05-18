@@ -26,8 +26,8 @@ Two long-lived branches:
 Clone with submodules so the SRD markdown comes along:
 
 ```
-git clone --recurse-submodules https://github.com/greghcarr/ttrpg-engine-dnd.git
-cd ttrpg-engine-dnd
+git clone --recurse-submodules https://github.com/greghcarr/dnd-srd-engine.git
+cd dnd-srd-engine
 npm install
 ```
 
@@ -90,7 +90,7 @@ For local development from a consumer app (e.g. `dndbnb`):
 ```jsonc
 // in the consumer's package.json
 "dependencies": {
-  "ttrpg-engine-dnd": "file:../ttrpg-engine-dnd"
+  "dnd-srd-engine": "file:../dnd-srd-engine"
 }
 ```
 

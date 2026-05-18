@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 // be a plain app build while the engine itself remains a library.
 //
 // Engine import boundary (per docs/web-demo-plan.md):
-//   - In dev, `ttrpg-engine-dnd` resolves to local `src/` so engine
+//   - In dev, `dnd-srd-engine` resolves to local `src/` so engine
 //     changes hot-reload into the demo.
 //   - In production, the alias points at the built `dist/` so the
 //     deployed demo runs the same bundle external consumers get.
@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
   const useSrc = mode !== 'production';
   const enginePath = useSrc
     ? resolve(__dirname, 'src/index.ts')
-    : resolve(__dirname, 'dist/ttrpg-engine-dnd.js');
+    : resolve(__dirname, 'dist/dnd-srd-engine.js');
   const starterPath = useSrc
     ? resolve(__dirname, 'src/starter-pack.ts')
     : resolve(__dirname, 'dist/starter-pack.js');
@@ -27,11 +27,11 @@ export default defineConfig(({ mode }) => {
   return {
     root: resolve(__dirname, 'web'),
     publicDir: false,
-    base: process.env.NODE_ENV === 'production' ? '/ttrpg-engine-dnd/' : '/',
+    base: process.env.NODE_ENV === 'production' ? '/dnd-srd-engine/' : '/',
     resolve: {
       alias: [
-        { find: /^ttrpg-engine-dnd\/starter-pack$/, replacement: starterPath },
-        { find: /^ttrpg-engine-dnd$/, replacement: enginePath },
+        { find: /^dnd-srd-engine\/starter-pack$/, replacement: starterPath },
+        { find: /^dnd-srd-engine$/, replacement: enginePath },
       ],
     },
     server: {

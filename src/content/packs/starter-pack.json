@@ -1,6 +1,6 @@
 {
   "id": "starter-pack",
-  "name": "ttrpg-engine-dnd starter pack",
+  "name": "dnd-srd-engine starter pack",
   "version": "0.1.0",
   "license": "CC-BY-4.0",
   "attribution": "Portions of this content pack are derived from the Dungeons & Dragons System Reference Document 5.2, copyright Wizards of the Coast LLC, used under the Creative Commons Attribution 4.0 International License (CC BY 4.0). The mechanical encodings are this package's own implementation. See docs/content-attribution.md for an item-by-item audit.",

@@ -143,7 +143,7 @@ const renderReady = (session: DemoState): void => {
 
 async function boot(): Promise<void> {
   setStatus('Loading starter pack...');
-  const { loadStarterPack } = await import('ttrpg-engine-dnd/starter-pack');
+  const { loadStarterPack } = await import('dnd-srd-engine/starter-pack');
 
   setStatus('Building scenario...');
   const starter = loadStarterPack();
