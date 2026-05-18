@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Cleric L1 Divine Order (slice 214)**
+
+Wires Cleric L1 Divine Order as a 2-option `OfferChoice`:
+
+- **Protector**: `GrantProficiency target=weapon id=martial` + `GrantProficiency target=armor id=heavy`. RAW: "Trained for battle, you gain proficiency with Martial weapons and training with Heavy armor."
+- **Thaumaturge**: `GrantSpell spellId=guidance preparation=always-prepared` + two `AddModifier` entries giving `max(1, abilityMod WIS)` on skill checks for Arcana and Religion. RAW: "You know one extra cantrip from the Cleric spell list. In addition, your mystical connection to the divine gives you a bonus to your Intelligence (Arcana or Religion) checks. The bonus equals your Wisdom modifier (minimum of +1)."
+
+Pragmatic compromise on the Thaumaturge "extra cantrip" arm: RAW lets the player pick any cleric cantrip, but the pack hardcodes Guidance for simplicity (avoids a nested OfferChoice pattern that hasn't been verified yet). Future content can swap the cantrip via a follow-up slice that introduces nested choices.
+
+Closes another missing main-class feature in the SRD 5.2.1 classes audit. Pure-content slice; no engine changes. Relies on slice 212's GrantSpell engine consumer (Thaumaturge cantrip) and existing skill-modifier predicate path.
+
+Tests: 2-case planner test in [tests/unit/engine/cleric-divine-order.test.ts](tests/unit/engine/cleric-divine-order.test.ts) verifying the resolved Protector and Thaumaturge variants each fold the correct effects into the bearer's effect stack; the Thaumaturge test exercises end-to-end ability-check computation showing INT (Arcana) total = 0 + 3 (WIS mod) = 3 for an INT-10 / WIS-16 cleric.
+
 **Content: subclass spell-list wiring sweep (slice 213)**
 
 Pure-content slice cashing in slice 212's `GrantSpell` consumer. Wires two more subclass L3 spell-list features that had been schema-only:

@@ -21,6 +21,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "bard L9 expertise-bard-9",
   "bard L10 bardic-inspiration-d10",
   "bard L15 bardic-inspiration-d12",
+  "cleric L1 divine-order",
   "cleric L2 channel-divinity",
   "cleric L6 channel-divinity-cleric-2",
   "cleric L7 blessed-strikes",

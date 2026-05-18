@@ -88,7 +88,7 @@ These don't appear in the "missing from pack" lists below.
 Filtering out the recurring patterns above, the genuinely-missing main-class features are concentrated in 2024 PHB updates the pack hasn't caught up with yet:
 
 - **Bard**: Words of Creation (L20)
-- **Cleric**: Divine Order (L1), Greater Divine Intervention (L20)
+- **Cleric**: ~~Divine Order (L1)~~ (slice 214: 2-option OfferChoice; Protector grants martial weapon + heavy armor proficiency, Thaumaturge grants Guidance cantrip + WIS-mod bonus on Arcana/Religion checks. RAW lets the cantrip be any cleric cantrip; the pack hardcodes Guidance to avoid a nested OfferChoice for now), Greater Divine Intervention (L20)
 - **Druid**: Primal Order (L1)
 - **Monk**: Heightened Focus (L10), ~~Self-Restoration (L10)~~ (slice 202: wired via `planSelfRestoration` + `GrantSelfRestoration` marker; food / water Exhaustion arm consumer-side), ~~Disciplined Survivor (L14)~~ (slice 203: 4 GrantProficiency entries on saves; same slice fixed a save-proficiency effect-stack bug that had silently inerted Slippery Mind too), ~~Superior Defense (L18)~~ (slice 209: dedicated planSuperiorDefense + superior-defense-active condition with 12 GrantResistance entries covering every non-Force damage type)
 - **Paladin**: ~~Paladin's Smite (L2)~~ (slice 210: dedicated planPaladinsSmite — bonus-action slot-spend, emits radiant DamageApplied chained to a triggering hit; +1d8 Undead/Fiend), ~~Aura Expansion (L18)~~ (slice 211: new `ExpandAuraRange` primitive replaces the prior dedup-by-id re-declarations; consumers compute effective aura range as `GrantAura.rangeFeet + auraRangeBonus()`)
