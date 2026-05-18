@@ -4,6 +4,21 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: class feature level placements (slice 172)**
+
+SRD 5.2.1 audit follow-up to slice 153's class-feature drift list. Twelve placement fixes across six classes plus one rename, all from data-side edits to starter-pack.json class `levelGrants`. No engine code touched.
+
+- Fighter: Tactical Mind L5 to L2, Tactical Shift L9 to L5, Tactical Master L11 to L9.
+- Bard: Expertise L3 to L2 (now sits alongside Jack of All Trades), Superior Inspiration L20 to L18.
+- Cleric: Channel Divinity L1 to L2 (now shares L2 with Divine Spark), Improved Blessed Strikes L17 to L14, renamed Improved Divine Intervention to Greater Divine Intervention at L20.
+- Rogue: Reliable Talent L11 to L7 (now shares L7 with Evasion), Improved Cunning Strike L14 to L11, Devious Strikes L18 to L14.
+- Ranger: Nature's Veil L9 to L14.
+- Evoker (Wizard subclass): Sculpt Spells L3 to L6 (now lives in its own L6 `levelGrants` entry separate from Evocation Savant at L3).
+
+Slice 153's audit also flagged Barbarian Improved Brutal Strike L13 to L17. That entry was incorrect: SRD 5.2.1 has Improved Brutal Strike at BOTH L13 (first additional Brutal Strike option) AND L17 (second additional option), as two separate features. The pack already places them at L13 and L17, so no edit was needed.
+
+Tests: features-test wired-class-features snapshot refreshed (Bard L2 expertise, Cleric L2 channel-divinity replacing L1, plus the three Rogue moves) by `npx vitest run tests/coverage/features.test.ts -u`. All 1452 tests pass; tsc --noEmit clean.
+
 **Content authoring: monsters batch 1.21**
 
 2 Humanoid combat tier-up entries added (closes the explicitly-called-out humanoid combat gap from the gaps-doc tail): Gladiator (CR 5), Assassin (CR 8). Gladiator extends the humanoid combatant ladder (Bandit Captain / Knight / Veteran / Berserker / Thug) up through CR 5 with three-attack Multiattack, Parry reaction, Brave save advantage, and shield-bash-with-prone; Assassin closes the high-CR rogue-archetype slot with Sneak Attack, Evasion, Assassinate, poisoned shortsword / light crossbow, and poison resistance. Both ship `traits: []`. One new mechanic-level deferral: Assassinate (composite of first-turn-advantage-on-untaken-turn-target + auto-crit-on-surprised-target; first composite needs an initiative-tracking predicate, second needs a brand-new "attack-against-surprised-target promotes to critical" attack-resolution rewrite). Folds Gladiator into Multiattack, Parry reaction, Brave save advantage, and on-hit save-or-condition (Shield Bash with STR-vs-prone); folds Assassin into Multiattack, Sneak Attack / Cunning Action / Evasion class-feature-borrow gap (Evasion adds a save-result-rewrite analogous to Legendary Resistance's install point), and poison-damage-rider-on-attack. Monster count grows from 116 to 118. The gaps-doc "notable gaps still open" tail entry has been updated: with this batch all previously-flagged tutorial / starter-encounter humanoid gaps are now closed.

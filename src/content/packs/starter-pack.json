@@ -158,7 +158,8 @@
                   "recharge": "shortRest"
                 }
               ]
-            }
+            },
+            { "id": "tactical-mind", "name": "Tactical Mind", "effects": [] }
           ],
           "columns": {}
         },
@@ -178,16 +179,16 @@
                 }
               ]
             },
-            { "id": "tactical-mind", "name": "Tactical Mind", "effects": [] }
+            { "id": "tactical-shift", "name": "Tactical Shift", "effects": [] }
           ],
           "columns": {}
         },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "9": { "proficiencyBonus": 4, "features": [{ "id": "indomitable", "name": "Indomitable", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 1, "recharge": "longRest" }] }, { "id": "tactical-shift", "name": "Tactical Shift", "effects": [] }], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [{ "id": "indomitable", "name": "Indomitable", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 1, "recharge": "longRest" }] }, { "id": "tactical-master", "name": "Tactical Master", "effects": [] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "11": { "proficiencyBonus": 4, "features": [{ "id": "extra-attack-2", "name": "Extra Attack (2)", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "tactical-master", "name": "Tactical Master", "effects": [] }], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [{ "id": "extra-attack-2", "name": "Extra Attack (2)", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [{ "id": "indomitable-2", "name": "Indomitable (2/long rest)", "effects": [{ "kind": "GrantResource", "resourceId": "indomitable", "max": 2, "recharge": "longRest" }] }, { "id": "studied-attacks", "name": "Studied Attacks", "effects": [{ "kind": "OnEvent", "id": "studied-attacks-on-miss", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": false }] } }, "actions": [{ "kind": "ApplyConditionToAttacker", "conditionId": "studied-target-active", "sourceFromEventTarget": true }] }] }], "columns": {} },
         "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
@@ -286,18 +287,18 @@
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (3d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "3d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "cunning-strike", "name": "Cunning Strike", "effects": [] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [{ "id": "expertise-rogue-2", "name": "Expertise (2 more)", "effects": [{ "kind": "OfferChoice", "choiceId": "rogue-expertise-l6", "prompt": "Choose two more skills you are proficient in to gain Expertise.", "oneOf": 2, "when": "onAcquire", "options": [{ "id": "acrobatics", "label": "Acrobatics", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "acrobatics", "level": "expertise" }] }, { "id": "athletics", "label": "Athletics", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "athletics", "level": "expertise" }] }, { "id": "deception", "label": "Deception", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "deception", "level": "expertise" }] }, { "id": "insight", "label": "Insight", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "insight", "level": "expertise" }] }, { "id": "intimidation", "label": "Intimidation", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "intimidation", "level": "expertise" }] }, { "id": "investigation", "label": "Investigation", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "investigation", "level": "expertise" }] }, { "id": "perception", "label": "Perception", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "perception", "level": "expertise" }] }, { "id": "performance", "label": "Performance", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "performance", "level": "expertise" }] }, { "id": "persuasion", "label": "Persuasion", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "persuasion", "level": "expertise" }] }, { "id": "sleight-of-hand", "label": "Sleight of Hand", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "sleight-of-hand", "level": "expertise" }] }, { "id": "stealth", "label": "Stealth", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "stealth", "level": "expertise" }] }] }] }], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (4d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "4d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "evasion-rogue", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (4d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "4d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "evasion-rogue", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }, { "id": "reliable-talent", "name": "Reliable Talent", "effects": [] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (5d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "5d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [], "columns": {} },
-        "11": { "proficiencyBonus": 4, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (6d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "6d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "reliable-talent", "name": "Reliable Talent", "effects": [] }], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (6d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "6d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "improved-cunning-strike", "name": "Improved Cunning Strike", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (7d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "7d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
-        "14": { "proficiencyBonus": 5, "features": [{ "id": "improved-cunning-strike", "name": "Improved Cunning Strike", "effects": [] }], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [{ "id": "devious-strikes", "name": "Devious Strikes", "effects": [] }], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (8d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "8d6", "damageType": "piercing" }], "oncePer": "turn" }] }, { "id": "slippery-mind", "name": "Slippery Mind", "effects": [{ "kind": "GrantProficiency", "target": "save", "id": "WIS", "level": "proficient" }, { "kind": "GrantProficiency", "target": "save", "id": "CHA", "level": "proficient" }] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (9d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "9d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
-        "18": { "proficiencyBonus": 6, "features": [{ "id": "devious-strikes", "name": "Devious Strikes", "effects": [] }], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [{ "id": "sneak-attack", "name": "Sneak Attack (10d6)", "effects": [{ "kind": "OnEvent", "id": "sneak-attack", "trigger": { "eventType": "AttackRolled", "filter": { "kind": "all", "terms": [ { "kind": "eq", "path": "event.attackerIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "any", "terms": [ { "kind": "eq", "path": "event.used", "value": "advantage" }, { "kind": "all", "terms": [ { "kind": "not", "term": { "kind": "eq", "path": "event.used", "value": "disadvantage" } }, { "kind": "eq", "path": "event.attackerHasAllyAdjacentToTarget", "value": true } ] } ] } ] } }, "actions": [{ "kind": "AddDamage", "dice": "10d6", "damageType": "piercing" }], "oncePer": "turn" }] }], "columns": {} },
         "20": { "proficiencyBonus": 6, "features": [{ "id": "stroke-of-luck", "name": "Stroke of Luck", "effects": [] }], "columns": {} }
       }
@@ -429,8 +430,8 @@
       "subclassLevel": 3,
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "bardic-inspiration", "name": "Bardic Inspiration", "effects": [{ "kind": "GrantResource", "resourceId": "bardic-inspiration", "max": 3, "recharge": "longRest" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "jack-of-all-trades", "name": "Jack of All Trades", "effects": [{ "kind": "GrantHalfProficiencyBonusFloor" }] }], "columns": {} },
-        "3": { "proficiencyBonus": 2, "features": [{ "id": "expertise-bard", "name": "Expertise", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "insight", "level": "expertise" }, { "kind": "GrantProficiency", "target": "skill", "id": "persuasion", "level": "expertise" }] }], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "jack-of-all-trades", "name": "Jack of All Trades", "effects": [{ "kind": "GrantHalfProficiencyBonusFloor" }] }, { "id": "expertise-bard", "name": "Expertise", "effects": [{ "kind": "GrantProficiency", "target": "skill", "id": "insight", "level": "expertise" }, { "kind": "GrantProficiency", "target": "skill", "id": "persuasion", "level": "expertise" }] }], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "font-of-inspiration", "name": "Font of Inspiration", "effects": [{ "kind": "RecoverResource", "resourceId": "bardic-inspiration", "amount": "all", "when": "shortRest" }] }, { "id": "bardic-inspiration-d8", "name": "Bardic Inspiration (d8)", "effects": [{ "kind": "GrantResource", "resourceId": "bardic-inspiration", "max": 3, "recharge": "longRest", "diceSize": 8 }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
@@ -445,9 +446,9 @@
         "15": { "proficiencyBonus": 5, "features": [{ "id": "bardic-inspiration-d12", "name": "Bardic Inspiration (d12)", "effects": [{ "kind": "GrantResource", "resourceId": "bardic-inspiration", "max": 3, "recharge": "longRest", "diceSize": 12 }] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "18": { "proficiencyBonus": 6, "features": [], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [{ "id": "superior-inspiration", "name": "Superior Inspiration", "effects": [] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [{ "id": "superior-inspiration", "name": "Superior Inspiration", "effects": [] }], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [], "columns": {} }
       },
       "spellcasting": { "ability": "CHA", "type": "full" }
     },
@@ -463,8 +464,8 @@
       "skillChoices": { "choices": 2, "from": ["history", "insight", "medicine", "persuasion", "religion"] },
       "subclassLevel": 3,
       "levelTable": {
-        "1": { "proficiencyBonus": 2, "features": [{ "id": "channel-divinity", "name": "Channel Divinity", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 1, "recharge": "shortRest" }] }], "columns": {} },
-        "2": { "proficiencyBonus": 2, "features": [{ "id": "divine-spark", "name": "Channel Divinity: Divine Spark", "effects": [] }], "columns": {} },
+        "1": { "proficiencyBonus": 2, "features": [], "columns": {} },
+        "2": { "proficiencyBonus": 2, "features": [{ "id": "channel-divinity", "name": "Channel Divinity", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 1, "recharge": "shortRest" }] }, { "id": "divine-spark", "name": "Channel Divinity: Divine Spark", "effects": [] }], "columns": {} },
         "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "sear-undead", "name": "Sear Undead", "effects": [] }], "columns": {} },
@@ -476,13 +477,13 @@
         "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [{ "id": "improved-blessed-strikes", "name": "Improved Blessed Strikes", "effects": [] }], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "17": { "proficiencyBonus": 6, "features": [{ "id": "improved-blessed-strikes", "name": "Improved Blessed Strikes", "effects": [] }], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [{ "id": "channel-divinity-cleric-3", "name": "Channel Divinity (3/rest)", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 3, "recharge": "shortRest" }] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [{ "id": "improved-divine-intervention", "name": "Improved Divine Intervention", "effects": [] }], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [{ "id": "greater-divine-intervention", "name": "Greater Divine Intervention", "effects": [] }], "columns": {} }
       },
       "spellcasting": { "ability": "WIS", "type": "full" }
     },
@@ -575,12 +576,12 @@
         "6": { "proficiencyBonus": 3, "features": [{ "id": "roving", "name": "Roving", "effects": [{ "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 5 }] }], "columns": {} },
         "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "9": { "proficiencyBonus": 4, "features": [{ "id": "hunters-mark-uses-4", "name": "Favored Enemy (4 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 4, "recharge": "longRest" }] }, { "id": "natures-veil", "name": "Nature's Veil", "effects": [] }], "columns": {} },
+        "9": { "proficiencyBonus": 4, "features": [{ "id": "hunters-mark-uses-4", "name": "Favored Enemy (4 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 4, "recharge": "longRest" }] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [{ "id": "tireless", "name": "Tireless", "effects": [] }], "columns": {} },
         "11": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [{ "id": "hunters-mark-uses-5", "name": "Favored Enemy (5 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 5, "recharge": "longRest" }] }, { "id": "relentless-hunter", "name": "Relentless Hunter", "effects": [] }], "columns": {} },
-        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [{ "id": "natures-veil", "name": "Nature's Veil", "effects": [] }], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [{ "id": "hunters-mark-uses-6", "name": "Favored Enemy (6 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 6, "recharge": "longRest" }] }], "columns": {} },
@@ -853,7 +854,9 @@
             "id": "evocation-savant",
             "name": "Evocation Savant",
             "effects": []
-          },
+          }
+        ],
+        "6": [
           {
             "id": "sculpt-spells",
             "name": "Sculpt Spells",
