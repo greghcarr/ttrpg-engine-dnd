@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.8, 8 SRD 5.2.1 spellcasting-focus subforms**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries spanning the three SRD spellcasting-focus families.
+
+- New ids: `arcane-focus-crystal`, `arcane-focus-orb`, `arcane-focus-rod`, `druidic-focus-sprig-of-mistletoe`, `druidic-focus-yew-wand`, `holy-symbol-amulet`, `holy-symbol-emblem`, `holy-symbol-reliquary`. Source: equipment.md Arcane Focus table (lines 1259 to 1300), Druidic Focus table (lines 1402 to 1433), Holy Symbol table (lines 1459 to 1492).
+- Cohort theme: spellcasting foci across the three SRD families. Each family is structured in `equipment.md` as a "Varies" parent entry plus a subforms table; the pack ships each subform as its own gear entry rather than the family-level "Varies" wrapper, matching the pack's existing convention for grouped variants (e.g. "Ioun Stone, Agility" / "Lantern, Bullseye"). Names use the same comma-form qualifier ("Arcane Focus, Crystal", "Holy Symbol, Amulet", etc.) so the family lineage stays parseable from the name alone.
+- Family coverage: 3 Arcane subforms (Crystal 10 GP, Orb 20 GP, Rod 10 GP), 2 Druidic (Sprig of Mistletoe 1 GP, Yew Wand 10 GP), 3 Holy Symbol (Amulet 5 GP, Emblem 5 GP, Reliquary 5 GP).
+- Three SRD subforms deferred from this batch with explicit reasons (folded into the gaps doc):
+  - Arcane Focus Staff: RAW-equivalent to the existing Quarterstaff weapon entry per the SRD note "(also a Quarterstaff)" on equipment.md line 1290. Deferred to avoid data duplication; consumers can use the Quarterstaff entry as both a weapon and an Arcane Focus.
+  - Arcane Focus Wand: the bare "Wand" gear id would collide with the magic-item-wands namespace (Wand of Magic Missiles, Wand of Fireballs, etc.). Deferred until either a namespace prefix convention is settled or the focus role gains a schema field that disambiguates without an id collision.
+  - Druidic Focus Wooden Staff: same Quarterstaff overlap deferral as the Arcane Staff (equipment.md line 1423 "Wooden staff (also a Quarterstaff)").
+- Schema note: the gear schema has no `focus: 'arcane' | 'druidic' | 'holy'` field, so the focus role stays content-side narrative for now. A future engine slice could add a focus marker to the gear schema; not deepening the schema preemptively per the "stop the bleeding, don't fix the past" rule on the agnostic-core seam.
+- Component Pouch (1 GP, equipment.md line 1386) is a spellcasting-focus substitute rather than a focus itself. Will ship in a future batch alongside the adventuring packs (Burglar's, Diplomat's, etc.) as a separate "spellcasting tools" sub-cohort, or earlier if a "miscellaneous spellcaster utility" cohort lands.
+
+Coverage bump: items 272 to 280 total, gear 55 to 63. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~10 SRD adventuring-gear entries remain unship (the 3 deferred-with-reason focus subforms, Component Pouch, 7 adventuring packs, Ammunition table) plus the Net (1 GP) simple-ranged weapon on the weapons side.
+
 **Content authoring: items batch 4.7, 8 SRD 5.2.1 traps + restraints + container stragglers**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries closing two deferred sub-cohorts in one batch.

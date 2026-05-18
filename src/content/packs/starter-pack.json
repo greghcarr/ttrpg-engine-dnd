@@ -2113,7 +2113,15 @@
     { "id": "lock", "itemKind": "gear", "name": "Lock" },
     { "id": "manacles", "itemKind": "gear", "name": "Manacles" },
     { "id": "pot-iron", "itemKind": "gear", "name": "Pot, Iron" },
-    { "id": "spikes-iron", "itemKind": "gear", "name": "Spikes, Iron" }
+    { "id": "spikes-iron", "itemKind": "gear", "name": "Spikes, Iron" },
+    { "id": "arcane-focus-crystal", "itemKind": "gear", "name": "Arcane Focus, Crystal" },
+    { "id": "arcane-focus-orb", "itemKind": "gear", "name": "Arcane Focus, Orb" },
+    { "id": "arcane-focus-rod", "itemKind": "gear", "name": "Arcane Focus, Rod" },
+    { "id": "druidic-focus-sprig-of-mistletoe", "itemKind": "gear", "name": "Druidic Focus, Sprig of Mistletoe" },
+    { "id": "druidic-focus-yew-wand", "itemKind": "gear", "name": "Druidic Focus, Yew Wand" },
+    { "id": "holy-symbol-amulet", "itemKind": "gear", "name": "Holy Symbol, Amulet" },
+    { "id": "holy-symbol-emblem", "itemKind": "gear", "name": "Holy Symbol, Emblem" },
+    { "id": "holy-symbol-reliquary", "itemKind": "gear", "name": "Holy Symbol, Reliquary" }
   ],
   "monsters": [
     {
