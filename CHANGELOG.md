@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine + content audit: class resource pool value drift (slice 174)**
+
+SRD 5.2.1 value-drift sweep for class resource pools. The audit caught four real bugs in pool sizes that the pack hardcoded with 2014 PHB values (or with values that simply diverged from RAW).
+
+Engine fix in [src/effects/builder.ts](src/effects/builder.ts): the `GrantResource` builder case previously only handled numeric `max` values and silently dropped Formula values. Two existing features in the pack (Wizard Arcane Recovery, Paladin Lay on Hands) were affected; they'd been defined with Formula `max` shapes since slice ~50 but the resource grant never reached the accumulator. Builder now evaluates the Formula via `ctx.formulaContext` (same path as `AddModifier`'s Formula branch). No new schema; just lifts the existing silent-drop.
+
+Content fixes in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json):
+
+- Cleric Channel Divinity: 1/2/3 to 2/3/4 at L2/L6/L18. SRD 5.2.1 Cleric Features table shows the Channel Divinity column starting at 2 and stepping up at L6 and L18; pack was off-by-one throughout.
+- Paladin Channel Divinity: added L11 grant (max = 3). SRD says "You gain an additional use when you reach Paladin level 11"; pack had only the L3 grant (max = 2) and never bumped.
+- Fighter Second Wind: added L4 (max = 3) and L10 (max = 4) grants. SRD Fighter Features table shows the Second Wind column at 2 (L1-3), 3 (L4-9), and 4 (L10-20); pack only set L1's 2.
+- Bardic Inspiration uses: hardcoded 3 (all four level rows) to formula `max(1, abilityMod CHA)`. SRD: "You can confer a Bardic Inspiration die a number of times equal to your Charisma modifier (minimum of once)." Applied to all four Bardic Inspiration grants (L1, L5, L10, L15). Made possible by the GrantResource Formula fix above.
+
+Snapshot: features-test wired-class-features refreshed for the four new wired entries (Fighter L4 / L10 Second Wind bumps, Paladin L11 Channel Divinity bump). The Bardic Inspiration L1/L5/L10/L15 entries were already wired and stay in place.
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: class feature 2014-flavor sweep (slice 173)**
 
 SRD 5.2.1 follow-up to slice 172. Four more entries closed from the class-audit's pack-only-features table.

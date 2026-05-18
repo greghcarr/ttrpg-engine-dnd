@@ -522,6 +522,13 @@ export const applyEffectToBuilder = (
           recharge: effect.recharge,
           source: ctx.source,
         });
+      } else if (ctx.formulaContext !== undefined) {
+        acc.addResourceGrant({
+          resourceId: effect.resourceId,
+          max: evaluateFormula(effect.max, ctx.formulaContext),
+          recharge: effect.recharge,
+          source: ctx.source,
+        });
       }
       return;
     case 'GrantProficiency':
