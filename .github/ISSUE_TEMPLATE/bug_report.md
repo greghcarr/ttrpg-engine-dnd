@@ -27,6 +27,6 @@ What actually happened. Include stack traces or error messages if any.
 
 ## Environment
 
-- ttrpg-engine-dnd version:
+- dnd-srd-engine version:
 - Node version:
 - OS:

@@ -9,7 +9,7 @@
 // scenario there is all it takes to extend CI coverage.
 
 import { describe, expect, it } from 'vitest';
-import { replay, serializeCampaign, loadCampaign } from 'ttrpg-engine-dnd';
+import { replay, serializeCampaign, loadCampaign } from 'dnd-srd-engine';
 import { SCENARIOS } from '../../web/scenarios/index.js';
 
 describe('web demo: replay equivalence', () => {

@@ -8,7 +8,7 @@
 // derived character view.
 
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
-import { ABILITY_SCORES, type AbilityScore, type Character, type DerivedCharacter, type ResolvedContent } from 'ttrpg-engine-dnd';
+import { ABILITY_SCORES, type AbilityScore, type Character, type DerivedCharacter, type ResolvedContent } from 'dnd-srd-engine';
 
 const PAGE_WIDTH = 612;
 const PAGE_HEIGHT = 792;

@@ -24,7 +24,7 @@ import {
   type Engine,
   type Event,
   type ItemAcquiredEvent,
-} from 'ttrpg-engine-dnd';
+} from 'dnd-srd-engine';
 
 const PARTY_X = 5;
 const GOBLIN_X = 25;

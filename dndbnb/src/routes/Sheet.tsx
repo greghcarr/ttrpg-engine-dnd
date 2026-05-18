@@ -20,8 +20,8 @@ import {
   resolveContent,
   type Character,
   type DerivedCharacter,
-} from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+} from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 import { supabase, type CharacterRow } from '@/lib/supabase';
 import { useUser } from '@/lib/session';
 import { FavoriteButton } from '@/components/FavoriteButton';
@@ -127,7 +127,7 @@ export const Sheet = (): JSX.Element => {
     try {
       const base = slugify(character.name);
       if (format === 'json') {
-        // The ttrpg-engine-dnd `Character` JSON is the source of truth
+        // The dnd-srd-engine `Character` JSON is the source of truth
         // and round-trips back through CharacterSchema.parse.
         const blob = new Blob([JSON.stringify(character, null, 2)], {
           type: 'application/json',
@@ -392,7 +392,7 @@ export const Sheet = (): JSX.Element => {
                 className="export-btn"
                 onClick={() => onExport('json')}
                 disabled={exporting}
-                title="Download as ttrpg-engine-dnd JSON"
+                title="Download as dnd-srd-engine JSON"
               >
                 JSON
               </button>

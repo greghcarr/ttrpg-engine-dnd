@@ -6,7 +6,7 @@
 // can ask "can I move on from this step?" without each step knowing
 // the rules in two places.
 
-import { ABILITY_SCORES, type AbilityScore, type ResolvedContent } from 'ttrpg-engine-dnd';
+import { ABILITY_SCORES, type AbilityScore, type ResolvedContent } from 'dnd-srd-engine';
 import { getSpellCounts, isCaster } from './spell-rules';
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;

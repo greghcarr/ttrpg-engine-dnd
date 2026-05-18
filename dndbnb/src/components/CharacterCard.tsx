@@ -5,8 +5,8 @@
 // makes sense on /characters where the user owns every row).
 
 import { Link } from 'react-router-dom';
-import { resolveContent } from 'ttrpg-engine-dnd';
-import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack';
+import { resolveContent } from 'dnd-srd-engine';
+import { loadStarterPack } from 'dnd-srd-engine/starter-pack';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import { DeleteCharacterButton } from '@/components/DeleteCharacterButton';
 import { CompassFilledIcon, CompassIcon, DragHandleIcon } from '@/components/Icons';

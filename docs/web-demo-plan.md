@@ -1,8 +1,8 @@
-# Web Demo Plan — `ttrpg-engine-dnd`
+# Web Demo Plan — `dnd-srd-engine`
 
 A browser-based test harness for the engine, deployed to GitHub Pages. Single-page app, plain TypeScript + Vite, no UI framework.
 
-**Status**: v1 shipped. The Combat Sandbox, Event Inspector, Rules Lab, Scenario Gallery, and Map Panel all run live at https://greghcarr.github.io/ttrpg-engine-dnd/. The active reference for running and extending the demo lives in [web/README.md](../web/README.md). This doc preserves the design rationale and non-goals for future contributors deciding whether to add a new mode.
+**Status**: v1 shipped. The Combat Sandbox, Event Inspector, Rules Lab, Scenario Gallery, and Map Panel all run live at https://greghcarr.github.io/dnd-srd-engine/. The active reference for running and extending the demo lives in [web/README.md](../web/README.md). This doc preserves the design rationale and non-goals for future contributors deciding whether to add a new mode.
 
 ---
 
@@ -70,7 +70,7 @@ These are settled. Re-open only if implementation reveals a hard problem.
 ### Folder layout
 
 ```
-ttrpg-engine-dnd/
+dnd-srd-engine/
 ├── src/                       # existing engine, untouched
 ├── web/                       # new
 │   ├── index.html
@@ -95,7 +95,7 @@ ttrpg-engine-dnd/
 
 Import from the **package's public entry point**, the same way an external consumer would. Do not reach into `src/` internals from `web/`. If a helper is missing from the public API, add it to the engine's exports — don't sidestep the boundary. This avoids the dual-build resolution issue where Vite picks ESM but a transitively-imported module picks CJS and Zod schemas get registered twice.
 
-**Decision (settled):** `vite.web.config.ts` aliases `ttrpg-engine-dnd` and `ttrpg-engine-dnd/starter-pack` to the local `src/index.ts` and `src/starter-pack.ts` for dev (so changes to engine source hot-reload into the demo), and falls back to the built `dist/` for production (so the deployed demo uses the same bundle real consumers get). Document this in `web/README.md` when scaffolding.
+**Decision (settled):** `vite.web.config.ts` aliases `dnd-srd-engine` and `dnd-srd-engine/starter-pack` to the local `src/index.ts` and `src/starter-pack.ts` for dev (so changes to engine source hot-reload into the demo), and falls back to the built `dist/` for production (so the deployed demo uses the same bundle real consumers get). Document this in `web/README.md` when scaffolding.
 
 ### Dispatch loop
 
@@ -170,7 +170,7 @@ The engine already exposes `serializeCampaign(c): string` and `loadCampaign(s): 
 `vite.web.config.ts`:
 - `root: 'web/'`
 - `build.outDir: '../docs'`
-- `base: process.env.NODE_ENV === 'production' ? '/ttrpg-engine-dnd/' : '/'`
+- `base: process.env.NODE_ENV === 'production' ? '/dnd-srd-engine/' : '/'`
 - `resolve.alias` aliases the engine paths to local `src/` in dev (see Engine import boundary above).
 
 `package.json` scripts:
@@ -185,7 +185,7 @@ The engine already exposes `serializeCampaign(c): string` and `loadCampaign(s): 
 
 ### Bundle size
 
-- Code-split the starter pack: `await import('ttrpg-engine-dnd/starter-pack')` inside each mode's init, not at module top level. (Subpath confirmed to chunk separately in `0.1.0-alpha.3`.)
+- Code-split the starter pack: `await import('dnd-srd-engine/starter-pack')` inside each mode's init, not at module top level. (Subpath confirmed to chunk separately in `0.1.0-alpha.3`.)
 - Target: initial JS payload under 250 KB gzipped. If we blow past 400 KB, stop adding features and investigate.
 
 ---
@@ -212,7 +212,7 @@ Each risk gets a specific mitigation. If a risk's mitigation can't be done in v1
 
 Strict order. Don't start step N+1 until step N works end-to-end.
 
-1. **Scaffold `web/`.** Empty `index.html`, `main.ts` that imports the engine (`createEngine` from `ttrpg-engine-dnd`, `loadStarterPack` from `ttrpg-engine-dnd/starter-pack`) and logs `engine.createCampaign({name:'demo'})` to console. `dev:web` script. Confirms both subpaths import cleanly into a Vite browser build, and that the dev alias resolves `ttrpg-engine-dnd` to local `src/`.
+1. **Scaffold `web/`.** Empty `index.html`, `main.ts` that imports the engine (`createEngine` from `dnd-srd-engine`, `loadStarterPack` from `dnd-srd-engine/starter-pack`) and logs `engine.createCampaign({name:'demo'})` to console. `dev:web` script. Confirms both subpaths import cleanly into a Vite browser build, and that the dev alias resolves `dnd-srd-engine` to local `src/`.
 2. **Engine host + dispatch loop.** `engine-host.ts` with `dispatch`, `subscribe`, `getState`. No UI yet; drive it from a `<button>` in `index.html` that fires a hardcoded `dodge` intent and logs the resulting state to console. Dodge is the simplest planner to demo because it has no targets and no dice rolls.
 3. **`goblin-skirmish.ts` scenario.** A small TypeScript file that builds the campaign state for the canned encounter: 2-4 combatants (one party fighter + one party wizard + two goblins), known initiative order, fixed starting positions. Use the engine's existing builders (`loadStarterPack`, then `engine.createCampaign` + `commit(CharacterCreated...)` chain). This is new content, not a port from `tests/golden/transcripts/` (the showcase transcript there is one big multi-act campaign, not a single-encounter scenario).
 4. **Combat Sandbox skeleton.** Render the scenario as a static list of combatants with HP. No interactivity. Confirms render-on-commit works.
@@ -233,8 +233,8 @@ If any step takes more than ~2x the time it should, stop and update this doc wit
 ### What's new in the engine since the original plan
 
 - `engine.plan.dodge` was added in `0.1.0-alpha.3` specifically for this demo. RAW 2024: emits `ActionEconomyConsumed('action')` + `ConditionApplied('dodged')`. The condition imposes disadvantage on incoming attacks and gives advantage on DEX saves. No new wiring needed in the demo beyond binding it to a button.
-- The starter-pack subpath (`ttrpg-engine-dnd/starter-pack`) shipped in `0.1.0-alpha.3`. Without it, the demo would have to either pull the full starter content into the main bundle or reach into `src/` internals — both ugly. Now `await import('ttrpg-engine-dnd/starter-pack')` from a mode's init gets a separate ~127 KB / ~16 KB-gzipped chunk.
-- `0.1.0-alpha.3` and later versions were originally on npm; the engine is no longer published to a registry. Consumers pin to `github:greghcarr/ttrpg-engine-dnd` (or a local `file:` path) for the same import surface.
+- The starter-pack subpath (`dnd-srd-engine/starter-pack`) shipped in `0.1.0-alpha.3`. Without it, the demo would have to either pull the full starter content into the main bundle or reach into `src/` internals — both ugly. Now `await import('dnd-srd-engine/starter-pack')` from a mode's init gets a separate ~127 KB / ~16 KB-gzipped chunk.
+- `0.1.0-alpha.3` and later versions were originally on npm; the engine is no longer published to a registry. Consumers pin to `github:greghcarr/dnd-srd-engine` (or a local `file:` path) for the same import surface.
 
 ### Things this plan got slightly wrong (now fixed in this doc)
 

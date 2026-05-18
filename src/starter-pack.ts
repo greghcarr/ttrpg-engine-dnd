@@ -1,4 +1,4 @@
-// Subpath export: `import { loadStarterPack } from 'ttrpg-engine-dnd/starter-pack'`.
+// Subpath export: `import { loadStarterPack } from 'dnd-srd-engine/starter-pack'`.
 //
 // Re-exports the starter-pack loader as its own entry so browser
 // consumers (the web demo, app dev servers) can code-split the

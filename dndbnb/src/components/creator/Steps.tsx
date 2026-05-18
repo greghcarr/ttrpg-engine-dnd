@@ -10,7 +10,7 @@ import {
   type AbilityScore,
   type ResolvedContent,
   type Spell,
-} from 'ttrpg-engine-dnd';
+} from 'dnd-srd-engine';
 import {
   POINT_BUY_BUDGET,
   POINT_BUY_COST,

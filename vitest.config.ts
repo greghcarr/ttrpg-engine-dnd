@@ -7,8 +7,8 @@ export default defineConfig({
       // Web demo scenarios import via the package name. Alias them
       // back to local source so the CI replay test (and any future
       // web-scenario tests) can run without a `dist/` build first.
-      { find: /^ttrpg-engine-dnd\/starter-pack$/, replacement: resolve(__dirname, 'src/starter-pack.ts') },
-      { find: /^ttrpg-engine-dnd$/, replacement: resolve(__dirname, 'src/index.ts') },
+      { find: /^dnd-srd-engine\/starter-pack$/, replacement: resolve(__dirname, 'src/starter-pack.ts') },
+      { find: /^dnd-srd-engine$/, replacement: resolve(__dirname, 'src/index.ts') },
       { find: '@', replacement: resolve(__dirname, 'src') },
     ],
   },

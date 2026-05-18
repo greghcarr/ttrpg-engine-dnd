@@ -9,7 +9,7 @@ import { resolve } from 'node:path';
 // build while sharing the engine source tree.
 //
 // Engine import boundary (same pattern as the web demo):
-//   - In dev, `ttrpg-engine-dnd` resolves to local `src/` so engine
+//   - In dev, `dnd-srd-engine` resolves to local `src/` so engine
 //     changes hot-reload into dndbnb.
 //   - In production, the alias points at the built `dist/` so the
 //     deployed app runs the same bundle external consumers get.
@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
   const useSrc = mode !== 'production';
   const enginePath = useSrc
     ? resolve(__dirname, 'src/index.ts')
-    : resolve(__dirname, 'dist/ttrpg-engine-dnd.js');
+    : resolve(__dirname, 'dist/dnd-srd-engine.js');
   const starterPath = useSrc
     ? resolve(__dirname, 'src/starter-pack.ts')
     : resolve(__dirname, 'dist/starter-pack.js');
@@ -36,8 +36,8 @@ export default defineConfig(({ mode }) => {
     base: mode === 'production' ? '/dndbnb/' : '/',
     resolve: {
       alias: [
-        { find: /^ttrpg-engine-dnd\/starter-pack$/, replacement: starterPath },
-        { find: /^ttrpg-engine-dnd$/, replacement: enginePath },
+        { find: /^dnd-srd-engine\/starter-pack$/, replacement: starterPath },
+        { find: /^dnd-srd-engine$/, replacement: enginePath },
         { find: '@', replacement: resolve(__dirname, 'dndbnb/src') },
       ],
     },

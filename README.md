@@ -1,27 +1,27 @@
-# ttrpg-engine-dnd
+# dnd-srd-engine
 
-[![CI](https://github.com/greghcarr/ttrpg-engine-dnd/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/ttrpg-engine-dnd/actions/workflows/ci.yml)
+[![CI](https://github.com/greghcarr/dnd-srd-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/greghcarr/dnd-srd-engine/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.json)
 [![Status](https://img.shields.io/badge/status-alpha-yellow)](README.md#status)
 
 A standalone, event-sourced TypeScript domain engine for Dungeons & Dragons 5.5e (the 2024 rules update). Schema-only. Bring your own content pack (a starter SRD-shaped pack ships in the box).
 
-The package is named `ttrpg-engine-dnd` because the long-term plan extracts the system-agnostic core (event sourcing, plan/commit, branded IDs, content packs, sessions, party, predicate / formula DSL) into a future `ttrpg-engine-core` package, with `ttrpg-engine-dnd` becoming the 5.5e adapter. See [VERSIONING.md](VERSIONING.md) and the Phase F slice in the roadmap below.
+The package is named `dnd-srd-engine` because the long-term plan extracts the system-agnostic core (event sourcing, plan/commit, branded IDs, content packs, sessions, party, predicate / formula DSL) into a future `ttrpg-engine-core` package, with `dnd-srd-engine` becoming the 5.5e adapter. See [VERSIONING.md](VERSIONING.md) and the Phase F slice in the roadmap below.
 
 If you are building a D&D character sheet, encounter tracker, virtual tabletop, automation tool, or AI dungeon master and you do not want to reimplement the rules engine from scratch, this is for you.
 
 ## Try it in your browser
 
-A live demo of the engine — combat sandbox + event inspector + import/export with replay verification — runs on GitHub Pages: **https://greghcarr.github.io/ttrpg-engine-dnd/** (deployed via `.github/workflows/deploy-demo.yml`; one-time setup is Settings → Pages → Source = "GitHub Actions"). Source lives under [web/](web/). See [web/README.md](web/README.md) for local development.
+A live demo of the engine — combat sandbox + event inspector + import/export with replay verification — runs on GitHub Pages: **https://greghcarr.github.io/dnd-srd-engine/** (deployed via `.github/workflows/deploy-demo.yml`; one-time setup is Settings → Pages → Source = "GitHub Actions"). Source lives under [web/](web/). See [web/README.md](web/README.md) for local development.
 
 ## Quick start
 
 The engine is not currently published to a package registry. Clone the repo and work against source:
 
 ```sh
-git clone --recurse-submodules https://github.com/greghcarr/ttrpg-engine-dnd.git
-cd ttrpg-engine-dnd
+git clone --recurse-submodules https://github.com/greghcarr/dnd-srd-engine.git
+cd dnd-srd-engine
 npm install
 npm test
 ```
@@ -64,7 +64,7 @@ Pick the doc that matches what you want:
 | Look up a specific public symbol | [docs/api-overview.md](docs/api-overview.md) |
 | See common patterns (save, undo, houserules, multiplayer sync) | [docs/recipes.md](docs/recipes.md) |
 | Author content packs (spells, classes, feats, items, monsters) | [docs/authoring-content-packs.md](docs/authoring-content-packs.md) |
-| Try the web demo in your browser | [https://greghcarr.github.io/ttrpg-engine-dnd/](https://greghcarr.github.io/ttrpg-engine-dnd/) |
+| Try the web demo in your browser | [https://greghcarr.github.io/dnd-srd-engine/](https://greghcarr.github.io/dnd-srd-engine/) |
 | Hack on the web demo locally | [web/README.md](web/README.md) |
 | Read the demo's architecture decisions | [docs/web-demo-plan.md](docs/web-demo-plan.md) |
 | Understand what's missing before the engine is trustworthy for unsupervised play | [docs/trustworthiness-roadmap.md](docs/trustworthiness-roadmap.md) |
@@ -175,7 +175,7 @@ The starter pack is intentionally a slice, not the full 2024 catalogs. This tabl
 | Weapons / armors / tools / gear | 39 weapons + 13 armors + 37 tools + 77 gear + 42 consumables | full PHB chapter | 🟢 | All PHB 2024 weapons (simple + martial) plus their 9 masteries. All 13 PHB armors. Item lane batches 4.1-4.16 closed the SRD 5.2.1 equipment.md H4 surface: 17 artisan's tools, 6 Other Tools, 10 Musical Instruments, 4 Gaming Set variants, 5 Ammunition sub-forms, 8 adventuring packs, plus alchemical-hazard consumables, light sources, containers, clothing, writing, traps, spellcasting foci, etc. |
 | Conditions | 98 (15 RAW + 83 rider) | 15 RAW | ✓ | All 15 RAW conditions plus 83 mechanic-rider conditions the engine uses (`blessed`, `baned`, `held-paralyzed-active`, `cursed-attacks-active`, `fire-shield-warm-active`, `healing-blocked-active`, `protection-from-evil-and-good-active`, `holy-aura-active`, `blade-warded-active`, `darkvision-active`, `sanctuary-active`, `studied-target-active`, `innate-sorcery-active`, etc.). |
 | Epic boons | 9 | ~16 in DMG 2024 | ⚪ | About half of the published list. |
-| Separate `ttrpg-engine-dnd-srd-2024` package | not built | — | 🟡 | Phase D Slice 31's deeper intent — extracting an SRD-derived pack as its own published package — was never done. The starter pack stands in. |
+| Separate `dnd-srd-engine-srd-2024` package | not built | — | 🟡 | Phase D Slice 31's deeper intent — extracting an SRD-derived pack as its own published package — was never done. The starter pack stands in. |
 
 #### Content triage
 
@@ -263,8 +263,8 @@ High-impact mechanics consumers will immediately want.
 
 These don't add rules; they make the library usable by people who didn't write it. Higher priority than Phase E for any consumer that isn't this repo's author.
 
-- ◐ **Slice 31.** Starter content pack bundled in the package as `src/content/packs/starter-pack.json` and exported via `loadStarterPack()`. Current contents (after Phase E content fill-out): 12 classes with 1-20 level tables and spellcasting blocks; 7 species; 8 backgrounds; ~22 feats including all six 2024 fighting styles; 9 epic boons; ~33 spells (with ~21 fully wired and ~10 still schema-only); ~25 items including 9 magic items; 6 monster statblocks (CR 1/4 - 10); the 2024 Bastion system; all 15 conditions. **Missing — by intention and by gap**: the L2+ class features carry empty `features: []` arrays for most levels (only Sneak Attack scales at the content layer; Rage / Action Surge progression / Channel Divinity options / Wild Shape forms / Ki uses / Bardic Inspiration die scaling / Extra Attack / Stunning Strike / Evasion / etc. are content-layer TODOs). **No subclasses ship**. The pack is "enough to instantiate a character and run combat at level 1-5"; for higher-level play or any subclass, consumers extend the pack from the 2024 SRD CC-BY release. There is **no separate `ttrpg-engine-dnd-srd-2024` package**; the deeper Phase D intent of extracting one was not done.
-- ✓ **Slice 32.** Two runnable adoption surfaces: (a) `/examples` with three CLI TypeScript apps — a character-sheet printer ([01-character-sheet](examples/01-character-sheet/)), an encounter-and-replay demo ([02-combat-encounter](examples/02-combat-encounter/)), and a save/load round-trip ([03-save-and-load](examples/03-save-and-load/)), each a single `npx tsx`-runnable file with an integration test in [tests/integration/examples.test.ts](tests/integration/examples.test.ts) that runs them in CI; and (b) `/web`, a browser demo deployed to GitHub Pages ([live link](https://greghcarr.github.io/ttrpg-engine-dnd/), source [web/](web/), plan [docs/web-demo-plan.md](docs/web-demo-plan.md)) featuring a Combat Sandbox (turn-aware action toolbar), an Event Inspector (virtualized event list with color-coding by category), and Export/Import event logs with on-page replay verification. A CI replay test at [tests/integration/web-scenarios.test.ts](tests/integration/web-scenarios.test.ts) asserts the replay-equivalence invariant against every shipped demo scenario. Auto-deploy via [.github/workflows/deploy-demo.yml](.github/workflows/deploy-demo.yml).
+- ◐ **Slice 31.** Starter content pack bundled in the package as `src/content/packs/starter-pack.json` and exported via `loadStarterPack()`. Current contents (after Phase E content fill-out): 12 classes with 1-20 level tables and spellcasting blocks; 7 species; 8 backgrounds; ~22 feats including all six 2024 fighting styles; 9 epic boons; ~33 spells (with ~21 fully wired and ~10 still schema-only); ~25 items including 9 magic items; 6 monster statblocks (CR 1/4 - 10); the 2024 Bastion system; all 15 conditions. **Missing — by intention and by gap**: the L2+ class features carry empty `features: []` arrays for most levels (only Sneak Attack scales at the content layer; Rage / Action Surge progression / Channel Divinity options / Wild Shape forms / Ki uses / Bardic Inspiration die scaling / Extra Attack / Stunning Strike / Evasion / etc. are content-layer TODOs). **No subclasses ship**. The pack is "enough to instantiate a character and run combat at level 1-5"; for higher-level play or any subclass, consumers extend the pack from the 2024 SRD CC-BY release. There is **no separate `dnd-srd-engine-srd-2024` package**; the deeper Phase D intent of extracting one was not done.
+- ✓ **Slice 32.** Two runnable adoption surfaces: (a) `/examples` with three CLI TypeScript apps — a character-sheet printer ([01-character-sheet](examples/01-character-sheet/)), an encounter-and-replay demo ([02-combat-encounter](examples/02-combat-encounter/)), and a save/load round-trip ([03-save-and-load](examples/03-save-and-load/)), each a single `npx tsx`-runnable file with an integration test in [tests/integration/examples.test.ts](tests/integration/examples.test.ts) that runs them in CI; and (b) `/web`, a browser demo deployed to GitHub Pages ([live link](https://greghcarr.github.io/dnd-srd-engine/), source [web/](web/), plan [docs/web-demo-plan.md](docs/web-demo-plan.md)) featuring a Combat Sandbox (turn-aware action toolbar), an Event Inspector (virtualized event list with color-coding by category), and Export/Import event logs with on-page replay verification. A CI replay test at [tests/integration/web-scenarios.test.ts](tests/integration/web-scenarios.test.ts) asserts the replay-equivalence invariant against every shipped demo scenario. Auto-deploy via [.github/workflows/deploy-demo.yml](.github/workflows/deploy-demo.yml).
 - ✓ **Slice 33.** Getting-started doc at [docs/getting-started.md](docs/getting-started.md) walking through install, engine setup, character creation, attack resolution, and save/load round-trip. API reference at [docs/api-overview.md](docs/api-overview.md) maps every public symbol by namespace (planners, derivations, events, schemas, content packs, RNG, IDs, migrations).
 - ✓ **Slice 34.** Public API conveniences. `engine.do(campaign, intent)` dispatches on `intent.type` to the right planner and commits the result in one call (covers every Phase A-C planner). `serializeCampaign(c)` writes a JSON string with id, name, schemaVersion, and events only; state is omitted because `loadCampaign(json)` replays the events to reconstruct it. `createPC({name, speciesId, backgroundId, classId, hpMax, ...})` returns a `Character` with sensible defaults; caller emits the `CharacterCreated` event themselves to add to a campaign.
 - ✓ **Slice 35.** Derivation memoization keyed on `CampaignState.version`. Every `engine.derive.*` method now caches its result per-engine; the cache invalidates automatically when `state.version` advances (i.e., on every commit). Repeated calls at the same version return the same object reference, so a UI that asks for derived AC ten times per frame across twelve combatants pays for one computation each.
@@ -287,7 +287,7 @@ Heavy on data, light on engine code. Each class slice stress-tests Phases A and 
 
 ### Phase F: Core extraction (1 slice, optional, future)
 
-- **Slice 47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `ttrpg-engine-dnd` (this package) becomes the 5.5e adapter on top of the core. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once this package is mature.
+- **Slice 47.** Extract `ttrpg-engine-core` as a separate package. The architectural layer (event sourcing, plan/commit, branded IDs, content packs, sessions, journal, party + currency abstraction, predicate + formula DSL, PendingChoice protocol, undo/redo, transcript formatter, RNG-capture proof) is system-agnostic and could be the foundation for other TTRPG engines (Pathfinder, Tales of the Valiant, Gamma World, etc.). `dnd-srd-engine` (this package) becomes the 5.5e adapter on top of the core. Only do this if multi-system support becomes a real goal; premature abstraction would slow the D&D work down for a hypothetical second consumer that doesn't exist yet. Estimated 2-4 weeks once this package is mature.
 
 ### Post-alpha.5: vocabulary expansion (slices 48–122, ongoing)
 
@@ -340,9 +340,9 @@ The engine is no longer distributed through a package registry. Pin to a git ref
 ```jsonc
 // in your consumer's package.json
 "dependencies": {
-  "ttrpg-engine-dnd": "github:greghcarr/ttrpg-engine-dnd"
+  "dnd-srd-engine": "github:greghcarr/dnd-srd-engine"
   // or, when developing alongside the engine:
-  // "ttrpg-engine-dnd": "file:../ttrpg-engine-dnd"
+  // "dnd-srd-engine": "file:../dnd-srd-engine"
 }
 ```
 
@@ -355,7 +355,7 @@ import {
   createEngine,
   loadContentPack,
   seededRNG,
-} from 'ttrpg-engine-dnd';
+} from 'dnd-srd-engine';
 import myContent from './my-content-pack.json';
 
 const engine = createEngine({
@@ -403,7 +403,7 @@ The package ships two categories of material under two licenses. See [NOTICE](NO
 
 **Starter content pack (CC BY 4.0)**: `src/content/packs/starter-pack.json` contains material derived from the Dungeons & Dragons System Reference Document 5.2, copyright Wizards of the Coast LLC, used under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/legalcode). The mechanical encodings (JSON structure, effect-primitive vocabulary, level-table shapes) are this package's own work; the derived material consists of names, structural rules, and numeric values present in SRD 5.2. Most-but-not-all of the pack is confidently SRD-covered; see the audit doc for items (notably Bastions and Epic Boons) where SRD inclusion was not independently verified by the authors.
 
-**Trademarks**: "Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast. The package name `ttrpg-engine-dnd` uses generic descriptive terms.
+**Trademarks**: "Dungeons & Dragons", "D&D", and related marks are trademarks of Wizards of the Coast LLC. This project is not affiliated with or endorsed by Wizards of the Coast. The package name `dnd-srd-engine` uses generic descriptive terms.
 
 If you build your own content pack to load into this engine, your pack's license is your choice and is independent of this package.
 

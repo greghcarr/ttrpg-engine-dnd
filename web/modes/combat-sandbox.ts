@@ -7,7 +7,7 @@
 // Dodge · End Turn. No generalization yet — the toolbar is rebuilt on
 // each commit because the active combatant moves around.
 
-import type { Campaign, OpportunityAvailableEvent } from 'ttrpg-engine-dnd';
+import type { Campaign, OpportunityAvailableEvent } from 'dnd-srd-engine';
 import type { EngineHost, Intent } from '../engine-host.js';
 import type { DemoSession } from '../scenarios/index.js';
 

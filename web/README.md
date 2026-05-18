@@ -1,6 +1,6 @@
 # Web demo
 
-GitHub Pages demo for `ttrpg-engine-dnd`. Plain TypeScript + Vite, no framework. Two modes: Combat Sandbox (left) and Event Inspector (right).
+GitHub Pages demo for `dnd-srd-engine`. Plain TypeScript + Vite, no framework. Two modes: Combat Sandbox (left) and Event Inspector (right).
 
 Plan and architecture decisions live in [docs/web-demo-plan.md](../docs/web-demo-plan.md). When something here disagrees with the plan, update the plan doc before changing course.
 
@@ -13,7 +13,7 @@ npm run build:web    # production bundle to dist-web/ (uses dist/ — run `npm r
 npm run preview:web  # serve the production bundle locally
 ```
 
-The dev alias maps `ttrpg-engine-dnd` and `ttrpg-engine-dnd/starter-pack` to local `src/`, so engine edits hot-reload into the demo. Production bundles import from the built `dist/`, so the deployed demo runs the same code an npm consumer would.
+The dev alias maps `dnd-srd-engine` and `dnd-srd-engine/starter-pack` to local `src/`, so engine edits hot-reload into the demo. Production bundles import from the built `dist/`, so the deployed demo runs the same code an npm consumer would.
 
 ## Deploying
 

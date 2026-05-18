@@ -9,15 +9,15 @@ The engine session stays on `main` in the primary worktree. The content session 
 From the primary worktree's terminal:
 
 ```bash
-git worktree add ../ttrpg-engine-dnd-content -b content/authoring-batch-1
-code ../ttrpg-engine-dnd-content
+git worktree add ../dnd-srd-engine-content -b content/authoring-batch-1
+code ../dnd-srd-engine-content
 ```
 
 In the new VS Code window's terminal:
 
 ```bash
 npm install
-ln -s ../ttrpg-engine-dnd/references references
+ln -s ../dnd-srd-engine/references references
 npx vitest run
 ```
 
@@ -37,7 +37,7 @@ Allowed:
 - All `tests/`
 - All shared docs (`CHANGELOG.md`, `docs/starter-pack-gaps.md`, `docs/api-overview.md`, `README.md`, `CLAUDE.md`)
 
-### Monster session (sibling worktree at `../ttrpg-engine-dnd-monsters`, branch `content/monsters-batch-N`)
+### Monster session (sibling worktree at `../dnd-srd-engine-monsters`, branch `content/monsters-batch-N`)
 
 Allowed:
 - `src/content/packs/starter-pack.json` — `monsters[]` array only, append-only, no modification of existing entries. No edits to any other top-level array.
@@ -51,7 +51,7 @@ Forbidden:
 - `CLAUDE.md` and the auto-memory directory.
 - `tests/coverage/__snapshots__/features.test.ts.snap` — slice 126 narrowed the per-id catalog snapshots to wired-only entries, so pure stub additions don't move this snapshot. If it does move, stop and surface the diff; do not refresh with `-u` until coordinated with the engine session.
 
-### Item session (sibling worktree at `../ttrpg-engine-dnd-items`, branch `content/items-batch-N`)
+### Item session (sibling worktree at `../dnd-srd-engine-items`, branch `content/items-batch-N`)
 
 Allowed:
 - `src/content/packs/starter-pack.json` — `items[]` array only, append-only, no modification of existing entries. No edits to any other top-level array.
@@ -69,11 +69,11 @@ Forbidden:
 Paste this into the new Claude Code chat in the monster worktree's VS Code window:
 
 ```
-We're running a parallel monster-authoring session for ttrpg-engine-dnd in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and an item-authoring session is in a third worktree handling magic items. This session is on branch `content/monsters-batch-N` in worktree `../ttrpg-engine-dnd-monsters` and is restricted to monster content. No engine code, no schema changes, no item / class / spell work.
+We're running a parallel monster-authoring session for dnd-srd-engine in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and an item-authoring session is in a third worktree handling magic items. This session is on branch `content/monsters-batch-N` in worktree `../dnd-srd-engine-monsters` and is restricted to monster content. No engine code, no schema changes, no item / class / spell work.
 
-**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep it for any rules text or statblock you're matching against; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../ttrpg-engine-dnd/references references`) makes it visible here.
+**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep it for any rules text or statblock you're matching against; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../dnd-srd-engine/references references`) makes it visible here.
 
-Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/monsters-batch-N`), `pwd` (should end in `ttrpg-engine-dnd-monsters`), and `ls references/srd-markdown/monsters-A-Z.md` (should show the file).
+Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/monsters-batch-N`), `pwd` (should end in `dnd-srd-engine-monsters`), and `ls references/srd-markdown/monsters-A-Z.md` (should show the file).
 
 Allowed edits:
 - `src/content/packs/starter-pack.json` — appending entries to the `monsters[]` array only. Do not touch any other top-level array; do not modify existing monster entries.
@@ -103,7 +103,7 @@ Pack reference conventions:
 - Skip any entry whose mechanics need an engine primitive that isn't shipped yet. Document the deferral in the gaps doc rather than half-wiring.
 
 Coordination notes:
-- The engine session is on `main`; the item session is on `content/items-batch-N` in `../ttrpg-engine-dnd-items`. JSON conflicts on `monsters[]` are unlikely since neither other session writes there.
+- The engine session is on `main`; the item session is on `content/items-batch-N` in `../dnd-srd-engine-items`. JSON conflicts on `monsters[]` are unlikely since neither other session writes there.
 - Doc conflicts on `CHANGELOG.md` and `docs/starter-pack-gaps.md` happen when sessions land near simultaneously. Resolve by keeping both blocks.
 - Each worktree maintains its own `node_modules`. If the engine session lands a dependency change in `package.json`, this worktree needs its own `npm install` to pick it up.
 
@@ -115,11 +115,11 @@ To start: read the gaps doc's Monsters section, then propose a starting batch (e
 Paste this into the new Claude Code chat in the item worktree's VS Code window:
 
 ```
-We're running a parallel item-authoring session for ttrpg-engine-dnd in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and a monster-authoring session is in a third worktree. This session is on branch `content/items-batch-N` in worktree `../ttrpg-engine-dnd-items` and is restricted to magic-item content. No engine code, no schema changes, no monster / class / spell work.
+We're running a parallel item-authoring session for dnd-srd-engine in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and a monster-authoring session is in a third worktree. This session is on branch `content/items-batch-N` in worktree `../dnd-srd-engine-items` and is restricted to magic-item content. No engine code, no schema changes, no monster / class / spell work.
 
-**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep `references/srd-markdown/magic-items.md` for item RAW text; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../ttrpg-engine-dnd/references references`) makes it visible here.
+**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep `references/srd-markdown/magic-items.md` for item RAW text; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../dnd-srd-engine/references references`) makes it visible here.
 
-Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/items-batch-N`), `pwd` (should end in `ttrpg-engine-dnd-items`), and `ls references/srd-markdown/magic-items.md` (should show the file).
+Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/items-batch-N`), `pwd` (should end in `dnd-srd-engine-items`), and `ls references/srd-markdown/magic-items.md` (should show the file).
 
 Allowed edits:
 - `src/content/packs/starter-pack.json` — appending entries to the `items[]` array only. Do not touch any other top-level array; do not modify existing entries.
@@ -166,7 +166,7 @@ In the primary (engine / `main`) worktree's terminal:
 
 ```bash
 git merge content/authoring-batch-1
-git worktree remove ../ttrpg-engine-dnd-content
+git worktree remove ../dnd-srd-engine-content
 git branch -d content/authoring-batch-1
 ```
 
@@ -180,7 +180,7 @@ The pattern accommodates a third (or fourth) parallel session if you can carve N
 
 ### Practical N=3 splits
 
-| Split | Lane A (primary, `main`) | Lane B (worktree at `../ttrpg-engine-dnd-monsters`) | Lane C (worktree at `../ttrpg-engine-dnd-items`) |
+| Split | Lane A (primary, `main`) | Lane B (worktree at `../dnd-srd-engine-monsters`) | Lane C (worktree at `../dnd-srd-engine-items`) |
 |---|---|---|---|
 | Default (current) | Engine + SRD audit + classes / spells / conditions / subclasses | Monsters only | Magic items only |
 | Content + docs polish | Engine (defers README / api-overview edits while Lane C is active) | Monsters + items | README + api-overview + tutorial / examples |
@@ -201,7 +201,7 @@ Probably 3-4 sessions before the coordination tax exceeds the parallelization be
 
 ### Setup for the default three-lane layout
 
-The two sibling worktrees already exist at `../ttrpg-engine-dnd-monsters` and `../ttrpg-engine-dnd-items` (recreated fresh at slice 176). To start a new round of work in each, open that folder in a VS Code window and in its terminal:
+The two sibling worktrees already exist at `../dnd-srd-engine-monsters` and `../dnd-srd-engine-items` (recreated fresh at slice 176). To start a new round of work in each, open that folder in a VS Code window and in its terminal:
 
 ```bash
 npm install
@@ -213,7 +213,7 @@ npx vitest run
 If a worktree was previously removed and needs to be recreated, from the primary worktree:
 
 ```bash
-git worktree add ../ttrpg-engine-dnd-monsters -b content/monsters-batch-N
+git worktree add ../dnd-srd-engine-monsters -b content/monsters-batch-N
 ```
 
 (Substitute `items` and `items-batch-N` for the item lane.)

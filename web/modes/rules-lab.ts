@@ -10,7 +10,7 @@
 // also passing in CI. The trustworthiness story for the demo is "see
 // for yourself."
 
-import type { ContentPack } from 'ttrpg-engine-dnd';
+import type { ContentPack } from 'dnd-srd-engine';
 import { ALL_PROBES, type Probe, type ProbeResult } from '../audit/probes.js';
 
 export interface RulesLabOptions {

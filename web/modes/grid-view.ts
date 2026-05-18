@@ -6,7 +6,7 @@
 // margin) so scenarios that spread out don't overflow the panel. The
 // active combatant gets a ring; downed combatants fade.
 
-import type { Campaign } from 'ttrpg-engine-dnd';
+import type { Campaign } from 'dnd-srd-engine';
 import type { EngineHost } from '../engine-host.js';
 import type { DemoSession } from '../scenarios/index.js';
 

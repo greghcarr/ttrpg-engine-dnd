@@ -7,7 +7,7 @@
 // that fully replays only when the user clicks it). Color-coded by
 // category. Click any row to expand the full JSON payload.
 
-import { loadCampaign, replay, serializeCampaign, type Campaign, type Event } from 'ttrpg-engine-dnd';
+import { loadCampaign, replay, serializeCampaign, type Campaign, type Event } from 'dnd-srd-engine';
 import type { EngineHost } from '../engine-host.js';
 import { createEventRow } from '../ui/event-row.js';
 import { firstDivergence } from '../ui/deep-equal.js';
