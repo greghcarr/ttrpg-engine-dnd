@@ -4,6 +4,20 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell AoE targeting backfill (slice 194)**
+
+Audited every pack spell against SRD body for AoE shape + size phrasing. Found 33 spells whose SRD bodies describe an area but where the pack's `targeting` field was unset. Added the field for 28 of them; skipped wall-of-ice (its "10-foot-square" describes object construct sections, not damage AoE) and disintegrate (cube describes target-corpse cleanup, not damage area).
+
+Fields added:
+- sphere (10): aura-of-life 30, conjure-minor-elementals 15, conjure-woodland-beings 10, mass-cure-wounds 30, globe-of-invulnerability 10, antimagic-field 10, holy-aura 30, meteor-swarm 40, acid-splash 5, purify-food-and-drink 5, flaming-sphere 5, pass-without-trace 30
+- cube (12): fabricate 10, hallucinatory-terrain 150, creation 5, guards-and-wards 50, heroes-feast 10, move-earth 40, programmed-illusion 30, druidcraft 5, minor-illusion 5, alarm 20, create-or-destroy-water 30, silent-image 15, phantasmal-force 10
+- cylinder (2): conjure-celestial 40, reverse-gravity 100
+- cone (1): dragons-breath 15
+
+The `targeting` field is documentation-only at the engine layer today (no planner reads it; pack convention is to also encode shape into the planner's logic), so this is data-completeness rather than runtime drift. Improves downstream consumer accuracy.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell material text bulk normalization (slice 193)**
 
 Audited every pack spell's M-component text against the SRD body's parenthesized material description. 126 mismatches found and fixed in one pass. Most are SRD 5.2.1 simplifications of 2014 PHB phrasings (the 2024 PHB systematically pared back material flavor text); a smaller subset are RAW reworks where the SRD changed the material entirely.
