@@ -1,0 +1,188 @@
+# Class feature gaps catalog
+
+Per-class catalog of which class features ship as `effects: []` stubs waiting on engine work versus what's already wired. Extracted from [starter-pack-gaps.md](starter-pack-gaps.md) in slice 249 to keep that doc readable.
+
+For the priority queue and "Future engine slices" backlog naming which primitive each stub waits on, see [starter-pack-gaps.md](starter-pack-gaps.md). For the SRD 5.2.1 audit cross-checking pack feature names + level placements, see [srd-5.2.1-audit-classes.md](srd-5.2.1-audit-classes.md).
+
+---
+
+## Class features
+
+All twelve classes have a `levelTable` keyed 1–20, but most rows ship `features: []`. The content shape exists; the data is the gap.
+
+| Class | Levels with features | Empty rows |
+|---|---|---|
+| barbarian | 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 6 (ASI / subclass-only levels) |
+| bard | 1, 2, 3, 5, 7, 9, 10, 15, 20 | 11 (ASI / subclass-only / un-named levels) |
+| cleric | 1, 2, 5, 6, 7, 10, 17, 18, 20 | 11 (ASI / subclass-only levels) |
+| druid | 1, 2, 5, 7, 9, 13, 15, 17, 18, 20 | 10 (ASI / subclass-only / un-named levels) |
+| fighter | 1, 2, 5, 9, 11, 13, 17, 20 | 12 (ASI / subclass-only levels) |
+| monk | 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 18, 20 | 5 (ASI / subclass-only levels) |
+| paladin | 1, 2, 3, 5, 6, 9, 10, 11, 14, 18 | 10 (ASI / subclass-only levels; both auras fully wired after slice 64; L18 range bump to 30ft via slice 65) |
+| ranger | 1, 2, 5, 6, 9, 10, 13, 17, 18, 20 | 10 (ASI / subclass-only levels) |
+| rogue | 1, 2, 3, 5, 6, 7, 9, 11, 13, 14, 15, 17, 18, 19, 20 | 5 (ASI / subclass-only levels) |
+| sorcerer | 1, 2, 5, 10, 15, 17, 20 | 13 (ASI / subclass-only / un-named levels) |
+| warlock | 1, 2, 3, 5, 7, 9, 11, 12, 13, 15, 17, 18, 20 | 7 (ASI / subclass-only levels) |
+| wizard | 1, 2, 5, 18, 20 | 15 (ASI / subclass-only / un-named levels) |
+
+Notable missing scaling: Wild Shape forms (the available CR / size / movement-mode beast list), Stunning Strike DC scaling, Martial Arts die (content-layer flags ship at L5 / L11 / L17 but stay as stubs — the engine's Custom martial-arts handler doesn't yet consult the level to compute the die), Sneak Attack damage (the only scaling-by-level feature that *does* currently land at the content layer). Rage use-count tiers (L3 / L6 / L12 / L17) wire after slice 49 via `GrantResource` overrides, the same pattern Channel Divinity uses; Rage damage bonus (L9 / L16) and Rage resistance / advantage still need engine work. Bardic Inspiration die scaling (L5 d8 / L10 d10 / L15 d12) wires after slice 50 via the `diceSize` field on `GrantResource`; the use-count formula is still hardcoded at 3 instead of CHA-mod-with-floor-1. Channel Divinity uses now scale fully across L1 / L6 / L18 (1 / 2 / 3 uses per rest) after slice 51. Wild Shape use-count tiers (L5 / L9 / L13 / L17) wire after slice 52 via the same pattern, hardcoding the PB-based progression instead of reading the actor's proficiency bonus.
+
+### Barbarian stub features (effects: [], waiting on engine work)
+
+Slice 49 filled the empty L3-L20 rows. Wired entries lift the rage use cap at L3 / L6 / L12 / L17. The remaining new features ship `effects: []` because each needs a primitive the engine doesn't have yet:
+
+- `primal-knowledge` (L3) — needs a "use STR mod instead of normal mod on these skill checks while raging" effect; depends on a `raging` condition the engine doesn't ship.
+- `instinctive-pounce` (L7) — bonus-action movement piggyback when entering Rage; needs the rage entry hook to attach a one-time movement grant.
+- `brutal-strike` (L9), `improved-brutal-strike` (L13), `improved-brutal-strike-mighty-roar` (L17) — replace Reckless Attack's advantage with a +1d10 (then +2d10) damage rider plus a chosen effect (Forceful Blow / Hamstring Blow / Sundering Blow / Staggering Blow). Needs a choice-at-attack-time primitive that the attack planner consults.
+- `relentless-rage` (L11) — auto-succeed a failed save once per Rage at the cost of Exhaustion; needs a save-result-replacement hook.
+- `persistent-rage` (L15) — drop the 10-round Rage duration but keep the "ends on no-attack-no-damage turn" rule; needs Rage to be a real ongoing effect with duration tracking the engine doesn't model.
+- `indomitable-might` (L18) — use STR score in place of a STR check total when lower; needs check-total replacement.
+- `primal-champion` (L20) — STR / CON +4 with a cap of 25; needs an ability-score-modification effect (the current schema only modifies derived values, not the base scores).
+
+Open item: the L1 Weapon Mastery feature (Barbarian gets 2 slots per the 2024 PHB) is not in the current pack — the L1 row only ships Rage + Unarmored Defense. That's a separate one-line fix outside this slice.
+
+### Bard stub features (effects: [], waiting on engine work)
+
+Slice 50 filled L7, L9, L10, L15, L20. Wired entries scale the Bardic Inspiration die (d8 / d10 / d12 at L5 / L10 / L15) and add a second Expertise pair at L9 (currently hardcoded to performance + deception, mirroring the L3 hardcode of insight + persuasion). The remaining stubs:
+
+- `countercharm` (L7) — Performance check to grant nearby allies a saving-throw advantage against Charmed / Frightened or to interrupt a hostile spell; needs a reaction-window primitive and a recurring action.
+- `magical-secrets` (L10) — daily-rest spell swap from any class's spell list; needs cross-class spell access plus a choice protocol that fires on long rest.
+- `superior-inspiration` (L20) — regain one Bardic Inspiration use on rolling initiative if at zero; needs an on-initiative trigger hook the engine doesn't model.
+
+The Expertise picks at L3 and L9 are hardcoded skill pairs because the existing `OfferChoice` protocol can express a player-pick but the L3 entry that shipped earlier didn't use it; the L9 entry matches L3's pattern for consistency. Moving both to player-pick is a separate small slice once any class needs the pattern (Rogue Expertise is the obvious next consumer).
+
+### Cleric stub features (effects: [], waiting on engine work)
+
+Slice 51 filled L2, L5, L7, L10, L17, L18, L20. The L18 entry wires the Channel Divinity use-count to 3/rest via `GrantResource`, completing the L1 / L6 / L18 tier ladder. The remaining stubs:
+
+- `divine-spark` (L2) — Channel Divinity option that lets the cleric heal or deal necrotic / radiant damage as a Bonus Action. Needs a "choose CD option at activation time" protocol and a saved-spell-like cast surface; the engine has `channel-divinity` as a resource but no per-option dispatch.
+- `sear-undead` (L5) — Channel Divinity (Turn Undead) adds radiant damage on a failed save. Needs Turn Undead modeled as an action plus a per-tier damage rider; not in pack.
+- `improved-blessed-strikes` (L17) — boosts Divine Strike to +2d8. Same `OnEvent` rider shape as the L7 entry but with bigger dice; honest die-scaling needs either replace-by-id semantics on level-up (so L17's OnEvent overrides L7's) or a level-conditional dice expression. Deferred until the broader die-scaling concern (Sneak Attack is the only feature that scales properly today) lands.
+- `divine-intervention` (L10) and `improved-divine-intervention` (L20) — 1/week (1/long-rest at L20) prayer for a divine effect. Needs a flag for "intervention used in last 7 days" plus a freeform DM-resolution event; closest existing surface is `CustomEffect`, but no handler ships.
+
+`blessed-strikes` at L7 is **wired (partially)** after slice 62: the `OnEvent` rider that fires +1d8 radiant on weapon hits (once per turn) is fully wired via the on-hit trigger primitive shipped in slice 61. The L7 entry is an `OfferChoice` between Divine Strike (the wired branch) and Potent Spellcasting (a stub branch — adds caster's WIS modifier to cantrip damage, needs a `TriggerAction.AddAbilityModDamage` that the engine doesn't model).
+
+Open item: L1 Divine Order (choice between Protector and Thaumaturge sub-features at character creation) is not in the L1 features array. Same shape as Barbarian's missing L1 Weapon Mastery; deferred to a later one-line slice.
+
+### Druid stub features (effects: [], waiting on engine work)
+
+Slice 52 filled L5, L7, L9, L13, L15, L17, L18, L20. Wired entries hardcode Wild Shape use counts at PB-based tiers (3 / 4 / 5 / 6 at L5 / L9 / L13 / L17). The pack still uses short-rest recharge from the L2 entry; 2024 RAW is long-rest recharge with PB uses, so the use-count progression matches the rulebook but the recharge cadence is a pre-existing inconsistency. Stubs:
+
+- `wild-resurgence` (L5) — regain one Wild Shape charge when casting a 1st+ level spell, or convert a Wild Shape charge into a 1st-level slot. Needs a "gain resource" trigger action (the engine's `OnEvent` ships only `SpendResource`, not a grant) plus a player-elected reverse swap.
+- `elemental-fury` (L7) and `improved-elemental-fury` (L15) — choice between Potent Spellcasting (+WIS mod to druid cantrip damage) or Wild Strike (extra unarmed-strike rider when Wild Shaped). Needs the same on-hit-rider + cantrip-bonus primitives Cleric's Blessed Strikes is blocked on.
+- `beast-spells` (L18) — cast druid spells while in Wild Shape. Needs the engine's Wild Shape handler to consult an "allow caster actions" flag rather than swap the entire actor.
+- `archdruid` (L20) — unlimited Wild Shape (treat the resource as auto-refunded on use), plus the ability to disregard verbal / somatic / non-cost material components for druid spells. Needs an "ignore resource cost" override.
+
+The CR / movement-mode / size catalog of Wild Shape forms (Beast Shape, Combat Wild Shape, etc.) is still entirely consumer territory; the engine accepts a chosen statblock at transformation time but no canonical druid form library ships in the pack.
+
+### Sorcerer stub features (effects: [], waiting on engine work)
+
+Slice 53 filled L10, L15, L17, L20 (plus an addition at L5). Wired entries bump the Sorcery Points max via `GrantResource` overrides at the milestone levels (L5 → 5, L10 → 10, L15 → 15, L17 → 17, L20 → 20). Non-milestone levels (L3 / L4 / L6 / L7 / L8 / L9 / L11 / L12 / L13 / L14 / L16 / L18 / L19) keep whichever max the last preceding milestone set, which under-counts the player's actual SP by 1 or 2 at most. The cleaner long-term fix is a `Formula` max on the L2 entry that reads the actor's sorcerer level; that's an L1-side edit deferred for now to keep this slice focused on filling empty rows. Stubs:
+
+- `metamagic-known-3` (L10) and `metamagic-known-4` (L17) — increase the count of Metamagic options the sorcerer knows. The L2 Metamagic entry ships as `Custom { handlerId: 'metamagic' }`; no handler is registered, and the "known options" count isn't a real engine concept (players track their own list). These tier entries note the level the count changes; full wiring needs Metamagic as a first-class concept with a per-option enum.
+- `arcane-apotheosis` (L20) — 2024 capstone: while Innate Sorcery is active, spending a Sorcery Point to use Metamagic on a spell costs zero points instead. Needs Innate Sorcery to be an actual condition the engine recognizes and a Metamagic-cost-zeroing override.
+
+Observation: `innate-sorcery` is currently a 2-use long-rest resource at L1 with no scaling. PHB 2024 keeps it at 2/long-rest through L20, so no tier ladder is required there.
+
+### Warlock stub features (effects: [], waiting on engine work)
+
+Slice 54 filled every Warlock level that has a PHB 2024 feature (L1, L2, L3, L5, L7, L9, L11, L12, L13, L15, L17, L18, L20). All entries ship `effects: []` because the Warlock's defining mechanics map poorly to the current effect vocabulary:
+
+- `eldritch-invocations-N` (L1 / L2 / L5 / L7 / L9 / L12 / L15 / L18) — the "known count" of invocations rises across eight tiers, but invocations themselves are a content catalog the pack doesn't ship. Each tier is a stub flag for now; full wiring needs (a) every PHB 2024 invocation as a Feat-like content row with its own `effects[]`, and (b) an `OfferChoice` at each tier that lets the player pick from the catalog. The L2 entry doubles as Magical Cunning's home (1/long-rest action that regains all expended Pact Magic slots after 1-minute meditation) — needs a "regain spell slots of a specific casting type" trigger action the engine doesn't expose.
+- `pact-boon` (L3) — choice between Pact of the Blade (summon a bound weapon), Chain (find familiar at-will + special familiar list), Tome (extra cantrips + ritual book), Talisman (proficiency-bonus die to ally checks). Each pact is itself a multi-effect bundle; needs a top-level `OfferChoice` whose options carry sub-effect arrays the engine already understands (`GrantSpell` at-will, summon-system reuse for Chain, `GrantProficiency` for Tome cantrips).
+- `mystic-arcanum-6/7/8/9` (L11 / L13 / L15 / L17) — one chosen Warlock spell of the given level, castable once per long rest without expending a Pact slot. Shape fits `OfferChoice + GrantSpell { preparation: 'oncePerLongRest' }` but the Warlock spell list isn't curated for the choice yet; stub until the spell catalog grows enough at L6+ to make the pick meaningful (the pack currently ships 0 spells at L6-9).
+- `eldritch-master` (L20) — 1/long-rest action to regain all Pact Magic slots. Same shape as Magical Cunning's regain mechanic; same missing primitive.
+
+Pre-existing gap closed by this slice: Warlock now ships `skillChoices` (choose 2 from Arcana, Deception, History, Intimidation, Investigation, Nature, Religion) and `subclassLevel: 3`, matching the shape every other class uses. Previously the entry shipped neither, which would have prevented a character creator from offering the Warlock's L1 skill picks or the Patron choice at L3.
+
+### Wizard stub features (effects: [], waiting on engine work)
+
+Slice 55 filled L2, L5, L18, L20 plus an L1 addition. The L2 entry (`scholar`) wires as the slice's only new fully-mechanical feature: an `OfferChoice` over the six academic skills (Arcana / History / Investigation / Medicine / Nature / Religion) with `oneOf: 2`, granting proficiency in the chosen pair. This is the first feature in the class-features fill-out that uses player-pick `OfferChoice` for proficiency (Bard's Expertise at L3 / L9 still hardcodes its picks; converting both is a separate small slice). Stubs:
+
+- `ritual-adept` (L1) — cast any ritual spell prepared in the spellbook without expending a slot. Needs a "treat spell cast as ritual variant" path the engine doesn't expose at cast time.
+- `memorize-spell` (L5) — once per turn, after a long rest, replace one prepared spell with another from the spellbook. Needs a per-turn one-shot edit to the prepared-list that the engine's level-up / long-rest events don't trigger.
+- `spell-mastery` (L18) — pick one L1 and one L2 spell from the spellbook; cast them at their lowest level without a slot. Fits `OfferChoice` over the wizard's spellbook plus a "cast this spell with cost 0 once per arbitrary use" rule the engine doesn't model.
+- `signature-spells` (L20) — pick two L3 spells; cast each 1/short rest with no slot. Same shape as Spell Mastery plus a short-rest cooldown.
+
+Pre-existing gap closed by this slice: Wizard now ships `skillChoices` (choose 2 from Arcana, History, Investigation, Medicine, Nature, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had no skill picks for wizards, which would have prevented a character creator from offering them.
+
+### Fighter stub features (effects: [], waiting on engine work)
+
+Slice 56 filled L9, L11, L13, L17, L20 plus an L5 addition. Six wired entries cover the major Fighter scaling: Indomitable use-count tiers (L9 / L13 / L20 = 1 / 2 / 3 per long rest via `GrantResource` overrides), the Action Surge tier bump at L17 (1 → 2 per short rest, same shape Cleric uses for Channel Divinity), and the Extra Attack tier bumps at L11 (count: +1 on top of L5) and L20 (another +1). The Extra Attack tier entries assume the engine sums `ModifyActionEconomy.extraAttack.count` across sources rather than overriding; if it overrides, the tier behavior would need a different shape (a single feature whose count grows by level, not three separate +1 entries). Stubs:
+
+- `tactical-mind` (L5) — when failing an ability check, spend a Second Wind use to add 1d10 to the check. Needs a "spend resource to reroll" trigger that fires on check-failure events.
+- `tactical-shift` (L9) — when using Second Wind, also move up to half your Speed without provoking opportunity attacks. Needs the same Second Wind-as-trigger hook plus a one-shot movement-grant primitive (the same gap Druid's Instinctive Pounce names).
+- `tactical-master` (L11) — apply a chosen Weapon Mastery property (Push, Sap, or Slow) on a weapon attack regardless of the weapon's mastery. Needs `planWeaponMastery` to accept an "override mastery for this attack" parameter; the existing planner reads the equipped weapon's mastery, not a per-attack choice.
+- ~~`studied-attacks` (L13)~~ — wired in slice 108. On missing a weapon attack, the fighter applies `studied-target-active` (sourceFromEventTarget=true) keyed against the missed creature; the condition's `SetAdvantageVsSource` grants advantage on the fighter's next attack against that same target, and a consume-on-next-attack OnEvent rider lifts the condition afterward. RAW "before end of your next turn" expiry isn't modeled; consecutive misses against the same target don't refresh due to ConditionApplied dedup (see condition description).
+
+Action Surge tier-up at L17 uses the same `GrantResource max:2 shortRest` shape as the L2 entry; the engine has been treating Action Surge as a real resource since its initial wiring, so this scales cleanly. Indomitable at L9 introduces the resource and L13 / L20 raise its max — same Channel Divinity / Rage / Wild Shape / Sorcery Points pattern (fifth class to follow that ladder).
+
+### Monk stub features (effects: [], waiting on engine work)
+
+Slice 57 filled L2 (addition), L3, L5 (addition), L6, L7 (addition), L9, L10, L11, L13, L15, L17, L18, L20. Four wired entries bump the Ki max via `GrantResource` overrides at milestones (L5 → 5, L10 → 10, L15 → 15, L20 → 20). Non-milestone levels keep the L2 hardcoded max of 2, undercounting by 1-4 vs the RAW "Ki = monk level" formula; the cleaner fix is a `Formula` max on the L2 entry that reads monk level (the wizard's Arcane Recovery uses this shape), deferred to keep the slice scoped. Stubs:
+
+- `uncanny-metabolism` (L2) — on initiative, regain Hit Points (martial-arts-die-roll + monk level) and regain all expended Ki points, once per long rest. Needs an on-initiative trigger hook plus a heal-by-formula primitive.
+- `deflect-attacks` (L3) — reaction to reduce damage from an attack, then redirect martial-arts-die + DEX + monk-level damage back at the attacker. Needs the reaction system plus a "reduce-then-counter" sequencing the engine doesn't model.
+- `martial-arts-die-d8` (L5), `martial-arts-die-d10` (L11), `martial-arts-die-d12` (L17) — the Custom martial-arts handler at L1 doesn't yet consult monk level to pick the die size. These tier-flags ship so the content surface acknowledges the scaling; the handler-side fix is a single line once someone wires it.
+- `empowered-strikes` (L6) — unarmed strikes count as magical and can deal force damage. Needs a "damage-type override on unarmed strike" content rider; the closest existing primitive is the on-hit damage rider used for Sneak Attack but it doesn't replace the base damage type.
+- `heightened-mobility` (L7) — Patient Defense and Step of the Wind cost zero Ki on the first use per turn. Needs a "free first cost per turn" tracker on specific Ki-using actions.
+- `acrobatic-movement` (L9) — move along walls or liquids on your turn without falling; advantage on STR (Athletics) checks. Needs a `MovementMode` extension plus a conditional advantage on a check.
+- `deflect-energy` (L13) — extend Deflect Attacks to also reduce damage from a damage type the attack deals. Same reaction hook as Deflect Attacks.
+- `perfect-focus` (L15) — when rolling initiative, if you have fewer than 4 Ki points, regain expended Ki up to a total of 4. Same on-initiative trigger as Uncanny Metabolism plus a conditional ceiling.
+- `empty-body` (L18) — spend 4 Ki to become Invisible and gain Resistance to all damage types except Force for 1 minute, no Concentration. Needs the Invisibility condition wired plus a multi-damage-type-resistance buff. Some of those conditions ship; bundling them into a single feature is a stub.
+- `body-and-mind` (L20) — DEX and WIS scores increase by 4, max 25 for those. Same shape as Barbarian's Primal Champion stub; needs an ability-score-modification effect with a max-override.
+
+Stunning Strike DC scaling (8 + prof + WIS) is still the engine's responsibility; the L5 stunning-strike entry is `Custom { handlerId: 'stunning-strike' }` and the handler is presumed to read the actor's stats.
+
+### Paladin stub features (effects: [], waiting on engine work)
+
+Slice 58 filled L5, L6, L9, L10, L11, L14, L18. One wired entry: Extra Attack at L5 (same `ModifyActionEconomy.extraAttack count: 1` shape Fighter / Ranger / Barbarian / Monk use). Seven stubs cover the aura cohort plus the Smite-adjacent and Channel Divinity options:
+
+- `faithful-steed` (L5) — cast Find Steed without expending a spell slot, once per long rest. Shape fits `GrantSpell { preparation: 'oncePerLongRest' }` once Find Steed is wired (it ships as a summon spell after slice 48); the wire is short-circuited because the existing Find Steed entry assumes a 2nd-level slot is consumed and there's no "free cast" flag on the spell mechanic yet.
+- `abjure-foes` (L9) — Channel Divinity option that frightens creatures within 60ft on a failed WIS save and prevents them from approaching. Same per-CD-option dispatch primitive Cleric's Divine Spark and Sear Undead are blocked on.
+- `radiant-strike` (L11) — on a weapon attack hit, deal +1d8 radiant damage. Fits the on-hit trigger system named in the deferred-engine-slices table; once that ships, this and the smite cohort (Branding Smite, Searing Smite, Divine Favor, etc) wire together.
+- `restoring-touch` (L14) — when using Lay on Hands, also cure one disease or condition (Blinded, Charmed, Deafened, Frightened, Paralyzed, Poisoned, Stunned) by spending an additional 5 HP from the pool. Needs Lay on Hands to be planner-modeled rather than purely a resource grant; the resource ships but no `planLayOnHands` exists yet.
+
+Pre-existing gap closed by this slice: Paladin now ships `skillChoices` (choose 2 from Athletics, Insight, Intimidation, Medicine, Persuasion, Religion) and `subclassLevel: 3`, matching every other class. The pack previously had neither.
+
+Open item: Divine Smite is L2 in PHB 2024 (the paladin can deal +2d8 radiant damage by spending a 1st-level spell slot on a weapon hit, scaling +1d8 per slot level up to 5d8). Not yet in the L2 features. Wireable as a planner (`planDivineSmite` consuming a slot and emitting damage) once the on-hit trigger pathway lands, similar to how the smite-pattern spells will land. Deferred to keep this slice's scope tight; flagged here for the next paladin-touch.
+
+### Ranger stub features (effects: [], waiting on engine work)
+
+Slice 59 filled L5 (addition), L6, L9, L10, L13, L17, L18, L20. Six wired entries: Hunter's Mark use-count tiers at L5 / L9 / L13 / L17 (3 / 4 / 5 / 6 uses, matching the 2024 PB-uses-per-long-rest formula by hardcoding milestones), Roving at L6 (`ModifySpeed walk +5` — the climb/swim "equal to walking speed" portion of Roving is not yet expressed because the schema's `ModifySpeed` only adjusts the named mode, not "match another mode"), and Feral Senses at L18 (`GrantSense blindsight 30` — exact RAW shape for 2024). Stubs:
+
+- `natures-veil` (L9) — bonus action: become Invisible until the start of your next turn, expending a Hunter's Mark use. Needs an action surface that consumes a resource and applies the Invisible condition for a duration; the Invisible condition ships and `SpendResource` is a `TriggerAction`, but they're not bundled into a single feature shape.
+- `tireless` (L10) — gain temp HP when finishing a Short Rest (10 + WIS mod), and Hunter's Mark uses refresh on Short Rest. Needs a temp-HP grant primitive (the deferred temp-HP slice in the spell engine table covers this) plus a recharge-frequency-override on the existing `hunters-mark` resource.
+- `relentless-hunter` (L13) — taking damage while concentrating on Hunter's Mark doesn't break concentration. Needs a per-spell concentration-immunity flag or a condition that the concentration-check planner consults.
+- `foe-slayer` (L20) — once per turn, add WIS modifier to one weapon attack roll or damage roll against a creature marked by Hunter's Mark. Needs an on-attack-or-damage trigger filtered on the target's marked state.
+
+The Roving climb/swim "equal to walking speed" pattern recurs across classes that gain climb / swim modes (some subclass features do the same). A `ModifySpeed mode: 'climb' op: 'matchWalk'` extension would wire several deferred features in one shot.
+
+### Rogue stub features (effects: [], waiting on engine work)
+
+Slice 60 filled L1 (three additions), L2, L3, L5, L6, L11, L14, L15, L18, L20. The L15 entry (Slippery Mind) wires cleanly via two `GrantProficiency` saves (WIS and CHA). The L1 Expertise (`expertise-rogue`) and L6 Expertise (`expertise-rogue-2`) both use `OfferChoice` with `oneOf: 2` over the full 11-skill rogue list, plus a Weapon Mastery grant (2 slots) at L1. Four wired entries plus eight stubs:
+
+- `thieves-cant` (L1) — language proficiency for the rogue dialect. Could wire via `GrantProficiency { target: 'language', id: 'thieves-cant' }`, but the language isn't in the pack's language list yet; stub until the language ships.
+- `cunning-action` (L2) — bonus action: Dash, Disengage, or Hide. Each sub-effect already has a planner (`planDash`, etc.); needs a top-level "grant an alternate bonus action with N options" surface plus the action-economy attribution.
+- `steady-aim` (L3) — bonus action: grant yourself advantage on the next attack this turn, but your speed becomes 0 until end of turn. Needs a self-effect that lasts until end of turn plus a speed-0 condition.
+- `cunning-strike` (L5) and `improved-cunning-strike` (L14) — when dealing Sneak Attack damage, forgo 1d6 (Improved: 2d6) to apply one of several effects (Poison, Trip, Withdraw, Daze, Knock Out, Obscure). Needs a "trade damage dice for a condition application" primitive that hooks into the Sneak Attack `OnEvent` already in place; the existing rider doesn't yet support an "exchange" mode.
+- `reliable-talent` (L11) — treat any natural d20 roll of 9 or lower as 10 when making an ability check using a skill or tool you have proficiency in. Needs a per-roll floor that the check planner consults; closest existing surface is `GrantHalfProficiencyBonusFloor` but that adds to the total, not a die-floor.
+- `devious-strikes` (L18) — upgrades Cunning Strike effects with three more options (Daze, Knock Out, Obscure). Same primitive gap as Cunning Strike.
+- `stroke-of-luck` (L20) — once per short rest, turn a missed attack into a hit or a failed check into a 20. Needs a per-resolve override hook on attack and check events.
+
+Sneak Attack damage scaling continues to be the only fully-modeled scaling-by-level class feature in the pack (each odd level rewrites the `AddDamage.dice` literal). All four wired entries this slice plus the existing odd-level Sneak Attack ladder make Rogue the highest-coverage class in the pack: 15 of 20 levels carry features after this slice.
+
+Pre-existing gap closed: Rogue now ships `skillChoices` (choose 4 from Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Performance, Persuasion, Sleight of Hand, Stealth) and `subclassLevel: 3`, matching every other class.
+
+
+---
+
+## Subclasses (per-batch progression notes)
+
+One canonical L3 subclass ships per class:
+
+- path-of-the-berserker, college-of-lore, life-domain, circle-of-the-land, champion, warrior-of-the-open-hand, oath-of-devotion, hunter, thief, draconic-sorcery, fiend-patron, evoker.
+
+Each entry's `levelGrants` only has an L3 row. L6 / L7 / L10 / L11 / L14 / L15 / L17 / L18 / L20 (the SRD 5.2.1 subclass progression points) are unstarted across every subclass except Champion (batch 1.1), Path of the Berserker (batch 1.2), Hunter (batch 1.3), Draconic Sorcery (batch 1.4), Oath of Devotion (batch 1.5), Fiend Patron (batch 1.6), Circle of the Land (batch 1.7), and Life Domain (batch 1.8). Champion now ships L7 Additional Fighting Style (wired via `OfferChoice`), L10 Heroic Warrior (deferred-stub: needs HeroicInspiration tracker), L15 Superior Critical (wired via `ExpandCritRange` threshold 18), and L18 Survivor (deferred-stub: needs death-save advantage, "natural N counts as 20", bloodied predicate, conditional recurring heal). Path of the Berserker now ships L6 Mindless Rage, L10 Retaliation, and L14 Intimidating Presence, all as deferred stubs (no rage-active predicate, no "make attack" trigger action, no bonus-action emanation-save primitive respectively). Hunter now ships L7 Defensive Tactics, L11 Superior Hunter's Prey, and L15 Superior Hunter's Defense, all as deferred stubs (no OA-flag on AttackRolled, no Hunter's-Mark-source predicate plus no "emit damage to a chosen second target" trigger action, no event-parameterized GrantResistance respectively). Draconic Sorcery now ships L6 Elemental Affinity (partial wire: GrantResistance per chosen damage type via OfferChoice; CHA-damage rider deferred because cast-spell.ts doesn't consult AddModifier-damage), L14 Dragon Wings (deferred-stub: no fly-buff-with-duration toggle), and L18 Dragon Companion (deferred-stub: summon-dragon spell isn't in the pack). Oath of Devotion now ships L7 Aura of Devotion (partial wire: self-immunity to Charmed wired via GrantConditionImmunity; ally-side aura half needs an `aura-of-devotion-active` condition added to conditions[]), L15 Smite of Protection (deferred-stub: needs Divine-Smite-usage trigger event and a Half Cover primitive), and L20 Holy Nimbus (deferred-stub: bonus-action 10-min toggle with aura-damage rider, multiple missing primitives). Fiend Patron now ships L6 Dark One's Own Luck (partial wire: GrantResource with max=max(1, CHA-mod), diceSize=10 mirrors Bardic Inspiration's pattern; spend mechanic deferred same as Second Wind), L10 Fiendish Resilience (near wire: OfferChoice with 12 GrantResistance options covering every damage type except Force; RAW divergence — one-time choice at acquire rather than swappable each rest, because OfferChoice when=onLongRest has no rest-time re-offer mechanism in the engine), and L14 Hurl Through Hell (deferred-stub: TriggerAction can't express save-then-conditional-damage-then-condition). Circle of the Land now ships an additional L3 Circle of the Land Spells entry (deferred-stub: per-land spell list grant), L6 Natural Recovery (partial wire: GrantResource max=1 recharge=longRest tracks once-per-LR), L10 Nature's Ward (near wire: GrantConditionImmunity for Poisoned + OfferChoice for 4 land-typed Resistances; RAW divergence — land choice at L10 doesn't inherit from L3 because L3 is schema-only), and L14 Nature's Sanctuary (deferred-stub: cube AOE + half cover + ally-shared resistance, multiple missing primitives). Life Domain now ships L3 Life Domain Spells and L3 Preserve Life as new entries (both deferred-stub: GrantSpell is schema-only and Channel-Divinity heal-pool needs a dedicated planner), plus L6 Blessed Healer (deferred-stub: HealedEvent has no casterId and buildEventFacts only generates facts for AttackRolled / DamageApplied), and L17 Supreme Healing (deferred-stub: no "max-roll healing dice" primitive). The additional 3-4 subclasses per class in the PHB are not in the pack.
+
+Even within the L3 row, several subclass features ship as content stubs (the names appear but no mechanical wiring): Wild Shape forms (druid), Patron Spells (warlock fiend, paladin devotion), Hunter's Lore + Hunter's Prey (ranger hunter), Fast Hands (rogue thief), Open Hand Technique (monk), Land's Aid (druid circle of the land), Sculpt Spells (evoker wizard), Dark One's Blessing (warlock fiend).

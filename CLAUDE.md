@@ -96,7 +96,7 @@ At the close of every slice, update the docs the slice touched:
 
 ### Doc size discipline (the single-Read ceiling)
 
-Index-type docs in this repo (README.md, CHANGELOG.md, docs/status.md, docs/roadmap.md, docs/starter-pack-gaps.md, and every file under docs/changelog/) must each fit in a single Read tool call. The Claude Code Read tool refuses files over **~25,000 tokens** (roughly **60 KB** for our dense technical prose, give or take). Beyond that ceiling an agent has to read with offset/limit, which is fine for spot lookups but breaks the fresh-agent discovery path (the very first Read on the front-door doc errors out).
+Index-type docs in this repo (README.md, CHANGELOG.md, docs/status.md, docs/roadmap.md, docs/starter-pack-gaps.md, the docs/gaps-*.md per-category catalogs, and every file under docs/changelog/) must each fit in a single Read tool call. The Claude Code Read tool refuses files over **~25,000 tokens** (roughly **60 KB** for our dense technical prose, give or take). Beyond that ceiling an agent has to read with offset/limit, which is fine for spot lookups but breaks the fresh-agent discovery path (the very first Read on the front-door doc errors out).
 
 **How to check** if a file fits:
 

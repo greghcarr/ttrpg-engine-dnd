@@ -4,6 +4,37 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs + infra: starter-pack-gaps split into per-category catalogs (slice 249)**
+
+Closes the deferral slice 248 explicitly flagged: `docs/starter-pack-gaps.md` was 410 KB / over the Claude Code Read tool's 256 KB hard ceiling, breaking step 4 of the fresh-agent quickstart. The doc is the canonical priority queue for next slices, so a fresh agent couldn't actually load it cold. This slice splits it into a slim top-level priority queue (57 KB, fits in a single Read) plus 12 per-category catalogs (each fits independently).
+
+What changed:
+
+- **docs/starter-pack-gaps.md**: 410 KB → 57 KB. Now contains only the actionable surface: header + "How to pick a slice" + "Relationship to other docs" + slim "Coverage at a glance" table (cells stripped from paragraph-length to 1-2 lines, with links into the per-category catalogs for detail) + the inline-tiny categories (Subclasses pointer, Species, Backgrounds, Feats, Conditions) + the full "Future engine slices" table + the full "Deferred primitives backlog" table + "How this list is maintained". The two priority-queue tables stay inline because they ARE step 3 and step 4 of the fresh-agent quickstart.
+- **12 per-category catalogs created** under `docs/`:
+  - `gaps-spells.md` (25 KB) — per-spell wired vs schema-only catalog at L0-L9.
+  - `gaps-class-features.md` (32 KB) — per-class stub-features inventory + the Subclasses per-batch progression notes that were inline in the old gaps doc.
+  - `gaps-items-batches-1.1-1.10.md` (36 KB) + `gaps-items-batches-1.11-1.20.md` (38 KB) — per-item RAW-shape catalog split at the batch 1.11 boundary.
+  - `gaps-monsters-batches-5.9-5.11.md` (31 KB), `gaps-monsters-batches-5.6-5.8.md` (26 KB), `gaps-monsters-batches-5.1-5.5.md` (38 KB), `gaps-monsters-batches-4.8-4.14.md` (37 KB), `gaps-monsters-batches-4.1-4.7.md` (28 KB), `gaps-monsters-batches-1.md` (17 KB), `gaps-monsters-deferred-mechanics.md` (56 KB) — Monsters section was 228 KB (a third of the original doc); split by batch cohort + the per-RAW-trait deferral catalog. The five batch cohorts cluster by chronological era (5.x most recent, 4.x mid, 1.x earliest) with internal halving where a single cohort was over the ceiling.
+- **CLAUDE.md "Doc size discipline"** section list extended: the index-type docs that must each fit in a single Read now explicitly include the `docs/gaps-*.md` per-category catalogs alongside the other size-checked docs.
+- **Cross-references**: stale links among the new gaps files (a couple of "see gaps-monsters-batches-4.md" references that pointed at an intermediate filename) cleaned up. `grep -rn` confirms zero residuals.
+
+Why the priority-queue tables stayed inline: the fresh-agent quickstart in [CLAUDE.md](CLAUDE.md) lists "Read the priority queue at docs/starter-pack-gaps.md" as step 4, with steps 3 and 4 being "jump to Future engine slices" and "also check Deferred primitives backlog" inside that doc. Splitting those tables out to a separate file would have added a hop. Instead the slim doc shed the detailed per-category catalogs (which only a contributor working on a specific category drills into) and trimmed the "Coverage at a glance" cells to single-line summaries.
+
+Pre-commit Uncle Bob audit:
+- **Names**: per-category file names follow a `gaps-<category>[-batch-range].md` pattern. Items split at the batch-1.11 boundary (rod / staff / wand cohort, distinct shape change from the earlier wondrous-item batches). Monsters split by batch cohort number (5.x / 4.x / 1.x) reflecting authorship era, with internal halving where the cohort overshot the ceiling.
+- **DRY**: each per-category header carries a slice-249 provenance note and pointers to sibling files. The pointer lists are unique per file; the boilerplate header (slice provenance + main-doc link) is the only repeated pattern, intentionally so (gives the file context regardless of arrival path).
+- **SRP**: the slim main doc owns the priority queue. Each per-category catalog owns one category's wired-vs-stub inventory. The "How to pick a slice" quickstart owns navigation. No file does two of these jobs.
+- **Magic numbers**: file sizes are documented in the CHANGELOG entry, not in the headers, to avoid drift. The single-Read ceiling stays the canonical limit in CLAUDE.md.
+- **at-threading**: N/A (no events).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1643 tests across 244 files) passes green; every file from the split verifiably fits in a single Read (checked by attempting Read without offset/limit on each — the previously over-ceiling docs all return content now); `grep` against intermediate filenames confirms zero stale references.
+- **Tests**: no test code changes. Doc reorganization only.
+
+Open follow-ups (none critical):
+
+- The slim top-level doc is 57 KB — comfortable but not generous. If "Future engine slices" or "Deferred primitives backlog" grows past another ~10 KB, those tables will need to move out. The Subclasses inline section was already moved this slice to make room.
+- `gaps-monsters-deferred-mechanics.md` at 56 KB is the largest per-category file; future per-mechanic additions might push it over. Splitting by mechanic family (per-action vs per-trait vs per-aura) is a natural next cut if needed.
+
 **Docs + infra: single-Read ceiling fits across front-door docs (slice 248)**
 
 Closes the friction surfaced by the slice 247 fresh-agent test: the agent's first Read on `README.md` errored out because the file was over the Claude Code Read tool's ~25,000-token limit (68 KB / ~28 K tokens at the time). `CHANGELOG.md` was even worse (462 KB / ~130 K tokens). Same issue would have hit any future agent landing cold. Pure documentation reorganization; no engine, schema, or content surface touched.
