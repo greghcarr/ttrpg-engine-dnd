@@ -163,11 +163,21 @@ function asStr(v: unknown): string {
   return v === undefined || v === null ? '<unset>' : String(v);
 }
 
+// Lazy-parse SRD at module scope, guarded on SRD_AVAILABLE. The
+// describe() callbacks below are evaluated at test-discovery time
+// even when their .runIf gate is false (the gate only skips the
+// inner it() blocks). Parsing inside the describe body therefore
+// would attempt to readFileSync the SRD markdown on every CI run,
+// which fails on environments without the gitignored clone.
+const srdSpells = SRD_AVAILABLE ? parseSrdSpells() : new Map<string, SrdSpell>();
+const srdMonsters = SRD_AVAILABLE ? parseSrdMonsters() : new Map<string, SrdMonster>();
+const srdItems = SRD_AVAILABLE ? parseSrdItems() : new Map<string, SrdItem>();
+
 // ----- Tests ---------------------------------------------------------
 
 describe.runIf(SRD_AVAILABLE)('SRD 5.2.1 drift audit', () => {
   describe('spells', () => {
-    const srd = parseSrdSpells();
+    const srd = srdSpells;
 
     it('school matches SRD', () => {
       const drift: string[] = [];
@@ -312,7 +322,7 @@ describe.runIf(SRD_AVAILABLE)('SRD 5.2.1 drift audit', () => {
   });
 
   describe('monsters', () => {
-    const srd = parseSrdMonsters();
+    const srd = srdMonsters;
 
     it('AC matches SRD', () => {
       const drift: string[] = [];
@@ -367,7 +377,7 @@ describe.runIf(SRD_AVAILABLE)('SRD 5.2.1 drift audit', () => {
   });
 
   describe('magic items', () => {
-    const srd = parseSrdItems();
+    const srd = srdItems;
 
     it('rarity matches SRD', () => {
       const drift: string[] = [];
