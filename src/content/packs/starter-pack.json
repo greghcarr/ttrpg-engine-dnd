@@ -1018,7 +1018,12 @@
           {
             "id": "draconic-spells",
             "name": "Draconic Sorcery Spells",
-            "effects": []
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "alter-self", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "chromatic-orb", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "command", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "dragons-breath", "preparation": "always-prepared" }
+            ]
           }
         ],
         "6": [
@@ -1073,7 +1078,12 @@
           {
             "id": "fiend-spells",
             "name": "Fiend Patron Spells",
-            "effects": []
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "burning-hands", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "command", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "scorching-ray", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "suggestion", "preparation": "always-prepared" }
+            ]
           }
         ],
         "6": [

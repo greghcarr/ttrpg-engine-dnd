@@ -4,6 +4,21 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: subclass spell-list wiring sweep (slice 213)**
+
+Pure-content slice cashing in slice 212's `GrantSpell` consumer. Wires two more subclass L3 spell-list features that had been schema-only:
+
+- **Draconic Sorcery L3 Draconic Spells**: Alter Self, Chromatic Orb, Command, Dragon's Breath (all always-prepared).
+- **Fiend Patron L3 Fiend Spells**: Burning Hands, Command, Scorching Ray, Suggestion (all always-prepared).
+
+RAW per-cleric/sorcerer/warlock-level higher tiers (L5+ Sorcerer / L5+ Warlock for these subclasses) are content follow-ups — each tier adds 2 more `GrantSpell` entries at the corresponding subclass `levelGrants[<level>]` row.
+
+Closes 2 more subclass features deferred by subclass batch 1.4 / 1.6.
+
+Tests: 3-case derive test in [tests/unit/engine/subclass-spell-lists.test.ts](tests/unit/engine/subclass-spell-lists.test.ts) verifying the accumulator returns the expected spell ids for L3 Draconic Sorcery sorcerer, L3 Fiend Patron warlock, and the no-subclass baseline.
+
+No engine changes; no schema changes.
+
 **Engine: GrantSpell consumer + Life Domain L3 Spells (slice 212)**
 
 Closes one of Lane B's highest-leverage engine gaps: the `GrantSpell` effect primitive existed in the schema but had no engine consumer, so every subclass domain-spell entry was schema-only — Life Domain Spells, Circle of the Land Spells, Draconic Spells, Fiend Spells, Devotion Spells, plus single-spell grants like Bard L20 Words of Creation all sat at `effects: []`.
