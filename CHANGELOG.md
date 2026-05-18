@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell range text (slice 191)**
+
+Strict full-text range audit against the SRD Range line, with allowance for the pack's "Self (15-foot cone)" / "Self (X-foot radius)" descriptive variants that wrap SRD's bare "Self". One real drift:
+
+- blindness-deafness: pack "30 feet" to "120 feet" per SRD 5.2.1.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell duration text (slice 190)**
 
 Strict full-text duration audit against the SRD's Duration line. Four drifts beyond slice 178 / 188:
