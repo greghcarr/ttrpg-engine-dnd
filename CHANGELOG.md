@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: weapon properties + mastery (slice 184)**
+
+Compared every pack weapon to the SRD 5.2.1 Simple Melee / Martial Melee / Simple Ranged / Martial Ranged weapon tables on damage, properties, and mastery. 35 of 39 pack weapons matched an SRD entry; two had drift:
+
+- greatclub: added mastery `Push` (was missing).
+- lance: added `two-handed` to properties (SRD 5.2.1 lists it as Heavy, Reach, Two-Handed (unless mounted); pack had Heavy, Reach).
+
+Snapshot: features wired-weapon-masteries refreshed (greatclub joins the Push family).
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: magic item rarity + attunement (slice 183)**
 
 Compared every pack magic item against the SRD 5.2.1 type-line for rarity and attunement requirement. 99 of the 122 pack magic items matched an SRD entry; eight had drift, all fixed:

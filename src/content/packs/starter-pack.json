@@ -1739,7 +1739,8 @@
       "attackKind": "melee",
       "damageType": "bludgeoning",
       "damageDice": "1d8",
-      "properties": ["two-handed"]
+      "properties": ["two-handed"],
+      "mastery": "Push"
     },
     {
       "id": "ogre-greatclub",
@@ -1904,7 +1905,7 @@
     { "id": "flail", "itemKind": "weapon", "name": "Flail", "category": "martial", "attackKind": "melee", "damageType": "bludgeoning", "damageDice": "1d8", "properties": [], "mastery": "Sap", "weight": 2, "cost": { "amount": 10, "currency": "gp" } },
     { "id": "glaive", "itemKind": "weapon", "name": "Glaive", "category": "martial", "attackKind": "melee", "damageType": "slashing", "damageDice": "1d10", "properties": ["heavy", "reach", "two-handed"], "mastery": "Graze", "weight": 6, "cost": { "amount": 20, "currency": "gp" } },
     { "id": "halberd", "itemKind": "weapon", "name": "Halberd", "category": "martial", "attackKind": "melee", "damageType": "slashing", "damageDice": "1d10", "properties": ["heavy", "reach", "two-handed"], "mastery": "Cleave", "weight": 6, "cost": { "amount": 20, "currency": "gp" } },
-    { "id": "lance", "itemKind": "weapon", "name": "Lance", "category": "martial", "attackKind": "melee", "damageType": "piercing", "damageDice": "1d10", "properties": ["heavy", "reach"], "mastery": "Topple", "weight": 6, "cost": { "amount": 10, "currency": "gp" } },
+    { "id": "lance", "itemKind": "weapon", "name": "Lance", "category": "martial", "attackKind": "melee", "damageType": "piercing", "damageDice": "1d10", "properties": ["heavy", "reach", "two-handed"], "mastery": "Topple", "weight": 6, "cost": { "amount": 10, "currency": "gp" } },
     { "id": "maul", "itemKind": "weapon", "name": "Maul", "category": "martial", "attackKind": "melee", "damageType": "bludgeoning", "damageDice": "2d6", "properties": ["heavy", "two-handed"], "mastery": "Topple", "weight": 10, "cost": { "amount": 10, "currency": "gp" } },
     { "id": "morningstar", "itemKind": "weapon", "name": "Morningstar", "category": "martial", "attackKind": "melee", "damageType": "piercing", "damageDice": "1d8", "properties": [], "mastery": "Sap", "weight": 4, "cost": { "amount": 15, "currency": "gp" } },
     { "id": "pike", "itemKind": "weapon", "name": "Pike", "category": "martial", "attackKind": "melee", "damageType": "piercing", "damageDice": "1d10", "properties": ["heavy", "reach", "two-handed"], "mastery": "Push", "weight": 18, "cost": { "amount": 5, "currency": "gp" } },

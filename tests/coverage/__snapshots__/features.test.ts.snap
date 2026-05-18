@@ -279,6 +279,7 @@ exports[`feature-coverage matrix: weapon masteries > mastery → weapon mapping 
   ],
   "Push": [
     "crossbow-heavy",
+    "greatclub",
     "pike",
     "warhammer",
   ],
