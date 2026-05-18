@@ -12,6 +12,8 @@ This is a long-running build. The roadmap lives in [README.md](README.md) as six
 
 **The local markdown clone at `references/srd-markdown/` is the canonical source for SRD 5.2.1 rules text.** Never fetch 5e content from the web (Roll20 wiki, dndbeyond, third-party sites). The web sources are 2014-PHB-flavored or third-party variants and have introduced drift bugs in past slices.
 
+The drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) parses the markdown clone and asserts every pack spell, monster, and magic item matches SRD on the script-detectable fields (school, level, components, classes, concentration, ritual, casting time / range / duration, V/S/M presence, AC, HP, CR, ability scores, rarity, attunement, etc.). It skips itself when the clone is absent (e.g., a fresh worktree without the symlink). Slices 177-194 used this same logic ad-hoc and shipped ~310 drift fixes; the harness now catches regressions automatically.
+
 When auditing content (monsters, spells, items, class features, magic items) against RAW, grep `references/srd-markdown/` and treat its text as authoritative. The PDF source at `references/SRD_CC_v5.2.1.pdf` is the original; the markdown is a faithful fork that was spot-checked against the PDF during the monster audit. Both are gitignored (per-worktree local files).
 
 Layout:

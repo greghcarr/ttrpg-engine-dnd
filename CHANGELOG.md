@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: SRD 5.2.1 drift audit harness (slice 195)**
+
+Adds [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts), a checked-in vitest suite that parses the SRD 5.2.1 markdown clone at `references/srd-markdown/` and asserts every pack spell, monster, and magic item matches SRD on script-detectable fields. Slices 177-194 used the same logic ad-hoc to ship ~310 drift fixes; the harness now catches regressions automatically.
+
+The suite is organized as three nested describes (spells, monsters, magic items) with 15 `it()` blocks covering:
+
+- Spells: school, level, class list, V/S/M component presence, concentration flag, ritual flag, halfOnSuccess for damage-save spells, attackKind presence for attack-mechanic spells, damage dice for attack/save mechanics.
+- Monsters: AC, HP (average), CR, ability scores.
+- Magic items: rarity, attunement requirement.
+
+If `references/srd-markdown/spells.md` is absent (fresh worktree without the symlink from the primary), the suite skips itself with a clear note rather than failing. Verified harness detection by injecting a synthetic regression (fire-bolt school evocation to conjuration) and confirming the spell-school audit failed with the expected message.
+
+CLAUDE.md's SRD-source-of-truth section now points at the harness.
+
+Tests: 1466 pass (1451 existing + 15 new audits), tsc --noEmit clean.
+
 **Content audit: spell AoE targeting backfill (slice 194)**
 
 Audited every pack spell against SRD body for AoE shape + size phrasing. Found 33 spells whose SRD bodies describe an area but where the pack's `targeting` field was unset. Added the field for 28 of them; skipped wall-of-ice (its "10-foot-square" describes object construct sections, not damage AoE) and disintegrate (cube describes target-corpse cleanup, not damage area).
