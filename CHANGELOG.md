@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.1 (mid-tier Demon ladder)**
+
+Six new SRD 5.2.1 statblocks: Vrock (CR 6), Hezrou (CR 8), Glabrezu (CR 9), Nalfeshnee (CR 13), Marilith (CR 16), Balor (CR 19). Closes the canonical Type I-VI demon ladder started by Dretch (CR 1/4) and Quasit (CR 1) in batch 1.7. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB. All six wire Magic Resistance via `{kind: "GrantMagicResistance"}` (bringing the slice-131 user count from 16 to 22). The pack's monster total moves from 111 to 117.
+
+Defers under existing engine gaps: Multiattack (all six), Demonic Restoration (narrative), poison / necrotic / force damage riders on melee (Vrock Shred, Hezrou Rend, Nalfeshnee Rend, Marilith Pact Blade, Balor Flame Whip + Lightning Blade), Glabrezu Pincer auto-grapple + Marilith Constrict on-hit save-grapple-restrain, Glabrezu Pummel multi-target save, Glabrezu innate Spellcasting, Nalfeshnee / Marilith / Balor Teleport, Vrock Spores (Recharge 6) + Stunning Screech (1/Day), Balor Legendary Resistance (added to the Aboleth + Adult Chromatic gap list). Four genuinely-new mechanic deferrals documented inline in the gaps doc: Hezrou Stench / Balor Fire Aura recurring-aura, Balor Flame Whip pull-and-prone, Balor Lightning Blade reaction-restriction, Marilith Reactive extra-per-turn-reaction.
+
+Tests: pending vitest + tsc.
+
 **Content audit: Fighter Indomitable + Druid Wild Shape uses (slice 176)**
 
 SRD 5.2.1 value-drift sweep continued.
