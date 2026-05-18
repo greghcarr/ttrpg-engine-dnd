@@ -87,6 +87,29 @@ export const ConsumeActionSchema = z.discriminatedUnion('kind', [
     kind: z.literal('ApplyCondition'),
     conditionId: z.string(),
   }),
+  // Slice 237. Spell-scroll consumption: cast the named spell at
+  // `slotLevel` without a slot cost and without preparation gating
+  // (the scroll itself is the spell-knowledge proxy). Delegates to
+  // planCastSpell via slice-219's noSlotCost + slice-220's
+  // ignorePreparation. The consumer's castTargetIds on the intent
+  // supplies the spell's targets; if omitted, defaults to the
+  // consumer (useful for self-buff scrolls).
+  //
+  // `castingClassId` is the spellcasting class to use for DC /
+  // attack-bonus computation. Scrolls typically specify 'wizard'
+  // since RAW pre-bakes "+5 spell attack / DC 13" for the standard
+  // wizardly scroll-author profile. Without this, planCastSpell
+  // throws on consumers with no spellcasting class.
+  //
+  // Spells whose engine path is a dedicated planner (Misty Step,
+  // Wish) are not wired via this action — they'd need a separate
+  // scroll-to-planner dispatch shape.
+  z.object({
+    kind: z.literal('CastSpell'),
+    spellId: z.string(),
+    slotLevel: z.number().int().min(0),
+    castingClassId: z.string().optional(),
+  }),
 ]);
 export type ConsumeAction = z.infer<typeof ConsumeActionSchema>;
 

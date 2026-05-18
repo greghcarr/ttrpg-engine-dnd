@@ -186,6 +186,71 @@ describe('planConsumeItem (slice 235)', () => {
     expect(applied).toBeDefined();
   });
 
+  it('drinking a Spell Scroll of Magic Missile casts the spell at slot level 1', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(243) });
+    const scroll = makeItemInstance('spell-scroll-of-magic-missile');
+    const baseHero = buildHero(40);
+    const hero: Character = { ...baseHero, inventory: [scroll.id] };
+    const target = CharacterSchema.parse({
+      id: newCharacterId(),
+      name: 'Goblin',
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'fighter', level: 1, hitDiceRemaining: 1 }],
+      abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 },
+      hp: { current: 20, max: 20, temp: 0 },
+    });
+    let campaign: Campaign = engine.createCampaign({ name: 'scroll-magic-missile' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: scroll },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.consumeItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: scroll.id,
+      castTargetIds: [target.id, target.id, target.id],
+    });
+    // Magic Missile fires SpellCastDeclared + per-dart damage chain.
+    expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
+    // No slot consumed (the scroll provided the slot).
+    expect(events.some((e) => e.type === 'SpellSlotConsumed')).toBe(false);
+    // The scroll itself is consumed.
+    expect(events.some((e) => e.type === 'ItemConsumed')).toBe(true);
+  });
+
+  it('a non-caster (Barbarian) can use the scroll thanks to ignorePreparation', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(244) });
+    const scroll = makeItemInstance('spell-scroll-of-fireball');
+    const barbarian: Character = CharacterSchema.parse({
+      id: newCharacterId(),
+      name: 'Grok',
+      speciesId: 'human',
+      backgroundId: 'outlander',
+      classes: [{ classId: 'barbarian', level: 5, hitDiceRemaining: 5 }],
+      abilityScores: { STR: 18, DEX: 14, CON: 16, INT: 8, WIS: 10, CHA: 10 },
+      hp: { current: 50, max: 50, temp: 0 },
+      inventory: [scroll.id],
+    });
+    const target = buildHero(20);
+    let campaign: Campaign = engine.createCampaign({ name: 'scroll-fireball' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: scroll },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: barbarian } satisfies CharacterCreatedEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: target } satisfies CharacterCreatedEvent,
+    ]);
+    // Barbarian has no spellcasting class, no spells, definitely can't
+    // cast Fireball without ignorePreparation. The scroll should let
+    // them anyway.
+    expect(() =>
+      engine.plan.consumeItem(campaign.state, {
+        characterId: barbarian.id,
+        instanceId: scroll.id,
+        castTargetIds: [target.id],
+      }),
+    ).not.toThrow();
+  });
+
   it('throws when the item is not a consumable', () => {
     const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(240) });
     const sword = makeItemInstance('longsword');

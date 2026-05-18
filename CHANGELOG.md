@@ -4,6 +4,43 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: `CastSpell` consume-action + spell-scroll wires (slice 237)**
+
+Extends slice 235's ConsumeAction union with `CastSpell { spellId, slotLevel, castingClassId? }`. The planner branch delegates to `planCastSpell` with slice-219's `noSlotCost: true` + slice-220's `ignorePreparation: true` — the scroll supplies the slot, the scroll-knowledge bypasses the prepared-spells gate. Single small primitive that builds entirely on existing foundations.
+
+**Content wired (6 scrolls)**:
+
+- **Spell Scroll of Fire Bolt** (Cantrip, Common) → `CastSpell fire-bolt 0 wizard`
+- **Spell Scroll of Magic Missile** (L1, Common) → `CastSpell magic-missile 1 wizard`
+- **Spell Scroll of Fireball** (L3, Uncommon) → `CastSpell fireball 3 wizard`
+- **Spell Scroll of Greater Invisibility** (L4, Rare) → `CastSpell greater-invisibility 4 wizard`
+- **Spell Scroll of Cone of Cold** (L5, Rare) → `CastSpell cone-of-cold 5 wizard`
+- **Spell Scroll of Disintegrate** (L6, Very Rare) → `CastSpell disintegrate 6 wizard`
+
+The `castingClassId: 'wizard'` field lets non-caster classes (Barbarian, Fighter, Rogue) actually use scrolls — without it, planCastSpell's `findCastingClass` throws since the consumer has no spellcasting class.
+
+**Deferred (dedicated-planner scrolls)**:
+
+- **Spell Scroll of Misty Step** — Misty Step has a dedicated `planMistyStep` (action-economy + slot-source-prefer + teleport-occupancy validation). The CastSpell action delegates to planCastSpell, which doesn't route to dedicated planners. Would need a scroll-to-planner dispatch layer.
+- **Spell Scroll of Wish** — same shape; planWish is dedicated.
+
+**RAW deviations to be tightened later**:
+
+- Scroll's pre-baked DC / attack-bonus not used (the engine uses the consumer's stats, not the scroll's printed +5 / DC 13 / etc.).
+- Non-class-list reader check (DC 10 + spell level INT/WIS) not enforced — any character with the scroll in inventory can read it.
+
+**Future SRD users this unblocks**: any future spell scrolls that aren't dedicated-planner spells. Author-time it's just `[{ kind: 'CastSpell', spellId, slotLevel, castingClassId }]`.
+
+Pre-commit Uncle Bob audit:
+- Names: `CastSpell` mirrors slice 235/236's ConsumeAction shape.
+- DRY: planner delegates to the existing `planCastSpell` with established flags from slices 219 + 220. No new code paths.
+- SRP: one new branch in the per-action loop. Schema entry. Content wires. Each does one thing.
+- Magic numbers: spell IDs + slot levels are SRD-derived (the scroll's printed level).
+- `castingClassId` field added when the test exposed the non-caster gap; documented in schema. Not added speculatively.
+- Mechanical outcomes asserted: `SpellCastDeclared` fires, no `SpellSlotConsumed`, Barbarian (non-caster) doesn't throw.
+
+Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) covering Magic Missile scroll happy path + Fireball scroll usable by a non-caster Barbarian. 1622 pass, 208 skipped. tsc clean.
+
 **Content: `ApplyCondition` consume-action + buff-potion wires (slice 236)**
 
 Extends slice 235's `ConsumeAction` union with `ApplyCondition { conditionId }`. The planner now dispatches on the new kind by emitting `ConditionApplied` (with `sourceCharacterId` set to the consumer so the condition can be traced back to who drank or fed the potion). Unblocks the buff-potion cohort.

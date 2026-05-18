@@ -4,6 +4,7 @@ import type { Event } from '../../schemas/events/index.js';
 import type { ItemConsumedEvent } from '../../schemas/events/inventory.js';
 import type { ConditionAppliedEvent, HealedEvent } from '../../schemas/events/combat.js';
 import { newAppliedConditionId } from '../../ids.js';
+import { planCastSpell } from './cast-spell.js';
 import type { RNG } from '../../rng/index.js';
 import { rollExpression } from '../../rng/dice.js';
 import { newEventId } from '../../ids.js';
@@ -18,6 +19,11 @@ export interface ConsumeItemIntent {
   // When set to another character, models "feed a potion to an
   // adjacent ally" (Magic action per RAW).
   readonly targetId?: string;
+  // Slice 237. Used by `CastSpell` ConsumeActions (spell scrolls)
+  // to supply the spell's targets. When omitted on a CastSpell
+  // action, defaults to [characterId] (useful for self-buff
+  // scrolls like Greater Invisibility).
+  readonly castTargetIds?: ReadonlyArray<string>;
   readonly at?: string;
 }
 
@@ -94,6 +100,28 @@ export const planConsumeItem = (
         sourceCharacterId: intent.characterId as ULID,
       };
       events.push(condApplied);
+    } else if (action.kind === 'CastSpell') {
+      // Slice 237: spell-scroll consumption. Delegate to planCastSpell
+      // with noSlotCost (slice 219) and ignorePreparation (slice 220):
+      // the scroll itself supplies the slot and the spell-knowledge.
+      // castTargetIds on the intent supplies targets; defaults to
+      // [consumer] for self-buff scrolls. `castingClassId` from the
+      // action (typically 'wizard' for scrolls) lets non-casters read
+      // the scroll — planCastSpell's `findCastingClass` would
+      // otherwise throw on a Barbarian / Fighter consumer.
+      const castTargetIds = intent.castTargetIds ?? [intent.characterId];
+      const castEvents = planCastSpell(state, content, rng, {
+        type: 'CastSpell',
+        characterId: intent.characterId,
+        spellId: action.spellId,
+        slotLevel: action.slotLevel,
+        targetIds: castTargetIds,
+        castingClassId: action.castingClassId,
+        noSlotCost: true,
+        ignorePreparation: true,
+        at,
+      });
+      events.push(...castEvents);
     }
   }
 
