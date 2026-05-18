@@ -4,6 +4,24 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: SRD 5.2.1 completion sweep — pure JSON wins (slice 223)**
+
+Pure content addition focused on closing the SRD 5.2.1 catalog with entries that need no engine work. Closes every SRD-listed entry that was missing from the pack and unblockable by JSON alone.
+
+- **15 SRD spells added** (was 16, but Animate Objects was already present; the gaps doc was stale on the spelling):
+  - **Wired** (single-save mechanic the engine already supports): Befuddlement (L8 INT, 10d12 psychic, half on success), Freezing Sphere (L6 CON, 10d6 cold, half), Mind Spike (L2 WIS, 3d8 psychic, half, +1d8/slot), Vitriolic Sphere (L4 DEX, 10d4 acid, half, +2d4/slot).
+  - **Schema-only** (deferred for engine wiring): Antilife Shell, Blink, Divine Smite, Elementalism, Floating Disk, Ice Knife, Illusory Script, Shining Smite, Sorcerous Burst, Summon Dragon, Transport via Plants. Each carries a documented blocker in [tests/unit/engine/spell-coverage.test.ts](tests/unit/engine/spell-coverage.test.ts).
+  - **SRD spell catalog coverage**: 324 → 339 / 340. Only the gaps-doc-stale "Animated Object" (already shipped as `animate-objects`) was a non-issue; the catalog is now SRD-complete to within one phantom entry.
+- **2 SRD species added**: Goliath (Medium Humanoid, walk 35), Orc (Medium Humanoid, walk 30). Both ship with the existing `traits: []` shape consistent with the other 7 species (mechanical traits are still consumer territory). **SRD species coverage**: 7/9 → 9/9.
+- **2 SRD feats added**: Grappler (general, prereq Level 4+ + STR/DEX 13+), Boon of Fate (epic boon, prereq Level 19+). Both ship `effects: []`; the Grappler bundle (Punch and Grab, Attack Advantage, Fast Wrestler) and Boon of Fate's 2d4 bonus/penalty mechanic both await targeted engine vocabulary. **SRD feat coverage**: 14/17 → 16/17 (Magic Initiate is split into 3 class variants per the existing pack convention; SRD treats it as one).
+- **Audit-regex fix**: the SRD drift audit's `halfOnSuccess` regex didn't recognize Vitriolic Sphere's "half the initial damage" phrasing. Extended the regex to match that variant. The SRD body explicitly says half on success for Vitriolic Sphere.
+
+Net result: the SRD 5.2.1 markdown surface in `references/srd-markdown/` is now pack-complete on spells, species, and feats. Magic items and monsters were already at 99.6% (only Troll Limb remains, deferred pending the Loathsome Limbs spawn primitive).
+
+Tests: every shipped spell has a matching expectation in the spell-coverage table (regression guard), and the SRD drift audit passes on all 15 script-detectable fields after the new entries land.
+
+No engine changes; no schema changes.
+
 **Content: Hunter's Mark damage-rider wire (slice 222)**
 
 Pure-content slice that wires Hunter's Mark (Ranger L1 spell) for its primary on-hit damage rider. The spell had `mechanicalEffects: []` since the catalog landed; ranger players couldn't actually feel the +1d6 force damage at the table. This slice closes the main wired arm.

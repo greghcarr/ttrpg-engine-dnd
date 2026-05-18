@@ -250,6 +250,25 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'water-breathing': { kind: 'skip', reason: 'utility (breathe underwater), narrative only' },
   'water-walk': { kind: 'skip', reason: 'utility (walk on water), narrative only' },
   'wind-wall': { kind: 'skip', reason: 'area STR save with object deflection; area-effect mechanic not modeled' },
+  // Slice 223: SRD 5.2.1 completion sweep. 15 entries that were
+  // SRD-listed but missing from the pack; each ships schema-only
+  // unless the primary mechanic is a single-save shape the engine
+  // already supports.
+  'antilife-shell': { kind: 'skip', reason: 'positional 10-foot emanation barring most creature types; geometry primitive not modeled' },
+  'befuddlement': { kind: 'save' },
+  'blink': { kind: 'skip', reason: 'per-turn 1d6 ethereal-plane toggle; cross-plane mechanic not modeled' },
+  'divine-smite': { kind: 'skip', reason: 'paladin smite on-hit rider with slot scaling + Fiend/Undead +1d8; on-hit rider mechanic not yet wired through planCastSpell' },
+  'elementalism': { kind: 'skip', reason: '5-variant cosmetic utility cantrip (Beckon Air/Earth/Fire/Water + Sculpt Element); no mechanical effect' },
+  'floating-disk': { kind: 'skip', reason: 'creates a 500-lb-capacity force disk; carry-capacity entity not modeled' },
+  'freezing-sphere': { kind: 'save' },
+  'ice-knife': { kind: 'skip', reason: 'two-mechanic spell (ranged spell attack 1d10 piercing + 5-ft AoE DEX save 2d6 cold on hit-or-miss); multi-mechanic shape not modeled' },
+  'illusory-script': { kind: 'skip', reason: 'imbues parchment with illusory writing for 10 days; narrative utility ritual' },
+  'mind-spike': { kind: 'save' },
+  'shining-smite': { kind: 'skip', reason: 'paladin smite + always-illuminate-target concentration buff; on-hit rider mechanic not yet wired through planCastSpell' },
+  'sorcerous-burst': { kind: 'skip', reason: 'open-die ranged spell attack with caster-chosen damage type; open-die scaling not modeled' },
+  'summon-dragon': { kind: 'skip', reason: 'summons a Draconic Spirit; the Draconic Spirit statblock is not in the monster catalog yet' },
+  'transport-via-plants': { kind: 'skip', reason: 'magical plant-to-plant link for movement; teleport-corridor primitive not modeled' },
+  'vitriolic-sphere': { kind: 'save' },
   // PHB 2024 L4 spells with wired mechanics
   'blight': { kind: 'save' },
   'charm-monster': { kind: 'save' },

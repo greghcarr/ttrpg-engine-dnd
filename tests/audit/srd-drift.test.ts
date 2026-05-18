@@ -268,7 +268,7 @@ describe.runIf(SRD_AVAILABLE)('SRD 5.2.1 drift audit', () => {
           if (me.kind !== 'save') continue;
           if (!me.damageDice) continue;
           if (typeof me.halfOnSuccess !== 'boolean') continue;
-          const srdHalf = /half (?:as much|the damage|damage on a successful)/i.test(s.body);
+          const srdHalf = /half (?:as much|the damage|the initial damage|damage on a successful)/i.test(s.body);
           if (me.halfOnSuccess !== srdHalf) {
             drift.push(`${sp.id as string}: pack=${me.halfOnSuccess} SRD=${srdHalf}`);
           }
