@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.2, 8 SRD 5.2.1 alchemical-hazard consumables**
+
+Continues the adventuring-gear catalog walk against the SRD 5.2.1 equipment table (source: `references/srd-markdown/equipment.md`). Eight new entries shipping as `itemKind: 'consumable'` with `onConsume: []` stubs and SRD-verbatim mechanical text in the `description` field, matching the existing alpha.5 potion shape (e.g., Potion of Greater Healing).
+
+- New ids: `acid`, `alchemists-fire`, `antitoxin`, `ball-bearings`, `caltrops`, `holy-water`, `oil`, `poison-basic`. Cohort theme: alchemical agents and area-denial deployables, the canonical SRD "improvised weapon / utility hazard" family from `equipment.md` lines 768, 772, 1255, 1306, 1350, 1494, 1560, 1582.
+- itemKind decision: all 8 ship as consumable rather than gear. RAW each entry has per-use mechanical effects (thrown attacks with DC 8 + DEX + PB saves on Acid / Alchemist's Fire / Holy Water / Oil-as-thrown, Utilize actions with fixed-DC saves on Ball Bearings / Caltrops, Bonus Action drink-or-coat on Antitoxin / Poison Basic). The pack's existing convention is consumable = substance with on-use effect, gear = physical object with no mechanical event. Oil dual-purposes as lamp fuel + thrown improvised weapon; the consumable kind wins because two of its three RAW use-modes are mechanical.
+- Effects stay deferred behind the `ConsumeItem` planner blocker batches 1.3 (potion set) and 1.12 (potions and oils) already named. The 4.2 cohort joins that queue. When `ConsumeItem` lands, each entry's `onConsume` arm wires from the `description` text without further authoring.
+- Verified one drift catch via the grep-first rule: Holy Water is 2d8 Radiant per SRD 5.2.1, not 2d6 (the 2014 PHB value). Caught at the SRD lookup step, before authoring.
+
+Coverage bump: items 224 to 232 total, consumables 30 to 38. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. Three SRD-listed consumables still unship (Potion of Diminution, Potion of Poison, Potion of Vitality), candidates for a future small completion batch.
+
 **Content authoring: items batch 4.1, 8 SRD 5.2.1 dungeoneering-utility gear entries**
 
 Opens the adventuring-gear catalog walk against the SRD 5.2.1 equipment table (verified against `references/srd-markdown/equipment.md`). All eight ship as pure-stub `itemKind: 'gear'` entries with no effects, no charges, no description, matching the existing alpha.5 seed gear shape (torch, rope, backpack, rations, waterskin, bedroll, tinderbox). Snapshot-clean.
