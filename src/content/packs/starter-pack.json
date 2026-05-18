@@ -908,6 +908,42 @@
             "name": "Draconic Sorcery Spells",
             "effects": []
           }
+        ],
+        "6": [
+          {
+            "id": "elemental-affinity",
+            "name": "Elemental Affinity",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "elemental-affinity",
+                "prompt": "Choose your draconic damage type.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }] },
+                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "dragon-wings",
+            "name": "Dragon Wings",
+            "effects": []
+          }
+        ],
+        "18": [
+          {
+            "id": "dragon-companion",
+            "name": "Dragon Companion",
+            "effects": []
+          }
         ]
       }
     },

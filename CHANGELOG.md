@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.4**
+
+Extends the Draconic Sorcery (Sorcerer subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (Resistance only); two defer.
+
+- L6 Elemental Affinity: partial wire. `OfferChoice` with 5 options (Acid / Cold / Fire / Lightning / Poison), each granting `GrantResistance` for the chosen damage type. The CHA-damage rider ("when you cast a spell that deals damage of that type, add your Charisma modifier to one damage roll") doesn't wire because `cast-spell.ts` doesn't consult `modifierSum('damage', ...)` against the bearer's effect stack; that flow exists only in `attack.ts` for weapon attacks. Documented in the audit doc; closing the partial requires either extending `cast-spell.ts` to consume damage modifiers or adding a `BoostSpellDamage` primitive parallel to `BoostHealing`.
+- L14 Dragon Wings: `effects: []` (deferred). RAW is a bonus-action toggle to gain Fly Speed 60 for 1 hour, once per long rest, restorable by spending 3 Sorcery Points. No fly-buff-with-duration toggle primitive exists, and the spend-other-resource-to-restore recovery shape has no primitive.
+- L18 Dragon Companion: `effects: []` (deferred). The "cast Summon Dragon once per long rest without a slot" portion would partially wire via `GrantSpell { preparation: 'oncePerLongRest' }`, but `summon-dragon` isn't in the pack's spell catalog so the reference would dangle. The no-material-component and optional-concentration-removal riders have no primitive either.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up the new `draconic-sorcery L6 elemental-affinity` wired entry.
+
 **Content authoring: subclass batch 1.3**
 
 Extends the Hunter (Ranger subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary; documents the engine-primitive gaps in the audit doc.

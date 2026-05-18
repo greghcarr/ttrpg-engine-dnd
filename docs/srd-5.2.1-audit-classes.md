@@ -103,7 +103,7 @@ About 17 main-class features. Follow-up content-authoring slices.
 
 This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / L10 / L14 / L17 (or similar progression). Pack subclasses mostly ship only the L3 features.
 
-### Missing subclass features (33 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 8 deferred-with-reason across batches 1.1-1.3)
+### Missing subclass features (30 outstanding of 41 across 12 subclasses; 2 fully wired + 1 partially wired across batches 1.1-1.4, 10 deferred-with-reason)
 
 | Subclass | Missing features |
 |---|---|
@@ -116,7 +116,7 @@ This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / 
 | Oath of Devotion | L3 Sacred Weapon, L7 Aura of Devotion, L15 Smite of Protection, L20 Holy Nimbus |
 | Hunter | L7 Defensive Tactics (deferred-stub, subclass batch 1.3: Escape the Horde needs OA-flag on AttackRolled which doesn't exist (AttackKind is melee/ranged only); Multiattack Defense needs a new condition + SetAdvantageVsSource, conditions array is outside the subclass-session edit surface), L11 Superior Hunter's Prey (deferred-stub, subclass batch 1.3: no Hunter's-Mark-source predicate to gate OnEvent, and TriggerAction has no "emit damage to a chosen second target" action), L15 Superior Hunter's Defense (deferred-stub, subclass batch 1.3: TriggerAction can't parameterize a follow-up GrantResistance by the triggering event's damage type) |
 | Thief | L9 Supreme Sneak, L13 Use Magic Device, L17 Thief's Reflexes |
-| Draconic Sorcery | L3 Draconic Spells, L6 Elemental Affinity, L14 Dragon Wings, L18 Dragon Companion |
+| Draconic Sorcery | L3 Draconic Spells (still schema-only), L6 Elemental Affinity (partial wire, subclass batch 1.4: GrantResistance per chosen damage type wired via OfferChoice; CHA-damage rider deferred because cast-spell.ts doesn't consult modifierSum('damage', ...) — that flow exists only in attack.ts for weapon attacks), L14 Dragon Wings (deferred-stub, subclass batch 1.4: no fly-buff-with-duration toggle primitive, no spend-other-resource-to-restore recovery shape), L18 Dragon Companion (deferred-stub, subclass batch 1.4: summon-dragon spell isn't in the pack catalog so GrantSpell can't reference it, and the no-material / optional-concentration-removal riders have no primitive) |
 | Fiend Patron | L3 Fiend Spells, L6 Dark One's Own Luck, L10 Fiendish Resilience, L14 Hurl Through Hell |
 | Evoker | L3 Potent Cantrip, L10 Empowered Evocation, L14 Overchannel |
 
