@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: class feature 2014-flavor sweep (slice 173)**
+
+SRD 5.2.1 follow-up to slice 172. Four more entries closed from the class-audit's pack-only-features table.
+
+- Paladin L11: Radiant Strike renamed to Radiant Strikes (SRD spelling, plural). Pack id `radiant-strike` to `radiant-strikes`.
+- Monk L18: Empty Body (2014 capstone) renamed to Superior Defense (SRD 5.2.1 L18). Pack id `empty-body` to `superior-defense`. Effects array remains empty (schema-only on both sides).
+- Monk L7: Step of the Wind: Heightened Mobility dropped. 2014-flavored feature with no SRD 5.2.1 analog; SRD has Evasion as the L7 grant, which the pack already wires.
+- Warlock L3: Pact Boon dropped. 2014 PHB feature; SRD 5.2.1 handles Pact Boon as an Eldritch Invocation option starting at L1 and reserves L3 for Warlock subclass selection (already modeled via the subclass machinery, not a feature entry).
+
+Remaining pack-only-features entries (Cleric L2 Divine Spark as a separate feature; Sorcerer L20 Sorcery Points (20)) are schema / modeling differences, not drift; kept as-is. None of the renames or drops were referenced in tests, src, or docs outside the pack itself.
+
+Tests: 1452 pass, tsc --noEmit clean. No snapshot refresh needed (all four edits touch only schema-only features absent from the wired-feature catalog).
+
 **Content audit: class feature level placements (slice 172)**
 
 SRD 5.2.1 audit follow-up to slice 153's class-feature drift list. Twelve placement fixes across six classes plus one rename, all from data-side edits to starter-pack.json class `levelGrants`. No engine code touched.

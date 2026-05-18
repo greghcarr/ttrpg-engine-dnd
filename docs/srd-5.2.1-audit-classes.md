@@ -4,6 +4,10 @@ Fifth audit in the SRD 5.2.1 standardization series. Companion to the monster, m
 
 Outcome (slice 153): documentation pass. Identifies real drift and missing features; the fixes are content-authoring work for follow-up slices.
 
+**Slice 172 update**: closed 12 of the 13 level-placement drift entries below. The Barbarian Improved Brutal Strike L13 to L17 entry was incorrect (SRD has Improved Brutal Strike at BOTH L13 and L17 as two separate features, and the pack already places them there). Also closed one rename (Cleric L20 Improved Divine Intervention to Greater Divine Intervention) from the pack-only-features table.
+
+**Slice 173 update**: closed four more entries from the pack-only-features table. Renames: Paladin L11 Radiant Strike to Radiant Strikes (plural, matching SRD), Monk L18 Empty Body to Superior Defense. Drops: Monk L7 Step of the Wind: Heightened Mobility (2014-flavor, no SRD analog; Evasion remains the L7 grant), Warlock L3 Pact Boon (2014-flavor; SRD 5.2.1 handles Pact Boon as an Eldritch Invocation option starting at L1, and Warlock subclass selection at L3 is already modeled via the subclass machinery). Remaining pack-only entries (Cleric L2 Divine Spark as a separate feature, Sorcerer L20 Sorcery Points (20)) are schema / modeling differences, not drift — kept for now. Remaining work in this audit is the genuinely-missing main-class plus subclass features.
+
 ## Status counts
 
 | Layer | Pack | SRD 5.2.1 | Match |

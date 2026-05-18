@@ -317,7 +317,7 @@
       "levelTable": {
         "1": { "proficiencyBonus": 2, "features": [{ "id": "eldritch-invocations-2", "name": "Eldritch Invocations (2 known)", "effects": [] }], "columns": {} },
         "2": { "proficiencyBonus": 2, "features": [{ "id": "magical-cunning", "name": "Magical Cunning", "effects": [] }, { "id": "eldritch-invocations-3", "name": "Eldritch Invocations (3 known)", "effects": [] }], "columns": {} },
-        "3": { "proficiencyBonus": 2, "features": [{ "id": "pact-boon", "name": "Pact Boon", "effects": [] }], "columns": {} },
+        "3": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "eldritch-invocations-4", "name": "Eldritch Invocations (4 known)", "effects": [] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
@@ -360,7 +360,7 @@
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "abjure-foes", "name": "Abjure Foes", "effects": [] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [{ "id": "aura-of-courage", "name": "Aura of Courage", "effects": [{ "kind": "GrantAura", "auraId": "aura-of-courage", "rangeFeet": 10, "allyConditionId": "aura-of-courage-active", "description": "You and allies within 10 ft can't be Frightened." }, { "kind": "GrantConditionImmunity", "conditionId": "frightened" }] }], "columns": {} },
-        "11": { "proficiencyBonus": 4, "features": [{ "id": "radiant-strike", "name": "Radiant Strike", "effects": [] }], "columns": {} },
+        "11": { "proficiencyBonus": 4, "features": [{ "id": "radiant-strikes", "name": "Radiant Strikes", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "14": { "proficiencyBonus": 5, "features": [{ "id": "restoring-touch", "name": "Restoring Touch", "effects": [] }], "columns": {} },
@@ -540,7 +540,7 @@
         "4": { "proficiencyBonus": 2, "features": [{ "id": "slow-fall", "name": "Slow Fall", "effects": [{ "kind": "Custom", "handlerId": "slow-fall" }] }], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "extra-attack-monk", "name": "Extra Attack", "effects": [{ "kind": "ModifyActionEconomy", "op": "extraAttack", "count": 1 }] }, { "id": "stunning-strike", "name": "Stunning Strike", "effects": [{ "kind": "Custom", "handlerId": "stunning-strike" }] }, { "id": "martial-arts-die-d8", "name": "Martial Arts (d8)", "effects": [] }, { "id": "ki-uses-5", "name": "Monk's Focus (5 Ki)", "effects": [{ "kind": "GrantResource", "resourceId": "ki", "max": 5, "recharge": "shortRest" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [{ "id": "empowered-strikes", "name": "Empowered Strikes", "effects": [] }], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [{ "id": "evasion-monk", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }, { "id": "heightened-mobility", "name": "Step of the Wind: Heightened Mobility", "effects": [] }], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "evasion-monk", "name": "Evasion", "effects": [{ "kind": "GrantEvasion" }] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [{ "id": "acrobatic-movement", "name": "Acrobatic Movement", "effects": [] }], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [{ "id": "ki-uses-10", "name": "Monk's Focus (10 Ki)", "effects": [{ "kind": "GrantResource", "resourceId": "ki", "max": 10, "recharge": "shortRest" }] }], "columns": {} },
@@ -551,7 +551,7 @@
         "15": { "proficiencyBonus": 5, "features": [{ "id": "ki-uses-15", "name": "Monk's Focus (15 Ki)", "effects": [{ "kind": "GrantResource", "resourceId": "ki", "max": 15, "recharge": "shortRest" }] }, { "id": "perfect-focus", "name": "Perfect Focus", "effects": [] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [{ "id": "martial-arts-die-d12", "name": "Martial Arts (d12)", "effects": [] }], "columns": {} },
-        "18": { "proficiencyBonus": 6, "features": [{ "id": "empty-body", "name": "Empty Body", "effects": [] }], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [{ "id": "superior-defense", "name": "Superior Defense", "effects": [] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "20": { "proficiencyBonus": 6, "features": [{ "id": "body-and-mind", "name": "Body and Mind", "effects": [] }, { "id": "ki-uses-20", "name": "Monk's Focus (20 Ki)", "effects": [{ "kind": "GrantResource", "resourceId": "ki", "max": 20, "recharge": "shortRest" }] }], "columns": {} }
       }
