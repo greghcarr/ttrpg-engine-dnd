@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.13, 8 SRD 5.2.1 Other Tools + Gaming Set sub-forms**
+
+Continues the tools catalog walk against `references/srd-markdown/equipment.md` (`## Tools` section). Eight new `itemKind: 'tool'` entries split between `category: 'other'` (4 entries) and `category: 'gaming'` (4 Gaming Set variants).
+
+- New ids: `disguise-kit`, `forgery-kit`, `navigators-tools`, `poisoners-kit`, `gaming-set-dice`, `gaming-set-dragonchess`, `gaming-set-playing-cards`, `gaming-set-three-dragon-ante`. Source lines in equipment.md: 727 (Disguise Kit), 732 (Forgery Kit), 736 to 739 (Gaming Set Varies + variants), 751 (Navigator's Tools), 755 (Poisoner's Kit).
+- Cohort theme: closes the SRD `Other Tools` and `Gaming Set` categories. The 4 Other Tools (Disguise Kit, Forgery Kit, Navigator's Tools, Poisoner's Kit) are the 4 single-form entries from the `#### Other Tools` subsection; the 4 Gaming Set variants are the SRD-listed sub-forms of the multi-form Gaming Set entry (line 739: "Variants: Dice (1 SP), dragonchess (1 GP), playing cards (5 SP), three-dragon ante (1 GP)").
+- Gaming Set sub-forms use the family-prefix id convention established by batch 4.8's focus subforms (`arcane-focus-crystal`, `holy-symbol-amulet`). Names use the comma-form qualifier ("Gaming Set, Dice", "Gaming Set, Three-Dragon Ante", etc.) so the family lineage stays parseable.
+- SRD presents the Gaming Set variant names with mixed capitalization ("Dice" capitalized but "dragonchess" / "playing cards" / "three-dragon ante" lowercase, line 739). Pack normalizes to title case ("Dragonchess", "Playing Cards", "Three-Dragon Ante") matching the existing pack convention for grouped variants. The SRD lowercase forms are a stylistic inconsistency in the source rather than a deliberate name-form distinction.
+- Pre-existing alpha.5 miscategorization persists: `thieves-tools` and `herbalism-kit` still ship as `category: 'artisan'` despite SRD 5.2.1 classifying both as Other Tools (equipment.md lines 741, 760). Still flagged for engine-session fix at merge time; not addressed in this batch per the content-lane "do not modify existing entries" rule. With the fix applied, pack tool-category counts will be: artisan 17, other 6, gaming 4, musical 1 (total 28, matching the SRD section structure).
+
+Coverage bump: items 308 to 316 total, tools 20 to 28. Only Musical Instrument variants remain unship in the tools catalog (9 sub-forms: Bagpipes, Drum, Dulcimer, Flute, Horn, Lyre, Pan Flute, Shawm, Viol; Lute already shipped from alpha.5). Batch 4.14 candidate.
+
 **Content authoring: items batch 4.12, 7 SRD 5.2.1 artisan's tools (second wave; closes the catalog)**
 
 Closes the SRD 5.2.1 artisan's tools catalog with the alphabetical second wave. Seven new `itemKind: 'tool'` entries with `category: 'artisan'`, pure-stub shape per the ToolSchema.

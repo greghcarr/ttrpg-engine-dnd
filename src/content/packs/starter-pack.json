@@ -2149,7 +2149,15 @@
     { "id": "potters-tools", "itemKind": "tool", "name": "Potter's Tools", "category": "artisan" },
     { "id": "tinkers-tools", "itemKind": "tool", "name": "Tinker's Tools", "category": "artisan" },
     { "id": "weavers-tools", "itemKind": "tool", "name": "Weaver's Tools", "category": "artisan" },
-    { "id": "woodcarvers-tools", "itemKind": "tool", "name": "Woodcarver's Tools", "category": "artisan" }
+    { "id": "woodcarvers-tools", "itemKind": "tool", "name": "Woodcarver's Tools", "category": "artisan" },
+    { "id": "disguise-kit", "itemKind": "tool", "name": "Disguise Kit", "category": "other" },
+    { "id": "forgery-kit", "itemKind": "tool", "name": "Forgery Kit", "category": "other" },
+    { "id": "navigators-tools", "itemKind": "tool", "name": "Navigator's Tools", "category": "other" },
+    { "id": "poisoners-kit", "itemKind": "tool", "name": "Poisoner's Kit", "category": "other" },
+    { "id": "gaming-set-dice", "itemKind": "tool", "name": "Gaming Set, Dice", "category": "gaming" },
+    { "id": "gaming-set-dragonchess", "itemKind": "tool", "name": "Gaming Set, Dragonchess", "category": "gaming" },
+    { "id": "gaming-set-playing-cards", "itemKind": "tool", "name": "Gaming Set, Playing Cards", "category": "gaming" },
+    { "id": "gaming-set-three-dragon-ante", "itemKind": "tool", "name": "Gaming Set, Three-Dragon Ante", "category": "gaming" }
   ],
   "monsters": [
     {
