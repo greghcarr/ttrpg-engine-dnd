@@ -840,6 +840,27 @@
             "name": "Hunter's Prey",
             "effects": []
           }
+        ],
+        "7": [
+          {
+            "id": "defensive-tactics",
+            "name": "Defensive Tactics",
+            "effects": []
+          }
+        ],
+        "11": [
+          {
+            "id": "superior-hunters-prey",
+            "name": "Superior Hunter's Prey",
+            "effects": []
+          }
+        ],
+        "15": [
+          {
+            "id": "superior-hunters-defense",
+            "name": "Superior Hunter's Defense",
+            "effects": []
+          }
         ]
       }
     },

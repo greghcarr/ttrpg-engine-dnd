@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.3**
+
+Extends the Hunter (Ranger subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary; documents the engine-primitive gaps in the audit doc.
+
+- L7 Defensive Tactics: `effects: []` (deferred). RAW is a choice between Escape the Horde (OAs against you have Disadvantage) and Multiattack Defense (an attacker that hits you has Disadvantage on their other attacks against you this turn). Escape the Horde needs an OA-flag on `AttackRolled` so a predicate can isolate opportunity attacks; `AttackKindSchema` is `melee | ranged` only, and the OA planner emits a vanilla `AttackRolled`. Multiattack Defense needs a new condition (`multiattack-defense-active`) plus `SetAdvantageVsSource`, but the conditions[] array is outside the subclass-session edit surface.
+- L11 Superior Hunter's Prey: `effects: []` (deferred). RAW is "once per turn when you deal damage to a creature marked by your Hunter's Mark, you can also deal that spell's extra damage to a different creature within 30 ft." No predicate gates on the target being the Hunter's-Mark source (needs an "event.targetIsMyHuntersMarkTarget" path), and `TriggerAction` has no "emit damage to a second chosen target" action.
+- L15 Superior Hunter's Defense: `effects: []` (deferred). RAW is a reaction granting Resistance to the damage type just taken (and any other damage of that type until end of turn). `TriggerAction` has no way to read the triggering event's damage type and pass it as a parameter to a follow-up `GrantResistance` effect.
+
+No engine code changed; no test snapshots moved.
+
 **Content authoring: subclass batch 1.2**
 
 Extends the Path of the Berserker (Barbarian subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary. Documents the gaps in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) so future engine slices know exactly what primitives unblock these.

@@ -103,7 +103,7 @@ About 17 main-class features. Follow-up content-authoring slices.
 
 This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / L10 / L14 / L17 (or similar progression). Pack subclasses mostly ship only the L3 features.
 
-### Missing subclass features (36 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 5 deferred-with-reason across batches 1.1-1.2)
+### Missing subclass features (33 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 8 deferred-with-reason across batches 1.1-1.3)
 
 | Subclass | Missing features |
 |---|---|
@@ -114,7 +114,7 @@ This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / 
 | Champion | ~~L7 Additional Fighting Style~~ (wired, subclass batch 1.1), L10 Heroic Warrior (deferred, no HeroicInspiration tracker / grant primitive), ~~L15 Superior Critical~~ (wired, subclass batch 1.1), L18 Survivor (deferred: needs death-save advantage primitive, "natural N counts as 20" primitive, bloodied predicate, and a conditional recurring heal) |
 | Warrior of the Open Hand | L6 Wholeness of Body, L11 Fleet Step, L17 Quivering Palm |
 | Oath of Devotion | L3 Sacred Weapon, L7 Aura of Devotion, L15 Smite of Protection, L20 Holy Nimbus |
-| Hunter | L7 Defensive Tactics, L11 Superior Hunter's Prey, L15 Superior Hunter's Defense |
+| Hunter | L7 Defensive Tactics (deferred-stub, subclass batch 1.3: Escape the Horde needs OA-flag on AttackRolled which doesn't exist (AttackKind is melee/ranged only); Multiattack Defense needs a new condition + SetAdvantageVsSource, conditions array is outside the subclass-session edit surface), L11 Superior Hunter's Prey (deferred-stub, subclass batch 1.3: no Hunter's-Mark-source predicate to gate OnEvent, and TriggerAction has no "emit damage to a chosen second target" action), L15 Superior Hunter's Defense (deferred-stub, subclass batch 1.3: TriggerAction can't parameterize a follow-up GrantResistance by the triggering event's damage type) |
 | Thief | L9 Supreme Sneak, L13 Use Magic Device, L17 Thief's Reflexes |
 | Draconic Sorcery | L3 Draconic Spells, L6 Elemental Affinity, L14 Dragon Wings, L18 Dragon Companion |
 | Fiend Patron | L3 Fiend Spells, L6 Dark One's Own Luck, L10 Fiendish Resilience, L14 Hurl Through Hell |
