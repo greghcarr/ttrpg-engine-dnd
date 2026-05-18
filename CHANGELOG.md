@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: subclass higher-tier spell-list sweep (slice 218)**
+
+Cashes in slice 212's `GrantSpell` engine consumer by wiring the L5/L7/L9 spell-list tiers for three subclasses that previously shipped only the L3 tier:
+
+- **Life Domain (cleric)**: L3 corrected from slice 212's incorrect Bless / Cure Wounds / Healing Word / Sanctuary to SRD-correct **Aid, Bless, Cure Wounds, Lesser Restoration**. L5 adds **Mass Healing Word, Revivify**. L7 adds **Aura of Life, Death Ward**. L9 adds **Greater Restoration, Mass Cure Wounds**.
+- **Draconic Sorcery (sorcerer)**: L5 adds **Fear, Fly**. L7 adds **Arcane Eye, Charm Monster**. L9 (Legend Lore + Summon Dragon) is deferred: `summon-dragon` is not in the pack yet; wiring a half-tier would be inaccurate.
+- **Fiend Patron (warlock)**: L5 adds **Fireball, Stinking Cloud**. L7 adds **Fire Shield, Wall of Fire**. L9 adds **Geas, Insect Plague**.
+
+Each tier rides under a distinct feature id (e.g., `life-domain-spells-l5` / `-l7` / `-l9`) so the effect stack's dedup-by-feature-id semantics accumulate the tiers additively rather than overwriting the L3 set.
+
+12-case derive test in [tests/unit/engine/subclass-higher-tier-spells.test.ts](tests/unit/engine/subclass-higher-tier-spells.test.ts) verifying the accumulator's `grantedSpells()` returns the expected sorted spell-id list at each tier boundary (L4/L5/L7/L9 for all three subclasses). The L9 Fiend Patron case also asserts Contact Other Plane (slice 217 class L9) is part of the union, since `effectiveSpellList` unions class + subclass grants.
+
+Updated slice 212's regression test for the Life Domain L3 fix. Updated the wired-subclass-features snapshot to include the new tier rows.
+
+No engine changes; no schema changes.
+
 **Docs: deferred-feature inventory (slice 217)**
 
 Docs-only sweep marking the three remaining missing-main-class-features in the SRD 5.2.1 classes audit as deferred-with-reason. Each has a multi-slice prerequisite that needs to ship first; documenting the blockers so future slices know what unblocks them.

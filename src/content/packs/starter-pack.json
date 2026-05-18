@@ -708,10 +708,10 @@
             "id": "life-domain-spells",
             "name": "Life Domain Spells",
             "effects": [
+              { "kind": "GrantSpell", "spellId": "aid", "preparation": "always-prepared" },
               { "kind": "GrantSpell", "spellId": "bless", "preparation": "always-prepared" },
               { "kind": "GrantSpell", "spellId": "cure-wounds", "preparation": "always-prepared" },
-              { "kind": "GrantSpell", "spellId": "healing-word", "preparation": "always-prepared" },
-              { "kind": "GrantSpell", "spellId": "sanctuary", "preparation": "always-prepared" }
+              { "kind": "GrantSpell", "spellId": "lesser-restoration", "preparation": "always-prepared" }
             ]
           },
           {
@@ -720,11 +720,41 @@
             "effects": []
           }
         ],
+        "5": [
+          {
+            "id": "life-domain-spells-l5",
+            "name": "Life Domain Spells (L5 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "mass-healing-word", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "revivify", "preparation": "always-prepared" }
+            ]
+          }
+        ],
         "6": [
           {
             "id": "blessed-healer",
             "name": "Blessed Healer",
             "effects": []
+          }
+        ],
+        "7": [
+          {
+            "id": "life-domain-spells-l7",
+            "name": "Life Domain Spells (L7 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "aura-of-life", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "death-ward", "preparation": "always-prepared" }
+            ]
+          }
+        ],
+        "9": [
+          {
+            "id": "life-domain-spells-l9",
+            "name": "Life Domain Spells (L9 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "greater-restoration", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "mass-cure-wounds", "preparation": "always-prepared" }
+            ]
           }
         ],
         "17": [
@@ -1026,6 +1056,26 @@
             ]
           }
         ],
+        "5": [
+          {
+            "id": "draconic-spells-l5",
+            "name": "Draconic Spells (L5 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "fear", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "fly", "preparation": "always-prepared" }
+            ]
+          }
+        ],
+        "7": [
+          {
+            "id": "draconic-spells-l7",
+            "name": "Draconic Spells (L7 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "arcane-eye", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "charm-monster", "preparation": "always-prepared" }
+            ]
+          }
+        ],
         "6": [
           {
             "id": "elemental-affinity",
@@ -1083,6 +1133,36 @@
               { "kind": "GrantSpell", "spellId": "command", "preparation": "always-prepared" },
               { "kind": "GrantSpell", "spellId": "scorching-ray", "preparation": "always-prepared" },
               { "kind": "GrantSpell", "spellId": "suggestion", "preparation": "always-prepared" }
+            ]
+          }
+        ],
+        "5": [
+          {
+            "id": "fiend-spells-l5",
+            "name": "Fiend Spells (L5 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "fireball", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "stinking-cloud", "preparation": "always-prepared" }
+            ]
+          }
+        ],
+        "7": [
+          {
+            "id": "fiend-spells-l7",
+            "name": "Fiend Spells (L7 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "fire-shield", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "wall-of-fire", "preparation": "always-prepared" }
+            ]
+          }
+        ],
+        "9": [
+          {
+            "id": "fiend-spells-l9",
+            "name": "Fiend Spells (L9 tier)",
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "geas", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "insect-plague", "preparation": "always-prepared" }
             ]
           }
         ],

@@ -18,8 +18,8 @@ import { eventId, isoTimestamp } from '../../fixtures/index.js';
 // cast those spells without putting them in `character.preparedSpells`.
 //
 // Canonical user: Life Domain L3 Life Domain Spells, which now
-// ships with four GrantSpell entries (Bless, Cure Wounds, Healing
-// Word, Sanctuary at always-prepared preparation).
+// ships with four GrantSpell entries (Aid, Bless, Cure Wounds,
+// Lesser Restoration at always-prepared preparation per SRD 5.2.1).
 
 const PACK = loadStarterPack();
 const CONTENT = resolveContent([PACK]);
@@ -65,7 +65,7 @@ describe('slice 212: GrantSpell engine consumer + Life Domain L3 Spells', () => 
       itemInstances: {},
     });
     const ids = acc.grantedSpells().map((g) => g.spellId).sort();
-    expect(ids).toEqual(['bless', 'cure-wounds', 'healing-word', 'sanctuary']);
+    expect(ids).toEqual(['aid', 'bless', 'cure-wounds', 'lesser-restoration']);
     for (const g of acc.grantedSpells()) {
       expect(g.preparation).toBe('always-prepared');
     }
