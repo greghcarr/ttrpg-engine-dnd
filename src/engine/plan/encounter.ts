@@ -25,6 +25,7 @@ import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { Character } from '../../schemas/runtime/character.js';
 import { planBreathWeaponRechargeAtTurnStart } from './breath-weapon.js';
+import { planRegenerationAtTurnStart } from './regeneration.js';
 
 const DEATH_SAVE_SUCCESS_THRESHOLD = 10;
 const DEATH_SAVE_FAILURES_TO_DIE = 3;
@@ -316,7 +317,8 @@ export const planAdvanceTurn = (
       first.combatantId,
       at,
     );
-    return [turnEnd, ...endTurnExpired, roundEnd, nextTurn, ...deathSave, ...expired, ...recharge];
+    const regen = planRegenerationAtTurnStart(state, content, first.combatantId, at);
+    return [turnEnd, ...endTurnExpired, roundEnd, nextTurn, ...deathSave, ...expired, ...recharge, ...regen];
   }
   const next = encounter.combatants[encounter.activeIndex + 1];
   if (!next) throw new Error('Bad combatant index');
@@ -348,7 +350,8 @@ export const planAdvanceTurn = (
     next.combatantId,
     at,
   );
-  return [turnEnd, ...endTurnExpired, nextTurn, ...deathSave, ...expired, ...recharge];
+  const regen = planRegenerationAtTurnStart(state, content, next.combatantId, at);
+  return [turnEnd, ...endTurnExpired, nextTurn, ...deathSave, ...expired, ...recharge, ...regen];
 };
 
 export interface BeginFirstTurnIntent {
@@ -389,7 +392,8 @@ export const planBeginFirstTurn = (
     first.combatantId,
     at,
   );
-  return [turnStart, ...deathSave, ...recharge];
+  const regen = planRegenerationAtTurnStart(state, content, first.combatantId, at);
+  return [turnStart, ...deathSave, ...recharge, ...regen];
 };
 
 export interface EndEncounterIntent {

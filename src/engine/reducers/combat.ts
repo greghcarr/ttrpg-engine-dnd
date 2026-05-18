@@ -67,6 +67,17 @@ export const applyDamageApplied = (
   event: DamageAppliedEvent,
 ): void => {
   const character = requireCharacter(state, event.targetId);
+  // Slice 232: record damage types for the Regeneration suppression
+  // check at next turn-start. Deduped append; consumed + cleared by
+  // planAdvanceTurn's regeneration hook. The reducer doesn't need
+  // content (we don't look up the Regeneration suppressedBy list
+  // here); the planner reads both the recorded types and the
+  // effect stack at turn-start.
+  for (const component of event.components) {
+    if (!character.damageTypesTakenThisTurn.includes(component.type)) {
+      character.damageTypesTakenThisTurn.push(component.type);
+    }
+  }
   const remainingAfterTemp = absorbTempHP(character, totalDamageOf(event));
   const startedConscious = character.hp.current > 0;
   const hpBeforeClamp = character.hp.current - remainingAfterTemp;

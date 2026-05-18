@@ -4,6 +4,33 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `Regeneration` monster trait primitive (slice 232)**
+
+New effect kind for the classic regenerating-monster trait: bearer regains `perTurn` HP at the start of each of their turns, suppressed on the next turn after taking damage of a type in `suppressedBy`. Canonical users: Troll (15 HP/turn, suppressed by Acid/Fire), Troll Limb (5 HP/turn, same suppression). Closes 2 backlog rows; the slice-226 Troll Limb statblock becomes mechanically real.
+
+**Architecture**: tracks `damageTypesTakenThisTurn` (deduped DamageType array) on each Character. Populated by the damage reducer (one for-loop in `applyDamageApplied`); consumed at turn-start by a new `planRegenerationAtTurnStart` helper that builds the bearer's effect stack and emits a Healed event when no recorded type appears in any Regeneration's `suppressedBy`. The TurnStarted reducer clears the array; the suppression check sits in the planner (where content access is available) so the reducer can stay content-free.
+
+**Plumbing**:
+
+- New `Regeneration { perTurn, suppressedBy }` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 48 → 49 wired primitives.
+- New `damageTypesTakenThisTurn: DamageType[]` field on the Character schema. Populated by `applyDamageApplied`; cleared by `applyTurnStarted`. Initialized empty in the summons reducer.
+- New `planRegenerationAtTurnStart` helper in [src/engine/plan/regeneration.ts](src/engine/plan/regeneration.ts). Mirrors the shape of `planBreathWeaponRechargeAtTurnStart`. Threaded into all 3 emission sites in `planAdvanceTurn` and `planBeginFirstTurn`.
+- `EffectAccumulator` gains `addRegeneration(perTurn, suppressedBy)` setter + `regenerations()` query. Builder dispatch routes the effect.
+
+**Content**: Troll and Troll Limb statblocks each gain a `traits` array with one Regeneration entry (per-turn 15 and 5, both suppressed by `["acid", "fire"]`).
+
+**Future users** (retro-wirable via content edits, no engine work): Werewolf, Hag variants, Vampire, and other SRD regenerators that the bestiary picks up later.
+
+Pre-commit Uncle Bob audit:
+- Helper file mirrors the existing `plan/breath-weapon.ts` turn-start helper structure.
+- Reducer hook is one bounded for-loop; no content lookup needed there.
+- Names: `Regeneration`, `damageTypesTakenThisTurn`, `regenerations()`, `planRegenerationAtTurnStart` all descriptive.
+- SRP: schema entry / accumulator query / damage-types tracker / turn-start helper / TurnStarted clear — each does one thing.
+- Magic numbers: 15 and 5 are SRD-derived (Troll and Troll Limb perTurn); `['acid', 'fire']` is RAW.
+- Tests assert mechanical outcomes: amount === 15, suppression-on / suppression-off, multi-turn re-enable.
+
+Tests: 4-case test in [tests/unit/engine/troll-regeneration.test.ts](tests/unit/engine/troll-regeneration.test.ts) covering (1) regen fires for 15 HP at turn-start, (2) acid damage suppresses next turn, (3) slashing damage does NOT suppress, (4) suppression lasts one turn only (regen re-enables on the turn after). 1608 pass, 209 skipped. tsc clean.
+
 **Engine: `GrantAdvantageVsBearersOfMyCondition` primitive + Ranger L17 Precise Hunter (slice 231)**
 
 Closes the second of the two remaining deferred-with-reason main-class features from the slice-217 audit. Adds a new effect kind that gives the bearer advantage / disadvantage on rolls of a specified target type when the roll's counterparty (e.g., attack target) carries an active condition whose source is the bearer. Mirrors `SetAdvantageVsSource` (slice 96) but reads from the opposite direction: this primitive lives on the attacker; `SetAdvantageVsSource` lives on a condition.

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   AbilityScoresSchema,
   CharacterLevelSchema,
+  DamageTypeSchema,
   ExhaustionLevelSchema,
   ULIDSchema,
 } from '../primitives.js';
@@ -159,6 +160,15 @@ export const CharacterSchema = z.object({
   // false (action available). Persists across encounters per RAW
   // (recharge resolves by die roll, not by rest).
   breathWeaponExpended: z.boolean().default(false),
+  // Slice 232: damage types taken since the bearer's last turn-start.
+  // Populated by the damage reducer (deduped append per DamageApplied).
+  // Consumed by the turn-start Regeneration hook: at the start of the
+  // bearer's turn, compare these types against the bearer's Regeneration
+  // suppressedBy lists; if no match, emit a Healed for perTurn. Cleared
+  // at turn-start regardless of outcome. The reducer can populate this
+  // without content; the suppression check sits in the planner where
+  // the effect stack is already built.
+  damageTypesTakenThisTurn: z.array(DamageTypeSchema).default([]),
   // Hero Points pool (DMG 2024 variant rule, gated by
   // `CampaignSettings.heroPoints`). Each character starts with
   // `5 + 1 per level above 1`. Spent for a 1d6 bonus on an attack /

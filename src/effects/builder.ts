@@ -110,6 +110,7 @@ export class EffectAccumulator {
   private readonly acOverrides: ACOverride[] = [];
   private readonly acFloors: { value: number; source: string }[] = [];
   private readonly abilityScoreFloors = new Map<AbilityScore, { value: number; source: string }[]>();
+  private readonly regenerationEntries: Array<{ perTurn: number; suppressedBy: DamageType[] }> = [];
   private readonly resourceGrants: ResourceGrant[] = [];
   // Slice 127: granted senses (darkvision / blindsight / tremorsense /
   // truesight). Stored as sense -> max-range (feet) where multiple
@@ -250,6 +251,14 @@ export class EffectAccumulator {
     const existing = this.abilityScoreFloors.get(ability) ?? [];
     existing.push({ value, source });
     this.abilityScoreFloors.set(ability, existing);
+  }
+  // Slice 232: records a Regeneration entry. Multiple sources stack
+  // additively (rare in RAW, but two unrelated regen traits should
+  // both fire). Consumers (the damage reducer for suppression-flag
+  // detection; the turn-start planner for the heal emission) read
+  // the entries via `regenerations()` below.
+  addRegeneration(perTurn: number, suppressedBy: DamageType[]): void {
+    this.regenerationEntries.push({ perTurn, suppressedBy });
   }
   addResourceGrant(grant: ResourceGrant): void {
     this.resourceGrants.push(grant);
@@ -477,6 +486,11 @@ export class EffectAccumulator {
     const entries = this.abilityScoreFloors.get(ability);
     if (entries === undefined || entries.length === 0) return undefined;
     return entries.reduce((best, current) => (current.value > best.value ? current : best));
+  }
+  // Slice 232: returns the bearer's Regeneration entries. Empty when
+  // the bearer has no Regeneration trait.
+  regenerations(): ReadonlyArray<{ perTurn: number; suppressedBy: ReadonlyArray<DamageType> }> {
+    return this.regenerationEntries;
   }
   resources(): ReadonlyArray<ResourceGrant> {
     return this.resourceGrants;
@@ -718,6 +732,9 @@ export const applyEffectToBuilder = (
       return;
     case 'OverrideAbilityScore':
       acc.addAbilityScoreFloor(effect.ability, effect.value, ctx.source);
+      return;
+    case 'Regeneration':
+      acc.addRegeneration(effect.perTurn, effect.suppressedBy);
       return;
     case 'GrantResource':
       if (typeof effect.max === 'number') {

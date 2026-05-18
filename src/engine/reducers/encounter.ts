@@ -103,6 +103,15 @@ export const applyTurnStarted = (
   );
   invariant(encounter.round === event.round, `Round mismatch`);
   clearTurnCountersForCharacter(state, event.combatantId);
+  // Slice 232: clear the damage-types-taken accumulator that the
+  // Regeneration suppression check reads. The planner's
+  // planRegenerationAtTurnStart has already read this state at plan
+  // time and decided whether to emit Healed; clearing the array here
+  // resets it for the new turn.
+  const character = state.characters[event.combatantId];
+  if (character !== undefined) {
+    character.damageTypesTakenThisTurn = [];
+  }
   active.turnUsage.actionUsed = false;
   active.turnUsage.bonusActionUsed = false;
   active.turnUsage.attacksMadeThisTurn = 0;

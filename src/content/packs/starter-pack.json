@@ -6800,7 +6800,8 @@
       "cr": 5,
       "xp": 1800,
       "proficiencyBonus": 3,
-      "languages": ["giant"]
+      "languages": ["giant"],
+      "traits": [{ "kind": "Regeneration", "perTurn": 15, "suppressedBy": ["acid", "fire"] }]
     },
     {
       "id": "troll-limb",
@@ -6816,7 +6817,8 @@
       "cr": 0.5,
       "xp": 100,
       "proficiencyBonus": 2,
-      "languages": []
+      "languages": [],
+      "traits": [{ "kind": "Regeneration", "perTurn": 5, "suppressedBy": ["acid", "fire"] }]
     },
     {
       "id": "oni",

@@ -218,6 +218,18 @@ export type Effect =
   // Belt of Giant Strength variants (STR 21/23/25/27/29). Future
   // users: Headband of Intellect, Tome of *, Manual of *.
   | { kind: 'OverrideAbilityScore'; ability: AbilityScore; value: number }
+  // Slice 232. Monster trait: the bearer regains `perTurn` HP at the
+  // start of each of their turns. If they take damage of a type in
+  // `suppressedBy` during a turn, regeneration is suppressed on the
+  // following turn (the `regenerationSuppressedThisTurn` Character
+  // field tracks the per-turn suppression flag). Canonical users:
+  // Troll (15 HP/turn, suppressed by Acid/Fire), Troll Limb (5 HP/turn,
+  // same suppression). Future users: Werewolf, Hag variants, Vampire.
+  // RAW "dies only if it starts its turn with 0 HP and doesn't
+  // regenerate" is honored by the Healed-at-turn-start mechanic
+  // (regen brings a 0-HP creature back; suppressed + 0 HP falls
+  // through to standard unconsciousness rules).
+  | { kind: 'Regeneration'; perTurn: number; suppressedBy: DamageType[] }
   | { kind: 'GrantResource'; resourceId: string; max: number | Formula; recharge: Recharge; diceSize?: number }
   | { kind: 'GrantSpellSlots'; level: SpellLevel; count: number; source: 'full' | 'half' | 'third' | 'pact' }
   | { kind: 'GrantSpell'; spellId: string; preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest'; spellcastingAbility?: AbilityScore }
@@ -459,6 +471,11 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       value: z.number().int().min(1).max(30),
     }),
     z.object({
+      kind: z.literal('Regeneration'),
+      perTurn: z.number().int().min(1),
+      suppressedBy: z.array(DamageTypeSchema),
+    }),
+    z.object({
       kind: z.literal('SetACFloor'),
       value: z.number().int().min(1),
     }),
@@ -659,6 +676,7 @@ export const EFFECT_KINDS = [
   'GrantMagicResistance',
   'OverrideACFormula',
   'OverrideAbilityScore',
+  'Regeneration',
   'SetACFloor',
   'GrantResource',
   'GrantSpellSlots',
