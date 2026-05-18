@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.7 (Metallic Wyrmling ladder)**
+
+Five new SRD 5.2.1 statblocks: Brass Dragon Wyrmling (CR 1), Copper Dragon Wyrmling (CR 1), Bronze Dragon Wyrmling (CR 2), Silver Dragon Wyrmling (CR 2), Gold Dragon Wyrmling (CR 3). Opens the Metallic Wyrmling tier below the Young + Adult Metallic ladder, mirroring slice 4.3 (Chromatic Wyrmlings). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 32 to 37 — every dragon Wyrmling in the pack now has a wired breath). Brass + Copper at CR 1 set the new Dragon-type CR floor (previously CR 2). Pack monster total moves from 141 to 146.
+
+Defers under existing engine gaps: Multiattack on Bronze / Silver / Gold (Brass + Copper Wyrmlings lack Multiattack in RAW — single Rend per Attack action, the only Multiattack-less Wyrmlings); Amphibious narrative on Bronze + Gold; secondary non-damaging breath weapons (Brass Sleep, Bronze Repulsion, Copper Slowing, Silver Paralyzing, Gold Weakening, scaled-down DCs) fold into the slice-4.5 family. Gold Wyrmling's Weakening Breath introduces the first per-tier numeric scaling within that family (1d4 damage-roll-subtract at Wyrmling, 1d6 at Young + Adult). Silver Wyrmling's Rend deals piercing (every other Metallic Wyrmling's Rend is slashing). Metallic Rend at Wyrmling tier has no elemental damage rider (same as Young tier; the rider first appears at Adult).
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.6 (Adult Metallic Dragon tier-up)**
 
 Five new SRD 5.2.1 statblocks: Adult Brass Dragon (CR 13), Adult Copper Dragon (CR 14), Adult Bronze Dragon (CR 15), Adult Silver Dragon (CR 16), Adult Gold Dragon (CR 17). Mirror of slice 1.18 (Adult Chromatics) for the Metallic ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) (non-lair stats only). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 27 to 32). Pack monster total moves from 136 to 141. Adult Gold at CR 17 with PB +6 ties with Adult Red as the second-highest-CR Adult-tier statblock in the pack.
