@@ -55,10 +55,7 @@ export type Tool = z.infer<typeof ToolSchema>;
 // use (charge-driven instead of single-use). The planner consumes 1
 // charge from the item's `charges` shape (if defined) before walking
 // the action list, and emits ItemUsed at the end instead of
-// ItemConsumed (no retirement). Future slices add Toggle (for
-// toggleable buffs like Boots of Speed) and per-action chargeCost
-// overrides (for Wand of Magic Missiles' variable cost) as their
-// canonical users come online.
+// ItemConsumed (no retirement).
 //
 // Slice 241. CastSpell variant added (parallel to slice 237's
 // ConsumeActionSchema CastSpell): unblocks spell-grant items like
@@ -69,6 +66,19 @@ export type Tool = z.infer<typeof ToolSchema>;
 // whose engine path is a dedicated planner (Misty Step, Wish,
 // Polymorph) are not wired via this action — same deferral as
 // ConsumeAction's CastSpell.
+//
+// Slice 242. Toggle variant added: click-on / click-off shape for
+// items like Boots of Speed where each activation flips the bearer
+// state. The planner inspects the target's current applied
+// conditions: if `conditionId` is already present, emit
+// ConditionRemoved (toggle off); otherwise emit ConditionApplied
+// (toggle on). Distinct semantic from ApplyCondition (which always
+// applies, even if already present — the existing reducer dedupes by
+// id but the per-use intent stays "always activate"). The condition
+// itself models the active-state effects; the click-again-off
+// behavior is handled by the planner. Future slices add per-action
+// `chargesCost: number` (for Wand of Magic Missiles' variable cost)
+// as that canonical user comes online.
 //
 // Duration on ApplyCondition: same shape as slice 236 — the engine's
 // auto-expiry primitive is round-based and source-keyed; minute /
@@ -85,6 +95,10 @@ export const UseActionSchema = z.discriminatedUnion('kind', [
     spellId: z.string(),
     slotLevel: z.number().int().min(0),
     castingClassId: z.string().optional(),
+  }),
+  z.object({
+    kind: z.literal('Toggle'),
+    conditionId: z.string(),
   }),
 ]);
 export type UseAction = z.infer<typeof UseActionSchema>;

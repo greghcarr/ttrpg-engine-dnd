@@ -6,7 +6,10 @@ import { loadStarterPack } from '../../../src/content/packs/starter.js';
 import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../../src/ids.js';
 import type { CharacterCreatedEvent } from '../../../src/schemas/events/progression.js';
-import type { ConditionAppliedEvent } from '../../../src/schemas/events/combat.js';
+import type {
+  ConditionAppliedEvent,
+  ConditionRemovedEvent,
+} from '../../../src/schemas/events/combat.js';
 import type { ItemUsedEvent } from '../../../src/schemas/events/inventory.js';
 import type { ItemChargeConsumedEvent } from '../../../src/schemas/events/charges.js';
 import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
@@ -207,6 +210,106 @@ describe('planUseItem (slice 240)', () => {
     });
     expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
     expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
+  // Slice 242: Toggle UseAction variant. Click-on / click-off shape.
+  // Canonical user: Boots of Speed (rare wondrous, attunement, no
+  // charges; onUse toggles `boots-of-speed-active`). The planner
+  // inspects the target's current applied conditions: if the
+  // conditionId is present, emit ConditionRemoved; otherwise emit
+  // ConditionApplied.
+  it('using Boots of Speed for the first time applies boots-of-speed-active', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(248) });
+    const boots = makeItemInstance('boots-of-speed');
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [boots.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'boots-of-speed-on' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: boots },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: boots.id,
+    });
+    const condApplied = events.find(
+      (e) => e.type === 'ConditionApplied' && (e as ConditionAppliedEvent).conditionId === 'boots-of-speed-active',
+    ) as ConditionAppliedEvent | undefined;
+    expect(condApplied).toBeDefined();
+    expect(condApplied!.sourceCharacterId).toBe(hero.id);
+    expect(events.some((e) => e.type === 'ConditionRemoved')).toBe(false);
+    expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
+  it('using Boots of Speed a second time removes boots-of-speed-active (toggle off)', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(249) });
+    const boots = makeItemInstance('boots-of-speed');
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [boots.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'boots-of-speed-toggle' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: boots },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    // First click: condition applied.
+    campaign = commit(
+      campaign,
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: boots.id,
+      }).events,
+    );
+    expect(
+      campaign.state.characters[hero.id]!.appliedConditions.some(
+        (c) => c.conditionId === 'boots-of-speed-active',
+      ),
+    ).toBe(true);
+    // Second click: condition removed.
+    const second = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: boots.id,
+    });
+    const removed = second.events.find(
+      (e) => e.type === 'ConditionRemoved' && (e as ConditionRemovedEvent).conditionId === 'boots-of-speed-active',
+    ) as ConditionRemovedEvent | undefined;
+    expect(removed).toBeDefined();
+    expect(removed!.targetId).toBe(hero.id);
+    expect(second.events.some((e) => e.type === 'ConditionApplied')).toBe(false);
+    campaign = commit(campaign, second.events);
+    expect(
+      campaign.state.characters[hero.id]!.appliedConditions.some(
+        (c) => c.conditionId === 'boots-of-speed-active',
+      ),
+    ).toBe(false);
+    // Boots persist (no charges, no retirement).
+    expect(campaign.state.characters[hero.id]!.inventory).toContain(boots.id);
+  });
+
+  it('Toggle on third use re-applies the condition (full on/off/on cycle)', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(250) });
+    const boots = makeItemInstance('boots-of-speed');
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [boots.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'boots-of-speed-cycle' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: boots },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    // Click 1 (on), click 2 (off), click 3 (on again).
+    for (let i = 0; i < 3; i += 1) {
+      campaign = commit(
+        campaign,
+        engine.plan.useItem(campaign.state, {
+          characterId: hero.id,
+          instanceId: boots.id,
+        }).events,
+      );
+    }
+    expect(
+      campaign.state.characters[hero.id]!.appliedConditions.some(
+        (c) => c.conditionId === 'boots-of-speed-active',
+      ),
+    ).toBe(true);
   });
 
   it('activating an item on a different target applies the condition to that target, not the user', () => {

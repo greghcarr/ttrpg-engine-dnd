@@ -2,7 +2,10 @@ import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type { ResolvedContent } from '../../content/pack.js';
 import type { Event } from '../../schemas/events/index.js';
 import type { ItemUsedEvent } from '../../schemas/events/inventory.js';
-import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
+import type {
+  ConditionAppliedEvent,
+  ConditionRemovedEvent,
+} from '../../schemas/events/combat.js';
 import type { ItemChargeConsumedEvent } from '../../schemas/events/charges.js';
 import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
@@ -122,6 +125,40 @@ export const planUseItem = (
         sourceCharacterId: intent.characterId as ULID,
       };
       events.push(condApplied);
+    } else if (action.kind === 'Toggle') {
+      // Slice 242. Click-on / click-off shape. Inspect the target's
+      // current applied conditions; if `conditionId` is present, emit
+      // ConditionRemoved (toggle off). Otherwise emit ConditionApplied
+      // (toggle on). The target defaults to the user, matching the
+      // typical self-buff toggle (Boots of Speed wearer clicks heels
+      // → speed-doubled or normal). Distinct from ApplyCondition,
+      // which always applies (the engine's reducer dedupes by id but
+      // the per-use intent stays "always activate"): Toggle is the
+      // explicit two-state semantic.
+      const target = state.characters[targetId];
+      const alreadyApplied =
+        target?.appliedConditions.some((c) => c.conditionId === action.conditionId) ?? false;
+      if (alreadyApplied) {
+        const removed: ConditionRemovedEvent = {
+          id: newEventId() as ULID,
+          at,
+          type: 'ConditionRemoved',
+          targetId: targetId as ULID,
+          conditionId: action.conditionId,
+        };
+        events.push(removed);
+      } else {
+        const condApplied: ConditionAppliedEvent = {
+          id: newEventId() as ULID,
+          at,
+          type: 'ConditionApplied',
+          targetId: targetId as ULID,
+          conditionId: action.conditionId,
+          appliedConditionId: newAppliedConditionId(),
+          sourceCharacterId: intent.characterId as ULID,
+        };
+        events.push(condApplied);
+      }
     } else if (action.kind === 'CastSpell') {
       // Slice 241. Mirror of slice 237's ConsumeAction CastSpell:
       // delegate to planCastSpell with slice-219's `noSlotCost` and

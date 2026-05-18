@@ -4,6 +4,50 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `Toggle` UseAction variant + Boots of Speed canonical user (slice 242)**
+
+Extends slice 240's `UseAction` union with `Toggle { conditionId }`. The planner inspects the target's current applied conditions: if the conditionId is already present, emit `ConditionRemoved` (click-off); otherwise emit `ConditionApplied` (click-on). Distinct semantic from `ApplyCondition`, which always applies (the reducer dedupes by id but the per-use intent stays "always activate") — `Toggle` is the explicit two-state semantic for click-on / click-off magic items. Unblocks Boots of Speed and lays the foundation for any future click-toggle item.
+
+**Plumbing**:
+
+- New `Toggle` variant on `UseActionSchema` in [src/schemas/content/item.ts](src/schemas/content/item.ts): `{ kind: 'Toggle', conditionId: string }`.
+- New Toggle branch in [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts) — reads the target's `appliedConditions`, dispatches to `ConditionApplied` or `ConditionRemoved` based on presence. Source is stamped on the apply path so future source-filtering (if a future Toggle variant needs to ignore conditions sourced elsewhere) is a clean follow-up.
+- New content-side condition `boots-of-speed-active` in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) carrying `ModifySpeed { mode: 'walk', op: 'multiply', value: 2 }`.
+
+**Content wired (1 magic item)**:
+
+- **Boots of Speed** (rare, attunement; no charges) → `onUse: [{ kind: 'Toggle', conditionId: 'boots-of-speed-active' }]`. Click → speed doubled; click again → speed back to normal. The boots persist after each use; instance never retires.
+
+**RAW deviations documented on the condition**:
+
+- The RAW "Disadvantage on opportunity attacks against the wearer" arm stays narrative — needs an `event.isOpportunityAttack` predicate fact that the engine doesn't yet carry on AttackRolled (only the slice-123 `event.attackKind` melee / ranged distinction landed). Same shape as Mantle of Spell Resistance's deferred per-source SetAdvantage predicate (`event.isSpellSave`).
+- The RAW cumulative-10-minute-per-long-rest budget stays consumer-managed (the engine's auto-expiry is round-based + source-keyed, not minute-budgeted). Documented in the condition description.
+- Action-economy cost not modeled (RAW: bonus action; engine doesn't model bonus-action consumption at item-use level — same shape as slice 240 / 241).
+- Attunement gate not enforced (same shape as slice 240 / 241).
+
+**Future SRD users this unblocks**:
+
+- Any click-toggle item — once a canonical user comes online, it's a 1-line content wire `[{ kind: 'Toggle', conditionId }]` plus the content-side condition.
+- Cap of Water Breathing's "action to activate / 1-hour duration" shape is close but not the same — that's a duration-bound apply, not a toggle.
+- Driftglobe's continuous-light-radius toggle once the engine carries a light primitive.
+
+**Deferred (still need new UseAction variants or other primitives)**:
+
+- **Wand of Magic Missiles** — still needs per-action `chargesCost` override on UseAction for the variable-cost (1-3 charges = slot 1-3) shape. Slice 240's planner still consumes exactly 1 charge per use.
+- **Helm of Telepathy** — Detect Thoughts at-will + Suggestion 1/dawn split needs per-action chargesCost differentiation; same shape.
+- **Pipes of Haunting** — item-fixed-DC save variant still deferred.
+- **Boots of Speed's "Disadvantage on opportunity attacks against wearer"** — needs `event.isOpportunityAttack` fact on AttackRolled (or `bearer.opportunityAttackDisadvantage` flag in the effect stack).
+- **Boots of Speed's cumulative 10-minute budget** — needs a minute-tracking shape distinct from rounds and charges.
+
+Pre-commit Uncle Bob audit:
+- Names: `Toggle` is the standard term for two-state action semantics; chosen over `ToggleCondition` because the action set's discriminator implies the resource is a condition (parallel to slice 240's `ApplyCondition` and slice 241's `CastSpell`).
+- DRY: the Toggle branch's "emit ConditionApplied" path is identical to the slice-240 ApplyCondition branch (same field set, same source stamping). Considered extracting a shared helper; declined because the two branches' semantic intent diverges (ApplyCondition always applies; Toggle's apply is the conditional half). Single-call-site duplication of 8 lines is below the threshold for abstraction.
+- SRP: planner does one thing per action kind; Toggle's apply / remove split is the action's natural shape, not a hidden side effect. The condition's effects (ModifySpeed) live in the condition, not the action.
+- Magic numbers: no new magic numbers. The `ModifySpeed value: 2` on `boots-of-speed-active` is RAW (walking speed × 2). The cumulative 10-minute budget would be a magic number once that primitive lands; documented as a deferred row in the gaps doc.
+- `at`-threading: single `nowIso()` resolved once, used for both ConditionApplied and ConditionRemoved emit paths. No double-resolution.
+- Mechanical outcomes asserted: first click applies, second click removes, third click re-applies (full cycle); boots persist across uses (no charges path means no charge decrement); source stamp on the applied condition tracks the user.
+- Tests: 3 new unit cases in [tests/unit/engine/plan-use-item.test.ts](tests/unit/engine/plan-use-item.test.ts). Total 11 cases in the file. No new RNG dependency (Toggle is a deterministic state inspection); the existing `rng` parameter is unused on the Toggle path but threaded for parity with the CastSpell path.
+
 **Engine: `CastSpell` UseAction variant + at-will spell-grant items (slice 241)**
 
 Extends slice 240's `UseAction` union with `CastSpell { spellId, slotLevel, castingClassId? }`. The planner branch delegates to `planCastSpell` with slice-219's `noSlotCost: true` + slice-220's `ignorePreparation: true` — the item supplies the slot, the item itself bypasses the prepared-spells gate. Mirror of slice 237's ConsumeAction CastSpell shape for the magic-item side. Unblocks the at-will spell-grant items cohort.
