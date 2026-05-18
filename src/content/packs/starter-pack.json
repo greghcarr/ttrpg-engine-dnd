@@ -2134,7 +2134,15 @@
     { "id": "potion-of-diminution", "itemKind": "consumable", "name": "Potion of Diminution", "onConsume": [], "description": "When drunk, the bearer gains the 'reduce' effect of the Enlarge / Reduce spell for 1d4 hours, no concentration required." },
     { "id": "potion-of-poison", "itemKind": "consumable", "name": "Potion of Poison", "onConsume": [], "description": "Appears as a Potion of Healing or another beneficial potion (Identify reveals its true nature). On drinking: 4d6 Poison damage and DC 13 Constitution saving throw or have the Poisoned condition for 1 hour." },
     { "id": "potion-of-vitality", "itemKind": "consumable", "name": "Potion of Vitality", "onConsume": [], "description": "When drunk, removes any Exhaustion levels and ends the Poisoned condition on the drinker. For the next 24 hours, the drinker regains the maximum HP for any Hit Point Die spent." },
-    { "id": "perfume", "itemKind": "consumable", "name": "Perfume", "onConsume": [], "description": "A 4-ounce vial. After applying Perfume to yourself, the bearer has Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 ft for 1 hour." }
+    { "id": "perfume", "itemKind": "consumable", "name": "Perfume", "onConsume": [], "description": "A 4-ounce vial. After applying Perfume to yourself, the bearer has Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 ft for 1 hour." },
+    { "id": "alchemists-supplies", "itemKind": "tool", "name": "Alchemist's Supplies", "category": "artisan" },
+    { "id": "brewers-supplies", "itemKind": "tool", "name": "Brewer's Supplies", "category": "artisan" },
+    { "id": "carpenters-tools", "itemKind": "tool", "name": "Carpenter's Tools", "category": "artisan" },
+    { "id": "cartographers-tools", "itemKind": "tool", "name": "Cartographer's Tools", "category": "artisan" },
+    { "id": "cobblers-tools", "itemKind": "tool", "name": "Cobbler's Tools", "category": "artisan" },
+    { "id": "cooks-utensils", "itemKind": "tool", "name": "Cook's Utensils", "category": "artisan" },
+    { "id": "glassblowers-tools", "itemKind": "tool", "name": "Glassblower's Tools", "category": "artisan" },
+    { "id": "jewelers-tools", "itemKind": "tool", "name": "Jeweler's Tools", "category": "artisan" }
   ],
   "monsters": [
     {

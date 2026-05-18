@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.11, 8 SRD 5.2.1 artisan's tools (first wave)**
+
+Opens the tools catalog walk against `references/srd-markdown/equipment.md` (`## Tools` section, lines 604 to 763). Eight new `itemKind: 'tool'` entries with `category: 'artisan'`, matching the existing pure-stub tool shape `{ id, itemKind, name, category }` used by the alpha.5 seed tools (the ToolSchema has no description field, unlike Gear and Consumable).
+
+- New ids: `alchemists-supplies`, `brewers-supplies`, `carpenters-tools`, `cartographers-tools`, `cobblers-tools`, `cooks-utensils`, `glassblowers-tools`, `jewelers-tools`. Source lines in equipment.md: 626, 632, 644, 650, 656, 662, 668, 674.
+- Cohort theme: alphabetical first wave of the SRD 5.2.1 artisan's tools catalog. The SRD lists 17 artisan's tools total; 2 were already shipped (Calligrapher's Supplies, Smith's Tools as alpha.5 seed), this batch ships 8 more, leaving 7 second-wave artisans for batch 4.12 (Leatherworker's, Mason's, Painter's Supplies, Potter's, Tinker's, Weaver's, Woodcarver's).
+- ID convention follows the existing tool entries: drop apostrophes from possessives (`smiths-tools`, `calligraphers-supplies` precedent extends to `alchemists-supplies`, `brewers-supplies`, etc.).
+- Naming convention preserves the apostrophe-bearing canonical SRD names ("Alchemist's Supplies", "Brewer's Supplies", "Carpenter's Tools"), matching the Smith's Tools / Calligrapher's Supplies shape already in pack.
+- Schema gap noted: the ToolSchema has no slot for RAW per-tool mechanics (Ability score for checks, Utilize action DCs, Craft list). Those stay in the SRD source-of-truth until the schema gains tool-mechanic fields. Pack-level data ships canonical name + category only.
+
+Coverage bump: items 293 to 301 total, tools 5 to 13. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated to reflect the tool-catalog opener. 7 SRD artisan's tools, 4 Other Tools entries, 4 Gaming Set sub-forms, and 9 Musical Instrument sub-forms remain unship; future batches will continue the catalog walk.
+
 **Content authoring: items batch 4.10, SRD-completion mixed-kind pack (5 entries)**
 
 Closes the SRD 5.2.1 adventuring-gear catalog walk by shipping the last canonical entries not previously authored: Net (gear, reclassified by SRD 5.2.1 from a 2014-PHB weapon to adventuring gear) plus the three SRD 5.2.1 potions missing from the pack (Diminution, Poison, Vitality) plus Perfume (the standalone entry referenced in Diplomat's Pack contents from batch 4.9).
