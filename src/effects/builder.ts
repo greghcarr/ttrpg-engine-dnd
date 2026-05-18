@@ -118,6 +118,7 @@ export class EffectAccumulator {
   private selfRestorationFlag: boolean = false;
   private maxHealingDiceFlag: boolean = false;
   private unarmedAsMagicalFlag: boolean = false;
+  private auraRangeBonusTotal: number = 0;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -495,6 +496,18 @@ export class EffectAccumulator {
   hasUnarmedAsMagical(): boolean {
     return this.unarmedAsMagicalFlag;
   }
+  // Slice 211: additive bonus to every aura the bearer projects.
+  // Canonical user: Paladin L18 Aura Expansion (+20 ft). Multiple
+  // sources stack additively. The engine doesn't auto-project auras
+  // (positions are consumer-side), so this primitive is purely a
+  // surfaced accumulator value that consumers (dndbnb / VTTs) read
+  // alongside the bearer's `GrantAura` effects.
+  addAuraRangeBonus(feet: number): void {
+    this.auraRangeBonusTotal += feet;
+  }
+  auraRangeBonus(): number {
+    return this.auraRangeBonusTotal;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -640,6 +653,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantUnarmedAsMagical':
       acc.markUnarmedAsMagical();
+      return;
+    case 'ExpandAuraRange':
+      acc.addAuraRangeBonus(effect.addFeet);
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

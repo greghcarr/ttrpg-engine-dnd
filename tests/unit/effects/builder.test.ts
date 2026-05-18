@@ -315,6 +315,23 @@ describe('EffectAccumulator', () => {
     expect(acc.hasUnarmedAsMagical()).toBe(true);
   });
 
+  it('ExpandAuraRange accumulates additively via auraRangeBonus()', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.auraRangeBonus()).toBe(0);
+    applyEffectToBuilder(
+      { kind: 'ExpandAuraRange', addFeet: 20 },
+      acc,
+      { source: 'paladin-l18' },
+    );
+    expect(acc.auraRangeBonus()).toBe(20);
+    applyEffectToBuilder(
+      { kind: 'ExpandAuraRange', addFeet: 10 },
+      acc,
+      { source: 'hypothetical-bonus' },
+    );
+    expect(acc.auraRangeBonus()).toBe(30);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,

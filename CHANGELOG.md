@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: ExpandAuraRange + Paladin L18 Aura Expansion (slice 211)**
+
+Adds the `ExpandAuraRange { addFeet: number }` effect primitive (45 to 46 EFFECT_KINDS). Each entry contributes additively to `EffectAccumulator.auraRangeBonus()`. The engine doesn't auto-project auras (positions are consumer territory), so the primitive is purely a surfaced accumulator value — consumers (dndbnb, VTTs) read it alongside the bearer's `GrantAura` effects to compute effective aura range as `GrantAura.rangeFeet + auraRangeBonus()`.
+
+Canonical user: Paladin L18 Aura Expansion. The L18 entry in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) now ships as a single `aura-expansion` feature with `{ kind: 'ExpandAuraRange', addFeet: 20 }`, replacing the prior approach that re-declared `aura-of-protection` and `aura-of-courage` at L18 with `rangeFeet: 30` (relying on `dedupeFeaturesByLatestLevel` to supersede the L6/L10 entries).
+
+**Consumer-visible behavior change**: an L18 paladin's `GrantAura` entries now report `rangeFeet: 10` (the L6/L10 base) rather than 30. Consumers that currently read `aura.rangeFeet` directly need to add `effects.auraRangeBonus()` for the effective range. The mechanical outcome is unchanged (effective range 30 ft); only the surfacing shape moves. Refactor justification: aura definitions stay self-describing about their base range, and future content (DMG magic items, multiclass features, etc.) can layer additional aura-range bonuses for free.
+
+Tests: existing `tests/unit/engine/aura-improvements.test.ts` rewritten to assert the new shape — L6/L10/L18 paladins all see `rangeFeet: 10` on their auras, with `auraRangeBonus()` returning 0 / 0 / 20. New accumulator test in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts) verifies additive stacking across multiple `ExpandAuraRange` entries.
+
 **Engine: planPaladinsSmite + Paladin L2 Paladin's Smite (slice 210)**
 
 Adds a dedicated planner for Paladin's Smite (the 2024 reframing of Divine Smite as a class feature, not a spell). RAW: "When you hit a creature with a melee weapon or an Unarmed Strike, you can use a Bonus Action to expend a Paladin spell slot to deal Radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 plus 1d8 for each spell slot level higher than 1st. The damage increases by 1d8 if the target is an Undead or a Fiend."

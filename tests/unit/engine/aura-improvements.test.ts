@@ -1,19 +1,27 @@
-// Unit test for Paladin Aura Improvements (L18) -- the range bump
-// from 10ft to 30ft on Aura of Protection and Aura of Courage.
+// Unit test for Paladin L18 Aura Expansion.
 //
-// Wired via the `dedupeFeaturesByLatestLevel` helper in
-// `src/derive/effect-stack.ts`: when two class features at different
-// levels share the same `id`, the engine keeps only the highest-level
-// instance. The L18 entries here re-use ids `aura-of-protection` and
-// `aura-of-courage` (matching L6 and L10), so an L18+ paladin's
-// effect stack contains the 30-ft versions instead of the 10-ft ones.
+// Pre-slice 211: the L18 entry re-declared `aura-of-protection` and
+// `aura-of-courage` with `rangeFeet: 30`, riding the
+// `dedupeFeaturesByLatestLevel` helper to replace the L6/L10 entries.
+//
+// Slice 211 swap: the L18 entry is now a separate feature
+// `aura-expansion` that ships a single `ExpandAuraRange { addFeet: 20 }`.
+// The L6 and L10 GrantAura entries continue to ship `rangeFeet: 10`;
+// consumers (dndbnb, VTTs) compute the bearer's effective aura range
+// as `GrantAura.rangeFeet + effects.auraRangeBonus()`. This keeps the
+// aura definitions self-describing about their base range, lets
+// future content (DMG magic items, etc.) compose additional aura
+// bonuses, and aligns with the audit doc's "Aura Expansion" entry.
 
 import { describe, expect, it } from 'vitest';
 import { createEngine } from '../../../src/engine/index.js';
 import { seededRNG } from '../../../src/rng/seeded.js';
 import { commit } from '../../../src/engine/commit.js';
 import { loadStarterPack } from '../../../src/content/packs/starter.js';
-import { collectEffectsFromCharacter } from '../../../src/derive/effect-stack.js';
+import {
+  buildEffectStack,
+  collectEffectsFromCharacter,
+} from '../../../src/derive/effect-stack.js';
 import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
 import { newCharacterId } from '../../../src/ids.js';
 import { eventId, isoTimestamp } from '../../fixtures/index.js';
@@ -35,10 +43,9 @@ const PACK = loadStarterPack();
 
 const findAura = (
   character: Character,
-  pack: ReturnType<typeof loadStarterPack>,
   auraId: string,
 ): { rangeFeet: number } | undefined => {
-  const engine = createEngine({ contentPacks: [pack], rng: seededRNG(1) });
+  const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
   const effects = collectEffectsFromCharacter({
     character,
     content: engine.content,
@@ -48,32 +55,37 @@ const findAura = (
   return aura?.kind === 'GrantAura' ? { rangeFeet: aura.rangeFeet } : undefined;
 };
 
-describe('Paladin Aura Improvements (L18)', () => {
-  it('L6 paladin has 10-ft Aura of Protection', () => {
-    const aura = findAura(buildPaladin(6), PACK, 'aura-of-protection');
-    expect(aura?.rangeFeet).toBe(10);
+const buildAcc = (character: Character) => {
+  const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
+  return buildEffectStack({
+    character,
+    content: engine.content,
+    itemInstances: {},
+  });
+};
+
+describe('Paladin L18 Aura Expansion (slice 211)', () => {
+  it('L6 paladin has 10-ft Aura of Protection and 0 aura range bonus', () => {
+    const character = buildPaladin(6);
+    expect(findAura(character, 'aura-of-protection')?.rangeFeet).toBe(10);
+    expect(buildAcc(character).auraRangeBonus()).toBe(0);
   });
 
-  it('L10 paladin has 10-ft Aura of Courage', () => {
-    const aura = findAura(buildPaladin(10), PACK, 'aura-of-courage');
-    expect(aura?.rangeFeet).toBe(10);
+  it('L10 paladin has 10-ft Aura of Courage and 0 aura range bonus', () => {
+    const character = buildPaladin(10);
+    expect(findAura(character, 'aura-of-courage')?.rangeFeet).toBe(10);
+    expect(buildAcc(character).auraRangeBonus()).toBe(0);
   });
 
-  it('L18 paladin has 30-ft Aura of Protection', () => {
-    const aura = findAura(buildPaladin(18), PACK, 'aura-of-protection');
-    expect(aura?.rangeFeet).toBe(30);
+  it('L18 paladin: GrantAura entries still ship the 10-ft base; +20 ft bonus on the accumulator', () => {
+    const character = buildPaladin(18);
+    expect(findAura(character, 'aura-of-protection')?.rangeFeet).toBe(10);
+    expect(findAura(character, 'aura-of-courage')?.rangeFeet).toBe(10);
+    expect(buildAcc(character).auraRangeBonus()).toBe(20);
+    // Consumer-side effective range: 10 + 20 = 30 ft for both auras.
   });
 
-  it('L18 paladin has 30-ft Aura of Courage', () => {
-    const aura = findAura(buildPaladin(18), PACK, 'aura-of-courage');
-    expect(aura?.rangeFeet).toBe(30);
-  });
-
-  it('L18 paladin still gains the self-effects (Frightened immunity + CHA-mod to saves)', () => {
-    // The L18 dedupe replaces the whole feature, not just the
-    // GrantAura entry, so the sibling self-effects (six save
-    // modifiers, Frightened immunity) must be duplicated on the
-    // L18 feature. Verify they survive.
+  it('L18 paladin retains the self-effects from L6 + L10 (CHA-mod saves + Frightened immunity)', () => {
     const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(1) });
     const paladin = buildPaladin(18);
     let campaign = engine.createCampaign({ name: 'l18-paladin' });

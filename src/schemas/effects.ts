@@ -295,6 +295,14 @@ export type Effect =
   // damage dice or the attack roll, just the `sourceIsMagical` flag
   // passed to `mitigateDamage`.
   | { kind: 'GrantUnarmedAsMagical' }
+  // Slice 211. Additive bonus to the range of every aura the bearer
+  // projects. Canonical user: Paladin L18 Aura Expansion (10 ft to
+  // 30 ft → addFeet: 20). The engine doesn't auto-project auras
+  // (positions are consumer territory) — `GrantAura` ships metadata
+  // for consumers to read. This primitive adds an accumulator-side
+  // bonus that consumers can read via `effects.auraRangeBonus()` and
+  // fold into the displayed / enforced aura range.
+  | { kind: 'ExpandAuraRange'; addFeet: number }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -549,6 +557,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantUnarmedAsMagical'),
     }),
     z.object({
+      kind: z.literal('ExpandAuraRange'),
+      addFeet: z.number().int().min(0),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -625,6 +637,7 @@ export const EFFECT_KINDS = [
   'GrantSelfRestoration',
   'GrantMaxHealingDice',
   'GrantUnarmedAsMagical',
+  'ExpandAuraRange',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',
