@@ -17,15 +17,22 @@ A live demo of the engine — combat sandbox + event inspector + import/export w
 
 ## Quick start
 
+The engine is not currently published to a package registry. Clone the repo and work against source:
+
 ```sh
-npm install ttrpg-engine-dnd@alpha
+git clone https://github.com/greghcarr/ttrpg-engine-dnd.git
+cd ttrpg-engine-dnd
+npm install
+npm test
 ```
+
+Then import from `src/` (or a local path alias) the same shapes the planned public API surfaced:
 
 ```ts
 import {
   createEngine, loadStarterPack, createPC, commit,
   seededRNG, newEventId,
-} from 'ttrpg-engine-dnd';
+} from './src/index.js';
 
 const engine = createEngine({ contentPacks: [loadStarterPack()], rng: seededRNG(42) });
 const alyx = createPC({
@@ -259,7 +266,7 @@ These don't add rules; they make the library usable by people who didn't write i
 - ✓ **Slice 33.** Getting-started doc at [docs/getting-started.md](docs/getting-started.md) walking through install, engine setup, character creation, attack resolution, and save/load round-trip. API reference at [docs/api-overview.md](docs/api-overview.md) maps every public symbol by namespace (planners, derivations, events, schemas, content packs, RNG, IDs, migrations).
 - ✓ **Slice 34.** Public API conveniences. `engine.do(campaign, intent)` dispatches on `intent.type` to the right planner and commits the result in one call (covers every Phase A-C planner). `serializeCampaign(c)` writes a JSON string with id, name, schemaVersion, and events only; state is omitted because `loadCampaign(json)` replays the events to reconstruct it. `createPC({name, speciesId, backgroundId, classId, hpMax, ...})` returns a `Character` with sensible defaults; caller emits the `CharacterCreated` event themselves to add to a campaign.
 - ✓ **Slice 35.** Derivation memoization keyed on `CampaignState.version`. Every `engine.derive.*` method now caches its result per-engine; the cache invalidates automatically when `state.version` advances (i.e., on every commit). Repeated calls at the same version return the same object reference, so a UI that asks for derived AC ten times per frame across twelve combatants pays for one computation each.
-- ✓ **Slice 36.** npm publish prep. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats. `files` whitelists `dist/`, `docs/`, license, and READMEs. `prepublishOnly` runs the full CI gate (typecheck + tests + coverage + build) before any publish. `publishConfig: { access: public }` is set. `npm pack --dry-run` reports a ~398 KB tarball with no source or test code. Publishing is `npm publish` away.
+- ✓ **Slice 36.** Build packaging. `package.json` declares `main` (CJS), `module` (ESM), `types` (`.d.ts`), and `exports` for both formats so consumers cloning the repo can resolve the engine cleanly. `files` whitelists `dist/`, `docs/`, license, and READMEs. The package itself is no longer distributed through npm (the older alpha versions were unpublished on IP grounds in May 2026; `private: true` is set to prevent accidental republish).
 - ✓ **Slice 37.** Content pack validator with diagnostic errors. `loadContentPack` throws a `ContentPackLoadError` whose `.issues` is a list of `{path, message}` entries derived from Zod's `safeParse` (e.g. `classes.0.hitDie: Expected number, received string`). `validateCrossReferences` returns issues with optional Levenshtein-based `suggestion` strings like `Did you mean "savage-attacker"?` so a one-character typo is identifiable from the error alone.
 
 ### Phase E: 2024 content fill-out (9 slices, 2 fully wired + 7 partial)
@@ -326,13 +333,7 @@ Each slice ships its primitive plus a canonical content user, a unit test, a con
 
 ## Install
 
-```sh
-npm install ttrpg-engine-dnd@alpha
-```
-
-The package is published under the `alpha` dist-tag and ships ESM, CJS, and `.d.ts`. Peer dependencies (`zod`, `immer`, `ulid`) install transitively. See [VERSIONING.md](VERSIONING.md) for the alpha-to-1.0 roadmap and the alpha->beta promotion gate.
-
-You can also pin to a git ref while iterating alongside the engine:
+The engine is no longer distributed through a package registry. Pin to a git ref or a local path while iterating:
 
 ```jsonc
 // in your consumer's package.json
@@ -342,6 +343,8 @@ You can also pin to a git ref while iterating alongside the engine:
   // "ttrpg-engine-dnd": "file:../ttrpg-engine-dnd"
 }
 ```
+
+The package's build outputs are still produced (ESM, CJS, and `.d.ts` under `dist/`); peer dependencies (`zod`, `immer`, `ulid`) install transitively through the git/file dependency. See [VERSIONING.md](VERSIONING.md) for the alpha-to-1.0 roadmap and the alpha->beta promotion gate.
 
 ## Usage (preview)
 

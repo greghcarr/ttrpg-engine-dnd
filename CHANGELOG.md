@@ -4,6 +4,20 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Distribution: drop npm-publish posture (slice 198)**
+
+Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:
+
+- `package.json`: added `"private": true` to gate `npm publish` from accidentally running. Removed `prepublish:check`, `prepublishOnly`, and `release` scripts plus `publishConfig`. Kept `main` / `module` / `types` / `exports` / `files` so consumers cloning the repo and depending on it via `github:greghcarr/ttrpg-engine-dnd` get a clean resolver path.
+- `README.md`: "Quick start" + "Install" sections replaced with git-clone instructions; `Slice 36` history entry rewritten ("build packaging" rather than "npm publish prep"). `npm install ttrpg-engine-dnd@alpha` references removed.
+- `CLAUDE.md`: first-paragraph "Published on npm as `ttrpg-engine-dnd`" line replaced with a note that the package is now repo-only with `private: true`. The old "All three names aligned on 2026-05-12" line is gone (only two names — local dir + GitHub repo — apply now).
+- `VERSIONING.md`: "Publish workflow" section renamed to "Release workflow" and rewritten; `npm run release` / `prepublishOnly` references replaced with a tag-and-push flow. Concrete-next-bumps table notes the alpha.0 and alpha.5 entries as originally-published-then-unpublished.
+- `docs/getting-started.md`: install section switched to a `package.json` git-ref snippet.
+- `docs/web-demo-plan.md`: risk table and history note no longer reference `npm install ttrpg-engine-dnd@latest`.
+- `dndbnb/README.md`: subtitle link points at GitHub instead of npmjs.com.
+
+Tests: 1466 pass, tsc --noEmit clean, `npm run build` green.
+
 **Docs: rollup pass (slice 197)**
 
 Updates README + SRD-audit docs + trustworthiness roadmap to reflect the slice 177-196 sweep and the lane-B/lane-C merges. No content or engine changes; documentation only.

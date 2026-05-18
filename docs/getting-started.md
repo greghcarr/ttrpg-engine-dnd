@@ -4,8 +4,12 @@ This walkthrough builds your first character, attacks a goblin, saves the campai
 
 ## 1. Install
 
-```sh
-npm install ttrpg-engine-dnd@alpha
+The engine is not currently distributed through a package registry. Pin to the git ref in your consumer's `package.json`:
+
+```jsonc
+"dependencies": {
+  "ttrpg-engine-dnd": "github:greghcarr/ttrpg-engine-dnd"
+}
 ```
 
 Peer dependencies (`zod`, `immer`, `ulid`) install transitively.

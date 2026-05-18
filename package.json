@@ -1,6 +1,7 @@
 {
   "name": "ttrpg-engine-dnd",
   "version": "0.1.0-alpha.5",
+  "private": true,
   "description": "Standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only content model with effect-primitive vocabulary and code-handler escape hatch.",
   "type": "module",
   "main": "./dist/ttrpg-engine-dnd.cjs",
@@ -37,18 +38,12 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "ci": "npm run typecheck && npm run test:coverage && npm run build",
-    "prepublish:check": "npm run typecheck && npm run test && npm run build",
     "dev:web": "vite --config vite.web.config.ts",
     "build:web": "vite build --config vite.web.config.ts",
     "preview:web": "vite preview --config vite.web.config.ts",
     "dev:dndbnb": "vite --config vite.dndbnb.config.ts",
     "build:dndbnb": "vite build --config vite.dndbnb.config.ts",
-    "preview:dndbnb": "vite preview --config vite.dndbnb.config.ts",
-    "prepublishOnly": "npm run prepublish:check",
-    "release": "npm publish && npm dist-tag add ttrpg-engine-dnd@$npm_package_version alpha"
-  },
-  "publishConfig": {
-    "access": "public"
+    "preview:dndbnb": "vite preview --config vite.dndbnb.config.ts"
   },
   "dependencies": {
     "immer": "^10.1.1",

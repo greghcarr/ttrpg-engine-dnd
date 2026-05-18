@@ -197,7 +197,7 @@ Each risk gets a specific mitigation. If a risk's mitigation can't be done in v1
 | Risk | Mitigation |
 | --- | --- |
 | Engine API churns and breaks the demo | Demo imports only from the public package entry. The Layer 9 contract test (`tests/contract/`) catches accidental breakage at engine PR time. When the demo needs a helper that doesn't exist, add it to engine exports (don't sidestep). |
-| Demo lags the published npm version | The dev alias points at local `src/`, so engine work shows up immediately in `dev:web`. Production demo bundles against `dist/`, which is built fresh on every deploy. If the demo behavior diverges from `npm install ttrpg-engine-dnd@latest`, the cause is almost always a stale `package-lock.json` in CI. |
+| Demo lags the engine | The dev alias points at local `src/`, so engine work shows up immediately in `dev:web`. Production demo bundles against `dist/`, which is built fresh on every deploy. If the demo behavior diverges from a fresh local `npm run build`, the cause is almost always a stale `package-lock.json` in CI. |
 | Replay verification breaks publicly | CI test runs verification against every shipped scenario before deploy. Failing test blocks deploy. |
 | `base:` path breaks local dev or production | Use the `NODE_ENV` ternary above. Test both `npm run dev:web` and a local `vite preview` of the production build before pushing. |
 | Event log jank at scale | Virtualize from day one. Cap visible event rows. |
@@ -234,7 +234,7 @@ If any step takes more than ~2x the time it should, stop and update this doc wit
 
 - `engine.plan.dodge` was added in `0.1.0-alpha.3` specifically for this demo. RAW 2024: emits `ActionEconomyConsumed('action')` + `ConditionApplied('dodged')`. The condition imposes disadvantage on incoming attacks and gives advantage on DEX saves. No new wiring needed in the demo beyond binding it to a button.
 - The starter-pack subpath (`ttrpg-engine-dnd/starter-pack`) shipped in `0.1.0-alpha.3`. Without it, the demo would have to either pull the full starter content into the main bundle or reach into `src/` internals — both ugly. Now `await import('ttrpg-engine-dnd/starter-pack')` from a mode's init gets a separate ~127 KB / ~16 KB-gzipped chunk.
-- `0.1.0-alpha.3` is on npm under both the `alpha` and `latest` tags. `npm install ttrpg-engine-dnd` Just Works.
+- `0.1.0-alpha.3` and later versions were originally on npm; the engine is no longer published to a registry. Consumers pin to `github:greghcarr/ttrpg-engine-dnd` (or a local `file:` path) for the same import surface.
 
 ### Things this plan got slightly wrong (now fixed in this doc)
 

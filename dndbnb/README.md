@@ -1,6 +1,6 @@
 # dndbnb
 
-A D&D Beyond-style consumer app, powered by [ttrpg-engine-dnd](https://www.npmjs.com/package/ttrpg-engine-dnd).
+A D&D Beyond-style consumer app, powered by [ttrpg-engine-dnd](https://github.com/greghcarr/ttrpg-engine-dnd).
 
 The source lives in this engine repo so engine changes are instantly reflected in dndbnb (no version-bump or publish cycle in between). The deploy workflow at [.github/workflows/deploy-dndbnb.yml](../.github/workflows/deploy-dndbnb.yml) pushes the built bundle to a sibling `greghcarr/dndbnb` repo's `gh-pages` branch, so the URL settles at https://greghcarr.github.io/dndbnb/.
 

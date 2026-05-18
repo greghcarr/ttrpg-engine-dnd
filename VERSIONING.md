@@ -126,8 +126,8 @@ Concrete next bumps:
 
 | Version | When | What |
 |---|---|---|
-| **0.1.0-alpha.0** | 2026-05-12 | First publishable alpha. Phases A through E complete (Slices 1–46). |
-| **0.1.0-alpha.5** | 2026-05-14 (current published) | Tier 3 content-stub sweep; class-feature matrix to 48 wired / 0 stub at L1–7; 48-probe RAW-compliance audit; 1009 tests. |
+| **0.1.0-alpha.0** | 2026-05-12 | First alpha. Phases A through E complete (Slices 1–46). Originally published to npm; later unpublished on IP-cleanup grounds. |
+| **0.1.0-alpha.5** | 2026-05-14 | Tier 3 content-stub sweep; class-feature matrix to 48 wired / 0 stub at L1–7; 48-probe RAW-compliance audit; 1009 tests. Originally published; later unpublished. |
 | **0.1.0-alpha.6** | when ready | Post-alpha.5 vocabulary expansion (slices 48–100). Spell catalog complete (399 spells, ~152 wired), class features filled out L1–L20 across all 12 classes, ~35 engine-primitive slices. Test count 1289. See [CHANGELOG.md](CHANGELOG.md). |
 | **0.1.0-alpha.7+** | as needed | Continued primitive + canonical-user vocabulary expansion. Nothing API-breaking. |
 | **0.2.0-alpha.0** | only if needed | Breaking API change discovered during validation, OR substantial new features that warrant their own alpha cycle. Pre-1.0 escape hatch. |
@@ -148,14 +148,15 @@ This is not a calendar commitment. The gate is external-consumer validation; the
 
 ## Notes for maintainers
 
-- Don't bump the version on every PR. The version is a user-facing signal, not a build counter.
+- Don't bump the version on every commit. The version is a user-facing signal, not a build counter.
 - When in doubt about whether a change is breaking, treat it as breaking. The cost of an over-cautious minor bump is small; the cost of a silently-breaking patch bump is consumer trust.
-- The `prepublishOnly` script runs the full CI gate. A failed gate blocks publish.
 
-### Publish workflow
+### Release workflow
 
-The canonical publish command is `npm run release`. It runs `npm publish` (which triggers `prepublishOnly` and publishes to the `latest` dist-tag) and then moves the `alpha` dist-tag to the same version. Both `alpha` and `latest` always point at the most recent published version.
+The engine is not currently distributed through a package registry (`private: true` is set in `package.json`); the alpha.0 through alpha.5 npm releases were unpublished in May 2026 on IP-cleanup grounds. The version field still bumps as documented above to keep a consistent signal across CHANGELOG entries, dist build outputs, and any consumers pinning to a git ref.
 
-When promoting from alpha to beta (or beta to rc), edit the trailing tag in the `release` script to match the new stage (`alpha` → `beta` → `rc`). Don't keep stale stage tags pointing at older versions; the dist-tags should always reflect the current line.
+When a release-worthy commit lands on `main`:
 
-After `npm run release`, tag the release commit in git: `git tag vX.Y.Z-stage.N && git push --tags`.
+1. Bump `package.json` `version` per the rules above.
+2. Move the `## Unreleased` heading in `CHANGELOG.md` to `## X.Y.Z-stage.N - YYYY-MM-DD` and open a fresh `## Unreleased` block.
+3. Tag the commit: `git tag vX.Y.Z-stage.N && git push --tags`. Consumers pinning to a tag get a stable reference; consumers pinning to `github:greghcarr/ttrpg-engine-dnd` get the moving tip.
