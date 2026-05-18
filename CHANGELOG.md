@@ -4,6 +4,26 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: magic-item mechanical wiring (slice 227)**
+
+Wires 4 SRD magic items that were `effects: []` to their existing-primitive shapes. No new engine vocabulary; pure content slice. Each item maps cleanly to a primitive the engine already supports (`GrantConditionImmunity`, `GrantImmunity`, `GrantResistance`, `ModifySpeed`, `SetAdvantage`).
+
+- **Periapt of Proof against Poison** (rare, attuned): `GrantConditionImmunity poisoned` + `GrantImmunity poison`. Exact RAW.
+- **Cloak of Arachnida** (very rare, attuned): `GrantResistance poison` + `ModifySpeed climb set 30`. The climb-speed value is an approximation matching the existing Slippers of Spider Climbing convention; RAW says "Climb Speed equal to your Speed" but the engine doesn't yet support a "match walk speed" `ModifySpeed` semantic.
+- **Eyes of the Eagle** (uncommon): `SetAdvantage` on Perception skill checks. Slightly broader than RAW, which restricts the advantage to sight-based Perception; the engine doesn't have a sight-vs-other-sense predicate fact yet.
+- **Cloak of the Bat** (rare, attuned): `SetAdvantage` on Stealth skill checks. The activated Fly Speed 40 in Dim Light or Darkness defers (needs an activate-as-action toggle + light-level predicate).
+
+Pack wired-items count: **14 → 18**. The wired-items snapshot updated accordingly.
+
+Pre-commit Uncle Bob audit (resumed per project convention):
+- Names: SRD-canonical retained.
+- DRY: no near-duplicates, no copy-paste blocks.
+- SRP: one primitive per effect entry, one job each.
+- Magic numbers: climb-speed 30 documented as Slippers-precedent.
+- The two approximations (Cloak of Arachnida climb speed; Eyes of the Eagle perception breadth) are explicit RAW deviations called out above so future engine slices can revisit when the missing primitives ship.
+
+Tests: 1587 pass, 209 skipped. Drift audit green. Wired-items snapshot updated.
+
 **Content: SRD Troll Limb statblock (slice 226)**
 
 Adds the Troll Limb monster, the final SRD 5.2.1 monster entry that was missing from the pack. Troll Limb is the dismembered-limb statblock that spawns from a Troll's *Loathsome Limbs* trait when the troll ends a turn Bloodied after taking 15+ Slashing damage that turn.
