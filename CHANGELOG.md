@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.12 (Genie + Mephit cohort)**
+
+Six new SRD 5.2.1 statblocks: Steam Mephit (CR 1/4), Dust Mephit (CR 1/2), Ice Mephit (CR 1/2), Magma Mephit (CR 1/2), Djinni (CR 11), Efreeti (CR 11). Opens the Genie + Mephit cohorts for the Elemental type, which moves from 5 to 11 entries. First `subtype: "genie"` and `subtype: "mephit"` users in the pack. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Djinni + Efreeti both wire Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 cohort moves from 28 to 30). Pack monster total moves from 164 to 170.
+
+Defers under existing engine gaps: Multiattack on Djinni + Efreeti (Mephits have no Multiattack, single Claw attack); Mephit Death Burst (on-death-area-save, low-CR mirror of Balor Death Throes — first multi-user cohort for that primitive); Mephit Recharge-6 area breaths (Dust Blinding Breath non-damaging, Ice / Magma / Steam typed damage — all 15-ft cones); Mephit innate spellcasting envelopes (Dust Sleep 1/Day, Ice Fog Cloud 1/Day); Steam Mephit Blurred Form (Disadvantage on incoming attacks unless Incapacitated, new defensive primitive); Djinni Create Whirlwind (concentration-based persistent area effect that moves 20 ft / turn with Restrained + recurring thunder damage — densest novel composite this batch); Djinni Storm Bolt prone-on-hit; Efreeti Hurl Flame 7d6 fire ranged; Djinni + Efreeti Spellcasting envelopes + Wishes 3/year (narrative); Djinni + Efreeti Elemental Restoration plane-respawn (narrative analogous to Demonic / Diabolical Restoration).
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.11 (Hag trio)**
 
 Three new SRD 5.2.1 statblocks: Sea Hag (CR 2), Green Hag (CR 3), Night Hag (CR 5). Closes the canonical SRD 5.2.1 Hag roster. Splits across two creature types: Sea + Green ship as Fey (roster moves from 4 to 6); Night ships as Fiend (roster moves from 16 to 17). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Night Hag wires Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 cohort moves from 27 to 28). Pack monster total moves from 161 to 164.
