@@ -2057,7 +2057,15 @@
     { "id": "wand-of-polymorph", "itemKind": "magic", "name": "Wand of Polymorph", "rarity": "very-rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-binding", "itemKind": "magic", "name": "Wand of Binding", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-enemy-detection", "itemKind": "magic", "name": "Wand of Enemy Detection", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
-    { "id": "wand-of-secrets", "itemKind": "magic", "name": "Wand of Secrets", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] }
+    { "id": "wand-of-secrets", "itemKind": "magic", "name": "Wand of Secrets", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
+    { "id": "block-and-tackle", "itemKind": "gear", "name": "Block and Tackle" },
+    { "id": "chain", "itemKind": "gear", "name": "Chain" },
+    { "id": "climbers-kit", "itemKind": "gear", "name": "Climber's Kit" },
+    { "id": "crowbar", "itemKind": "gear", "name": "Crowbar" },
+    { "id": "grappling-hook", "itemKind": "gear", "name": "Grappling Hook" },
+    { "id": "ladder-10", "itemKind": "gear", "name": "Ladder" },
+    { "id": "pole-10", "itemKind": "gear", "name": "Pole" },
+    { "id": "shovel", "itemKind": "gear", "name": "Shovel" }
   ],
   "monsters": [
     {

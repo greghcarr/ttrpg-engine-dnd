@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.1, 8 SRD 5.2.1 dungeoneering-utility gear entries**
+
+Opens the adventuring-gear catalog walk against the SRD 5.2.1 equipment table (verified against `references/srd-markdown/equipment.md`). All eight ship as pure-stub `itemKind: 'gear'` entries with no effects, no charges, no description, matching the existing alpha.5 seed gear shape (torch, rope, backpack, rations, waterskin, bedroll, tinderbox). Snapshot-clean.
+
+- New ids: `block-and-tackle`, `chain`, `climbers-kit`, `crowbar`, `grappling-hook`, `ladder-10`, `pole-10`, `shovel`. Names match SRD canonical exactly ("Ladder", "Pole", the 10-foot length lives in the SRD body text rather than the entry name; the kebab-case ids keep the suffix to leave room for future length variants).
+- Cohort theme: physical dungeoneering utility (traversal, breaching, hauling, anchoring). All eight are SRD-priced entries (Climber's Kit 25 GP, Crowbar 2 GP, Grappling Hook 2 GP, Chain 5 GP, Shovel 2 GP, Block and Tackle 1 GP, Pole 5 CP, Ladder 1 SP). Cost / weight metadata stays unship until a future content pass takes the full mundane-item catalog (matches the existing alpha.5 gear shape).
+- Three non-SRD candidates dropped from the original plan during the audit pass: Hammer (the SRD ships Light Hammer / Warhammer as weapons, no gear-kind hammer), Pick / Miner's (dropped in the 2024 / SRD 5.2.1 catalog), Piton (rolled into Climber's Kit body text, no standalone entry). Replaced with Block and Tackle, Chain, and Climber's Kit.
+
+Coverage bump: items 217 to 224 total, gear 7 to 15. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` are updated.
+
 **Content audit: Fighter Indomitable + Druid Wild Shape uses (slice 176)**
 
 SRD 5.2.1 value-drift sweep continued.
