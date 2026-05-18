@@ -588,7 +588,7 @@
         "14": { "proficiencyBonus": 5, "features": [{ "id": "natures-veil", "name": "Nature's Veil", "effects": [] }], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
-        "17": { "proficiencyBonus": 6, "features": [{ "id": "hunters-mark-uses-6", "name": "Favored Enemy (6 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 6, "recharge": "longRest" }] }], "columns": {} },
+        "17": { "proficiencyBonus": 6, "features": [{ "id": "hunters-mark-uses-6", "name": "Favored Enemy (6 uses)", "effects": [{ "kind": "GrantResource", "resourceId": "hunters-mark", "max": 6, "recharge": "longRest" }] }, { "id": "precise-hunter", "name": "Precise Hunter", "effects": [{ "kind": "GrantAdvantageVsBearersOfMyCondition", "conditionId": "hunters-mark-active", "on": "attack", "mode": "advantage" }] }], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [{ "id": "feral-senses", "name": "Feral Senses", "effects": [{ "kind": "GrantSense", "sense": "blindsight", "range": 30 }] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "20": { "proficiencyBonus": 6, "features": [{ "id": "foe-slayer", "name": "Foe Slayer", "effects": [] }], "columns": {} }

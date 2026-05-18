@@ -163,6 +163,17 @@ export type Effect =
   // bearing condition has no `sourceCharacterId` (the planner stamps
   // this on spell-applied conditions since slice 88).
   | { kind: 'SetAdvantageVsSource'; on: RollTarget; mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail' }
+  // Slice 231. Mirror of SetAdvantageVsSource but lives on the
+  // attacker (not on a condition on the target). The bearer of this
+  // effect has advantage / disadvantage on rolls of `on` whenever
+  // the roll's counterparty (e.g. the attack target) carries an
+  // active condition with id `conditionId` whose `sourceCharacterId`
+  // matches the bearer. Canonical user: Ranger L17 Precise Hunter
+  // ("while your Hunter's Mark spell is on a creature, you have
+  // Advantage on attack rolls against that creature"). 3-way join:
+  // bearer has the marker, target has the named condition, condition's
+  // source is the bearer.
+  | { kind: 'GrantAdvantageVsBearersOfMyCondition'; conditionId: string; on: RollTarget; mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail' }
   // While the bearing condition is active, the bearer cannot regain
   // hit points. Heal planners consult this via the effect stack and,
   // when blocked, emit a Healed event with amount=0 (the reducer's
@@ -405,6 +416,12 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       mode: z.enum(['advantage', 'disadvantage', 'auto-crit', 'auto-fail']),
     }),
     z.object({
+      kind: z.literal('GrantAdvantageVsBearersOfMyCondition'),
+      conditionId: z.string(),
+      on: RollTargetSchema,
+      mode: z.enum(['advantage', 'disadvantage', 'auto-crit', 'auto-fail']),
+    }),
+    z.object({
       kind: z.literal('BlockHealing'),
     }),
     z.object({
@@ -633,6 +650,7 @@ export const EFFECT_KINDS = [
   'AddModifier',
   'SetAdvantage',
   'SetAdvantageVsSource',
+  'GrantAdvantageVsBearersOfMyCondition',
   'BlockHealing',
   'GrantResistance',
   'GrantImmunity',

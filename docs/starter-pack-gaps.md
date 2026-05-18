@@ -779,7 +779,7 @@ These are smaller deferrals from individual content slices: missing primitives, 
 | Hunter's Mark — Advantage on WIS (Perception or Survival) checks to find the marked target | slice 222 | New effect kind `GrantAdvantageVsBearersOfMyCondition { conditionId, skills }`, read by the caster's skill-check derive |
 | Hunter's Mark — bonus-action remark on target death | slice 222 | Dedicated `planRemarkHuntersMark` planner (consumes bonus action, moves `hunters-mark-active` from old target to new) |
 | Hunter's Mark — upcast-driven duration extension (1 hr → 8 hr at L3-4, 24 hr at L5+) | slice 222 | Concentration system carries round-based expiry today; add hour-tier duration semantics |
-| Ranger L17 Precise Hunter | slice 217 (rolled-forward) | Same `GrantAdvantageVsBearersOfMyCondition` primitive as the Hunter's Mark Perception arm above |
+| ~~Ranger L17 Precise Hunter~~ | ~~slice 217 (rolled-forward)~~ | ~~Closed by slice 231: new `GrantAdvantageVsBearersOfMyCondition` Effect kind threaded into the planAttack advantage resolution. Wired as a single content edit on top of the slice-222 hunters-mark-active condition.~~ |
 | Monk L10 Heightened Focus | slice 217 (rolled-forward) | `planFlurryOfBlows`, `planPatientDefense`, `planStepOfTheWind` (Monk L2 bonus-action planners — all currently content stubs) |
 | Cleric L20 Greater Divine Intervention — 2d4-LR cooldown when Wish is the chosen spell | slice 221 | New `ResourceCooldownExtended` primitive that the rest reducer can honor by skipping `divine-intervention` recharge until the cooldown count reaches zero |
 | Sorcerer L7 Sorcery Incarnate — doubled-metamagic-per-spell arm | slice 201 (rolled-forward) | Once-per-spell metamagic enforcement in the metamagic planner |

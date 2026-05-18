@@ -75,6 +75,18 @@ export class EffectAccumulator {
   // disadvantage variant); queried by consumers that know the relevant
   // counterparty id (the attack planner with the target's id).
   private readonly advantagesVsSource = new Map<string, AdvantageState>();
+  // Slice 231: bearer-side advantage that applies when the roll's
+  // counterparty carries a specified condition with sourceCharacterId
+  // equal to the bearer. Indexed by rollKey; the entry carries the
+  // conditionId and mode. The consumer (planAttack) reads the entries
+  // for the relevant roll target, checks the counterparty's
+  // appliedConditions, and folds the advantage in when the 3-way join
+  // matches. Canonical user: Ranger L17 Precise Hunter via
+  // `hunters-mark-active`.
+  private readonly advantagesVsBearersOfMyCondition = new Map<
+    string,
+    Array<{ conditionId: string; mode: AdvantageState }>
+  >();
   // Slice 112: per-type resistance entries with optional qualifier.
   // No qualifier means the resistance always applies. A 'nonmagical'
   // qualifier means the resistance applies only when the incoming
@@ -181,6 +193,27 @@ export class EffectAccumulator {
     else state.autoFail = true;
   }
 
+  // Slice 231: records an entry stating that on rolls of `target`,
+  // when the counterparty carries an active condition with the named
+  // id whose source is this bearer, apply the advantage mode. The
+  // consumer (planAttack) queries via `advantageVsBearersOfMyCondition`
+  // below at attack-resolution time.
+  addAdvantageVsBearersOfMyCondition(
+    target: RollTarget,
+    conditionId: string,
+    mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail',
+  ): void {
+    const key = rollKey(target);
+    const entries = this.advantagesVsBearersOfMyCondition.get(key) ?? [];
+    const advState = emptyAdvantage();
+    if (mode === 'advantage') advState.advantage = true;
+    else if (mode === 'disadvantage') advState.disadvantage = true;
+    else if (mode === 'auto-crit') advState.autoCrit = true;
+    else advState.autoFail = true;
+    entries.push({ conditionId, mode: advState });
+    this.advantagesVsBearersOfMyCondition.set(key, entries);
+  }
+
   addResistance(type: DamageType | 'all', qualifier?: 'nonmagical' | 'magical'): void {
     let list = this.resistances.get(type);
     if (list === undefined) {
@@ -265,6 +298,34 @@ export class EffectAccumulator {
   advantageVsSource(target: RollTarget, sourceCharacterId: string): AdvantageState {
     const key = `${rollKey(target)}::${sourceCharacterId}`;
     return this.advantagesVsSource.get(key) ?? emptyAdvantage();
+  }
+
+  // Slice 231: returns the AdvantageState that applies when this
+  // character makes a `target` roll against `counterpartyConditions`
+  // (the target character's applied-conditions list) and this
+  // character's id is `bearerId`. Walks the bearer's recorded
+  // GrantAdvantageVsBearersOfMyCondition entries and folds in those
+  // whose conditionId appears on the counterparty with sourceCharacterId
+  // matching the bearer.
+  advantageVsBearersOfMyCondition(
+    target: RollTarget,
+    counterpartyConditions: ReadonlyArray<{ conditionId: string; sourceCharacterId?: string }>,
+    bearerId: string,
+  ): AdvantageState {
+    const entries = this.advantagesVsBearersOfMyCondition.get(rollKey(target));
+    if (entries === undefined || entries.length === 0) return emptyAdvantage();
+    const result = emptyAdvantage();
+    for (const entry of entries) {
+      const match = counterpartyConditions.some(
+        (c) => c.conditionId === entry.conditionId && c.sourceCharacterId === bearerId,
+      );
+      if (!match) continue;
+      if (entry.mode.advantage) result.advantage = true;
+      if (entry.mode.disadvantage) result.disadvantage = true;
+      if (entry.mode.autoCrit) result.autoCrit = true;
+      if (entry.mode.autoFail) result.autoFail = true;
+    }
+    return result;
   }
 
   // True when this character has any effect that grants attackers
@@ -621,6 +682,9 @@ export const applyEffectToBuilder = (
       if (ctx.sourceCharacterId !== undefined) {
         acc.setAdvantageVsSource(effect.on, ctx.sourceCharacterId, effect.mode);
       }
+      return;
+    case 'GrantAdvantageVsBearersOfMyCondition':
+      acc.addAdvantageVsBearersOfMyCondition(effect.on, effect.conditionId, effect.mode);
       return;
     case 'BlockHealing':
       acc.markHealingBlocked();

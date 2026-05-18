@@ -394,6 +394,16 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     pendingChoices: state.pendingChoices,
   });
   const attackerVsTargetAdvantage = attackerEffects.advantageVsSource('attack', input.targetId);
+  // Slice 231: 3-way join — if the attacker bears a
+  // GrantAdvantageVsBearersOfMyCondition entry and the target carries
+  // a matching condition whose source is the attacker, fold in that
+  // advantage / disadvantage. Canonical user: Ranger L17 Precise
+  // Hunter (advantage vs Hunter's-Marked targets).
+  const attackerVsMarkedTargetAdvantage = attackerEffects.advantageVsBearersOfMyCondition(
+    'attack',
+    target.appliedConditions,
+    input.attackerId,
+  );
   // Generic attacker-side advantage on attacks (e.g. Invisible) and
   // disadvantage on attacks (e.g. Blinded, Frightened, Poisoned,
   // Prone, Restrained). Folded alongside target-side contributions
@@ -414,6 +424,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     || rangedInMelee
     || heavyForSmall
     || attackerVsTargetAdvantage.disadvantage
+    || attackerVsMarkedTargetAdvantage.disadvantage
     || attackerSelfAdvantage.disadvantage;
   let advantage = input.advantage ?? 'none';
   // Reckless Attack: if the attacker activated it this turn (and the
@@ -427,6 +438,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
       targetGrantsAdvantage
       || attackerRecklessAdvantage
       || attackerVsTargetAdvantage.advantage
+      || attackerVsMarkedTargetAdvantage.advantage
       || attackerSelfAdvantage.advantage
     );
   if (targetCancelsAdvantage && advantage === 'advantage') {

@@ -80,6 +80,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "ranger L9 hunters-mark-uses-4",
   "ranger L13 hunters-mark-uses-5",
   "ranger L17 hunters-mark-uses-6",
+  "ranger L17 precise-hunter",
   "ranger L18 feral-senses",
   "rogue L1 expertise-rogue",
   "rogue L1 sneak-attack",

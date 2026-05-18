@@ -4,6 +4,32 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `GrantAdvantageVsBearersOfMyCondition` primitive + Ranger L17 Precise Hunter (slice 231)**
+
+Closes the second of the two remaining deferred-with-reason main-class features from the slice-217 audit. Adds a new effect kind that gives the bearer advantage / disadvantage on rolls of a specified target type when the roll's counterparty (e.g., attack target) carries an active condition whose source is the bearer. Mirrors `SetAdvantageVsSource` (slice 96) but reads from the opposite direction: this primitive lives on the attacker; `SetAdvantageVsSource` lives on a condition.
+
+The 3-way join — attacker bears the marker, target bears the named condition, condition's source is the attacker — sits naturally in the existing attack-planner advantage-resolution path. One new query (`advantageVsBearersOfMyCondition`) folds alongside the existing `advantageVsSource` / `advantageFor` calls.
+
+**Canonical user**: Ranger L17 Precise Hunter. RAW: "while your Hunter's Mark spell is on a creature, you have Advantage on attack rolls against that creature." Wires as `GrantAdvantageVsBearersOfMyCondition { conditionId: 'hunters-mark-active', on: 'attack', mode: 'advantage' }`. The slice-222 work establishing `hunters-mark-active` with `sourceCharacterId` made this a single content edit on top of the new primitive.
+
+**Plumbing**:
+
+- New `GrantAdvantageVsBearersOfMyCondition` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 47 → 48 wired primitives.
+- `EffectAccumulator` gains `addAdvantageVsBearersOfMyCondition(target, conditionId, mode)` + `advantageVsBearersOfMyCondition(target, counterpartyConditions, bearerId)` query. The query walks the entries and folds in advantage only when the 3-way join matches.
+- Builder dispatch routes the effect to the accumulator.
+- `planAttack` adds one new query call alongside the existing advantage resolution; folds the result into the same disadvantage-cancellation logic as the other contributions.
+
+**State of the deferred-with-reason class-feature list**: was 2 (Monk L10 Heightened Focus, Ranger L17 Precise Hunter); now 1 (Monk L10 only). Heightened Focus still needs the three Monk L2 bonus-action planners shipped first.
+
+Pre-commit Uncle Bob audit:
+- Names: `GrantAdvantageVsBearersOfMyCondition` mirrors the existing `SetAdvantageVsSource` family; verbose but precise.
+- DRY: followed the `SetAdvantageVsSource` pattern exactly. Field + setter + query + dispatch case + planAttack fold; no new abstractions.
+- SRP: each piece does one thing; the 3-way-join logic sits in one method on the accumulator.
+- No magic numbers / strings: `hunters-mark-active` is the existing slice-222 condition id.
+- Tests assert mechanical outcomes: `attackRolled.used === 'advantage'` (and `!== 'advantage'` for the negative cases), not just event presence.
+
+Tests: 4-case planner test in [tests/unit/engine/ranger-precise-hunter.test.ts](tests/unit/engine/ranger-precise-hunter.test.ts) covering (1) L17 ranger against own marked target gets advantage, (2) L16 ranger (no feature yet) gets no advantage even with mark active, (3) L17 ranger against creature marked by a different ranger gets no advantage (source-match check), (4) L17 ranger against unmarked target gets no advantage. 1604 pass, 209 skipped. tsc clean.
+
 **Engine: `bearer.wieldingShield` predicate fact + Bracers of Defense wire (slice 230)**
 
 Tiny primitive: a new predicate fact `bearer.wieldingShield` (mirror of `bearer.wearingArmor` from slice 116), populated in [src/derive/ac.ts](src/derive/ac.ts) alongside the existing armor fact. True iff the bearer has an item equipped in their shield slot.
