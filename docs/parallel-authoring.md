@@ -49,6 +49,20 @@ Forbidden:
 - `CLAUDE.md` and the auto-memory directory.
 - `tests/coverage/__snapshots__/features.test.ts.snap` — slice 126 narrowed the per-id catalog snapshots to wired-only entries, so pure stub additions (monsters, items with `effects: []` and no charges) don't move this snapshot. If it does move, stop and surface the diff; do not refresh with `-u` until coordinated with the engine session.
 
+### Subclass session (sibling worktree, `content/subclass-batch-N`)
+
+Allowed:
+- `src/content/packs/starter-pack.json` — `subclasses[]` array only. Existing pack subclass entries may be modified to add missing `levelGrants` keys (L6 / L10 / L14 / L17 etc.) per the SRD 5.2.1 audit doc. No edits to `classes[]`, `monsters[]`, `items[]`, `spells[]`, `species[]`, `backgrounds[]`, `feats[]`, or `conditions[]`.
+- `docs/srd-5.2.1-audit-classes.md` — Layer 4 (subclass features) section, marking entries closed as they ship.
+- `docs/starter-pack-gaps.md` — if a subclass section exists, the rows for completed features.
+- `CHANGELOG.md` — a clearly-labeled subhead like `**Subclass authoring batch N**` under `## Unreleased`.
+
+Forbidden:
+- All of `src/engine/`, `src/derive/`, `src/schemas/`, `src/effects/`, `tests/`. If a subclass feature needs an Effect primitive that isn't yet in the engine vocabulary, document the deferral in the audit doc and skip that feature; do not extend the engine.
+- All other arrays in `starter-pack.json` (see Allowed list).
+- `README.md`, `CLAUDE.md`, the auto-memory directory.
+- `tests/coverage/__snapshots__/features.test.ts.snap` — subclass features have empty `effects: []` arrays today, so adding them as stubs doesn't move the wired-features snapshot. Wiring a subclass feature with real effects WILL move it; in that case stop and surface the diff rather than refreshing with `-u`.
+
 ## Starter prompt for the content session
 
 Paste this into the new Claude Code chat in the content worktree's VS Code window:
@@ -92,6 +106,55 @@ Coordination notes:
 - Each worktree maintains its own `node_modules`. If the engine session lands a dependency change in `package.json`, this worktree needs its own `npm install` to pick it up.
 
 To start: read the gaps doc's Monsters and Items sections, then propose a starting batch (something coherent like "10 low-CR humanoids: bandit + bandit captain + cultist + cult fanatic + acolyte + commoner + guard + noble + scout + spy" or "5 uncommon wondrous items"). Wait for confirmation before authoring.
+```
+
+## Starter prompt for the subclass session
+
+Paste this into the new Claude Code chat in the subclass worktree's VS Code window:
+
+```
+We're running a parallel subclass-authoring session for ttrpg-engine-dnd in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and a content-authoring session is in a third worktree handling monsters and items. This session is on branch `content/subclass-batch-1` in worktree `../ttrpg-engine-dnd-subclasses` and is restricted to subclass content. No engine code, no schema changes, no monster / item / class work.
+
+Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/subclass-batch-1`), and `pwd` (should end in `ttrpg-engine-dnd-subclasses`).
+
+Allowed edits:
+- `src/content/packs/starter-pack.json` — `subclasses[]` array only. You may modify existing subclass entries to add missing `levelGrants` keys (L6, L10, L14, L17 etc.). Do not touch `classes[]`, `monsters[]`, `items[]`, `spells[]`, `species[]`, `backgrounds[]`, `feats[]`, or `conditions[]`.
+- `docs/srd-5.2.1-audit-classes.md` — Layer 4 section, marking subclass features closed as they ship.
+- `docs/starter-pack-gaps.md` — subclass-related rows only.
+- `CHANGELOG.md` — add a subhead like `**Subclass authoring batch 1**` under `## Unreleased`. Don't touch other sessions' entries.
+
+Forbidden:
+- All of `src/engine/`, `src/derive/`, `src/schemas/`, `src/effects/`, `tests/`. If a subclass feature needs an Effect primitive that isn't yet in the engine vocabulary, document the deferral in the audit doc and skip that feature; do not extend the engine.
+- All other arrays in `starter-pack.json` (see Allowed list).
+- `README.md`, `CLAUDE.md`, any auto-memory files.
+- `tests/coverage/__snapshots__/features.test.ts.snap` — pure stub additions (subclass features with `effects: []`) don't move this snapshot. If a feature you wire with real effects moves it, stop and surface the diff rather than refreshing with `-u` until coordinated with the engine session.
+
+Authoritative queue:
+- [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) Layer 4 lists 41 SRD 5.2.1 subclass features missing from the pack, organized by subclass.
+- Each entry's RAW text is in [references/srd-markdown/classes.md](references/srd-markdown/classes.md). Grep by feature name.
+- Note: a few entries may already be partially present in the pack under a different shape; the audit script flagged by structural presence. When adding a feature, first grep `subclasses[]` for the feature id to avoid duplicate entries.
+
+Slice cadence (mirrors the engine session):
+1. Pick a target — one subclass at a time is the cleanest unit. Pick the subclass with the most missing features, or a small batch across multiple subclasses if they share a primitive.
+2. For each missing feature: read the SRD body, decide whether the engine has the primitive to wire it (current vocabulary in [src/schemas/effects.ts](src/schemas/effects.ts) `EFFECT_KINDS`). If yes, wire it with the real effect. If no, ship a schema-only stub (`effects: []`) and add a deferral note in the audit doc.
+3. Add the feature to the subclass's `levelGrants` table at the SRD-listed level.
+4. Update the audit doc's Layer 4 table to mark the feature closed.
+5. `npx vitest run` — full suite green. The content-pack validator catches malformed JSON.
+6. `npx tsc --noEmit` — clean.
+7. Pre-commit Uncle Bob self-review: no schema changes; only `subclasses[]` and the named docs in your diff; full vitest green; intention-revealing feature ids and names.
+8. Commit locally with message format `content (subclass batch 1.N): <subclass name> features` or `content (subclass batch 1.N): cross-subclass <primitive> users`. Never push.
+
+Pack reference conventions:
+- IDs are kebab-case (e.g. `life-domain-preserve-life`, `champion-survivor`).
+- Levels are string keys in `levelGrants`: `"6"`, `"10"`, `"14"`, `"17"`.
+- Existing subclass entries to use as references: Path of the Berserker, Life Domain, Champion, Oath of Devotion, Hunter, Thief, Draconic Sorcery, Fiend Patron, Evoker.
+
+Coordination notes:
+- The engine session is on `main` and may concurrently fix value drift in existing classes / subclasses. JSON conflicts on `subclasses[]` are possible if both sessions edit the same subclass; rebase frequently and prefer narrow scope per slice.
+- The monster session in the third worktree only touches `monsters[]` and `items[]`, so should not collide with this lane.
+- Each worktree maintains its own `node_modules`. If the engine session lands a dependency change in `package.json`, this worktree needs its own `npm install` to pick it up.
+
+To start: read [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) Layer 4 (the 41 missing subclass features table), then propose a starting batch (e.g. "all four Life Domain L3/L6/L17 features" or "the three Hunter subclass features at L7/L11/L15"). Wait for confirmation before authoring.
 ```
 
 ## Coordination during parallel work
