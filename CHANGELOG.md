@@ -4,6 +4,25 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `bearer.wieldingShield` predicate fact + Bracers of Defense wire (slice 230)**
+
+Tiny primitive: a new predicate fact `bearer.wieldingShield` (mirror of `bearer.wearingArmor` from slice 116), populated in [src/derive/ac.ts](src/derive/ac.ts) alongside the existing armor fact. True iff the bearer has an item equipped in their shield slot.
+
+**Canonical user**: Bracers of Defense (RAW: "+2 bonus to AC if you are wearing no armor and using no Shield"). Now wires the full RAW gate via an `AddModifier { target: 'ac', value: 2 }` whose condition is `all([eq bearer.wearingArmor false, eq bearer.wieldingShield false])`. Previously it was `effects: []` and one of the deferred backlog rows from slice 227's audit.
+
+**Pre-commit Uncle Bob audit**:
+- Names: `bearer.wieldingShield` mirrors `bearer.wearingArmor` exactly — symmetric, intention-revealing.
+- DRY: piggybacks on the existing fact-population block (same Map, two adjacent lines).
+- SRP: one new line of state derivation; the fact has a single semantic.
+- No magic numbers/strings.
+- The asymmetry of having `wearingArmor` but not `wieldingShield` was an architectural smell; this closes it.
+
+Pack wired-items count: **26 → 27**. Closes the "Bracers of Defense bearer.wieldingShield predicate" backlog row.
+
+Tests: 3-case test in [tests/unit/engine/bracers-of-defense.test.ts](tests/unit/engine/bracers-of-defense.test.ts) covering (1) unarmored + no-shield gets the +2, (2) shield-wielding gets nothing, (3) armored gets nothing. Uses total-AC comparison against a baseline-no-bracers character to avoid coupling to breakdown labels.
+
+1600 pass, 209 skipped. tsc clean.
+
 **Engine: `OverrideAbilityScore` primitive (slice 229)**
 
 New effect kind that floors an ability score at a specific value: if the bearer's base score is below `value`, derivations use `value` instead; if at or above, no effect. Mirrors the `SetACFloor` shape from slice 74. Multiple floors on the same ability fold to the highest. Closes 9 backlog rows in one slice.

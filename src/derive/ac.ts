@@ -136,8 +136,12 @@ export const computeAC = (input: ComputeACInput): ACResult => {
   // future modifiers (shield-only, heavy-armor-only, etc.) can join
   // the same fact namespace. `bearer.wearingArmor` is true iff the
   // character has an item equipped in their armor slot.
+  // Slice 230: added `bearer.wieldingShield` (mirror of the armor
+  // fact) so Bracers of Defense can express the RAW "no armor + no
+  // shield" gate exactly.
   const facts = new Map<string, unknown>([
     ['bearer.wearingArmor', input.character.equipped.armor !== undefined],
+    ['bearer.wieldingShield', input.character.equipped.shield !== undefined],
   ]);
 
   // A flat `armorClass` on the character takes precedence over equipment

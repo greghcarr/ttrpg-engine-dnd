@@ -2427,7 +2427,7 @@
     { "id": "robe-of-the-archmagi", "itemKind": "magic", "name": "Robe of the Archmagi", "rarity": "legendary", "requiresAttunement": true, "attunementCondition": "Sorcerer, Warlock, or Wizard", "effects": [] },
     { "id": "robe-of-eyes", "itemKind": "magic", "name": "Robe of Eyes", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-displacement", "itemKind": "magic", "name": "Cloak of Displacement", "rarity": "rare", "requiresAttunement": true, "effects": [] },
-    { "id": "bracers-of-defense", "itemKind": "magic", "name": "Bracers of Defense", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    { "id": "bracers-of-defense", "itemKind": "magic", "name": "Bracers of Defense", "rarity": "rare", "requiresAttunement": true, "effects": [{ "kind": "AddModifier", "target": "ac", "value": 2, "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.wearingArmor", "value": false }, { "kind": "eq", "path": "bearer.wieldingShield", "value": false }] } }] },
     { "id": "boots-of-levitation", "itemKind": "magic", "name": "Boots of Levitation", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "boots-of-speed", "itemKind": "magic", "name": "Boots of Speed", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-the-manta-ray", "itemKind": "magic", "name": "Cloak of the Manta Ray", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 60 }] },
