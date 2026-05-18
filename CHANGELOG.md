@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: Cleric L10 Divine Intervention planner + `ignorePreparation` flag (slice 220)**
+
+Closes one of the three deferred-with-reason main-class features from the slice-217 audit pass. Ships in two pieces:
+
+- **Primitive**: new `ignorePreparation?: boolean` flag on `CastSpellIntent`. When true, `planCastSpell` skips the "does the bearer know or prepare this spell?" gate; the calling planner is responsible for validating eligibility against the feature's rule. Used here for Divine Intervention's "any Cleric spell L5 or lower" rule, and available for any future magic-item or feature that lets the bearer cast from a fixed catalog.
+- **Canonical user**: new `planDivineIntervention` planner in [src/engine/plan/divine-intervention.ts](src/engine/plan/divine-intervention.ts). RAW: "As a Magic action, choose any Cleric spell of level 5 or lower that doesn't require a Reaction to cast. As part of the same action, you cast that spell without expending a spell slot or needing Material components. You can't use this feature again until you finish a Long Rest." Implementation validates the spell is on the Cleric list, level ≤ 5, and not Reaction casting time; consumes one `divine-intervention` resource use; then delegates to `planCastSpell` with both `noSlotCost: true` (slice 219) and `ignorePreparation: true`. The delegated cast emits its own action-economy event matching the underlying spell's casting time, which models "as part of the same action" (Divine Intervention IS the Magic action; the cast inherits it).
+
+Pack changes: Cleric L10 feature `divine-intervention` now ships a `GrantResource { resourceId: 'divine-intervention', max: 1, recharge: 'longRest' }` effect (was previously `effects: []`).
+
+The L20 Greater Divine Intervention Wish variant is still a follow-up: it needs to add Wish to the selectable set and impose a 2d4 long-rest cooldown override when Wish is the chosen spell (the only RNG-bearing part of the feature).
+
+Tests: 6-case planner test in [tests/unit/engine/plan-divine-intervention.test.ts](tests/unit/engine/plan-divine-intervention.test.ts) covering the happy path (free cast, resource depletion), exhaustion rejection, non-Cleric spell rejection, above-L5 rejection, and the "no preparation needed" guarantee. Updated wired-features snapshot to include the L10 wire.
+
 **Engine: `noSlotCost` flag on CastSpellIntent (slice 219)**
 
 Adds `noSlotCost?: boolean` to `CastSpellIntent`. When true, `planCastSpell` skips both the slot-availability gate and the `SpellSlotConsumed` / `PactSlotConsumed` emission; the chosen `slotLevel` still drives any per-slot upcast scaling. The default (false / unset) preserves the existing paid-cast behavior exactly.

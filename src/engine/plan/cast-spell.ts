@@ -100,6 +100,14 @@ export interface CastSpellIntent {
   // Warlock Contact Patron `oncePerLongRest` preparation, magic-item
   // "casts X without expending a slot" riders.
   readonly noSlotCost?: boolean;
+  // Slice 220: when true, the cast skips the "does the bearer know or
+  // prepare this spell?" gate. The consumer (always a feature-driven
+  // planner) is responsible for validating the spell against the
+  // feature's eligibility rule before delegating here. Used by
+  // Cleric Divine Intervention (any Cleric spell L5 or lower), and
+  // by magic items that let the bearer cast from a fixed catalog
+  // regardless of class.
+  readonly ignorePreparation?: boolean;
   readonly at?: string;
 }
 
@@ -1163,7 +1171,7 @@ export const planCastSpell = (
   assertActorCanAct(character, 'cast a spell');
   const spell = content.spells.get(intent.spellId);
   if (!spell) throw new Error(`Unknown spell ${intent.spellId}`);
-  if (!characterKnowsSpell(state, content, character, intent.spellId)) {
+  if (intent.ignorePreparation !== true && !characterKnowsSpell(state, content, character, intent.spellId)) {
     throw new Error(`Character does not know or prepare spell ${intent.spellId}`);
   }
   if (intent.slotLevel < spell.level) {
