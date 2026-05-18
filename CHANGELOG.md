@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell AoE sizes (slice 186)**
+
+Audited spell `targeting.shape` + `targeting.size` against SRD body text. Two real drifts (others were script artifacts where cylinder height vs radius are both present in the body):
+
+- sleep: targeting size 20 to 5. SRD 5.2.1 Sleep is a 5-foot-radius Sphere; pack carried the 2014 PHB 20-foot-radius. Note: the spell's hp-pool-knockout mechanical-effect shape is still 2014-flavored (SRD 5.2.1 reframed Sleep as a WIS-save Incapacitate progression). That mechanic rewrite is a future slice; this one only corrects the targeting size.
+- sleet-storm: cylinder size 40 to 20. SRD 5.2.1: 20-foot-radius, 40-foot-high Cylinder. Pack had stored the height (40) where the size field should hold the radius (matches pack convention for other cylinder spells: ice-storm 20 radius, flame-strike 10 radius, moonbeam 5 radius, magic-circle 10 radius, call-lightning 60 radius).
+
+Audit also noted: pack uses `cube` for SRD's "Square" shape and `sphere` for SRD's "Emanation" shape because the engine schema only has cone / cube / line / sphere / cylinder. These are conscious modeling decisions, not drift.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell damage dice + upcast scaling (slice 185)**
 
 Audited spell damage dice and upcast scaling against SRD body text across the full pack. Three drifts fixed:
