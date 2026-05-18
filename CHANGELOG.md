@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell material text bulk normalization (slice 193)**
+
+Audited every pack spell's M-component text against the SRD body's parenthesized material description. 126 mismatches found and fixed in one pass. Most are SRD 5.2.1 simplifications of 2014 PHB phrasings (the 2024 PHB systematically pared back material flavor text); a smaller subset are RAW reworks where the SRD changed the material entirely.
+
+Representative changes:
+- fireball: "a tiny ball of bat guano and sulfur" to "a ball of bat guano and sulfur".
+- hold-person, hold-monster: dropped "small" qualifier per SRD.
+- bless: "a sprinkling of holy water" to "a Holy Symbol worth 5+ GP" (RAW change, not normalization).
+- banishment: "an item distasteful to the target" to "a pentacle".
+- flame-strike: added missing article ("pinch of sulfur" to "a pinch of sulfur").
+- stoneskin, awaken, greater-restoration, hallow: now carry the "which the spell consumes" RAW suffix.
+- private-sanctum / resilient-sphere / creation / dream / insect-plague / telepathic-bond: substantially simplified materials per SRD.
+
+Material text is documentation-only (the engine doesn't validate / cost it), but RAW accuracy matters for downstream consumers who render the spell description.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: magic item attunement conditions (slice 192)**
 
 Audited every pack magic item's `attunementCondition` against the SRD 5.2.1 type-line restriction. Four real drifts (others were pack-convention normalization: pack uses bare class nouns like "Spellcaster" / "Paladin" / "Dwarf" where SRD uses "a Spellcaster" / "a Paladin"; that's a normalization choice, not drift):
