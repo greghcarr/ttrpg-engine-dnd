@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.4, 8 SRD 5.2.1 containers**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the batch-4.1 / 4.3 cohorts.
+
+- New ids: `barrel`, `basket`, `bucket`, `case-map-or-scroll`, `chest`, `pouch`, `quiver`, `sack`. Source lines in equipment.md: 1310, 1314, 1342, 1362, 1370, 1598, 1606, 1628.
+- Cohort theme: storage / carry. The eight cover the canonical SRD container family from generic (Sack, Pouch, Basket) through specialized (Quiver for arrows, Case Map or Scroll for documents) to dungeon-furniture (Barrel, Chest, Bucket).
+- Two canonical SRD candidates deferred: Pot Iron (kitchenware, not strictly a storage container in the carrying sense) and Case Crossbow Bolt (parallel of Quiver scoped to bolt ammunition; shipped only Quiver to avoid the ammunition-case redundancy in a single batch). Both remain available for a future batch.
+- All eight are gear-kind without per-use mechanical effects. RAW capacity numbers (Barrel 40 gallons, Sack 30 lb, Pouch 6 lb, Quiver 20 arrows, etc.) stay narrative; the gear schema has no capacity field, and the pack's weight / cost metadata stays unship across the alpha.5-shaped gear cohort.
+
+Coverage bump: items 240 to 248 total, gear 23 to 31. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~42 SRD adventuring-gear entries remain unship (clothing, foci, writing supplies, traps + restraints, misc utility, plus the two deferred candidates).
+
 **Content authoring: items batch 4.3, 8 SRD 5.2.1 light-sources + observation gear entries**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new entries shipping as pure-stub `itemKind: 'gear'` with no description, matching the existing alpha.5 seed gear shape and the batch-4.1 dungeoneering-utility cohort.

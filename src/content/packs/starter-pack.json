@@ -2081,7 +2081,15 @@
     { "id": "magnifying-glass", "itemKind": "gear", "name": "Magnifying Glass" },
     { "id": "mirror", "itemKind": "gear", "name": "Mirror" },
     { "id": "signal-whistle", "itemKind": "gear", "name": "Signal Whistle" },
-    { "id": "spyglass", "itemKind": "gear", "name": "Spyglass" }
+    { "id": "spyglass", "itemKind": "gear", "name": "Spyglass" },
+    { "id": "barrel", "itemKind": "gear", "name": "Barrel" },
+    { "id": "basket", "itemKind": "gear", "name": "Basket" },
+    { "id": "bucket", "itemKind": "gear", "name": "Bucket" },
+    { "id": "case-map-or-scroll", "itemKind": "gear", "name": "Case, Map or Scroll" },
+    { "id": "chest", "itemKind": "gear", "name": "Chest" },
+    { "id": "pouch", "itemKind": "gear", "name": "Pouch" },
+    { "id": "quiver", "itemKind": "gear", "name": "Quiver" },
+    { "id": "sack", "itemKind": "gear", "name": "Sack" }
   ],
   "monsters": [
     {
