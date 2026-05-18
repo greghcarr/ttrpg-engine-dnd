@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.13 (Low-CR Monstrosity sweep)**
+
+Five new SRD 5.2.1 statblocks: Cockatrice (CR 1/2), Death Dog (CR 1), Mimic (CR 2), Basilisk (CR 3), Phase Spider (CR 3). Opens the low-CR-to-mid Monstrosity tier with five canonical adventure-staple Monstrosities below CR 4. The Monstrosity type roster moves from 12 to 17 entries. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Pack monster total moves from 170 to 175.
+
+Defers under existing engine gaps: Multiattack on Death Dog + Phase Spider (Cockatrice / Mimic / Basilisk are single-attack); Petrification riders on Basilisk Petrifying Gaze (Recharge 4-6, DC 12 CON in 30-ft cone, two-failure escalation Restrained then Petrified — first Recharge 4-6 user in the pack) and Cockatrice Petrifying Bite (DC 11 CON, two-failure escalation, 24-hour Petrified duration) — folds into the two-failure-escalation save shape from the dragon Sleep / Paralyzing / lycanthrope-curse family; Death Dog Bite disease (DC 12 CON, Poisoned + HP-max-no-restore on long rest + 1d10 HP-max-decrease per failure) folds into the Mummy / Mummy Lord cursed-HP-max-decay family with a per-failure stacking decrement; Mimic Adhesive (Object Form Only) auto-grapple + Disadvantage-on-escape-checks + Shape-Shift between blob and object forms folds into Shape-Shift gap with per-form action availability; Phase Spider Ethereal Jaunt + Ethereal Sight (first cross-plane traversal bonus action in the pack); Phase Spider Bite reduce-to-0-then-Stable-Poisoned-Paralyzed shares shape with Vampire Familiar Umbral Dagger from batch 4.9. Basilisk + Phase Spider poison damage riders fold into the existing on-hit-poison-damage-rider gap.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.12 (Genie + Mephit cohort)**
 
 Six new SRD 5.2.1 statblocks: Steam Mephit (CR 1/4), Dust Mephit (CR 1/2), Ice Mephit (CR 1/2), Magma Mephit (CR 1/2), Djinni (CR 11), Efreeti (CR 11). Opens the Genie + Mephit cohorts for the Elemental type, which moves from 5 to 11 entries. First `subtype: "genie"` and `subtype: "mephit"` users in the pack. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Djinni + Efreeti both wire Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 cohort moves from 28 to 30). Pack monster total moves from 164 to 170.
