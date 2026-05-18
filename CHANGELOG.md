@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.16, 5 SRD 5.2.1 Ammunition sub-forms (closes the equipment.md H4 surface)**
+
+Closes the SRD 5.2.1 `## Adventuring Gear` Ammunition Varies entry (equipment.md line 776) by expanding its 5 sub-forms into explicit gear entries. Source: the Ammunition sub-table at equipment.md line 1204.
+
+- New ids: `ammunition-arrows`, `ammunition-bolts`, `ammunition-bullets-firearm`, `ammunition-bullets-sling`, `ammunition-needles`. All `itemKind: 'gear'` with the family-prefix id convention matching batch 4.8 / 4.13 / 4.14 (foci / gaming / musical multi-form expansions).
+- Cohort theme: ammunition. The SRD Ammunition table at line 1204 lists 5 variants with bundle quantities, total weights, costs, and typical storage:
+  - Arrows: 20 per bundle, 1 lb, 1 GP, Quiver
+  - Bolts: 20 per bundle, 1.5 lb, 1 GP, Case
+  - Bullets, Firearm: 10 per bundle, 2 lb, 3 GP, Pouch
+  - Bullets, Sling: 20 per bundle, 1.5 lb, 4 CP, Pouch
+  - Needles: 50 per bundle, 1 lb, 1 GP, Pouch
+- Descriptions populated per the batch-4.9 / 4.10 precedent because the bundle quantity is essential metadata (pack data otherwise can't distinguish "1 arrow" from "1 bundle of 20 arrows"). SRD uses the unicode ½ glyph for the 1.5 lb weights; pack normalizes to decimal "1.5 lb." matching existing pack content (no unicode fractions used anywhere in starter-pack.json).
+- Bullets, Firearm ship despite the pack not currently containing the Musket / Pistol weapons that consume them. SRD includes firearms in the Ammunition table and the Tinker's Tools Craft list (equipment.md line 713), so the firearm ammunition shipping makes the pack RAW-complete on the ammunition surface; consumers can author firearm weapons as content extensions without re-deriving ammunition data.
+- Schema gap noted: the gear schema has no `ammunition: { for: weaponKind, bundleSize: N }` field; the relationship between ammunition entries and the weapons that consume them stays narrative/SRD-source-of-truth.
+
+Coverage bump: items 325 to 330 total, gear 72 to 77. **SRD 5.2.1 `equipment.md` H4 surface is now fully exhausted in the pack**: every H4 entry across the Weapons, Armor, Tools, and Adventuring Gear sections is shipped, except for the 3 deferred-with-reason focus subforms (Arcane Staff / Arcane Wand / Druidic Wooden Staff, all documented in batch 4.8's note with concrete reasons: Quarterstaff overlap and namespace collision).
+
 **Content authoring: items batch 4.15, Viol (closes SRD Musical Instruments 10/10)**
 
 Single-entry closure batch. New id `musical-viol`, name "Viol", `category: 'musical'`. Source: equipment.md line 749. Closes the SRD 5.2.1 Musical Instrument variant catalog (10/10 shipped: Lute from alpha.5 + 8 from batch 4.14 + Viol from this batch).

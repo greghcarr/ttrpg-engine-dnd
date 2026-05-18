@@ -2166,7 +2166,12 @@
     { "id": "musical-lyre", "itemKind": "tool", "name": "Lyre", "category": "musical" },
     { "id": "musical-pan-flute", "itemKind": "tool", "name": "Pan Flute", "category": "musical" },
     { "id": "musical-shawm", "itemKind": "tool", "name": "Shawm", "category": "musical" },
-    { "id": "musical-viol", "itemKind": "tool", "name": "Viol", "category": "musical" }
+    { "id": "musical-viol", "itemKind": "tool", "name": "Viol", "category": "musical" },
+    { "id": "ammunition-arrows", "itemKind": "gear", "name": "Arrows", "description": "20 arrows, 1 lb. total weight, 1 GP per bundle. Typically stored in a Quiver." },
+    { "id": "ammunition-bolts", "itemKind": "gear", "name": "Bolts", "description": "20 crossbow bolts, 1.5 lb. total weight, 1 GP per bundle. Typically stored in a Case." },
+    { "id": "ammunition-bullets-firearm", "itemKind": "gear", "name": "Bullets, Firearm", "description": "10 firearm bullets, 2 lb. total weight, 3 GP per bundle. Typically stored in a Pouch." },
+    { "id": "ammunition-bullets-sling", "itemKind": "gear", "name": "Bullets, Sling", "description": "20 sling bullets, 1.5 lb. total weight, 4 CP per bundle. Typically stored in a Pouch." },
+    { "id": "ammunition-needles", "itemKind": "gear", "name": "Needles", "description": "50 blowgun needles, 1 lb. total weight, 1 GP per bundle. Typically stored in a Pouch." }
   ],
   "monsters": [
     {
