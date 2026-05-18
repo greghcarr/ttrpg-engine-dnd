@@ -90,7 +90,7 @@ Filtering out the recurring patterns above, the genuinely-missing main-class fea
 - **Bard**: Words of Creation (L20)
 - **Cleric**: Divine Order (L1), Greater Divine Intervention (L20)
 - **Druid**: Primal Order (L1)
-- **Monk**: Heightened Focus (L10), ~~Self-Restoration (L10)~~ (slice 202: wired via `planSelfRestoration` + `GrantSelfRestoration` marker; food / water Exhaustion arm consumer-side), ~~Disciplined Survivor (L14)~~ (slice 203: 4 GrantProficiency entries on saves; same slice fixed a save-proficiency effect-stack bug that had silently inerted Slippery Mind too), Superior Defense (L18)
+- **Monk**: Heightened Focus (L10), ~~Self-Restoration (L10)~~ (slice 202: wired via `planSelfRestoration` + `GrantSelfRestoration` marker; food / water Exhaustion arm consumer-side), ~~Disciplined Survivor (L14)~~ (slice 203: 4 GrantProficiency entries on saves; same slice fixed a save-proficiency effect-stack bug that had silently inerted Slippery Mind too), ~~Superior Defense (L18)~~ (slice 209: dedicated planSuperiorDefense + superior-defense-active condition with 12 GrantResistance entries covering every non-Force damage type)
 - **Paladin**: Paladin's Smite (L2), Aura Expansion (L18)
 - **Ranger**: ~~Expertise (L9)~~ (slice 208: pure content; OfferChoice over the 8 ranger skills, mirrors Rogue Expertise), Precise Hunter (L17)
 - **Rogue**: ~~Uncanny Dodge (L5)~~ (slice 200: wired as a dedicated reaction planner + `GrantUncannyDodge` marker, compensating-Healed pattern), ~~Elusive (L18)~~ (slice 199: wired via the new `CancelAdvantageOnAttackers` primitive, predicate-gated on `bearerHasIncapacitated`)

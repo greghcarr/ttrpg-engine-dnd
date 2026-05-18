@@ -4,6 +4,20 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: planSuperiorDefense + Monk L18 Superior Defense (slice 209)**
+
+Adds a dedicated planner for the Monk L18 capstone-tier defensive cooldown. RAW: "As a Bonus Action, you can spend 3 Focus Points to give yourself Resistance to all damage except Force damage for 1 minute."
+
+The planner ([src/engine/plan/superior-defense.ts](src/engine/plan/superior-defense.ts)) consumes 3 `ki` (the engine's name for Focus Points), consumes a bonus action when invoked on the actor's turn inside an encounter, and applies the new `superior-defense-active` condition with `expiresOnRound = currentRound + 10` (1 minute = 10 rounds) so the slice-102 turn-end sweep lifts it automatically. Out of encounter the condition stays consumer-managed until commit.
+
+The active condition lives in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) and ships 12 `GrantResistance` entries — one per non-Force damage type (acid, bludgeoning, cold, fire, lightning, necrotic, piercing, poison, psychic, radiant, slashing, thunder). The existing `GrantResistance` primitive composes naturally; no new schema. Conditions count moves from 98 to 99.
+
+Monk L18 Superior Defense in the pack now uses `{ kind: 'Custom', handlerId: 'superior-defense' }` to point consumers at the planner, matching the existing Custom-handler conventions (Stunning Strike, Sacred Weapon, Frenzy, etc.).
+
+Tests: 4-case planner test in [tests/unit/engine/plan-superior-defense.test.ts](tests/unit/engine/plan-superior-defense.test.ts) (happy path, insufficient-ki throw, mitigation spot-check against fire / thunder / psychic / force, non-Monk throws via no-ki). Golden scenario with transcript at [tests/golden/s209-superior-defense.test.ts](tests/golden/s209-superior-defense.test.ts).
+
+No new effect kind. EFFECT_KINDS stays at 45.
+
 **Content: Ranger L9 Expertise (slice 208)**
 
 Pure-content slice. Wires Ranger L9 Expertise as an `OfferChoice` with 2 selections from the Ranger skill list (animal-handling, athletics, insight, investigation, nature, perception, stealth, survival), each option granting `GrantProficiency { target: 'skill', level: 'expertise' }`. Mirrors the existing Rogue L1 / L6 Expertise pattern.

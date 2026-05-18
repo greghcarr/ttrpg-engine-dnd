@@ -52,6 +52,7 @@ import {
   planSacredWeapon,
   planInnateSorcery,
   planSelfRestoration,
+  planSuperiorDefense,
   planMagicWeapon,
   planElementalWeapon,
   planRecklessAttack,
@@ -167,6 +168,7 @@ import {
   type SacredWeaponIntent,
   type InnateSorceryIntent,
   type SelfRestorationIntent,
+  type SuperiorDefenseIntent,
   type MagicWeaponIntent,
   type ElementalWeaponIntent,
   type RecklessAttackIntent,
@@ -282,6 +284,7 @@ export interface Engine {
     sacredWeapon(state: CampaignState, intent: Omit<SacredWeaponIntent, 'type'>): PlanResult;
     innateSorcery(state: CampaignState, intent: Omit<InnateSorceryIntent, 'type'>): PlanResult;
     selfRestoration(state: CampaignState, intent: Omit<SelfRestorationIntent, 'type'>): PlanResult;
+    superiorDefense(state: CampaignState, intent: Omit<SuperiorDefenseIntent, 'type'>): PlanResult;
     magicWeapon(state: CampaignState, intent: Omit<MagicWeaponIntent, 'type'>): PlanResult;
     elementalWeapon(state: CampaignState, intent: Omit<ElementalWeaponIntent, 'type'>): PlanResult;
     recklessAttack(state: CampaignState, intent: Omit<RecklessAttackIntent, 'type'>): PlanResult;
@@ -518,6 +521,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     selfRestoration(state, intent) {
       return { events: planSelfRestoration(state, content, { type: 'SelfRestoration', ...intent }) };
+    },
+    superiorDefense(state, intent) {
+      return { events: planSuperiorDefense(state, { type: 'SuperiorDefense', ...intent }) };
     },
     magicWeapon(state, intent) {
       return { events: planMagicWeapon(state, content, { type: 'MagicWeapon', ...intent }) };

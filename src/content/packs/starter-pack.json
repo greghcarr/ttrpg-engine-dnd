@@ -551,7 +551,7 @@
         "15": { "proficiencyBonus": 5, "features": [{ "id": "perfect-focus", "name": "Perfect Focus", "effects": [] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [{ "id": "martial-arts-die-d12", "name": "Martial Arts (d12)", "effects": [] }], "columns": {} },
-        "18": { "proficiencyBonus": 6, "features": [{ "id": "superior-defense", "name": "Superior Defense", "effects": [] }], "columns": {} },
+        "18": { "proficiencyBonus": 6, "features": [{ "id": "superior-defense", "name": "Superior Defense", "effects": [{ "kind": "Custom", "handlerId": "superior-defense" }] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "20": { "proficiencyBonus": 6, "features": [{ "id": "body-and-mind", "name": "Body and Mind", "effects": [] }], "columns": {} }
       }
@@ -7294,6 +7294,26 @@
       "endsOn": [{ "kind": "longRest" }],
       "effects": [
         { "kind": "AddModifier", "target": "spellSaveDC", "value": 1 }
+      ]
+    },
+    {
+      "id": "superior-defense-active",
+      "name": "Superior Defense",
+      "stackable": false,
+      "endsOn": [{ "kind": "longRest" }],
+      "effects": [
+        { "kind": "GrantResistance", "damageType": "acid" },
+        { "kind": "GrantResistance", "damageType": "bludgeoning" },
+        { "kind": "GrantResistance", "damageType": "cold" },
+        { "kind": "GrantResistance", "damageType": "fire" },
+        { "kind": "GrantResistance", "damageType": "lightning" },
+        { "kind": "GrantResistance", "damageType": "necrotic" },
+        { "kind": "GrantResistance", "damageType": "piercing" },
+        { "kind": "GrantResistance", "damageType": "poison" },
+        { "kind": "GrantResistance", "damageType": "psychic" },
+        { "kind": "GrantResistance", "damageType": "radiant" },
+        { "kind": "GrantResistance", "damageType": "slashing" },
+        { "kind": "GrantResistance", "damageType": "thunder" }
       ]
     },
     {
