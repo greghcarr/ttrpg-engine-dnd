@@ -6803,6 +6803,22 @@
       "languages": ["giant"]
     },
     {
+      "id": "troll-limb",
+      "name": "Troll Limb",
+      "size": "Small",
+      "type": "Giant",
+      "alignment": { "lawChaos": "chaotic", "goodEvil": "evil" },
+      "ac": 13,
+      "hp": { "average": 14, "formula": "4d6" },
+      "speed": { "walk": 20 },
+      "abilityScores": { "STR": 18, "DEX": 12, "CON": 10, "INT": 1, "WIS": 9, "CHA": 1 },
+      "senses": { "darkvision": 60, "passivePerceptionOverride": 9 },
+      "cr": 0.5,
+      "xp": 100,
+      "proficiencyBonus": 2,
+      "languages": []
+    },
+    {
       "id": "oni",
       "name": "Oni",
       "size": "Large",

@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: SRD Troll Limb statblock (slice 226)**
+
+Adds the Troll Limb monster, the final SRD 5.2.1 monster entry that was missing from the pack. Troll Limb is the dismembered-limb statblock that spawns from a Troll's *Loathsome Limbs* trait when the troll ends a turn Bloodied after taking 15+ Slashing damage that turn.
+
+Stats per SRD 5.2.1 (matches every drift-audit field):
+- Small Giant, Chaotic Evil
+- AC 13, HP 14 (4d6), Speed 20 ft.
+- STR 18, DEX 12, CON 10, INT 1, WIS 9, CHA 1
+- Darkvision 60 ft., Passive Perception 9
+- CR 1/2 (XP 100, PB +2)
+
+Mechanical traits (Regeneration, Troll Spawn 1d12 on day 24+, Rend +6 melee for 2d4+4 slashing) ship as the same schema-only shape as the parent Troll entry; the Loathsome Limbs *spawn* primitive on the parent Troll (which would actually emit a Troll Limb on the right trigger) stays deferred — that's an engine-track follow-up needing a `SpawnCreature` TriggerAction.
+
+Net effect: **SRD 5.2.1 monster catalog is now 235/235 pack-complete**. Every `### Name` block in `references/srd-markdown/monsters-A-Z.md` has a matching pack entry.
+
+Tests: drift audit green on all 252 monsters (252 pack monsters; the audit hit-count remains 234 by name lookup since several SRD parents like Animated Object have variants in pack and the pack doesn't always use the SRD's exact canonical name — those skip the audit cleanly). 1587 tests pass, 209 skipped. tsc clean. No engine changes; no schema changes.
+
 **Content: SRD 5.2.1 variant-parent unrolls + slice-224 dup cleanup (slice 225)**
 
 Closes the last Tier-1 pure-JSON gap for SRD compliance: the 4 multi-rarity SRD parents (Figurine of Wondrous Power, Potion of Giant Strength, Potions of Healing, Spell Scroll) each get explicit variant unrolls so the pack covers every SRD-listed variant by name. Also cleans up 15 duplicate entries inadvertently created by slice 224.
