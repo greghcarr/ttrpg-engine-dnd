@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: magic item rarity + attunement (slice 183)**
+
+Compared every pack magic item against the SRD 5.2.1 type-line for rarity and attunement requirement. 99 of the 122 pack magic items matched an SRD entry; eight had drift, all fixed:
+
+- eyes-of-the-eagle, glamoured-studded-leather, ring-of-resistance, ring-of-three-wishes, ring-of-animal-influence — pack listed `requiresAttunement: true`, SRD 5.2.1 lists them as no-attunement (2014 PHB had them as attunement-required; 2024 PHB removed the gate).
+- cloak-of-the-manta-ray, periapt-of-health — pack listed `requiresAttunement: false`, SRD requires attunement.
+- ring-of-feather-falling — pack rarity uncommon, SRD rarity rare (with attunement, which the pack already had set).
+
+Tests: 1451 pass, tsc --noEmit clean. No snapshot impact.
+
 **Content audit: spell class lists (slice 182)**
 
 Compared the `classes` array on every pack spell against the parenthesized class list in the SRD 5.2.1 spell-header line. 50 mismatches found and fixed.
