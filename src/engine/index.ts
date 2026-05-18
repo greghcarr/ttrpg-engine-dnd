@@ -50,6 +50,7 @@ import {
   planThunderStep,
   planActionSurge,
   planSacredWeapon,
+  planInnateSorcery,
   planMagicWeapon,
   planElementalWeapon,
   planRecklessAttack,
@@ -163,6 +164,7 @@ import {
   type ThunderStepIntent,
   type ActionSurgeIntent,
   type SacredWeaponIntent,
+  type InnateSorceryIntent,
   type MagicWeaponIntent,
   type ElementalWeaponIntent,
   type RecklessAttackIntent,
@@ -276,6 +278,7 @@ export interface Engine {
     thunderStep(state: CampaignState, intent: Omit<ThunderStepIntent, 'type'>): PlanResult;
     actionSurge(state: CampaignState, intent: Omit<ActionSurgeIntent, 'type'>): PlanResult;
     sacredWeapon(state: CampaignState, intent: Omit<SacredWeaponIntent, 'type'>): PlanResult;
+    innateSorcery(state: CampaignState, intent: Omit<InnateSorceryIntent, 'type'>): PlanResult;
     magicWeapon(state: CampaignState, intent: Omit<MagicWeaponIntent, 'type'>): PlanResult;
     elementalWeapon(state: CampaignState, intent: Omit<ElementalWeaponIntent, 'type'>): PlanResult;
     recklessAttack(state: CampaignState, intent: Omit<RecklessAttackIntent, 'type'>): PlanResult;
@@ -506,6 +509,9 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
     },
     sacredWeapon(state, intent) {
       return { events: planSacredWeapon(state, content, { type: 'SacredWeapon', ...intent }) };
+    },
+    innateSorcery(state, intent) {
+      return { events: planInnateSorcery(state, content, { type: 'InnateSorcery', ...intent }) };
     },
     magicWeapon(state, intent) {
       return { events: planMagicWeapon(state, content, { type: 'MagicWeapon', ...intent }) };

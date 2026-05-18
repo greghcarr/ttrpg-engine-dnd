@@ -4,6 +4,24 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: planInnateSorcery + Sorcerer L7 Sorcery Incarnate (slice 201)**
+
+Adds an `engine.plan.innateSorcery` planner for activating Innate Sorcery, plus a `GrantInnateSorcerySpendAlternative` marker primitive (41 to 42 EFFECT_KINDS) and a new `innate-sorcery-active` condition. The planner accepts either of two cost paths:
+
+1. **Default**: consume one `innate-sorcery` resource use. Throws when the bearer is out of uses.
+2. **Sorcery Incarnate alternative (Sorcerer L7+)**: pass `useSorceryPoints: true`. Gated on the new marker; consumes 2 Sorcery Points instead. Throws on missing marker or insufficient SP.
+
+Both paths consume a bonus action when the planner is invoked inside an active encounter and apply the `innate-sorcery-active` condition, which contributes a static `+1 spell save DC` modifier per RAW.
+
+Two arms of the full Innate Sorcery / Sorcery Incarnate spec are deferred:
+
+- **Advantage on Sorcerer spell attack rolls** (the other half of Innate Sorcery's L1 benefit). Needs an `event.spellSourceClassId` fact in `AttackRolled` events so a predicate-gated SetAdvantage can scope to "attacks from Sorcerer spells." Not blocked by anything else; punted to keep slice 201 focused.
+- **Doubled Metamagic options per spell while active** (the second half of Sorcery Incarnate). The current `planMetamagic` records the resource spend but doesn't enforce a once-per-spell limit, so there's no cap for Sorcery Incarnate to lift. A follow-up slice can wire per-spell metamagic tracking and have this condition halve / lift that gate accordingly.
+
+Canonical user: Sorcerer L7 Sorcery Incarnate, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json). Closes another of the missing main-class features in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) (~15 to ~14 remaining after slices 199 and 200 closed Elusive and Uncanny Dodge).
+
+Tests: 7-case planner test in [tests/unit/engine/plan-innate-sorcery.test.ts](tests/unit/engine/plan-innate-sorcery.test.ts) (default-path, exhausted-throw, SP-path, missing-marker throw, insufficient-SP throw, in / out of encounter); accumulator marker test alongside slices 199 + 200 in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s201-sorcery-incarnate.test.ts](tests/golden/s201-sorcery-incarnate.test.ts) walks the SP-alternative-cost activation. tsc --noEmit clean.
+
 **Engine: planUncannyDodge + Rogue L5 Uncanny Dodge (slice 200)**
 
 Adds a dedicated reaction planner for Uncanny Dodge plus a `GrantUncannyDodge` marker primitive (40 to 41 EFFECT_KINDS). RAW (SRD 5.2.1): "When an attacker that you can see hits you with an attack roll, you can take a Reaction to halve the attack's damage against you (round down)."

@@ -259,6 +259,16 @@ export type Effect =
   // take a Reaction") — the engine doesn't auto-fire it; it just
   // gates the planner.
   | { kind: 'GrantUncannyDodge' }
+  // Slice 201. Marker primitive that unlocks the Sorcery-Points
+  // alternative cost on `planInnateSorcery`. Without the marker, the
+  // planner only accepts the innate-sorcery resource path; with it,
+  // the consumer may pass `useSorceryPoints: true` to spend 2 SP
+  // instead (RAW Sorcery Incarnate L7: "If you have no uses of
+  // Innate Sorcery left, you can use it if you spend 2 Sorcery
+  // Points..."). Canonical user: Sorcerer L7 Sorcery Incarnate. The
+  // double-metamagic arm of the same feature is deferred (needs
+  // once-per-spell metamagic enforcement first).
+  | { kind: 'GrantInnateSorcerySpendAlternative' }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -501,6 +511,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantUncannyDodge'),
     }),
     z.object({
+      kind: z.literal('GrantInnateSorcerySpendAlternative'),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -573,6 +586,7 @@ export const EFFECT_KINDS = [
   'ImposeDisadvantageOnAttackers',
   'CancelAdvantageOnAttackers',
   'GrantUncannyDodge',
+  'GrantInnateSorcerySpendAlternative',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',

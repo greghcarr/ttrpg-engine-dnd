@@ -114,6 +114,7 @@ export class EffectAccumulator {
   private healingBoostPerSpellLevel: number = 0;
   private evasionFlag: boolean = false;
   private uncannyDodgeFlag: boolean = false;
+  private innateSorcerySpendAlternativeFlag: boolean = false;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -456,6 +457,15 @@ export class EffectAccumulator {
   hasUncannyDodge(): boolean {
     return this.uncannyDodgeFlag;
   }
+  // Slice 201: marker that unlocks the Sorcery-Points alternative
+  // cost on `planInnateSorcery`. Set by Sorcerer L7 Sorcery Incarnate
+  // via the `GrantInnateSorcerySpendAlternative` effect.
+  markInnateSorcerySpendAlternative(): void {
+    this.innateSorcerySpendAlternativeFlag = true;
+  }
+  hasInnateSorcerySpendAlternative(): boolean {
+    return this.innateSorcerySpendAlternativeFlag;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -589,6 +599,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantUncannyDodge':
       acc.markUncannyDodge();
+      return;
+    case 'GrantInnateSorcerySpendAlternative':
+      acc.markInnateSorcerySpendAlternative();
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

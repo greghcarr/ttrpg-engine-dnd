@@ -92,6 +92,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "sorcerer L2 font-of-magic",
   "sorcerer L2 metamagic",
   "sorcerer L5 sorcerous-restoration",
+  "sorcerer L7 sorcery-incarnate",
   "wizard L1 arcane-recovery",
   "wizard L2 scholar",
 ]
@@ -146,6 +147,7 @@ exports[`feature-coverage matrix: conditions > wired conditions catalog is stabl
   "hexed-active",
   "holy-aura-active",
   "holy-weapon-active",
+  "innate-sorcery-active",
   "invisible",
   "invulnerable-active",
   "longstrider-active",

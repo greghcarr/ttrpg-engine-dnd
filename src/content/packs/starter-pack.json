@@ -609,7 +609,7 @@
         "4": { "proficiencyBonus": 2, "features": [], "columns": {} },
         "5": { "proficiencyBonus": 3, "features": [{ "id": "sorcerous-restoration", "name": "Sorcerous Restoration", "effects": [{ "kind": "RecoverResource", "resourceId": "sorcery-points", "amount": 4, "when": "shortRest" }] }], "columns": {} },
         "6": { "proficiencyBonus": 3, "features": [], "columns": {} },
-        "7": { "proficiencyBonus": 3, "features": [], "columns": {} },
+        "7": { "proficiencyBonus": 3, "features": [{ "id": "sorcery-incarnate", "name": "Sorcery Incarnate", "effects": [{ "kind": "GrantInnateSorcerySpendAlternative" }] }], "columns": {} },
         "8": { "proficiencyBonus": 3, "features": [], "columns": {} },
         "9": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "10": { "proficiencyBonus": 4, "features": [{ "id": "metamagic-known-3", "name": "Metamagic (3 known)", "effects": [] }], "columns": {} },
@@ -5697,6 +5697,15 @@
       "endsOn": [{ "kind": "longRest" }],
       "effects": [
         { "kind": "AddModifier", "target": "attack", "value": 3 }
+      ]
+    },
+    {
+      "id": "innate-sorcery-active",
+      "name": "Innate Sorcery",
+      "stackable": false,
+      "endsOn": [{ "kind": "longRest" }],
+      "effects": [
+        { "kind": "AddModifier", "target": "spellSaveDC", "value": 1 }
       ]
     },
     {

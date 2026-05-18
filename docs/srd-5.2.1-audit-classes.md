@@ -94,10 +94,10 @@ Filtering out the recurring patterns above, the genuinely-missing main-class fea
 - **Paladin**: Paladin's Smite (L2), Aura Expansion (L18)
 - **Ranger**: Expertise (L9), Precise Hunter (L17)
 - **Rogue**: ~~Uncanny Dodge (L5)~~ (slice 200: wired as a dedicated reaction planner + `GrantUncannyDodge` marker, compensating-Healed pattern), ~~Elusive (L18)~~ (slice 199: wired via the new `CancelAdvantageOnAttackers` primitive, predicate-gated on `bearerHasIncapacitated`)
-- **Sorcerer**: Sorcery Incarnate (L7)
+- **Sorcerer**: ~~Sorcery Incarnate (L7)~~ (slice 201: alternative-cost arm wired via `planInnateSorcery` + `GrantInnateSorcerySpendAlternative` marker; doubled-metamagic arm deferred pending once-per-spell metamagic enforcement)
 - **Warlock**: Contact Patron (L9)
 
-About 17 main-class features at slice 196; slice 199 closed Rogue L18 Elusive (`CancelAdvantageOnAttackers` primitive) and slice 200 closed Rogue L5 Uncanny Dodge (dedicated reaction planner + `GrantUncannyDodge` marker). 15 remaining.
+About 17 main-class features at slice 196; slice 199 closed Rogue L18 Elusive (`CancelAdvantageOnAttackers` primitive), slice 200 closed Rogue L5 Uncanny Dodge (dedicated reaction planner + `GrantUncannyDodge` marker), and slice 201 closed Sorcerer L7 Sorcery Incarnate's alternative-cost arm (`planInnateSorcery` + `GrantInnateSorcerySpendAlternative` marker). 14 remaining (the doubled-metamagic arm of Sorcery Incarnate is deferred to a future metamagic-tracking slice).
 
 ## Layer 4: subclass features
 
