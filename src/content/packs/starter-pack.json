@@ -2089,7 +2089,15 @@
     { "id": "chest", "itemKind": "gear", "name": "Chest" },
     { "id": "pouch", "itemKind": "gear", "name": "Pouch" },
     { "id": "quiver", "itemKind": "gear", "name": "Quiver" },
-    { "id": "sack", "itemKind": "gear", "name": "Sack" }
+    { "id": "sack", "itemKind": "gear", "name": "Sack" },
+    { "id": "blanket", "itemKind": "gear", "name": "Blanket" },
+    { "id": "clothes-fine", "itemKind": "gear", "name": "Clothes, Fine" },
+    { "id": "clothes-travelers", "itemKind": "gear", "name": "Clothes, Traveler's" },
+    { "id": "costume", "itemKind": "gear", "name": "Costume" },
+    { "id": "flask", "itemKind": "gear", "name": "Flask" },
+    { "id": "jug", "itemKind": "gear", "name": "Jug" },
+    { "id": "robe", "itemKind": "gear", "name": "Robe" },
+    { "id": "tent", "itemKind": "gear", "name": "Tent" }
   ],
   "monsters": [
     {

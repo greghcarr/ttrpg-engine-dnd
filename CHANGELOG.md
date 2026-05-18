@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.5, 8 SRD 5.2.1 clothing + camp gear entries**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the 4.1 / 4.3 / 4.4 cohorts.
+
+- New ids: `blanket`, `clothes-fine`, `clothes-travelers`, `costume`, `flask`, `jug`, `robe`, `tent`. Source lines in equipment.md: 1326, 1378, 1382, 1390, 1447, 1512, 1618, 1662.
+- Cohort theme: personal wear + camp gear, covering the canonical SRD clothing entries (Fine, Traveler's, Costume, Robe, Blanket) plus the camp / vessel gear (Tent, Flask, Jug).
+- Names per SRD canonical including the comma form ("Clothes, Fine" / "Clothes, Traveler's"). The SRD 5.2.1 entry is "Costume" not "Clothes, Costume" (per `equipment.md` line 1390); kept as just "Costume" to match.
+- No collisions with existing pack ids. Note the bare `robe` id is distinct from the magic-item ids (`robe-of-the-archmagi`, `robe-of-eyes`, `robe-of-useful-items`), and the bare `flask` is distinct from the batch-4.2 `oil` consumable (which RAW comes in an oil flask but ships as a single consumable).
+- RAW capacity / mechanical details stay narrative per the existing gear-shape convention (Tent fits 2 people, Flask holds 1 pint, Jug holds 1 gallon, Clothes Fine appropriate to high society, etc.).
+
+Coverage bump: items 248 to 256 total, gear 31 to 39. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~34 SRD adventuring-gear entries remain unship (foci as "Varies" multi-form entries, writing supplies, traps + restraints, misc utility, plus deferred Pot Iron / Case Crossbow Bolt).
+
 **Content authoring: items batch 4.4, 8 SRD 5.2.1 containers**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the batch-4.1 / 4.3 cohorts.
