@@ -281,6 +281,30 @@ export class EffectAccumulator {
 
   private disadvantageOnAttackersEntries: Array<{ predicate?: Predicate }> = [];
 
+  // Slice 199. While set, any source that would grant an incoming
+  // attacker advantage against this character is cancelled (the
+  // attacker still rolls; they just don't get the advantage die).
+  // Distinct from `imposesDisadvantageOnAttackers`, which contributes
+  // disadvantage outright and cancels with attacker-side advantage
+  // sources per the 2024 PHB "Advantage and Disadvantage" rule.
+  // Entries optionally carry a predicate evaluated against the
+  // *bearer's* facts (notably `bearerHasIncapacitated` for Elusive,
+  // populated by the attack planner from `findActorBlockingCondition`).
+  cancelsAdvantageOnAttackers(
+    bearerFacts?: ReadonlyMap<string, unknown>,
+  ): boolean {
+    return this.cancelAdvantageOnAttackersEntries.some((entry) => {
+      if (entry.predicate === undefined) return true;
+      return evaluatePredicate(entry.predicate, { facts: bearerFacts });
+    });
+  }
+
+  markCancelsAdvantageOnAttackers(predicate?: Predicate): void {
+    this.cancelAdvantageOnAttackersEntries.push({ predicate });
+  }
+
+  private cancelAdvantageOnAttackersEntries: Array<{ predicate?: Predicate }> = [];
+
   // True when any active effect on this character blocks them from
   // regaining hit points. Heal planners consult this and, when set,
   // emit a Healed event with amount=0 (the reducer's amount<=0
@@ -568,6 +592,9 @@ export const applyEffectToBuilder = (
       return;
     case 'ImposeDisadvantageOnAttackers':
       acc.markImposesDisadvantageOnAttackers(effect.condition);
+      return;
+    case 'CancelAdvantageOnAttackers':
+      acc.markCancelsAdvantageOnAttackers(effect.condition);
       return;
     case 'GrantSense':
       acc.grantSense(effect.sense, effect.range);

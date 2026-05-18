@@ -223,6 +223,43 @@ describe('EffectAccumulator', () => {
     expect(acc.hasMagicResistance()).toBe(true);
   });
 
+  it('CancelAdvantageOnAttackers reports false when no entries are present', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.cancelsAdvantageOnAttackers()).toBe(false);
+  });
+
+  it('CancelAdvantageOnAttackers reports true after an unpredicated entry is added', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'CancelAdvantageOnAttackers' },
+      acc,
+      { source: 'elusive' },
+    );
+    expect(acc.cancelsAdvantageOnAttackers()).toBe(true);
+  });
+
+  it('CancelAdvantageOnAttackers respects a bearer-facts predicate', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'CancelAdvantageOnAttackers',
+        condition: { kind: 'eq', path: 'bearerHasIncapacitated', value: false },
+      },
+      acc,
+      { source: 'elusive' },
+    );
+    expect(
+      acc.cancelsAdvantageOnAttackers(
+        new Map<string, unknown>([['bearerHasIncapacitated', false]]),
+      ),
+    ).toBe(true);
+    expect(
+      acc.cancelsAdvantageOnAttackers(
+        new Map<string, unknown>([['bearerHasIncapacitated', true]]),
+      ),
+    ).toBe(false);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,

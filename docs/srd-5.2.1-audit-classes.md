@@ -93,11 +93,11 @@ Filtering out the recurring patterns above, the genuinely-missing main-class fea
 - **Monk**: Heightened Focus (L10), Self-Restoration (L10), Disciplined Survivor (L14), Superior Defense (L18)
 - **Paladin**: Paladin's Smite (L2), Aura Expansion (L18)
 - **Ranger**: Expertise (L9), Precise Hunter (L17)
-- **Rogue**: Uncanny Dodge (L5), Elusive (L18)
+- **Rogue**: Uncanny Dodge (L5), ~~Elusive (L18)~~ (slice 199: wired via the new `CancelAdvantageOnAttackers` primitive, predicate-gated on `bearerHasIncapacitated`)
 - **Sorcerer**: Sorcery Incarnate (L7)
 - **Warlock**: Contact Patron (L9)
 
-About 17 main-class features. Follow-up content-authoring slices.
+About 17 main-class features at slice 196; slice 199 closed Rogue L18 Elusive (the engine added the `CancelAdvantageOnAttackers` primitive on the same slice). 16 remaining.
 
 ## Layer 4: subclass features
 

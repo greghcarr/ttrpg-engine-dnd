@@ -320,6 +320,15 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   })();
   const targetGrantsAdvantage =
     targetEffects.grantsAdvantageToAttackers() || targetRecklessGrantsAdvantage;
+  // Slice 199: target may carry `CancelAdvantageOnAttackers` (Rogue
+  // L18 Elusive). Build a small bearer-facts map so a predicate-gated
+  // entry can consult the target's own state — Elusive's gate is
+  // "unless you have the Incapacitated condition," which the engine
+  // models via the action-blocking condition set in `_actor-state`.
+  const targetBearerFacts = new Map<string, unknown>([
+    ['bearerHasIncapacitated', findActorBlockingCondition(target) !== undefined],
+  ]);
+  const targetCancelsAdvantage = targetEffects.cancelsAdvantageOnAttackers(targetBearerFacts);
   // Attacker's own Reckless Attack: melee STR-based attack rolls gain
   // advantage when the attacker has recklessAttackActive set on their
   // turnUsage.
@@ -401,11 +410,19 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // Reckless Attack: if the attacker activated it this turn (and the
   // attack qualifies), it contributes advantage just like the target's
   // grants-advantage path.
+  // Elusive (slice 199) cancels every advantage contribution against
+  // the bearer; an explicit `input.advantage === 'advantage'` from the
+  // caller is also suppressed below.
   const effectivelyGrantsAdvantage =
-    targetGrantsAdvantage
-    || attackerRecklessAdvantage
-    || attackerVsTargetAdvantage.advantage
-    || attackerSelfAdvantage.advantage;
+    !targetCancelsAdvantage && (
+      targetGrantsAdvantage
+      || attackerRecklessAdvantage
+      || attackerVsTargetAdvantage.advantage
+      || attackerSelfAdvantage.advantage
+    );
+  if (targetCancelsAdvantage && advantage === 'advantage') {
+    advantage = 'none';
+  }
   // 2024 advantage/disadvantage cancellation: if both apply, the
   // attack is rolled with neither. Apply the target's contributions
   // first, then resolve.

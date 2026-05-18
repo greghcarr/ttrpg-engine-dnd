@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: CancelAdvantageOnAttackers + Rogue L18 Elusive (slice 199)**
+
+Adds the `CancelAdvantageOnAttackers` effect primitive (39 to 40 EFFECT_KINDS): a predicate-gated marker that suppresses every advantage contribution against the bearer at attack-roll time. Wired in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) just before the 2024 advantage / disadvantage resolution block; an explicit `input.advantage === 'advantage'` from the caller is also nullified when the bearer carries the marker. Disadvantage contributions are unaffected, matching RAW ("no attack roll can have Advantage against you").
+
+Canonical user: Rogue L18 Elusive, wired via:
+
+```jsonc
+{
+  "kind": "CancelAdvantageOnAttackers",
+  "condition": { "kind": "eq", "path": "bearerHasIncapacitated", "value": false }
+}
+```
+
+The attack planner populates `bearerHasIncapacitated` from `findActorBlockingCondition` so the rule's "unless you have the Incapacitated condition" exemption picks up every action-blocking condition (incapacitated / stunned / paralyzed / petrified / unconscious, plus the HP-zero proxy) instead of just the literal `incapacitated` id. Closes one of the ~17 missing-main-class-feature entries from [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md).
+
+Tests: builder accumulator unit tests in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); 8-case planner test in [tests/unit/engine/plan-attack-elusive.test.ts](tests/unit/engine/plan-attack-elusive.test.ts); golden scenario with transcript at [tests/golden/s199-elusive.test.ts](tests/golden/s199-elusive.test.ts) walks an Invisible attacker against an Elusive Rogue (advantage suppressed) and then re-runs with the bearer Stunned (advantage restored). 1488 tests pass.
+
 **Distribution: drop npm-publish posture (slice 198)**
 
 Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:

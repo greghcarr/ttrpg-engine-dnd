@@ -237,6 +237,20 @@ export type Effect =
   // need to know.
   | { kind: 'GrantAdvantageToAttackers'; condition?: Predicate }
   | { kind: 'ImposeDisadvantageOnAttackers'; condition?: Predicate }
+  // Slice 199. Marker primitive: while bearing this, any source that
+  // would grant an incoming attacker advantage against this character
+  // is cancelled. Distinct from `ImposeDisadvantageOnAttackers` — that
+  // imposes disadvantage outright (which then cancels with any
+  // attacker-side advantage to net "neither"). `CancelAdvantageOnAttackers`
+  // suppresses the *advantage* contribution itself, leaving the attack
+  // resolved without it (still rolled with whatever disadvantage
+  // sources also apply). Canonical user: Rogue L18 Elusive ("No attack
+  // roll can have Advantage against you unless you have the
+  // Incapacitated condition") via a `bearerHasIncapacitated` predicate
+  // that the attack planner populates from `findActorBlockingCondition`.
+  // Future users: Wizard / Sorcerer Foresight, similar "advantage
+  // immunity" features.
+  | { kind: 'CancelAdvantageOnAttackers'; condition?: Predicate }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -472,6 +486,10 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       condition: PredicateSchema.optional(),
     }),
     z.object({
+      kind: z.literal('CancelAdvantageOnAttackers'),
+      condition: PredicateSchema.optional(),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -542,6 +560,7 @@ export const EFFECT_KINDS = [
   'GrantEvasion',
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
+  'CancelAdvantageOnAttackers',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',
