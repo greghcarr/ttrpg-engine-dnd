@@ -1638,7 +1638,7 @@
     { "id": "darkvision", "name": "Darkvision", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "either a pinch of dried carrot or an agate" }, "duration": "8 hours", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "darkvision-active" }] },
     { "id": "detect-thoughts", "name": "Detect Thoughts", "level": 2, "school": "divination", "castingTime": "Action", "range": "Self", "components": { "verbal": true, "somatic": true, "material": "a copper coin" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "dragons-breath", "name": "Dragon's Breath", "level": 2, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a hot pepper" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["sorcerer", "wizard"], "mechanicalEffects": [] },
-    { "id": "enhance-ability", "name": "Enhance Ability", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "fur or a feather from a beast" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "druid", "sorcerer"], "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "bears-endurance", "conditionId": "bears-endurance-active" }, { "key": "bulls-strength", "conditionId": "bulls-strength-active" }, { "key": "cats-grace", "conditionId": "cats-grace-active" }, { "key": "eagles-splendor", "conditionId": "eagles-splendor-active" }, { "key": "foxs-cunning", "conditionId": "foxs-cunning-active" }, { "key": "owls-wisdom", "conditionId": "owls-wisdom-active" }] } }] },
+    { "id": "enhance-ability", "name": "Enhance Ability", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "fur or a feather" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["bard", "cleric", "druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "bulls-strength", "conditionId": "bulls-strength-active" }, { "key": "cats-grace", "conditionId": "cats-grace-active" }, { "key": "eagles-splendor", "conditionId": "eagles-splendor-active" }, { "key": "foxs-cunning", "conditionId": "foxs-cunning-active" }, { "key": "owls-wisdom", "conditionId": "owls-wisdom-active" }] } }] },
     { "id": "enlarge-reduce", "name": "Enlarge/Reduce", "level": 2, "school": "transmutation", "castingTime": "Action", "range": "30 feet", "components": { "verbal": true, "somatic": true, "material": "a pinch of powdered iron" }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "druid", "sorcerer", "wizard"], "mechanicalEffects": [{ "kind": "buff", "casterChoosesVariant": { "variants": [{ "key": "enlarge", "conditionId": "enlarged-active" }, { "key": "reduce", "conditionId": "reduced-active" }] } }] },
     { "id": "enthrall", "name": "Enthrall", "level": 2, "school": "enchantment", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["bard", "warlock"], "mechanicalEffects": [] },
     { "id": "find-steed", "name": "Find Steed", "level": 2, "school": "conjuration", "castingTime": "1 minute", "range": "30 feet", "components": { "verbal": true, "somatic": true }, "duration": "Instantaneous", "concentration": false, "ritual": false, "classes": ["paladin"], "mechanicalEffects": [{ "kind": "summon", "name": "Bonded Steed", "ac": 11, "hpBase": 30, "hpPerSlotAbove": 10, "baseSlotLevel": 2, "speedFeet": 60 }] },
@@ -4612,16 +4612,6 @@
       "endsOn": [],
       "effects": [],
       "recurringSave": { "ability": "WIS", "trigger": "turnEnd", "onSuccess": "removeCondition" }
-    },
-    {
-      "id": "bears-endurance-active",
-      "name": "Bear's Endurance",
-      "description": "Advantage on Constitution checks while the spell lasts. RAW also grants 2d6 temp HP at cast; that one-shot temp-HP grant isn't fired yet because the multi-mechanic shape doesn't condition a temp-hp mechanic on the buff variant chosen.",
-      "stackable": false,
-      "endsOn": [],
-      "effects": [
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "CON" }, "mode": "advantage" }
-      ]
     },
     {
       "id": "bulls-strength-active",

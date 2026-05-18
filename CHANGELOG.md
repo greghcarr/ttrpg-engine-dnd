@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: Enhance Ability SRD 5.2.1 alignment (slice 181)**
+
+Enhance Ability had several drift points from SRD 5.2.1:
+
+- Six variants (including a CON one, Bear's Endurance, from the 2014 PHB); SRD 5.2.1 lists only five abilities (Strength, Dexterity, Intelligence, Wisdom, Charisma — no Constitution). Dropped the bears-endurance variant from the spell's caster-choice list and removed the orphan `bears-endurance-active` condition entirely.
+- Class list missing Ranger and Wizard. Added both (SRD 5.2.1: Bard, Cleric, Druid, Ranger, Sorcerer, Wizard).
+- Material component text "fur or a feather from a beast" normalized to "fur or a feather" per SRD.
+
+Test surface: enhance-ability test file updated to test 5 variants instead of 6. Spell-coverage matrix entry switched from the bears-endurance variant to bulls-strength as the representative cast. Features-wired-conditions snapshot refreshed (`bears-endurance-active` removed).
+
+Tests: 1451 pass (one less than 1452 because the 6-variant test row was removed), tsc --noEmit clean.
+
 **Content audit: spell attack kinds + monster stat sweep (slice 180)**
 
 Two SRD 5.2.1 audits run; one found drift, the other found none.

@@ -179,7 +179,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'darkvision': { kind: 'buff', conditionId: 'darkvision-active' },
   'detect-thoughts': { kind: 'skip', reason: 'divination utility; detection mechanic not modeled' },
   'dragons-breath': { kind: 'skip', reason: 'grants ally a breath-weapon reaction-style; on-action rider not modeled' },
-  'enhance-ability': { kind: 'buff', conditionId: 'bears-endurance-active', casterChoice: { kind: 'variant', value: 'bears-endurance' } },
+  'enhance-ability': { kind: 'buff', conditionId: 'bulls-strength-active', casterChoice: { kind: 'variant', value: 'bulls-strength' } },
   'enlarge-reduce': { kind: 'buff', conditionId: 'enlarged-active', casterChoice: { kind: 'variant', value: 'enlarge' } },
   'enthrall': { kind: 'skip', reason: 'WIS save against perception disadvantage on caster; perception-buff condition not modeled' },
   'find-steed': { kind: 'summon' },

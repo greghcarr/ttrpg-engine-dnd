@@ -10,9 +10,10 @@ import type { CharacterCreatedEvent } from '../../../src/schemas/events/progress
 import type { ConditionAppliedEvent } from '../../../src/schemas/events/combat.js';
 import { eventId, isoTimestamp } from '../../fixtures/index.js';
 
-// Tests Enhance Ability's six caster-chosen variants. Same shape as
-// Command (slice 85) but exercises a 6-variant buff routing list to
-// flush out any off-by-one in the resolver's larger-list path.
+// Tests Enhance Ability's five caster-chosen variants. Same shape as
+// Command (slice 85) but exercises a 5-variant buff routing list. The
+// 2014 PHB had a sixth variant (Bear's Endurance, CON-check advantage)
+// that SRD 5.2.1 dropped along with the spell's CON-check coverage.
 
 const PACK = loadStarterPack();
 
@@ -51,9 +52,8 @@ const buildCampaign = (caster: Character, target: Character) => {
   return { engine, campaign };
 };
 
-describe('Enhance Ability caster-chosen variant (6-variant buff)', () => {
+describe('Enhance Ability caster-chosen variant (5-variant buff)', () => {
   it.each([
-    ['bears-endurance', 'bears-endurance-active'],
     ['bulls-strength', 'bulls-strength-active'],
     ['cats-grace', 'cats-grace-active'],
     ['eagles-splendor', 'eagles-splendor-active'],
