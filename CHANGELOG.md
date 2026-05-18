@@ -4,6 +4,12 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 5.1**
+
+Aberration sweep (5 entries): Chuul (CR 4), Cloaker (CR 8), Darkmantle (CR 1/2), Grick (CR 2), Roper (CR 5). Closes the SRD 5.2.1 Aberration roster outside the seed Aboleth / Gibbering Mouther / Otyugh. Aberration type moves from 3 to 8 entries; pack monster total moves from 181 to 186. Every entry sourced verbatim from `references/srd-markdown/monsters-A-Z.md` on AC / HP / abilities / damage R/I/V / condition immunities / senses / CR / XP / PB. All five ship `traits: []` — Spider Climb / Amphibious / Sense Magic / Light Sensitivity have no engine primitive yet. Bestiary mechanics defer under existing gaps: Chuul Pincer + Grick Tentacles + Roper Tentacle auto-grapple-on-hit; Chuul Paralyzing Tentacles two-tier Poisoned-then-Paralyzed escalation; Cloaker Attach damage-share-on-attach (first such mechanic in the pack); Cloaker Phantasms (Recharge after Short or Long Rest spell-cast with bright-light early-end gating); Cloaker Moan 60-ft Frightened emanation with 24-hour per-target immunity tracker; Darkmantle Crush auto-attach + Blinded + suffocating composite; Darkmantle Darkness Aura (1/Day Concentration emanation magical darkness, first such in pack); Roper Reel directional-movement-on-Grappled (first such in pack); Roper destructible per-tentacle AC 20 / HP 10 composite (densest per-attack-slot destructible-component primitive in pack). Darkmantle's blindsight-60 / no-darkvision sense profile is the second such after Black Pudding.
+
+Tests: pre-existing suite, no engine changes.
+
 **Distribution: drop npm-publish posture (slice 198)**
 
 Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:
