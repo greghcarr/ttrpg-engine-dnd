@@ -4,6 +4,29 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs + infra: fresh-agent discovery polish (slice 246)**
+
+Closes the gaps surfaced by the Uncle Bob audit of slices 244-245's onboarding refresh. No engine or content surface touched; this is a "make the fresh-agent test actually succeed" slice.
+
+Six small fixes that compound:
+
+1. **CLAUDE.md branch-from inconsistency.** Slice 244 said "branch off `main` or off `dev` (both fine)"; that's wrong because branching off `main` loses recent `dev` work. Corrected to "branch off `dev`" with the rationale inline.
+2. **CLAUDE.md stale slice number.** The Goal section referenced "currently at slice 203"; we're far past that. Replaced the hardcoded number with a pointer to `git log --oneline | head -5` so the doc doesn't drift on every slice.
+3. **README primitive-count drift.** The why-this-engine section said "About 25 declarative primitives"; the architecture section said "fixed vocabulary of 43"; the actual `EFFECT_KINDS` catalog is currently 49. Both prose mentions now read "around 50" with an authoritative pointer to [src/schemas/effects.ts](src/schemas/effects.ts), so future drift only requires the count detail row to update.
+4. **CI submodule checkout.** [.github/workflows/ci.yml](.github/workflows/ci.yml) now passes `submodules: recursive` to `actions/checkout@v5`. Without this, the SRD drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) self-skips on every CI run and SRD regressions silently land green. This was the most consequential gap from the slice-245 submodule rollout.
+5. **AGENTS.md** at the repo root. Thin pointer to [CLAUDE.md](CLAUDE.md) so AI coding agents that don't auto-load `CLAUDE.md` (Codex CLI, Cursor, Continue, others) still find the working manual. Documents the cross-vendor agent-config conventions and explicitly tells an agent that can't read CLAUDE.md to refuse non-trivial changes.
+6. **.cursorrules** at the repo root. Cursor-specific entry point. Summarizes the seven load-bearing rules from CLAUDE.md (quality bar, commit-don't-push, dev-branch, SRD canon, slice cadence, Uncle Bob audit, pre-commit checks) and points to the full working manual.
+7. **docs/starter-pack-gaps.md** gains a "How to pick a slice" intro at the top. Previously opened with "Engine-internal accounting..." which was maintainer-voiced; now opens with a 5-step new-contributor flow that points back at [CLAUDE.md](CLAUDE.md) for the working norms, then explains the relationship between the "Future engine slices" and "Deferred primitives backlog" tables. The previous content-attribution.md cross-reference is preserved under a "Relationship to other docs" subhead.
+
+Pre-commit Uncle Bob audit:
+- Names: `AGENTS.md` matches the cross-vendor convention emerging from OpenAI Codex CLI and others; `.cursorrules` is Cursor's literal expected filename. Both are dot-or-uppercase to stand out at the repo root. No surprise naming.
+- DRY: AGENTS.md and .cursorrules are thin pointers to CLAUDE.md, not duplicates. Each file's content tells the agent "this is a pointer; the canonical source is CLAUDE.md." `.cursorrules` does inline a 7-rule summary because Cursor's read of `.cursorrules` is gated and brief — readers might not click through. That's a deliberate redundancy with an explicit "these seven are a summary, not a replacement" note at the bottom. The drift risk is one file (`.cursorrules`); flagged for an annual / per-major-rev sync check.
+- SRP: each new file has one job. AGENTS.md routes non-Claude agents. .cursorrules routes Cursor specifically. CI submodule flag enables the drift audit gate. CLAUDE.md and README edits each correct one specific staleness or inconsistency.
+- Magic numbers: README primitive-count update uses "around 50" with a pointer to the authoritative `EFFECT_KINDS` rather than embedding an exact count that would drift. CLAUDE.md drops its slice-number reference for the same drift-resistance reason.
+- at-threading: N/A (no events).
+- Mechanical outcomes asserted: CI's `submodules: recursive` will be verified by the next PR's CI run picking up the submodule (the SRD drift audit should now report results instead of self-skipping). Fresh-agent test on a clean clone will exercise AGENTS.md / `.cursorrules` discoverability.
+- Tests: no new test code. The existing SRD drift audit becomes an effective CI gate as a side effect of the checkout fix.
+
 **Infra: SRD 5.2.1 markdown as git submodule (slice 245)**
 
 Closes the blocker that prevented a fresh contributor from doing SRD-aligned content work. Previously `references/srd-markdown/` was gitignored and lived only on Greg's machine; a stranger cloning the repo had no documented path to obtain it. Now the directory lands as a git submodule pointing at [`github.com/greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown) (CC-BY-4.0, derived from the Wizards-released SRD 5.2.1).

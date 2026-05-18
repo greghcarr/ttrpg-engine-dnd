@@ -16,6 +16,12 @@ jobs:
         node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v5
+        with:
+          # Pull in the SRD 5.2.1 markdown submodule at
+          # references/srd-markdown/. Without this, the drift audit
+          # at tests/audit/srd-drift.test.ts self-skips on CI and
+          # SRD regressions can land green. Slice 246.
+          submodules: recursive
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v5
         with:

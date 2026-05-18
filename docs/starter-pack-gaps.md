@@ -1,6 +1,18 @@
 # Starter pack coverage and gaps
 
-Engine-internal accounting of what currently ships in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) versus what's deferred. Consumers of `ttrpg-engine-dnd` who want fuller coverage will be extending this pack; this doc tells them where the holes are and why.
+This doc is the **priority queue** for contributor work and the canonical accounting of what currently ships in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) versus what's deferred.
+
+## How to pick a slice (for new contributors)
+
+1. **Read [CLAUDE.md](../CLAUDE.md) first** if you haven't — slice cadence, branch flow, pre-commit Uncle Bob audit, SRD canon. Those rules apply to every slice.
+2. **Skim the "Coverage at a glance" table below** for the lay of the land.
+3. **Jump to "Future engine slices"** further down for the catalog of focused primitives, each with the cohort of spells / features / items it unblocks. Rows ranked roughly by payoff.
+4. **Also check "Deferred primitives backlog"** further down for small, accreted RAW deviations that each have a one-primitive fix. Lower-payoff per slice but excellent for getting familiar with the codebase.
+5. **Pick a row, follow [docs/slice-template.md](slice-template.md)**, commit to `dev`, surface the work.
+
+If you're not sure which row is approachable, the smallest-scope rows in "Deferred primitives backlog" (single-feature unblockers) are good first slices. Large structural primitives (new event types, new TriggerAction variants) are larger commits and best done after one or two warm-up slices.
+
+## Relationship to other docs
 
 This is separate from [content-attribution.md](content-attribution.md), which is a licensing audit (what's clearly SRD-derived vs needs verification). The two docs are kept in parallel: attribution tracks "may we ship this?", this doc tracks "is it actually in here, and how completely?".
 

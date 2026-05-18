@@ -34,7 +34,7 @@ If anything in the working norms below conflicts with how you would normally ope
 - `main`: stable, releasable. Tagged versions live here. Never commit slice work directly to main.
 - `dev`: daily slice work. All slice commits land here first.
 - The user (Greg) merges `dev` into `main` on his cadence, typically when a coherent group of slices is ready to surface.
-- Branch off `main` or off `dev` (both fine for slices). Commit to `dev`. Do not push or merge to main yourself; surface the work and let the user decide.
+- Branch off `dev` (it has the latest slice work). Commit to `dev`. Do not push or merge to main yourself; surface the work and let the user decide. Branching off `main` would lose recent dev commits.
 - For multi-track parallel work (engine slices + content authoring), see [docs/parallel-authoring.md](docs/parallel-authoring.md). Worktrees still commit to `dev` (or to per-worktree feature branches that merge to `dev`).
 
 ### Commit, don't push
@@ -106,7 +106,7 @@ If a check fails, fix the cause. Never `--no-verify` or skip.
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 (slices 48 onward, currently at slice 203 with two parallel content lanes recently merged in) has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The exact slice count drifts; check `git log --oneline | head -5` for the latest. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
 
 ## SRD source of truth
 
