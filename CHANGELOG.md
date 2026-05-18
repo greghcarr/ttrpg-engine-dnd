@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: GrantMaxHealingDice + Life Domain L17 Supreme Healing (slice 205)**
+
+Adds the `GrantMaxHealingDice` marker primitive (43 to 44 EFFECT_KINDS). RAW (SRD 5.2.1): "When you would normally roll one or more dice to restore HP with a spell or Channel Divinity, you don't roll those dice; you use the highest possible value instead."
+
+Wiring lives in cast-spell.ts's heal-mechanic branch: builds the caster's effect stack (already done for `BoostHealing`), checks `hasMaxHealingDice()`, and when true skips `rollDamage` for the healing dice and computes `(parsed.count + bonusDice) * parsed.die + parsed.modifier + castingAbilityMod` directly. Flat modifiers (WIS / CHA mod, Disciple of Life's `+2 + slotLevel`, per-slot upcast scaling) layer on unchanged.
+
+Canonical user: Life Domain L17 Supreme Healing, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json). Closes the third Life Domain deferral that subclass batch 1.8 left in the audit doc (after the `GrantSpell` engine consumer for L3 Life Domain Spells + the Channel-Divinity planner for L3 Preserve Life). Blessed Healer (L6) remains deferred pending HealedEvent.casterId + slot-level surfacing.
+
+Tests: 3-case planner test in [tests/unit/engine/plan-cast-spell-max-healing.test.ts](tests/unit/engine/plan-cast-spell-max-healing.test.ts) (L17 cleric heals 23 deterministically at slot 1, 57 at slot 3, L16 cleric without the feature produces sub-max amounts across seeds); accumulator marker test in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s205-supreme-healing.test.ts](tests/golden/s205-supreme-healing.test.ts) walks the deterministic-max heal.
+
 **Engine: cast-spell damage-modifier effect-stack fold + Elemental Affinity CHA rider (slice 204)**
 
 Threads `EffectAccumulator.modifierSum('damage', {event.damageType})` into both cast-spell paths so `AddModifier { target: 'damage' }` effects on the caster now compose with spell damage. Pre-slice 204 the call existed only in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) for weapon attacks; spell damage silently dropped any effect-stack contributions, which is why Draconic Sorcery's Elemental Affinity rider was the canonical "partial-wire, CHA-mod-not-yet-firing" gap recorded in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) by subclass batch 1.4.

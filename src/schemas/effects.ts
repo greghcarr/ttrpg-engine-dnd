@@ -278,6 +278,15 @@ export type Effect =
   // give Exhaustion" arm of the same feature is consumer-side
   // narrative state (the engine doesn't model food / water).
   | { kind: 'GrantSelfRestoration' }
+  // Slice 205. Marker primitive: while the caster bears this, every
+  // healing-dice roll in the cast-spell heal-mechanic path is
+  // replaced by its maximum value. RAW Life Domain L17 Supreme
+  // Healing: "When you would normally roll one or more dice to
+  // restore HP with a spell or Channel Divinity, you don't roll
+  // those dice; you use the highest possible value instead."
+  // Flat modifiers (CHA mod, Disciple of Life boost) compose
+  // unchanged on top.
+  | { kind: 'GrantMaxHealingDice' }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -526,6 +535,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantSelfRestoration'),
     }),
     z.object({
+      kind: z.literal('GrantMaxHealingDice'),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -600,6 +612,7 @@ export const EFFECT_KINDS = [
   'GrantUncannyDodge',
   'GrantInnateSorcerySpendAlternative',
   'GrantSelfRestoration',
+  'GrantMaxHealingDice',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',

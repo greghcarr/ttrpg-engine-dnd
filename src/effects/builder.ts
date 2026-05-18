@@ -116,6 +116,7 @@ export class EffectAccumulator {
   private uncannyDodgeFlag: boolean = false;
   private innateSorcerySpendAlternativeFlag: boolean = false;
   private selfRestorationFlag: boolean = false;
+  private maxHealingDiceFlag: boolean = false;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -475,6 +476,15 @@ export class EffectAccumulator {
   hasSelfRestoration(): boolean {
     return this.selfRestorationFlag;
   }
+  // Slice 205: marker that swaps every healing-dice roll to its max
+  // value in cast-spell's heal-mechanic path. Set by Life Domain L17
+  // Supreme Healing via the `GrantMaxHealingDice` effect.
+  markMaxHealingDice(): void {
+    this.maxHealingDiceFlag = true;
+  }
+  hasMaxHealingDice(): boolean {
+    return this.maxHealingDiceFlag;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -614,6 +624,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantSelfRestoration':
       acc.markSelfRestoration();
+      return;
+    case 'GrantMaxHealingDice':
+      acc.markMaxHealingDice();
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

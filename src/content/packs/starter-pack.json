@@ -726,7 +726,7 @@
           {
             "id": "supreme-healing",
             "name": "Supreme Healing",
-            "effects": []
+            "effects": [{ "kind": "GrantMaxHealingDice" }]
           }
         ]
       }

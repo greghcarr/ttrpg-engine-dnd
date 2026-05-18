@@ -683,12 +683,25 @@ const planHealMechanic = (
     pendingChoices: state.pendingChoices,
   });
   const healingBoost = casterEffects.healingBoostFor(intent.slotLevel);
+  // Slice 205: Life Domain L17 Supreme Healing replaces every healing
+  // die with its maximum value. RAW: "When you would normally roll
+  // one or more dice to restore HP with a spell or Channel Divinity,
+  // you don't roll those dice; you use the highest possible value
+  // instead." Flat modifiers (CHA mod, Disciple of Life boost) still
+  // layer on top unchanged.
+  const useMaxHealingDice = casterEffects.hasMaxHealingDice();
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
     let rolledAmount = 0;
     if (mechanic.amountDice !== undefined) {
-      const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
-      rolledAmount = rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod;
+      if (useMaxHealingDice) {
+        const parsed = parseDiceExpression(mechanic.amountDice);
+        const totalDice = parsed.count + bonusDice;
+        rolledAmount = totalDice * parsed.die + parsed.modifier + castingAbilityMod;
+      } else {
+        const { rolls, modifier } = rollDamage(mechanic.amountDice, bonusDice, rng, false);
+        rolledAmount = rolls.reduce((s, v) => s + v, 0) + modifier + castingAbilityMod;
+      }
     }
     const targetBlocked = isHealingBlocked({ state, content, targetId });
     const amount = targetBlocked ? 0 : Math.max(0, rolledAmount + flatAmount + healingBoost);

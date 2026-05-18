@@ -293,6 +293,17 @@ describe('EffectAccumulator', () => {
     expect(acc.hasSelfRestoration()).toBe(true);
   });
 
+  it('GrantMaxHealingDice marker propagates via hasMaxHealingDice()', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.hasMaxHealingDice()).toBe(false);
+    applyEffectToBuilder(
+      { kind: 'GrantMaxHealingDice' },
+      acc,
+      { source: 'life-domain-l17' },
+    );
+    expect(acc.hasMaxHealingDice()).toBe(true);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,
