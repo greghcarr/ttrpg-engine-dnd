@@ -93,7 +93,7 @@ Pick the doc that matches what you want:
 
 ## Status
 
-**Alpha.** Architecturally complete and content-substantial. 1622 tests across 243 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full. Slice 195's [SRD drift audit harness](tests/audit/srd-drift.test.ts) catches regressions against the SRD 5.2.1 markdown clone on 15 script-detectable fields across spells, monsters, and magic items. **SRD 5.2.1 pack-presence is now complete across every category** (slices 223-226 closed the remaining missing entries; the drift audit is green on every entry).
+**Alpha.** Architecturally complete and content-substantial. 1643 tests across 244 files; the engine compiles and builds (ESM + CJS + `.d.ts`); the load-bearing invariants (event-sourcing, plan/commit, RNG capture, replay equivalence, branded IDs, effect primitives) are locked and proven. The 48-probe RAW-compliance audit at [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts) passes in full. Slice 195's [SRD drift audit harness](tests/audit/srd-drift.test.ts) catches regressions against the SRD 5.2.1 markdown clone on 15 script-detectable fields across spells, monsters, and magic items. **SRD 5.2.1 pack-presence is now complete across every category** (slices 223-226 closed the remaining missing entries; the drift audit is green on every entry).
 
 ### Coverage at a glance
 
@@ -183,7 +183,7 @@ The 🟡 items become relevant as the campaign progresses past low levels. The �
 
 ### Test infrastructure gaps
 
-All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1622 tests across 243 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)), a 15-check SRD drift audit (Layer 11, [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts)) that compares pack content against the SRD 5.2.1 markdown clone on every script-detectable field, and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
+All three test-infrastructure layers from the standard now ship: replay-equivalence + RNG-capture invariants (Layers 5 + 6), property-based tests with `fast-check` at 1000 iterations × 34 properties (Layer 7), a feature-coverage matrix that audits every class feature / mastery / condition / feat / magic item (Layer 8), and a public-API contract test that snapshots exports + locks key signatures (Layer 9). The engine ships **1643 tests across 244 files**, plus a 48-probe RAW-compliance audit (Layer 10, [tests/audit/raw-compliance.test.ts](tests/audit/raw-compliance.test.ts)), a 15-check SRD drift audit (Layer 11, [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts)) that compares pack content against the SRD 5.2.1 markdown clone on every script-detectable field, and exhaustive boundary sweeps over the canonical PHB 2024 tables (ability modifier, proficiency bonus, full / half / pact slot tables, carrying capacity, exhaustion) in [tests/boundaries/](tests/boundaries/).
 
 #### Property-test generator coverage
 
@@ -407,7 +407,16 @@ If you build your own content pack to load into this engine, your pack's license
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The architecture is locked (see [CLAUDE.md](CLAUDE.md)); contributions that fit within it are very welcome. Open an issue before a large change.
+The engine is structured so that anyone (or any AI coding agent) can clone the repo and start contributing effectively. The working manual is [CLAUDE.md](CLAUDE.md): quality bar, branch structure, commit conventions, SRD-as-canon, slice cadence, pre-commit Uncle Bob audit, architecture. Read it before opening anything else.
+
+Then:
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) for the contributor flow and testing standard.
+- [DEVELOPMENT.md](DEVELOPMENT.md) for dev commands and branch flow (slice work goes to `dev`, never `main`).
+- [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the prioritized backlog of next slices.
+- [docs/slice-template.md](docs/slice-template.md) for the per-shape checklist (new planner / new content / new derivation).
+
+The architecture is locked. The quality bar is high: **incorrect code is worse than no code.** Contributions that fit within the locked architecture are welcome; open an issue before a large architectural change.
 
 ## License
 

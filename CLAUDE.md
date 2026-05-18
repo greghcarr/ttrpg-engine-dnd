@@ -1,6 +1,105 @@
-# ttrpg-engine-dnd, conventions
+# ttrpg-engine-dnd — working manual
 
-A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Local directory at `Visual Studio Code/ttrpg-engine-dnd/`; GitHub repo at `github.com/greghcarr/ttrpg-engine-dnd`. Not currently distributed through a package registry; `private: true` is set in `package.json`. Earlier alpha releases on npm (alpha.0 through alpha.5) were unpublished in May 2026 on IP-cleanup grounds — see CHANGELOG. Ships schemas + engine only; no rulebook content. Consumers supply content packs.
+A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Schema-only library; consumers supply content packs. GitHub repo: `github.com/greghcarr/ttrpg-engine-dnd`. Not currently distributed via npm (the alpha.0-alpha.5 releases were unpublished in May 2026 on IP-cleanup grounds; see CHANGELOG).
+
+**This file is the working manual.** It is auto-loaded into the context of any Claude Code instance opened in this repo. Read it end-to-end before opening anything else. The conventions below are non-negotiable; the architecture below is locked.
+
+## Quality bar
+
+**Incorrect code is worse than no code.** This engine is designed to be the foundation other D&D tools rely on. A subtly-wrong rule implementation that *looks* correct will mislead consumers for months. Hold every change to that standard:
+
+- If you cannot make a change correct, leave it deferred with a tracked row in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) and document the RAW deviation in the slice's CHANGELOG entry.
+- Cite the SRD when content judgments are involved (see "SRD is canon" below). Never substitute web sources.
+- The full test suite must be green and `tsc --noEmit` must be clean before every commit. No exceptions.
+- Each commit ships one coherent slice. See "Slice cadence" below.
+
+Everything below exists to keep that bar.
+
+## Fresh-agent quickstart
+
+If you (Claude or otherwise) are arriving at this repo for the first time, do this in order:
+
+1. Skim [README.md](README.md) for the user-facing pitch, the roadmap, and the current "Status" section.
+2. Read this file end-to-end. The norms in "Working norms" apply to every commit.
+3. Confirm `references/srd-markdown/` exists in your worktree. If absent, ask before proceeding — never substitute web sources for SRD content. See "SRD is canon" below.
+4. Read the priority queue at [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md). The "Future engine slices" table and "Deferred primitives backlog" are the next-slice candidates, sorted roughly by cohort payoff.
+5. Pick a slice, follow [docs/slice-template.md](docs/slice-template.md), commit to `dev`, surface the work to the user.
+
+If anything in the working norms below conflicts with how you would normally operate, the norms win.
+
+## Working norms (read first)
+
+### Branch structure
+
+- `main`: stable, releasable. Tagged versions live here. Never commit slice work directly to main.
+- `dev`: daily slice work. All slice commits land here first.
+- The user (Greg) merges `dev` into `main` on his cadence, typically when a coherent group of slices is ready to surface.
+- Branch off `main` or off `dev` (both fine for slices). Commit to `dev`. Do not push or merge to main yourself; surface the work and let the user decide.
+- For multi-track parallel work (engine slices + content authoring), see [docs/parallel-authoring.md](docs/parallel-authoring.md). Worktrees still commit to `dev` (or to per-worktree feature branches that merge to `dev`).
+
+### Commit, don't push
+
+- Treat `git commit` as a **local-only** operation.
+- Never run `git push` (or any other remote-modifying operation: `git push --force`, `git push origin`, branch deletions on origin, etc.) unless the user explicitly asks.
+- Never run `git commit --amend`, `git rebase`, `git reset --hard`, or any history-rewriting operation without explicit instruction.
+- Never skip hooks (`--no-verify`) or bypass signing without explicit instruction.
+- If a pre-commit hook fails, fix the underlying issue and create a NEW commit. Do not amend the failed commit.
+
+### SRD is canon. Use the local clone.
+
+- `references/srd-markdown/` is the **only** source of truth for SRD 5.2.1 rules text (spells, monsters, magic items, conditions, classes, species, backgrounds, feats).
+- **Never WebFetch D&D content.** Web sources (Roll20 wiki, dndbeyond, third-party fan sites) are 2014-PHB-flavored or third-party variants and have introduced drift bugs in past slices.
+- If you need an SRD lookup, grep `references/srd-markdown/`. The drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) catches regressions automatically.
+- If the symlink is missing (fresh worktree, recent clone), ask the user to symlink it from the primary worktree (`ln -s ../ttrpg-engine-dnd/references references`) rather than proceeding with web sources.
+
+Detailed SRD layout under "SRD source of truth" below.
+
+### Slice cadence: primitive + canonical user
+
+Each commit ships one focused unit. Three valid slice shapes:
+
+1. **Engine primitive + canonical user**: a new effect kind, TriggerAction, planner, schema field, or condition + 1-2 RAW spells / features / items that exercise it.
+2. **Content sweep**: pure JSON wires that exercise an existing primitive. No engine work.
+3. **Doc / workflow / infra change**: rare. This file's most recent rewrite is an example.
+
+See recent commits via `git log --oneline | head -40` for the pattern. Slices 88-122 are the most representative of the per-slice rhythm; slices 235-243 are recent examples of the primitive + canonical user cadence on the UseItem / ConsumeItem surface.
+
+Detailed checklists per slice shape live in [docs/slice-template.md](docs/slice-template.md).
+
+### Pre-commit Uncle Bob audit
+
+Before every engine slice commit, write a 5-8-line audit in the commit message body covering:
+
+- **Names**: are the new identifiers intention-revealing? Did you reuse the naming convention of the surrounding code?
+- **DRY**: did you copy something instead of factoring? If so, justify in one line. Single-call-site duplication of < 10 lines is usually below the abstraction threshold; document the call when you decline.
+- **SRP**: does each new function / module do one thing at one level of abstraction?
+- **Magic numbers**: extracted to named constants? RAW values cited?
+- **at-threading** (when the slice emits events): single `nowIso()` resolution per planner, passed through to every emitted event.
+- **Mechanical outcomes asserted**: which observable behaviors do your tests pin?
+- **Tests**: which bugs does each new test prevent? Did you over-test?
+
+The audit is **mandatory** for engine slices. Pure content sweeps (JSON wires only) can use a shorter audit confirming the new wires match RAW.
+
+The audit is a discipline tool, not paperwork: writing it forces you to notice the issues you would otherwise ship. If you cannot defend a decision in one line, reconsider it before committing.
+
+### Doc updates per slice
+
+At the close of every slice, update the docs the slice touched:
+
+- [CHANGELOG.md](CHANGELOG.md) — **always**. One entry per slice under `## Unreleased`. Include the Uncle Bob audit summary.
+- [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) — when a deferred row is closed (strike it through with `~~...~~`), when a new deferral is noted, or when "Coverage at a glance" counts change.
+- [docs/api-overview.md](docs/api-overview.md) — when the public surface changes.
+- [README.md](README.md) — when "Known gaps" closes, when a status row's cell shifts, or when the test count moves significantly.
+
+### Pre-commit checks
+
+Run all of these before committing. Each is mandatory:
+
+- `npx tsc --noEmit` — vitest does not typecheck. Always run this separately.
+- `npx vitest run` — full suite. Must be green.
+- `npx vitest run -u` — only when adding wired conditions, items, or other content that feeds the coverage snapshot at [tests/coverage/__snapshots__/](tests/coverage/__snapshots__/). Inspect the diff to confirm only intentional additions land.
+
+If a check fails, fix the cause. Never `--no-verify` or skip.
 
 ## Goal
 
@@ -26,9 +125,11 @@ Layout:
 
 If `references/srd-markdown/` is absent (fresh worktree, recent clone), surface that immediately and ask the user to symlink it from the primary worktree (`ln -s ../ttrpg-engine-dnd/references references`) rather than proceeding with web sources.
 
-## Library-quality bar (internal working note)
+## Engineering standards (internal, not for marketing copy)
 
-Hold the engine to a library-quality standard: TypeScript strict mode, deterministic replay, plan/commit RNG capture, 80%+ coverage on engine/derive/effects, golden transcripts on every behavior change. Do not advertise this framing on public-facing surfaces (README, package.json, repo description). The work should speak through the code and tests; quality labels in marketing copy are noise. See [feedback memory](../../../.claude/projects/-Users-greghcarr-Documents-Visual-Studio-Code-dndbnb/memory/feedback_no_quality_self_label_public.md) for the reasoning.
+The "Quality bar" section above is the user-facing framing. Internally, the engine is held to a library-quality standard: TypeScript strict mode (`noUncheckedIndexedAccess`), deterministic replay, plan/commit RNG capture, 80%+ coverage on `src/engine/` `src/derive/` `src/effects/`, golden transcripts on every behavior change, drift-audited content against the SRD markdown clone.
+
+Do not advertise this framing on public-facing surfaces (README, package.json description, repo description, marketing). The work speaks through the code, tests, and transcripts. Quality labels in marketing copy are noise.
 
 ## Known gaps (canonical list lives in README)
 
@@ -38,7 +139,7 @@ The engine architecture is locked. Original Phase A–E combat / state / adoptio
 2. **Content authoring** — most of what's left. The bulk of the MM bestiary (~365 statblocks), most subclasses (~38), the long tail of schema-only spells (~247), the DMG magic-item catalog. None requires engine work, just JSON. See [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) for the catalog.
 3. **Phase F** (optional) — `ttrpg-engine-core` extraction. Unstarted. Only do this if multi-system support becomes a real goal.
 
-When working in this repo, the slice cadence is "primitive + canonical user": one focused primitive plus the first one or two RAW spells / features that exercise it. See recent slices (88–122) for the pattern.
+For the slice cadence ("primitive + canonical user"), see the "Working norms" section above plus [docs/slice-template.md](docs/slice-template.md) for the per-shape checklist.
 
 ## System-agnostic core seam (forward-looking)
 

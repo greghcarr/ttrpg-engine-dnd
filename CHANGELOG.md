@@ -4,6 +4,38 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs + workflow: onboarding refresh + dev-branch convention (slice 244)**
+
+Pure documentation and workflow change; no engine or content surface touched. Two motivations:
+
+1. Establish a `main` + `dev` branch convention so slice work lands on `dev` and `main` stays at clean release checkpoints. Previously slice work was committed directly to `main`. The transition: `dev` was branched off `main` at slice 243 (commit `7b9a747`); going forward, slice commits land on `dev`. The user (Greg) merges `dev` into `main` on his cadence.
+2. Make the working norms discoverable by any AI agent (or human contributor) opening the repo cold. Previously several load-bearing norms lived only in the project author's personal global config or in the AI agent's per-session memory; now they live in the repo's tracked docs.
+
+Changes:
+
+- [CLAUDE.md](CLAUDE.md) — new top-level sections: "Quality bar" (states the *incorrect code is worse than no code* standard), "Fresh-agent quickstart" (the order-of-operations for any new agent / contributor), "Working norms" (branch structure, commit-don't-push, SRD-as-canon, slice cadence, pre-commit Uncle Bob audit, doc updates per slice, pre-commit checks). The "Library-quality bar (internal working note)" section is reframed as "Engineering standards" with the public-vs-internal framing kept intact.
+- [DEVELOPMENT.md](DEVELOPMENT.md) — Branches section expanded with the working flow (start on dev, commit early, pre-commit checks, never touch main without explicit instruction) plus branch-from rules (parallel worktrees target dev).
+- [CONTRIBUTING.md](CONTRIBUTING.md) — new "Quality bar" section up top, new "Working with an AI agent" section pointing agents to CLAUDE.md's fresh-agent quickstart, and the existing "Commit and PR style" section gains the dev-branch + Uncle Bob audit conventions.
+- [README.md](README.md) — "Contributing" section rewritten as a pointer to CLAUDE.md / CONTRIBUTING.md / DEVELOPMENT.md / starter-pack-gaps.md / slice-template.md; test count refreshed to 1643 / 244 files.
+
+What the new norms surface that wasn't previously tracked in the repo:
+
+- The "commit, don't push" rule, previously only in the project author's `~/.claude/CLAUDE.md` (Claude Code's user-level config). Now load-bearing in the project's CLAUDE.md so any agent or human picks it up automatically.
+- The Uncle Bob pre-commit audit checklist (names, DRY, SRP, magic numbers, at-threading, mechanical outcomes asserted, tests). Previously only in the AI agent's per-session memory and applied informally; now mandatory and codified.
+- The branch convention (slice work → `dev`; `main` is for stable releases). Previously the repo had a 2-line mention in DEVELOPMENT.md; now load-bearing.
+- The SRD-is-canon rule, previously implicit; now explicit with the do-not-WebFetch reminder.
+- The fresh-agent quickstart, a 5-step onboarding sequence for any new contributor.
+
+Why this matters: previously, the conventions that kept code quality high were partly stored in environments outside the repo (the author's personal Claude config, an AI agent's session memory). A fresh AI agent or new human contributor would not see them and could ship correct-looking but rule-incorrect code. The repo's documentation now stands alone as the single source of working norms.
+
+Pre-commit Uncle Bob audit:
+- Names: section headers are intention-revealing ("Quality bar", "Fresh-agent quickstart", "Working norms"). Document-level naming follows the existing convention of CLAUDE.md / CONTRIBUTING.md / DEVELOPMENT.md.
+- DRY: the same norms appear in multiple docs at different framings (CLAUDE.md detailed, CONTRIBUTING.md contributor-focused, DEVELOPMENT.md command-focused). This is deliberate — each doc has a distinct audience and the conventions are load-bearing enough to repeat the key pointers. Cross-references via markdown links keep them in sync.
+- SRP: each doc has one job. CLAUDE.md is the agent / author working manual. CONTRIBUTING.md is the contributor-facing onboarding. DEVELOPMENT.md is the command + branch reference. README.md stays public-facing.
+- No magic numbers introduced. No engine code touched.
+- Tests: no test changes. tsc and full vitest suite remain green (verified pre-commit).
+- Mechanical outcomes: the working norms are now discoverable by a fresh agent on the first read; the branch convention is committed to dev; the Uncle Bob audit shape is documented in three places (CLAUDE.md as primary, CONTRIBUTING.md as link, slice-template.md unchanged but unchanged-and-still-correct on the audit step).
+
 **Engine: action-selector + per-action chargesCost + Staff of Healing (slice 243)**
 
 Generalizes slice 240's UseItem from "fire all onUse actions, charge 1 per use" to "fire one of N onUse actions (consumer-selected), charge that action's chargesCost." Two new fields on each `UseAction` variant: `actionId` (consumer-facing selector) and `chargesCost` (defaults to 1). One new field on `UseItemIntent`: `actionId` (matches against the action's `actionId`; required for multi-action items, optional for single-action items).
