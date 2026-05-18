@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: Monk Ki + Sorcerer Sorcery Points linear scaling (slice 175)**
+
+SRD 5.2.1 follow-up to slice 174. Both Monk Focus Points (Ki) and Sorcerer Sorcery Points scale linearly with class level per the Monk Features and Sorcerer Features tables (Ki = Monk level at L2+; Sorcery Points = Sorcerer level at L2+). The pack modeled both with hardcoded multi-tier grants at L2/L5/L10/L15/L20 (Monk) and L2/L5/L10/L15/L17/L20 (Sorcerer), which produced correct totals only at the granted levels and stale-low totals in between (e.g., L3 Monk had 2 Ki instead of 3).
+
+- Monk: kept the L2 `monks-focus` grant but changed `max: 2` to `max: { kind: "level", classId: "monk" }`. Dropped the L5 `ki-uses-5`, L10 `ki-uses-10`, L15 `ki-uses-15`, and L20 `ki-uses-20` redundant entries.
+- Sorcerer: kept the L2 `font-of-magic` grant but changed `max: 2` to `max: { kind: "level", classId: "sorcerer" }`. Dropped L5 `sorcery-points-5`, L10 `sorcery-points-10`, L15 `sorcery-points-15`, L17 `sorcery-points-17`, and L20 `sorcery-points-20` redundant entries.
+
+Made possible by the slice 174 GrantResource Formula fix.
+
+Snapshot: features wired-class-features refreshed (nine entries dropped).
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Engine + content audit: class resource pool value drift (slice 174)**
 
 SRD 5.2.1 value-drift sweep for class resource pools. The audit caught four real bugs in pool sizes that the pack hardcoded with 2014 PHB values (or with values that simply diverged from RAW).
