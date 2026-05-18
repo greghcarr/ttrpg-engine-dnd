@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell class lists (slice 182)**
+
+Compared the `classes` array on every pack spell against the parenthesized class list in the SRD 5.2.1 spell-header line. 50 mismatches found and fixed.
+
+The drift was symmetric: 41 spells had missing classes (the pack denied access to a legitimate SRD caster, e.g., Bard couldn't cast Cure Wounds, Druid couldn't cast Aid, Ranger couldn't cast Dominate Beast), and ~10 spells had extra classes (most commonly Warlock or Sorcerer entries that the 2024 PHB / SRD 5.2.1 dropped; one spell had `artificer` which isn't even an SRD class).
+
+Representative fixes: cure-wounds gained bard; aid gained druid + ranger; revivify gained druid + ranger and dropped artificer; dominate-beast gained ranger; greater-restoration gained paladin + ranger; conjure-fey dropped warlock; flesh-to-stone dropped warlock and gained druid + sorcerer; speak-with-dead gained wizard.
+
+Most missing-class fixes restore SRD-correct caster access; most extra-class fixes remove non-SRD entries. The net effect is a more permissive caster surface for classic utility spells and a tighter list for the warlock/sorcerer where the 2024 PHB pulled back.
+
+Tests: 1451 pass, tsc --noEmit clean. No snapshot impact (class-list field doesn't feed the wired-features snapshot).
+
 **Content audit: Enhance Ability SRD 5.2.1 alignment (slice 181)**
 
 Enhance Ability had several drift points from SRD 5.2.1:
