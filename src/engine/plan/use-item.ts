@@ -6,6 +6,8 @@ import type { ConditionAppliedEvent } from '../../schemas/events/combat.js';
 import type { ItemChargeConsumedEvent } from '../../schemas/events/charges.js';
 import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
+import { planCastSpell } from './cast-spell.js';
+import type { RNG } from '../../rng/index.js';
 import type { ULID } from '../ids-utils.js';
 
 export interface UseItemIntent {
@@ -18,6 +20,13 @@ export interface UseItemIntent {
   // (rare; not all items support it, but the planner stays
   // shape-agnostic about RAW range).
   readonly targetId?: string;
+  // Slice 241. Used by `CastSpell` UseActions (spell-grant items
+  // like Hat of Disguise / Boots of Levitation) to supply the spell's
+  // targets. When omitted on a CastSpell action, defaults to
+  // [characterId] (useful for self-buff spell-grant items, which is
+  // the typical RAW shape — Boots of Levitation casts Levitate on
+  // the wearer, Hat of Disguise casts Disguise Self on the wearer).
+  readonly castTargetIds?: ReadonlyArray<string>;
   readonly at?: string;
 }
 
@@ -25,15 +34,18 @@ export interface UseItemIntent {
  * Slice 240. Activates a magic item: validates the instance, decrements
  * charges (if the definition carries the `charges` shape), walks the
  * item's `onUse` action list emitting the corresponding effect events
- * (ConditionApplied for ApplyCondition variants), then emits an
+ * (ConditionApplied for ApplyCondition variants; SpellCastDeclared +
+ * the spell's chain for slice-241's CastSpell variants), then emits an
  * ItemUsed event as a journal marker.
  *
  * Unlike planConsumeItem, the instance persists after activation.
  *
- * Canonical user: Wings of Flying (rare wondrous, attunement; 1/dawn
- * charges; onUse applies the `flying-active` condition). Future
- * users include Boots of Speed, Boots of Levitation, Cloak of the
- * Bat, and any other activate-as-action toggle item.
+ * Canonical users:
+ * - Slice 240: Wings of Flying (rare wondrous, attunement; 1/dawn
+ *   charges; onUse applies the `flying-active` condition).
+ * - Slice 241: Boots of Levitation + Hat of Disguise (rare /
+ *   uncommon, at-will, no charges; CastSpell variant delegates to
+ *   planCastSpell with noSlotCost + ignorePreparation).
  *
  * Validation:
  * - Instance exists in state.itemInstances and in the character's
@@ -47,11 +59,13 @@ export interface UseItemIntent {
  * no attunement gate (the engine has attunement state but consumers
  * can use unattuned items freely through this planner); no range
  * check when targetId !== characterId (engine doesn't model
- * position).
+ * position); item-fixed spell DC not used (the engine uses the
+ * consumer's stats, not the RAW per-item DC).
  */
 export const planUseItem = (
   state: CampaignState,
   content: ResolvedContent,
+  rng: RNG,
   intent: UseItemIntent,
 ): ReadonlyArray<Event> => {
   const character = state.characters[intent.characterId];
@@ -108,6 +122,29 @@ export const planUseItem = (
         sourceCharacterId: intent.characterId as ULID,
       };
       events.push(condApplied);
+    } else if (action.kind === 'CastSpell') {
+      // Slice 241. Mirror of slice 237's ConsumeAction CastSpell:
+      // delegate to planCastSpell with slice-219's `noSlotCost` and
+      // slice-220's `ignorePreparation` (the item supplies the
+      // slot; the item itself is the spell-knowledge proxy).
+      // `castingClassId` from the action lets non-casters wear the
+      // item — same shape as scrolls. Targets default to [user] so
+      // that the typical RAW self-buff spell-grant items (Hat of
+      // Disguise, Boots of Levitation) Just Work without
+      // consumer-side target selection.
+      const castTargetIds = intent.castTargetIds ?? [intent.characterId];
+      const castEvents = planCastSpell(state, content, rng, {
+        type: 'CastSpell',
+        characterId: intent.characterId,
+        spellId: action.spellId,
+        slotLevel: action.slotLevel,
+        targetIds: castTargetIds,
+        castingClassId: action.castingClassId,
+        noSlotCost: true,
+        ignorePreparation: true,
+        at,
+      });
+      events.push(...castEvents);
     }
   }
 

@@ -144,6 +144,71 @@ describe('planUseItem (slice 240)', () => {
     ).toThrow(/not a magic item/);
   });
 
+  // Slice 241: CastSpell UseAction variant. Same delegation pattern as
+  // slice 237's ConsumeAction CastSpell — planUseItem hands the action
+  // to planCastSpell with noSlotCost + ignorePreparation. Canonical
+  // users: Boots of Levitation (Levitate L2, no charges, at-will) and
+  // Hat of Disguise (Disguise Self L1, no charges, at-will). Both
+  // target spells are schema-only, so the cast emits SpellCastDeclared
+  // and no mechanical chain.
+  it('using Boots of Levitation casts the Levitate spell on the wearer (no charges, no slot cost)', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(246) });
+    const boots = makeItemInstance('boots-of-levitation');
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [boots.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'boots-of-levitation' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: boots },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: boots.id,
+    });
+    expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
+    // No slot consumed (item supplies the slot).
+    expect(events.some((e) => e.type === 'SpellSlotConsumed')).toBe(false);
+    // No charges to decrement (Boots of Levitation has no charges).
+    expect(events.some((e) => e.type === 'ItemChargeConsumed')).toBe(false);
+    // Instance persists.
+    expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
+  it('using Hat of Disguise casts Disguise Self on the wearer (Barbarian non-caster path works)', () => {
+    // Hat of Disguise via a Barbarian — verifies the ignorePreparation
+    // + castingClassId='wizard' flow works for non-caster classes,
+    // same shape as slice 237's scroll-of-fireball Barbarian test.
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(247) });
+    const hat = makeItemInstance('hat-of-disguise');
+    const barbarian: Character = CharacterSchema.parse({
+      id: newCharacterId(),
+      name: 'Grok',
+      speciesId: 'human',
+      backgroundId: 'outlander',
+      classes: [{ classId: 'barbarian', level: 5, hitDiceRemaining: 5 }],
+      abilityScores: { STR: 18, DEX: 14, CON: 16, INT: 8, WIS: 10, CHA: 10 },
+      hp: { current: 50, max: 50, temp: 0 },
+      inventory: [hat.id],
+    });
+    let campaign: Campaign = engine.createCampaign({ name: 'hat-of-disguise' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: hat },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: barbarian } satisfies CharacterCreatedEvent,
+    ]);
+    expect(() =>
+      engine.plan.useItem(campaign.state, {
+        characterId: barbarian.id,
+        instanceId: hat.id,
+      }),
+    ).not.toThrow();
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: barbarian.id,
+      instanceId: hat.id,
+    });
+    expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
+    expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
   it('activating an item on a different target applies the condition to that target, not the user', () => {
     // Wings of Flying RAW is a self-only cloak; the engine doesn't
     // enforce that. Test the multi-target seam by using the same

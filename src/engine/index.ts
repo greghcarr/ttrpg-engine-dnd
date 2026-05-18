@@ -552,7 +552,7 @@ export const createEngine = (opts: CreateEngineOptions): Engine => {
       return { events: planConsumeItem(state, content, rng, { type: 'ConsumeItem', ...intent }) };
     },
     useItem(state, intent) {
-      return { events: planUseItem(state, content, { type: 'UseItem', ...intent }) };
+      return { events: planUseItem(state, content, rng, { type: 'UseItem', ...intent }) };
     },
     magicWeapon(state, intent) {
       return { events: planMagicWeapon(state, content, { type: 'MagicWeapon', ...intent }) };

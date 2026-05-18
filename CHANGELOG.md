@@ -4,6 +4,52 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `CastSpell` UseAction variant + at-will spell-grant items (slice 241)**
+
+Extends slice 240's `UseAction` union with `CastSpell { spellId, slotLevel, castingClassId? }`. The planner branch delegates to `planCastSpell` with slice-219's `noSlotCost: true` + slice-220's `ignorePreparation: true` — the item supplies the slot, the item itself bypasses the prepared-spells gate. Mirror of slice 237's ConsumeAction CastSpell shape for the magic-item side. Unblocks the at-will spell-grant items cohort.
+
+**Plumbing**:
+
+- New `CastSpell` variant on `UseActionSchema` in [src/schemas/content/item.ts](src/schemas/content/item.ts) with the same `{ spellId, slotLevel, castingClassId? }` shape as the slice-237 ConsumeAction variant.
+- New `castTargetIds?: ReadonlyArray<string>` field on `UseItemIntent`. Used by CastSpell variants to supply the spell's targets; defaults to `[characterId]` for self-buff spell-grant items (the typical RAW shape — Boots of Levitation casts Levitate on the wearer, Hat of Disguise casts Disguise Self on the wearer).
+- `planUseItem` signature gains `rng: RNG` (required by `planCastSpell`). Engine surface threads `rng` through at the same call site as `planConsumeItem`.
+
+**Content wired (2 magic items)**:
+
+- **Hat of Disguise** (uncommon, attunement; at-will, no charges) → `CastSpell disguise-self 1 wizard`
+- **Boots of Levitation** (rare, attunement; at-will, no charges) → `CastSpell levitate 2 wizard`
+
+Both target spells are schema-only in the engine today, so the cast records a `SpellCastDeclared` for journal / replay but no mechanical chain fires — same shape as slice-239's potion-of-animal-friendship / potion-of-mind-reading wires.
+
+**RAW deviations**:
+
+- `castingClassId: 'wizard'` is a parity convention with the slice-237 scroll wires; the engine computes spell DC / attack from the consumer's INT, not the RAW per-item DC (Hat of Disguise RAW is a fixed effect with no save; Boots of Levitation RAW casts Levitate with a fixed save DC tied to the wearer's stats in some interpretations).
+- No attunement gate (both items require attunement per RAW; the planner doesn't check it — same shape as slice 240).
+- No action-economy cost (both items are an action per RAW; the engine doesn't model that at item-use level — same shape as slice 240).
+- Duration consumer-managed (Disguise Self lasts 1 hour, Levitate is concentration 10 minutes — neither rides on the engine's auto-expiry).
+- Hat of Disguise's "no components needed" is implicit (the spell-grant path doesn't enforce material components anyway).
+
+**Deferred (still need new UseAction variants or other primitives)**:
+
+- **Wand of Magic Missiles** — needs per-action `chargesCost` override on UseAction (RAW casts Magic Missile at level X by spending X charges). Slice 240's planner consumes exactly 1 charge per use.
+- **Wand of Fireballs / Lightning Bolts / Web** — same variable-charge shape.
+- **Wand of Polymorph** — Polymorph has a dedicated planner; same deferral as slice-237's Spell Scroll of Wish / Misty Step.
+- **Pipes of Haunting** — RAW is a bespoke save mechanic (DC 15, fixed), not a spell cast; needs an item-fixed-DC save variant on UseAction.
+- **Boots of Speed** — needs the `Toggle` UseAction variant + cumulative-minute budget.
+- **Cloak of the Bat** — needs `CastSpell` (for Polymorph-to-Bat — dedicated planner deferral) plus the slice-227 light-level predicate.
+- **Helm of Telepathy / Decanter of Endless Water** — both are CastSpell-pattern but need the per-charge gate (Helm of Telepathy specifically uses charges per use) or a fixed-effect catalog (Decanter's three command words).
+
+**Future SRD users this unblocks**: any future at-will spell-grant magic item maps to a 1-line content wire `[{ kind: 'CastSpell', spellId, slotLevel, castingClassId }]` once authored.
+
+Pre-commit Uncle Bob audit:
+- Names: `UseAction.CastSpell` mirrors `ConsumeAction.CastSpell` from slice 237. Same field set, same semantics. Future divergence (per-action `chargesCost` override) is the only reason the two unions aren't unified — see DRY note below.
+- DRY: planUseItem's CastSpell branch is a near-copy of planConsumeItem's CastSpell branch (slice 237). Considered extracting a shared `applyCastSpellFromItem(state, content, rng, intent, action, targetIds, at)` helper — declined for now because the two callers diverge in `castTargetIds` defaults (planConsumeItem defaults to `[consumer]`, planUseItem defaults to `[user]` — currently the same since both are self-cast, but the action-economy framing differs: feeding-a-potion-to-an-ally is a recognized RAW shape; using-a-magic-item-on-an-ally is less standard). Re-evaluate if a third caller lands.
+- SRP: planUseItem still does one thing per action kind; no new concerns introduced. The CastSpell branch delegates to `planCastSpell` which owns the actual spell-cast resolution.
+- Magic numbers: castingClassId is hard-coded to `'wizard'` on both wired items. This is a parity convention with slice 237's scroll wires and is documented in the schema comment. Each item's slotLevel (1 for Disguise Self, 2 for Levitate) is RAW-derived (the lowest slot at which the spell becomes available).
+- `at`-threading: single `at = intent.at ?? nowIso()` resolved once and passed to planCastSpell via the inner intent. No double-resolution.
+- Mechanical outcomes asserted: SpellCastDeclared emits; no SpellSlotConsumed (noSlotCost honored); no ItemChargeConsumed (items have no charges); ItemUsed lands; Barbarian non-caster path works (ignorePreparation honored).
+- Tests: 2 new unit cases (Boots of Levitation happy path with no-charges + no-slot-cost assertion; Hat of Disguise with Barbarian non-caster). Total 8 cases in [tests/unit/engine/plan-use-item.test.ts](tests/unit/engine/plan-use-item.test.ts). No new RNG-capture test needed (planCastSpell's RNG-capture path is already covered in cast-spell tests; the UseAction CastSpell branch is pure delegation).
+
 **Engine: `UseItem` planner + Wings of Flying canonical user (slice 240)**
 
 Adds the magic-item activate-as-action sibling of slice 235's `ConsumeItem`. Where ConsumeItem retires the instance (potions, scrolls), UseItem persists the instance and consumes 1 charge from the definition's existing `charges` shape. Canonical user: Wings of Flying (rare wondrous, attunement; 1/dawn charge; activates `flying-active`).

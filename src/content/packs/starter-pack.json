@@ -2319,7 +2319,17 @@
     { "id": "periapt-of-wound-closure", "itemKind": "magic", "name": "Periapt of Wound Closure", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-swimming", "itemKind": "magic", "name": "Ring of Swimming", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 40 }] },
     { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage" }] },
-    { "id": "hat-of-disguise", "itemKind": "magic", "name": "Hat of Disguise", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    {
+      "id": "hat-of-disguise",
+      "itemKind": "magic",
+      "name": "Hat of Disguise",
+      "rarity": "uncommon",
+      "requiresAttunement": true,
+      "effects": [],
+      "onUse": [
+        { "kind": "CastSpell", "spellId": "disguise-self", "slotLevel": 1, "castingClassId": "wizard" }
+      ]
+    },
     { "id": "headband-of-intellect", "itemKind": "magic", "name": "Headband of Intellect", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "boots-of-striding-and-springing", "itemKind": "magic", "name": "Boots of Striding and Springing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-the-bat", "itemKind": "magic", "name": "Cloak of the Bat", "rarity": "rare", "requiresAttunement": true, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "stealth" }, "mode": "advantage" }] },
@@ -2532,7 +2542,17 @@
     { "id": "robe-of-eyes", "itemKind": "magic", "name": "Robe of Eyes", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-displacement", "itemKind": "magic", "name": "Cloak of Displacement", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "bracers-of-defense", "itemKind": "magic", "name": "Bracers of Defense", "rarity": "rare", "requiresAttunement": true, "effects": [{ "kind": "AddModifier", "target": "ac", "value": 2, "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.wearingArmor", "value": false }, { "kind": "eq", "path": "bearer.wieldingShield", "value": false }] } }] },
-    { "id": "boots-of-levitation", "itemKind": "magic", "name": "Boots of Levitation", "rarity": "rare", "requiresAttunement": true, "effects": [] },
+    {
+      "id": "boots-of-levitation",
+      "itemKind": "magic",
+      "name": "Boots of Levitation",
+      "rarity": "rare",
+      "requiresAttunement": true,
+      "effects": [],
+      "onUse": [
+        { "kind": "CastSpell", "spellId": "levitate", "slotLevel": 2, "castingClassId": "wizard" }
+      ]
+    },
     { "id": "boots-of-speed", "itemKind": "magic", "name": "Boots of Speed", "rarity": "rare", "requiresAttunement": true, "effects": [] },
     { "id": "cloak-of-the-manta-ray", "itemKind": "magic", "name": "Cloak of the Manta Ray", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 60 }] },
     { "id": "amulet-of-proof-against-detection-and-location", "itemKind": "magic", "name": "Amulet of Proof Against Detection and Location", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
