@@ -770,6 +770,37 @@ Each entry below is one engine primitive: a focused engine slice that, once land
 
 Picking from this list, top three by spell-count payoff: summon system (11+), area-effect mechanic (~13), on-hit trigger (~9). The other primitives each unblock smaller cohorts; bundle them together by primitive when their turn comes.
 
+## Deferred primitives backlog (small, accreted over recent slices)
+
+These are smaller deferrals from individual content slices: missing primitives, predicate facts, or planner shapes that block a specific feature or RAW arm. Each row names the slice where the deferral was first noted plus what specifically would unblock it. Bundle nearby entries when shipping the unblocking primitive (e.g. one slice for the three "ModifySpeed" extensions).
+
+| Deferred feature | First noted | Unblocker (smallest primitive that closes it) |
+|---|---|---|
+| Hunter's Mark — Advantage on WIS (Perception or Survival) checks to find the marked target | slice 222 | New effect kind `GrantAdvantageVsBearersOfMyCondition { conditionId, skills }`, read by the caster's skill-check derive |
+| Hunter's Mark — bonus-action remark on target death | slice 222 | Dedicated `planRemarkHuntersMark` planner (consumes bonus action, moves `hunters-mark-active` from old target to new) |
+| Hunter's Mark — upcast-driven duration extension (1 hr → 8 hr at L3-4, 24 hr at L5+) | slice 222 | Concentration system carries round-based expiry today; add hour-tier duration semantics |
+| Ranger L17 Precise Hunter | slice 217 (rolled-forward) | Same `GrantAdvantageVsBearersOfMyCondition` primitive as the Hunter's Mark Perception arm above |
+| Monk L10 Heightened Focus | slice 217 (rolled-forward) | `planFlurryOfBlows`, `planPatientDefense`, `planStepOfTheWind` (Monk L2 bonus-action planners — all currently content stubs) |
+| Cleric L20 Greater Divine Intervention — 2d4-LR cooldown when Wish is the chosen spell | slice 221 | New `ResourceCooldownExtended` primitive that the rest reducer can honor by skipping `divine-intervention` recharge until the cooldown count reaches zero |
+| Sorcerer L7 Sorcery Incarnate — doubled-metamagic-per-spell arm | slice 201 (rolled-forward) | Once-per-spell metamagic enforcement in the metamagic planner |
+| Troll + Troll Limb — Regeneration trait (regain N HP at turn start unless acid/fire damage suppressed it last turn) | slice 226 | New monster-trait effect kind `Regeneration { perTurn: N, suppressedBy: DamageType[] }` + turn-start hook + per-creature "regeneration-suppressed-this-turn" flag |
+| Troll — Loathsome Limbs spawn (emit a Troll Limb when bloodied + 15 slashing in a turn) | slice 226 | New `SpawnCreature` TriggerAction (references a creature template id, places into encounter, links spawn to source) |
+| Cloak of Arachnida — climb speed equal to walk speed | slice 227 | `ModifySpeed` extension: new `op: 'matchWalkSpeed'` or similar "derive from existing speed" semantic (current `set` requires a static number; existing Slippers of Spider Climbing uses 30 as approximation) |
+| Eyes of the Eagle — Advantage restricted to sight-based Perception | slice 227 | New predicate fact `event.checkUsesSight` (or a per-skill-action sub-kind); current wire is broader (all Perception) |
+| Cloak of the Bat — Fly Speed 40 active in Dim Light or Darkness | slice 227 | (a) activate-as-action toggle for the fly speed, (b) `bearer.lightLevel` predicate fact populated from encounter / scene state |
+| Cloak of the Bat — Polymorph-self-to-Bat in Dim Light or Darkness | slice 227 | Same light-level predicate + a `castSpell` cross-reference primitive |
+| Bracers of Defense — no-shield clause on the +2 AC | slice 227 | New predicate fact `bearer.wieldingShield` (mirror of existing `bearer.wearingArmor`); allows the existing `AddModifier` condition DSL to express RAW exactly |
+| Armor of Resistance / Ring of Resistance — chooser-at-creation damage type | slice 224 | Variant-instance pattern (one pack entry per damage type) OR a `GrantResistance` whose damage type is bound at item-instance creation. Same shape as Belt of Giant Strength variants. |
+| Amulet of Health / Gauntlets of Ogre Power / Belt of Dwarvenkind (ability-score override floors) | slice 224 | New `OverrideAbilityScore { ability, value }` primitive. Floor semantics (only applies when current score < value); precedent: SetACFloor (slice 74) |
+| Mantle of Spell Resistance — Advantage on saves vs spells | slice 224 | New predicate fact `event.isSpellSave` (true when the save was triggered by a SpellCastDeclared event); current SetAdvantage on save target is per-ability, not per-source |
+| Wings of Flying / Boots of Speed / Boots of Levitation — activate-as-action toggle items | slice 224 | Generic `UseItem` planner that emits a condition with an `activated-X-active` shape, plus auto-deactivate hooks (drop, sleep, etc.) |
+| Most consumables (potions, oils, dusts, scrolls in pack) | slice 224 | `ConsumeItem` planner that resolves the item's `onConsume` effect list once, then removes one charge / destroys the instance |
+| Bracers of Archery — proficiency + damage bonus with Longbow/Shortbow specifically | slice 224 | Weapon-type predicate fact (current `event.attackKind` is melee/ranged binary; need weapon-id or weapon-category specificity for "bows only" gates) |
+
+When a slice ships one of these unblockers, walk the affected rows and either delete them (closed) or move them to a new bucket. The goal is for this list to stay short — every entry is concrete enough to be the canonical user for a focused primitive slice.
+
 ## How this list is maintained
 
 At the close of each content slice, update the relevant section here and bump the "Coverage at a glance" counts. If the slice introduces a new mechanic kind (e.g. a future reaction-spell primitive), retro-update the affected schema-only spells to either `wired` or move them to a different deferred bucket. When an engine slice from the "Future engine slices" table ships, mark it as done and walk the affected spells in this doc to their new status.
+
+**Also add to the "Deferred primitives backlog" above** any new deferral noted in a slice commit body: if a slice ships with documented approximations or RAW deviations, those go in the backlog so the next session has a concrete priority queue instead of having to grep CHANGELOG history.
