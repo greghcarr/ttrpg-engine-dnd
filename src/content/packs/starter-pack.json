@@ -703,6 +703,30 @@
             "id": "disciple-of-life",
             "name": "Disciple of Life",
             "effects": [{ "kind": "BoostHealing", "flat": 2, "perSpellLevel": 1 }]
+          },
+          {
+            "id": "life-domain-spells",
+            "name": "Life Domain Spells",
+            "effects": []
+          },
+          {
+            "id": "preserve-life",
+            "name": "Channel Divinity: Preserve Life",
+            "effects": []
+          }
+        ],
+        "6": [
+          {
+            "id": "blessed-healer",
+            "name": "Blessed Healer",
+            "effects": []
+          }
+        ],
+        "17": [
+          {
+            "id": "supreme-healing",
+            "name": "Supreme Healing",
+            "effects": []
           }
         ]
       }

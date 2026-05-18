@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.8**
+
+Extends the Life Domain (Cleric subclass) entry beyond its L3 baseline. All four remaining SRD 5.2.1 features defer because each blocks on a distinct missing engine capability; two new L3 entries also defer pending the same primitives.
+
+- L3 Life Domain Spells: new `effects: []` entry (deferred). Per-cleric-level prepared spell list (Aid / Bless / Cure Wounds / Lesser Restoration at L3, Mass Healing Word / Revivify at L5, Aura of Life / Death Ward at L7, Greater Restoration / Mass Cure Wounds at L9 — all 10 spells exist in the pack). The `GrantSpell` primitive is schema-defined but has no engine consumer: `src/effects/builder.ts:577` falls through, and no derivation reads `GrantSpell` effects to populate a character's prepared spell list. Wiring would need an `EffectAccumulator.grantSpell` collector plus a `derivedPreparedSpells` derivation that consults it.
+- L3 Preserve Life: new `effects: []` entry (deferred). RAW expends a Channel Divinity use to evoke healing equal to 5 × cleric level distributed among Bloodied creatures within 30 ft (capped at half HP max per recipient). Same shape as Sacred Weapon — a Channel Divinity action needing a dedicated planner. Every existing `Custom` handlerId in the pack (frenzy, sacred-weapon, reckless-attack, wild-companion, martial-arts, slow-fall, stunning-strike, metamagic, cutting-words) pairs with an engine planner; shipping a `preserve-life` handlerId without one would break that invariant and inflate the wired-features snapshot.
+- L6 Blessed Healer: `effects: []` (deferred). RAW triggers when *you* cast a healing spell that restores HP to a creature *other than yourself*, with the heal-back amount = 2 + spell slot level. Two engine gaps: (1) `HealedEvent` payload has `targetId`, `amount`, `source` — no `casterId`, so an OnEvent rider can't confirm the bearer was the caster; (2) `buildEventFacts` in `src/engine/triggers/dispatch.ts` only generates relative facts (`event.targetIsSelf`, `event.attackerIsSelf`, etc.) for `AttackRolled` and `DamageApplied` events, so a filter referencing `event.targetIsSelf` on a Healed event sees `undefined` and never fires.
+- L17 Supreme Healing: `effects: []` (deferred). RAW: "When you would normally roll one or more dice to restore HP with a spell or Channel Divinity, don't roll those dice; use the highest possible value instead." No "max-roll healing dice instead of rolling" primitive exists; `cast-spell.ts` always rolls via `rollDamage`. Closing this would need a `MaxHealingDice` flag in the effect stack plus a check in the healing branch of cast-spell.
+
+Tests: 1466 pass, tsc --noEmit clean. No snapshot moves (all four are pure stubs).
+
 **Content authoring: subclass batch 1.7**
 
 Extends the Circle of the Land (Druid subclass) entry beyond its L3 row. Two of four remaining SRD 5.2.1 features wire (one partial, one near-wire); two defer. Also adds a missing L3 entry to the existing array.
