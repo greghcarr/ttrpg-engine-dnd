@@ -17,10 +17,11 @@ In the new VS Code window's terminal:
 
 ```bash
 npm install
+ln -s ../ttrpg-engine-dnd/references references
 npx vitest run
 ```
 
-`npm install` is required because `node_modules` is gitignored and per-worktree. Confirm the suite is green (203 files, ~1471 tests as of slice 139) before starting Claude in the new window.
+`npm install` is required because `node_modules` is gitignored and per-worktree. The `references/` symlink points at the primary worktree's copy of the SRD markdown and PDF, which are gitignored. Without it the sibling sessions will try to fetch 5e content from the web (typically getting 2014-PHB-flavored answers that produce drift bugs). Confirm the suite is green (~1452 tests as of slice 177) and the symlink resolves (`ls references/srd-markdown/classes.md` shows the file) before starting Claude in the new window.
 
 For subsequent batches, after merging batch N back to `main`, branch off again from inside the worktree. `main` is already checked out in the primary worktree, so you can't `git checkout main` here. Branch directly off the freshly-fetched remote tip instead: `git fetch origin && git checkout -b content/authoring-batch-2 origin/main`. Or reuse the same branch name if you removed the worktree at cleanup.
 
@@ -70,7 +71,9 @@ Paste this into the new Claude Code chat in the monster worktree's VS Code windo
 ```
 We're running a parallel monster-authoring session for ttrpg-engine-dnd in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and an item-authoring session is in a third worktree handling magic items. This session is on branch `content/monsters-batch-N` in worktree `../ttrpg-engine-dnd-monsters` and is restricted to monster content. No engine code, no schema changes, no item / class / spell work.
 
-Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/monsters-batch-N`), and `pwd` (should end in `ttrpg-engine-dnd-monsters`).
+**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep it for any rules text or statblock you're matching against; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../ttrpg-engine-dnd/references references`) makes it visible here.
+
+Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/monsters-batch-N`), `pwd` (should end in `ttrpg-engine-dnd-monsters`), and `ls references/srd-markdown/monsters-A-Z.md` (should show the file).
 
 Allowed edits:
 - `src/content/packs/starter-pack.json` — appending entries to the `monsters[]` array only. Do not touch any other top-level array; do not modify existing monster entries.
@@ -114,7 +117,9 @@ Paste this into the new Claude Code chat in the item worktree's VS Code window:
 ```
 We're running a parallel item-authoring session for ttrpg-engine-dnd in a separate git worktree. The engine / SRD-audit session is on `main` in another VS Code window, and a monster-authoring session is in a third worktree. This session is on branch `content/items-batch-N` in worktree `../ttrpg-engine-dnd-items` and is restricted to magic-item content. No engine code, no schema changes, no monster / class / spell work.
 
-Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/items-batch-N`), and `pwd` (should end in `ttrpg-engine-dnd-items`).
+**SRD source of truth.** Treat `references/srd-markdown/` as the canonical SRD 5.2.1 source. Grep `references/srd-markdown/magic-items.md` for item RAW text; never fetch 5e content from the web (most web sources are 2014-PHB-flavored and have caused drift bugs in past slices). If `references/srd-markdown/` doesn't exist in this worktree, surface that immediately rather than proceeding; the primary worktree has it, and a symlink (`ln -s ../ttrpg-engine-dnd/references references`) makes it visible here.
+
+Confirm setup before starting: run `git status` (should show clean working tree), `git branch --show-current` (should print `content/items-batch-N`), `pwd` (should end in `ttrpg-engine-dnd-items`), and `ls references/srd-markdown/magic-items.md` (should show the file).
 
 Allowed edits:
 - `src/content/packs/starter-pack.json` — appending entries to the `items[]` array only. Do not touch any other top-level array; do not modify existing entries.

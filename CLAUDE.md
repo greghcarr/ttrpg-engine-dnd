@@ -1,4 +1,4 @@
-# ttrpg-engine-dnd, conventions
+  # ttrpg-engine-dnd, conventions
 
 A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). Published on npm as `ttrpg-engine-dnd`; local directory at `Visual Studio Code/ttrpg-engine-dnd/`; GitHub repo at `github.com/greghcarr/ttrpg-engine-dnd`. All three names aligned on 2026-05-12. Ships schemas + engine only; no rulebook content. Consumers supply content packs.
 
@@ -7,6 +7,22 @@ A standalone, event-sourced TypeScript domain engine for D&D 5.5e (2024 rules). 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
 This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 (slices 48–100) has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+
+## SRD source of truth
+
+**The local markdown clone at `references/srd-markdown/` is the canonical source for SRD 5.2.1 rules text.** Never fetch 5e content from the web (Roll20 wiki, dndbeyond, third-party sites). The web sources are 2014-PHB-flavored or third-party variants and have introduced drift bugs in past slices.
+
+When auditing content (monsters, spells, items, class features, magic items) against RAW, grep `references/srd-markdown/` and treat its text as authoritative. The PDF source at `references/SRD_CC_v5.2.1.pdf` is the original; the markdown is a faithful fork that was spot-checked against the PDF during the monster audit. Both are gitignored (per-worktree local files).
+
+Layout:
+- `references/srd-markdown/classes.md` — class + subclass features tables and body text
+- `references/srd-markdown/spells.md` — every SRD 5.2.1 spell, `#### Spell Name` headers
+- `references/srd-markdown/monsters.md`, `monsters-A-Z.md` — bestiary
+- `references/srd-markdown/magic-items.md` — DMG items
+- `references/srd-markdown/character-creation.md` — species, backgrounds, feats
+- `references/srd-markdown/rules-glossary.md` — conditions, damage types, generic rules
+
+If `references/srd-markdown/` is absent (fresh worktree, recent clone), surface that immediately and ask the user to symlink it from the primary worktree (`ln -s ../ttrpg-engine-dnd/references references`) rather than proceeding with web sources.
 
 ## Library-quality bar (internal working note)
 
