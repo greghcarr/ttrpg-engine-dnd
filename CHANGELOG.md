@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 5.10**
+
+Pack predators + Elemental fill (8 entries): Axe Beak (CR 1/4), Grimlock (CR 1/4), Gnoll Warrior (CR 1/2), Magmin (CR 1/2), Worg (CR 1/2), Azer Sentinel (CR 2), Winter Wolf (CR 3), Xorn (CR 5). Adds the canonical pack-predator cohort (Axe Beak / Worg / Winter Wolf + Gnoll Warrior + Grimlock) plus three Elemental fills.
+
+Monstrosity 33 to 35, Aberration 8 to 9, Fey 14 to 15, Fiend 27 to 28, Elemental 13 to 16 (densest Elemental expansion since the slice-1.9 base Elementals). Pack monster total 234 to 242. Every entry sourced verbatim from `references/srd-markdown/monsters-A-Z.md` on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB.
+
+Winter Wolf Cold Breath wired via slice-140 breath weapon primitive (wired-breath cohort 43 to 44); second non-Dragon breath user this slice after Dragon Turtle (5.9). Pack Tactics cohort 4 to 5 (Winter Wolf). SRD 5.2.1 type reclassifications: Gnoll (Humanoid to Fiend), Worg (Monstrosity to Fey). Primordial sub-dialects now cover Aquan + Ignan + Terran (3 of 4); Ignan cohort 1 to 3 (Azer + Magmin + existing Salamander).
+
+Deferred mechanics: Azer Fire Aura (8th aura-trigger user), Magmin Death Burst (first on-death-area-damage primitive), Magmin Ignited Illumination (first toggleable Illumination), Magmin Touch start-burning environmental rider, Gnoll Warrior Rampage on-damage-to-Bloodied trigger (first such), Worg Bite on-hit-grant-Advantage-to-next-attacker (novel variant of Pirate Captain Rapier shape), Xorn Earth Glide (second persistent-environment non-modification movement after Purple Worm Tunneler) + Treasure Sense (second metal-detection after Rust Monster Iron Scent). All eight ship `traits: []`. 6 of 8 are single-attack-only — densest single-attack-only batch in the pack.
+
+Tests: pre-existing suite, no engine changes.
+
 **Content authoring: monsters batch 5.9**
 
 Iconic high-CR closure + Tarrasque (7 entries): Pseudodragon (CR 1/4), Centaur Trooper (CR 2), Ettercap (CR 2), Doppelganger (CR 3), Purple Worm (CR 15), Dragon Turtle (CR 17), Tarrasque (CR 30). Brings the canonical adventure-iconic high-CR set into the pack with Tarrasque as the CR 30 capstone (the SRD 5.2.1 single-highest CR statblock). Monstrosity 29 to 33, Dragon 42 to 44, Fey 13 to 14. Pack monster total 227 to 234. Every entry sourced verbatim from `references/srd-markdown/monsters-A-Z.md` on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB.
