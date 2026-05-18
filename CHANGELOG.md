@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: more spell concentration / duration drift (slice 188)**
+
+Audited every pack spell's `concentration` flag against the SRD body's Duration line. Three additional drifts found beyond what slice 178 caught:
+
+- Barkskin: pack `concentration: true` + duration "Concentration, up to 1 hour" to `concentration: false` + duration "1 hour". SRD 5.2.1 reframed Barkskin as non-concentration; pack carried the 2014 PHB concentration.
+- Enthrall: pack `concentration: false` + duration "1 minute" to `concentration: true` + duration "Concentration, up to 1 minute". SRD 5.2.1: "Concentration, up to 1 minute"; pack had dropped the concentration.
+- Magic Weapon: pack `concentration: true` + duration "Concentration, up to 1 hour" to `concentration: false` + duration "1 hour". SRD 5.2.1 dropped concentration.
+
+This catches stragglers from the slice-178 sweep that the heuristic missed (slice 178 looked at spells whose pack duration string mentioned "Concentration" without cross-checking the SRD's Duration line; these three had duration / concentration combinations that slice 178's checks didn't trigger on).
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: Epic Boon prerequisites (slice 187)**
 
 Audited feat prerequisites against SRD 5.2.1 type-line. All six SRD-derived Epic Boons (Combat Prowess, Dimensional Travel, Irresistible Offense, Spell Recall, the Night Spirit, Truesight) had empty `prerequisites` arrays but SRD 5.2.1 lists them all as requiring Level 19+. Spell Recall additionally requires the Spellcasting Feature.
