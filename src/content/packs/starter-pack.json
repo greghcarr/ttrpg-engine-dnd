@@ -2129,7 +2129,12 @@
     { "id": "entertainers-pack", "itemKind": "gear", "name": "Entertainer's Pack", "description": "Contains: Backpack, Bedroll, Bell, Bullseye Lantern, 3 Costumes, Mirror, 8 flasks of Oil, 9 days of Rations, Tinderbox, and Waterskin." },
     { "id": "explorers-pack", "itemKind": "gear", "name": "Explorer's Pack", "description": "Contains: Backpack, Bedroll, 2 flasks of Oil, 10 days of Rations, Rope, Tinderbox, 10 Torches, and Waterskin." },
     { "id": "priests-pack", "itemKind": "gear", "name": "Priest's Pack", "description": "Contains: Backpack, Blanket, Holy Water, Lamp, 7 days of Rations, Robe, and Tinderbox." },
-    { "id": "scholars-pack", "itemKind": "gear", "name": "Scholar's Pack", "description": "Contains: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox." }
+    { "id": "scholars-pack", "itemKind": "gear", "name": "Scholar's Pack", "description": "Contains: Backpack, Book, Ink, Ink Pen, Lamp, 10 flasks of Oil, 10 sheets of Parchment, and Tinderbox." },
+    { "id": "net", "itemKind": "gear", "name": "Net", "description": "Thrown as part of the Attack action (range 15 ft); target makes a Dexterity saving throw (DC 8 + Dexterity modifier + Proficiency Bonus) or has the Restrained condition until it escapes. Targets Huge or larger succeed automatically. Escape: DC 10 Strength (Athletics) check (action) by the target or a creature within 5 ft. Destroying the Net (AC 10, 5 HP, Immunity to Bludgeoning, Poison, and Psychic damage) also frees the target." },
+    { "id": "potion-of-diminution", "itemKind": "consumable", "name": "Potion of Diminution", "onConsume": [], "description": "When drunk, the bearer gains the 'reduce' effect of the Enlarge / Reduce spell for 1d4 hours, no concentration required." },
+    { "id": "potion-of-poison", "itemKind": "consumable", "name": "Potion of Poison", "onConsume": [], "description": "Appears as a Potion of Healing or another beneficial potion (Identify reveals its true nature). On drinking: 4d6 Poison damage and DC 13 Constitution saving throw or have the Poisoned condition for 1 hour." },
+    { "id": "potion-of-vitality", "itemKind": "consumable", "name": "Potion of Vitality", "onConsume": [], "description": "When drunk, removes any Exhaustion levels and ends the Poisoned condition on the drinker. For the next 24 hours, the drinker regains the maximum HP for any Hit Point Die spent." },
+    { "id": "perfume", "itemKind": "consumable", "name": "Perfume", "onConsume": [], "description": "A 4-ounce vial. After applying Perfume to yourself, the bearer has Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 ft for 1 hour." }
   ],
   "monsters": [
     {

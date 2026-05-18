@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.10, SRD-completion mixed-kind pack (5 entries)**
+
+Closes the SRD 5.2.1 adventuring-gear catalog walk by shipping the last canonical entries not previously authored: Net (gear, reclassified by SRD 5.2.1 from a 2014-PHB weapon to adventuring gear) plus the three SRD 5.2.1 potions missing from the pack (Diminution, Poison, Vitality) plus Perfume (the standalone entry referenced in Diplomat's Pack contents from batch 4.9).
+
+- New ids: `net`, `potion-of-diminution`, `potion-of-poison`, `potion-of-vitality`, `perfume`. Sources: equipment.md line 1554 (Net), magic-items.md lines 3234 / 3389 / 3454 (the three potions), equipment.md line 1578 (Perfume).
+- Net SRD reclassification finding: the 2024 PHB / SRD 5.2.1 moved Net from the Weapons section (where it appeared in the 2014 PHB as a simple ranged weapon dealing 0 damage) to the Adventuring Gear section. In SRD 5.2.1 `equipment.md`, Net is at line 1554 under `## Adventuring Gear` (line 764), NOT under `## Weapons` (line 42). Net's RAW mechanics ("thrown as part of the Attack action", 15-ft range, DC 8 + DEX + PB save vs Restrained) are now classified as adventuring-gear-with-attack-action-semantics. Ships as `itemKind: 'gear'` with a description capturing the throw / save / escape / destroy mechanics. Earlier batch-menu narration called Net a "missing simple-ranged weapon"; corrected here.
+- The three potions ship as `itemKind: 'consumable'` with `onConsume: []` stubs and SRD-derived descriptions, matching the existing Potion of Healing / Greater Healing / Climbing / Animal Friendship / Growth / Heroism / Mind Reading / Resistance / Fire Breath / Hill Giant Strength / Invisibility / Flying / Speed / Water Breathing / Stone Giant Strength / Frost / Fire / Cloud / Storm Giant Strength shape.
+- Perfume ships as `itemKind: 'consumable'` because the SRD describes it as a 4-ounce vial applied to oneself with a 1-hour mechanical effect ("Advantage on Charisma (Persuasion) checks made to influence an Indifferent Humanoid within 5 ft"), matching the substance-with-on-use-effect convention. Closes the batch-4.9 follow-up note that flagged Perfume as referenced inside Diplomat's Pack contents but never authored standalone.
+- Pack weapons count drops from "40 weapons" (the doc's prior figure, which was off by one) to 39 weapons accurately. The pack's actual weapon array is 39 entries: 36 SRD canonical weapons plus the three monster-adapter weapons (Ogre Greatclub, Young Red Dragon Rend, Unarmed Strike). Coverage row updated to reflect actual file content.
+
+Coverage bump: items 288 to 293 total (+4 since Net moves from weapons-side to gear-side), gear 71 to 72, consumables 38 to 42. SRD 5.2.1 catalog walk now complete on the H4-entry surface across all three item-source files (equipment.md, magic-items.md, weapons section). The remaining 4 SRD H4 deferrals (Arcane Staff / Arcane Wand / Druidic Wooden Staff / Ammunition Varies) all have documented reasons in batch 4.8's note. Branch ready to merge as the full items-batch-4 lane.
+
 **Content authoring: items batch 4.9, 8 SRD 5.2.1 adventuring packs + Component Pouch**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new `itemKind: 'gear'` entries: the seven canonical adventuring packs plus Component Pouch (a spellcasting-focus substitute rather than a focus itself).
