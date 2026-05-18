@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell attack kinds + monster stat sweep (slice 180)**
+
+Two SRD 5.2.1 audits run; one found drift, the other found none.
+
+Spell attack-kind audit: scanned every pack spell with `mechanicalEffects.kind === 'attack'` and compared to the SRD body's "Ranged Spell Attack" or "Melee Spell Attack" phrasing. Six spells lacked the `attackKind` field entirely (silently defaulted at engine layer). All six are ranged-attack cantrips / L1 attack spells: fire-bolt, produce-flame, starry-wisp, guiding-bolt, ray-of-sickness, chromatic-orb. Added `"attackKind": "ranged"` to each. The save-ability audit ran in parallel and found zero drift across save-based spells.
+
+Monster stat sweep: compared every pack monster against SRD on AC, HP, CR, and all six ability scores. Zero drift on 118 monsters; slices 154-164 (the secondary-monster-fields audit) and the content-authoring batches 1.1-1.21 already had every value correct. Audited monster speeds and active senses (darkvision / blindsight / tremorsense / truesight) in parallel and found zero drift there too. The audit also surfaced that `senses.passivePerceptionOverride` is unset on most monsters; not classed as drift because the field is informational-only with no engine consumer, but the gap is noted for a potential future sweep.
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: spell components (slice 179)**
 
 SRD 5.2.1 follow-up to slice 178. Compared V/S/M presence across all pack spells against SRD bodies; five mismatches found and fixed.
