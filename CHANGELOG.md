@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell duration text (slice 190)**
+
+Strict full-text duration audit against the SRD's Duration line. Four drifts beyond slice 178 / 188:
+
+- guidance: pack "1 minute" to "Concentration, up to 1 minute". Pack already had concentration: true; just the duration string was 2014-flavored.
+- conjure-animals: pack "Concentration, up to 1 hour" to "Concentration, up to 10 minutes". Same shape as the slice-178 conjure-elemental / conjure-fey duration nerf in SRD 5.2.1.
+- glyph-of-warding: pack "Until dispelled" to "Until dispelled or triggered". SRD adds the trigger clause to the duration string.
+- sending: pack "1 round" to "Instantaneous". SRD 5.2.1: Instantaneous.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell halfOnSuccess (slice 189)**
 
 Audited every save-and-damage spell's `halfOnSuccess` flag against the SRD body's "half as much damage on a successful save" phrasing. One drift:
