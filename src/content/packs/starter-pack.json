@@ -2105,7 +2105,15 @@
     { "id": "paper", "itemKind": "gear", "name": "Paper" },
     { "id": "parchment", "itemKind": "gear", "name": "Parchment" },
     { "id": "string", "itemKind": "gear", "name": "String" },
-    { "id": "vial", "itemKind": "gear", "name": "Vial" }
+    { "id": "vial", "itemKind": "gear", "name": "Vial" },
+    { "id": "bell", "itemKind": "gear", "name": "Bell" },
+    { "id": "bottle-glass", "itemKind": "gear", "name": "Bottle, Glass" },
+    { "id": "case-crossbow-bolt", "itemKind": "gear", "name": "Case, Crossbow Bolt" },
+    { "id": "hunting-trap", "itemKind": "gear", "name": "Hunting Trap" },
+    { "id": "lock", "itemKind": "gear", "name": "Lock" },
+    { "id": "manacles", "itemKind": "gear", "name": "Manacles" },
+    { "id": "pot-iron", "itemKind": "gear", "name": "Pot, Iron" },
+    { "id": "spikes-iron", "itemKind": "gear", "name": "Spikes, Iron" }
   ],
   "monsters": [
     {

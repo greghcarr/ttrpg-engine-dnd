@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.7, 8 SRD 5.2.1 traps + restraints + container stragglers**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries closing two deferred sub-cohorts in one batch.
+
+- New ids: `bell`, `bottle-glass`, `case-crossbow-bolt`, `hunting-trap`, `lock`, `manacles`, `pot-iron`, `spikes-iron`. Source lines in equipment.md: 1322, 1338, 1358, 1498, 1532, 1540, 1590, 1650.
+- Cohort theme split into two halves: traps + restraints (Bell as alarm, Hunting Trap, Lock, Manacles, Spikes Iron) plus the three container stragglers explicitly deferred in earlier batches (Bottle Glass deferred in 4.6, Case Crossbow Bolt deferred in 4.4 to avoid ammunition-case redundancy with Quiver, Pot Iron deferred in 4.4 as kitchenware-adjacent).
+- Names per SRD canonical including the comma form ("Spikes, Iron" / "Bottle, Glass" / "Pot, Iron" / "Case, Crossbow Bolt").
+- All eight are gear-kind despite Hunting Trap (RAW: snaps shut on pressure plate, 1d4 Piercing + restrained, DC 13 STR to escape) and Spikes Iron (RAW: hammered into wood to jam doors or anchor rope) carrying mechanical RAW. The gear schema has no effects array, so the mechanics stay narrative; engine-modeled deployment is a future engine slice.
+- Closes the deferred-candidate list from prior batches. Remaining gear unship is primarily structural: foci as "Varies" multi-form entries (Arcane Focus / Druidic Focus / Holy Symbol / Component Pouch) plus the seven adventuring packs and Ammunition table.
+
+Coverage bump: items 264 to 272 total, gear 47 to 55. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~18 SRD adventuring-gear entries remain (foci families, packs, Ammunition), plus the Net (1 GP) simple-ranged weapon on the weapons side.
+
 **Content authoring: items batch 4.6, 8 SRD 5.2.1 writing + small-vessel utility gear entries**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the 4.1 / 4.3 / 4.4 / 4.5 cohorts.
