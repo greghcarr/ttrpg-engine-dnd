@@ -722,6 +722,54 @@
             "id": "lands-aid",
             "name": "Land's Aid",
             "effects": []
+          },
+          {
+            "id": "circle-of-the-land-spells",
+            "name": "Circle of the Land Spells",
+            "effects": []
+          }
+        ],
+        "6": [
+          {
+            "id": "natural-recovery",
+            "name": "Natural Recovery",
+            "effects": [
+              {
+                "kind": "GrantResource",
+                "resourceId": "natural-recovery",
+                "max": 1,
+                "recharge": "longRest"
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "natures-ward",
+            "name": "Nature's Ward",
+            "effects": [
+              { "kind": "GrantConditionImmunity", "conditionId": "poisoned" },
+              {
+                "kind": "OfferChoice",
+                "choiceId": "natures-ward-land",
+                "prompt": "Choose your land type to gain its associated damage Resistance.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "arid", "label": "Arid (Fire)", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "polar", "label": "Polar (Cold)", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "temperate", "label": "Temperate (Lightning)", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "tropical", "label": "Tropical (Poison)", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "natures-sanctuary",
+            "name": "Nature's Sanctuary",
+            "effects": []
           }
         ]
       }

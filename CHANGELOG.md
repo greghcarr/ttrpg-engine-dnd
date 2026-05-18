@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.7**
+
+Extends the Circle of the Land (Druid subclass) entry beyond its L3 row. Two of four remaining SRD 5.2.1 features wire (one partial, one near-wire); two defer. Also adds a missing L3 entry to the existing array.
+
+- L3 Circle of the Land Spells: new `effects: []` entry (deferred). RAW grants a per-land-type prepared spell list (Arid / Polar / Temperate / Tropical) with 3-4 spells per land per druid level (L3 / L5 / L7 / L9). Wiring would need 4 OfferChoice options × 4 level rows of always-prepared `GrantSpell` entries, blocked on the same `OfferChoice when='onLongRest'` non-implementation that gates Fiendish Resilience and many other rest-swappable features.
+- L6 Natural Recovery: partial wire. `GrantResource { resourceId: "natural-recovery", max: 1, recharge: "longRest" }` tracks the once-per-LR cap shared by both halves (no-slot circle-spell cast + short-rest slot recovery up to half druid level). Neither spend mechanic has a planner; the resource is bookkeeping that consumers can surface as "Natural Recovery (1/LR)" — same shape as Fighter Second Wind, Fiend Patron Dark One's Own Luck.
+- L10 Nature's Ward: near wire. `GrantConditionImmunity { conditionId: "poisoned" }` covers the Poisoned-condition immunity cleanly. The damage-resistance half ships as `OfferChoice` with 4 options (Arid→Fire, Polar→Cold, Temperate→Lightning, Tropical→Poison) per the SRD Nature's Ward table. RAW divergence: the land choice happens at L10 standalone rather than inheriting from the L3 Circle of the Land Spells land choice, because L3 is currently schema-only and the engine has no way to share a single OfferChoice answer across two distinct level-grant features.
+- L14 Nature's Sanctuary: `effects: []` (deferred). RAW spends a Wild Shape use to place a 15-ft cube within 120 ft for 1 min, granting Half Cover and the bearer's current Nature's Ward resistance to allies inside. Movable as a bonus action. None of the cube placement, half-cover, ally-area-resistance-share, or generic Wild Shape consumption primitives exist.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up two new wired entries (`circle-of-the-land L6 natural-recovery` and `circle-of-the-land L10 natures-ward`).
+
 **Content authoring: subclass batch 1.6**
 
 Extends the Fiend Patron (Warlock subclass) entry beyond its L3 row. Two of three remaining SRD 5.2.1 features wire as partials with documented caveats; one defers.
