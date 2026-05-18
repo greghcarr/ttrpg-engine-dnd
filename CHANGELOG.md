@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.5**
+
+Extends the Oath of Devotion (Paladin subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (self-immunity only); two defer. Also cleans up one audit-script false positive (L3 Sacred Weapon was flagged as missing but is already wired in the pack as a Custom handler under feature id `sacred-weapon`).
+
+- L7 Aura of Devotion: partial wire. `GrantConditionImmunity { conditionId: "charmed" }` on the paladin captures the self-immunity half ("You [...] have Immunity to the Charmed condition while in your Aura of Protection"). The ally-side aura half ("and your allies have Immunity to the Charmed condition while in your Aura of Protection") needs a new `aura-of-devotion-active` condition added to `conditions[]` plus a `GrantAura` marker on the paladin; the conditions[] array is outside this session's allowed-edit surface. Pattern mirrors the existing L10 Aura of Courage Paladin entry which uses GrantAura + a sibling `aura-of-courage-active` condition for Frightened.
+- L15 Smite of Protection: `effects: []` (deferred). RAW triggers off casting Divine Smite, but there's no Divine-Smite-usage trigger event. The "Half Cover" benefit also has no primitive — cover is positional and the engine doesn't model spatial relationships beyond what individual planners encode.
+- L20 Holy Nimbus: `effects: []` (deferred). Bonus-action toggle with 10-min duration, once per long rest, restorable by expending a 5th-level slot. Stacks an advantage-on-saves-from-fiends/undead rider, a "radiant damage to enemies starting their turn in the aura" rider, and a sunlight emission. None of these compose cleanly today.
+
+Bonus: audit-doc cleanup. The 41 originally-flagged Layer 4 missing features included Sacred Weapon, which the audit script flagged because the pack uses feature id `sacred-weapon` rather than the name the script was searching for. Sacred Weapon ships fully wired at L3 via a Custom handler. True count corrected to 40.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up the new `oath-of-devotion L7 aura-of-devotion` wired entry.
+
 **Content authoring: subclass batch 1.4**
 
 Extends the Draconic Sorcery (Sorcerer subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (Resistance only); two defer.

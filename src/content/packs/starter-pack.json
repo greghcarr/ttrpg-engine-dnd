@@ -821,6 +821,29 @@
             "name": "Channel Divinity: Sacred Weapon",
             "effects": [{ "kind": "Custom", "handlerId": "sacred-weapon" }]
           }
+        ],
+        "7": [
+          {
+            "id": "aura-of-devotion",
+            "name": "Aura of Devotion",
+            "effects": [
+              { "kind": "GrantConditionImmunity", "conditionId": "charmed" }
+            ]
+          }
+        ],
+        "15": [
+          {
+            "id": "smite-of-protection",
+            "name": "Smite of Protection",
+            "effects": []
+          }
+        ],
+        "20": [
+          {
+            "id": "holy-nimbus",
+            "name": "Holy Nimbus",
+            "effects": []
+          }
         ]
       }
     },
