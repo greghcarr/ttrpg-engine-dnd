@@ -2411,7 +2411,34 @@
     { "id": "sentinel-shield", "itemKind": "magic", "name": "Sentinel Shield", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": "initiative", "mode": "advantage" }, { "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage" }] },
     { "id": "spellguard-shield", "itemKind": "magic", "name": "Spellguard Shield", "rarity": "very-rare", "requiresAttunement": true, "effects": [] },
     { "id": "staff-of-charming", "itemKind": "magic", "name": "Staff of Charming", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard", "charges": { "max": 10, "recharge": "dawn", "rechargeFormula": "1d8+2" }, "effects": [] },
-    { "id": "staff-of-healing", "itemKind": "magic", "name": "Staff of Healing", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Bard, Cleric, or Druid", "charges": { "max": 10, "recharge": "dawn", "rechargeFormula": "1d6+4" }, "effects": [] },
+    {
+      "id": "staff-of-healing",
+      "itemKind": "magic",
+      "name": "Staff of Healing",
+      "rarity": "rare",
+      "requiresAttunement": true,
+      "attunementCondition": "Bard, Cleric, or Druid",
+      "charges": { "max": 10, "recharge": "dawn", "rechargeFormula": "1d6+4" },
+      "effects": [],
+      "onUse": [
+        {
+          "kind": "CastSpell",
+          "actionId": "lesser-restoration",
+          "spellId": "lesser-restoration",
+          "slotLevel": 2,
+          "chargesCost": 2,
+          "castingClassId": "cleric"
+        },
+        {
+          "kind": "CastSpell",
+          "actionId": "mass-cure-wounds",
+          "spellId": "mass-cure-wounds",
+          "slotLevel": 5,
+          "chargesCost": 5,
+          "castingClassId": "cleric"
+        }
+      ]
+    },
     { "id": "wand-of-web", "itemKind": "magic", "name": "Wand of Web", "rarity": "uncommon", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-magic-detection", "itemKind": "magic", "name": "Wand of Magic Detection", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
     { "id": "wand-of-fireballs", "itemKind": "magic", "name": "Wand of Fireballs", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },

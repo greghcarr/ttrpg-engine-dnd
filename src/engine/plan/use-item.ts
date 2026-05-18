@@ -11,7 +11,48 @@ import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { planCastSpell } from './cast-spell.js';
 import type { RNG } from '../../rng/index.js';
+import type { UseAction } from '../../schemas/content/item.js';
 import type { ULID } from '../ids-utils.js';
+
+// Slice 243. Resolve which actions to fire on this use. Single-action
+// items keep the slice-240 back-compat (fire the only entry); multi-
+// action items REQUIRE the consumer to pass `actionId` so the planner
+// fires exactly one. Throws on actionId mismatch or on a multi-action
+// item with no actionId on the intent.
+const selectFiredActions = (
+  onUse: ReadonlyArray<UseAction>,
+  actionId: string | undefined,
+  itemDefId: string,
+): ReadonlyArray<UseAction> => {
+  if (onUse.length === 0) return [];
+  if (onUse.length === 1) {
+    const only = onUse[0]!;
+    if (actionId !== undefined && only.actionId !== undefined && only.actionId !== actionId) {
+      throw new Error(
+        `Item ${itemDefId} has no action with id '${actionId}'; available: '${only.actionId}'`,
+      );
+    }
+    return [only];
+  }
+  if (actionId === undefined) {
+    const available = onUse
+      .map((a) => a.actionId ?? '(unnamed)')
+      .join(', ');
+    throw new Error(
+      `Item ${itemDefId} has multiple onUse actions; UseItemIntent.actionId is required (available: ${available})`,
+    );
+  }
+  const match = onUse.find((a) => a.actionId === actionId);
+  if (match === undefined) {
+    const available = onUse
+      .map((a) => a.actionId ?? '(unnamed)')
+      .join(', ');
+    throw new Error(
+      `Item ${itemDefId} has no action with id '${actionId}'; available: ${available}`,
+    );
+  }
+  return [match];
+};
 
 export interface UseItemIntent {
   readonly type: 'UseItem';
@@ -30,6 +71,13 @@ export interface UseItemIntent {
   // the typical RAW shape — Boots of Levitation casts Levitate on
   // the wearer, Hat of Disguise casts Disguise Self on the wearer).
   readonly castTargetIds?: ReadonlyArray<string>;
+  // Slice 243. Selector for multi-action items (Staff of Healing's
+  // three spell arms, Gem of Brightness's three actions, etc.).
+  // When the item's `onUse` has > 1 entry, this field is required
+  // and must match exactly one action's `actionId`; the planner
+  // fires only that action. When `onUse` has exactly 1 entry, this
+  // field is optional (back-compat with slice 240).
+  readonly actionId?: string;
   readonly at?: string;
 }
 
@@ -88,28 +136,49 @@ export const planUseItem = (
   const targetId = intent.targetId ?? intent.characterId;
   const events: Event[] = [];
 
-  // Charge gate: when the definition carries `charges`, require at
-  // least one charge remaining and emit the decrement before the
-  // action effects. When the definition has no `charges`, the item
-  // is freely activatable.
+  // Slice 243. Action-selector for multi-action items. When the item
+  // has > 1 onUse entry, the consumer must pass `actionId` and the
+  // planner fires only the matching action. When the item has
+  // exactly 1 entry, the planner fires that single action (whether
+  // or not the consumer passes actionId — back-compat with slices
+  // 240-242). If actionId is set but doesn't match any onUse entry,
+  // throw.
+  const firedActions = selectFiredActions(def.onUse, intent.actionId, def.id);
+
+  // Charge gate: when the definition carries `charges`, total
+  // chargesCost is the sum of fired-action chargesCosts (defaults to
+  // 1 per fired action). Validate the item has at least that many
+  // charges and emit a single ItemChargeConsumed for the total. When
+  // the definition has no `charges` shape, fired actions still
+  // resolve but no charge decrement happens (and a non-zero
+  // chargesCost on an action is silently ignored, since the item
+  // carries no charge pool to draw from).
   if (def.charges !== undefined) {
+    const totalChargesCost = firedActions.reduce(
+      (sum, action) => sum + (action.chargesCost ?? 1),
+      0,
+    );
     const remaining = instance.chargesRemaining ?? 0;
-    if (remaining < 1) {
-      throw new Error(`Item ${def.id} has no charges remaining`);
+    if (remaining < totalChargesCost) {
+      throw new Error(
+        `Item ${def.id} has ${remaining} charges remaining, needs ${totalChargesCost}`,
+      );
     }
-    const charge: ItemChargeConsumedEvent = {
-      id: newEventId() as ULID,
-      at,
-      type: 'ItemChargeConsumed',
-      itemInstanceId: intent.instanceId as ULID,
-      amount: 1,
-      byCharacterId: intent.characterId as ULID,
-      forEffect: `use:${def.id}`,
-    };
-    events.push(charge);
+    if (totalChargesCost > 0) {
+      const charge: ItemChargeConsumedEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'ItemChargeConsumed',
+        itemInstanceId: intent.instanceId as ULID,
+        amount: totalChargesCost,
+        byCharacterId: intent.characterId as ULID,
+        forEffect: `use:${def.id}`,
+      };
+      events.push(charge);
+    }
   }
 
-  for (const action of def.onUse) {
+  for (const action of firedActions) {
     if (action.kind === 'ApplyCondition') {
       // Mirror of slice 236's ConsumeAction ApplyCondition: stamp
       // `sourceCharacterId` to the user so the condition can be

@@ -76,9 +76,20 @@ export type Tool = z.infer<typeof ToolSchema>;
 // applies, even if already present — the existing reducer dedupes by
 // id but the per-use intent stays "always activate"). The condition
 // itself models the active-state effects; the click-again-off
-// behavior is handled by the planner. Future slices add per-action
-// `chargesCost: number` (for Wand of Magic Missiles' variable cost)
-// as that canonical user comes online.
+// behavior is handled by the planner.
+//
+// Slice 243. Multi-action items + per-action chargesCost. Each
+// variant now carries optional `actionId` (consumer-facing selector
+// for items that offer multiple distinct uses, e.g. Staff of
+// Healing's Cure Wounds / Lesser Restoration / Mass Cure Wounds) and
+// optional `chargesCost` (defaults to 1; differentiates per-action
+// charge cost on the same item — Staff of Healing's Lesser
+// Restoration is 2 charges, Mass Cure Wounds is 5). When `onUse`
+// has more than one entry, the consumer MUST pass `actionId` on
+// UseItemIntent to disambiguate; single-action items keep the
+// slice-240 back-compat (no actionId required). Future slice adds
+// variable per-use chargesCost (consumer picks 1-3 charges to
+// upcast Wand of Magic Missiles).
 //
 // Duration on ApplyCondition: same shape as slice 236 — the engine's
 // auto-expiry primitive is round-based and source-keyed; minute /
@@ -89,16 +100,22 @@ export const UseActionSchema = z.discriminatedUnion('kind', [
   z.object({
     kind: z.literal('ApplyCondition'),
     conditionId: z.string(),
+    actionId: z.string().optional(),
+    chargesCost: z.number().int().min(0).optional(),
   }),
   z.object({
     kind: z.literal('CastSpell'),
     spellId: z.string(),
     slotLevel: z.number().int().min(0),
     castingClassId: z.string().optional(),
+    actionId: z.string().optional(),
+    chargesCost: z.number().int().min(0).optional(),
   }),
   z.object({
     kind: z.literal('Toggle'),
     conditionId: z.string(),
+    actionId: z.string().optional(),
+    chargesCost: z.number().int().min(0).optional(),
   }),
 ]);
 export type UseAction = z.infer<typeof UseActionSchema>;

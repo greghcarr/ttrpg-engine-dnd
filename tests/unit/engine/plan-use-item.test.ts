@@ -109,7 +109,7 @@ describe('planUseItem (slice 240)', () => {
         characterId: hero.id,
         instanceId: cloak.id,
       }),
-    ).toThrow(/no charges remaining/);
+    ).toThrow(/0 charges remaining, needs 1/);
   });
 
   it('throws when the item is not in the inventory', () => {
@@ -310,6 +310,136 @@ describe('planUseItem (slice 240)', () => {
         (c) => c.conditionId === 'boots-of-speed-active',
       ),
     ).toBe(true);
+  });
+
+  // Slice 243: action-selector + per-action chargesCost. Canonical
+  // user: Staff of Healing (rare staff with 10 charges; Lesser
+  // Restoration costs 2, Mass Cure Wounds costs 5). The Cure Wounds
+  // arm is variable-cost (1-4 charges → slot 1-4) and deferred to a
+  // future slice. Both target spells are wired so the cast actually
+  // emits the heal chain.
+  it("using Staff of Healing's Mass Cure Wounds arm spends 5 charges and casts the wired spell", () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(251) });
+    const staff = makeItemInstance('staff-of-healing', { chargesRemaining: 10, maxCharges: 10 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [staff.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'staff-mass-cure' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: staff },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: staff.id,
+      actionId: 'mass-cure-wounds',
+    });
+    const charge = events.find((e) => e.type === 'ItemChargeConsumed') as ItemChargeConsumedEvent | undefined;
+    expect(charge).toBeDefined();
+    expect(charge!.amount).toBe(5);
+    expect(events.some((e) => e.type === 'SpellCastDeclared')).toBe(true);
+    // No engine-tracked slot consumed (the staff supplies the slot).
+    expect(events.some((e) => e.type === 'SpellSlotConsumed')).toBe(false);
+    expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
+  it("using Staff of Healing's Lesser Restoration arm spends 2 charges", () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(252) });
+    const staff = makeItemInstance('staff-of-healing', { chargesRemaining: 10, maxCharges: 10 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [staff.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'staff-lesser-restoration' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: staff },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    campaign = commit(
+      campaign,
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: staff.id,
+        actionId: 'lesser-restoration',
+      }).events,
+    );
+    expect(campaign.state.itemInstances[staff.id]!.chargesRemaining).toBe(8);
+    // Staff persists.
+    expect(campaign.state.itemInstances[staff.id]).toBeDefined();
+  });
+
+  it('a multi-action item without an actionId on the intent throws with a helpful message', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(253) });
+    const staff = makeItemInstance('staff-of-healing', { chargesRemaining: 10, maxCharges: 10 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [staff.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'staff-missing-actionid' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: staff },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    expect(() =>
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: staff.id,
+      }),
+    ).toThrow(/multiple onUse actions.*actionId is required/);
+  });
+
+  it('an unknown actionId throws with a helpful message listing available ids', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(254) });
+    const staff = makeItemInstance('staff-of-healing', { chargesRemaining: 10, maxCharges: 10 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [staff.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'staff-bad-actionid' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: staff },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    expect(() =>
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: staff.id,
+        actionId: 'nonexistent',
+      }),
+    ).toThrow(/no action with id 'nonexistent'/);
+  });
+
+  it('using Mass Cure Wounds with only 4 charges remaining throws (needs 5)', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(255) });
+    const staff = makeItemInstance('staff-of-healing', { chargesRemaining: 4, maxCharges: 10 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [staff.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'staff-not-enough' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: staff },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    expect(() =>
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: staff.id,
+        actionId: 'mass-cure-wounds',
+      }),
+    ).toThrow(/has 4 charges remaining, needs 5/);
+  });
+
+  it('single-action items still work without actionId on the intent (slice-240 back-compat)', () => {
+    // Wings of Flying has a single onUse entry — slice 243's
+    // action-selector should not require actionId for single-action
+    // items.
+    const engine = createEngine({ contentPacks: [PACK], rng: seededRNG(256) });
+    const cloak = makeItemInstance('wings-of-flying', { chargesRemaining: 1, maxCharges: 1 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [cloak.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wings-back-compat' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: cloak },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    expect(() =>
+      engine.plan.useItem(campaign.state, {
+        characterId: hero.id,
+        instanceId: cloak.id,
+      }),
+    ).not.toThrow();
   });
 
   it('activating an item on a different target applies the condition to that target, not the user', () => {

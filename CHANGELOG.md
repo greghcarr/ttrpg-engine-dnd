@@ -4,6 +4,45 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: action-selector + per-action chargesCost + Staff of Healing (slice 243)**
+
+Generalizes slice 240's UseItem from "fire all onUse actions, charge 1 per use" to "fire one of N onUse actions (consumer-selected), charge that action's chargesCost." Two new fields on each `UseAction` variant: `actionId` (consumer-facing selector) and `chargesCost` (defaults to 1). One new field on `UseItemIntent`: `actionId` (matches against the action's `actionId`; required for multi-action items, optional for single-action items).
+
+Canonical user: Staff of Healing, a rare staff with 10 charges that offers three spell arms at different fixed costs. Slice 243 wires the two fixed-cost arms; the variable-cost Cure Wounds arm (1-4 charges → slot 1-4) defers to slice 244.
+
+**Plumbing**:
+
+- `actionId?: string` and `chargesCost?: number` on all three UseAction variants (ApplyCondition / CastSpell / Toggle) in [src/schemas/content/item.ts](src/schemas/content/item.ts).
+- `actionId?: string` on `UseItemIntent` in [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts).
+- New `selectFiredActions(onUse, actionId, itemDefId)` helper resolves which action(s) to fire. Single-action items keep slice-240 back-compat (no actionId required). Multi-action items REQUIRE actionId on the intent or throw with a helpful "available: X, Y, Z" message.
+- Charge gate generalized: instead of charging 1 per use of the item, the planner sums `chargesCost` (defaulting to 1) across fired actions and emits a single `ItemChargeConsumed` for the total. Insufficient-charges error reports both "has N remaining, needs M".
+
+**Content wired (1 magic item, 2 spell arms)**:
+
+- **Staff of Healing** (rare staff, 10 charges, dawn recharge 1d6+4)
+  - `lesser-restoration` action: CastSpell `lesser-restoration` L2, **chargesCost: 2**, castingClassId: cleric
+  - `mass-cure-wounds` action: CastSpell `mass-cure-wounds` L5, **chargesCost: 5**, castingClassId: cleric
+
+Both target spells are wired in the engine (slice 47 / 76 era), so the cast actually fires the heal chain — the most mechanically-active UseItem canonical user yet.
+
+**Deferred**:
+
+- **Staff of Healing's Cure Wounds arm** — variable 1-4 charges → slot 1-4. Needs the variable-chargesCost shape (slice 244).
+- **Wand of Magic Missiles** — variable 1-3 charges → slot 1-3 (3-5 darts). Same variable-cost shape.
+- **Wand of Fireballs / Wand of Lightning Bolts** — variable 1-7 charges → slot 3-7. Same shape.
+- **Staff of Healing's "if you expend the last charge, roll 1d20; on a 1 the staff vanishes"** — per-item degradation roll primitive. Defer until a second item needs it (Wind Fan's 20% per-use tear shape is similar).
+- **Staff of Healing's "using your spellcasting ability modifier"** — engine uses castingClassId='cleric' as parity convention; the wielder's actual class isn't consulted. Same shape as slice 237 scroll wirings.
+
+Pre-commit Uncle Bob audit:
+- Names: `actionId` (consumer-facing selector) and `chargesCost` (per-action cost) match the existing pack-side vocabulary. Considered `key` or `id` for the selector; picked `actionId` to disambiguate from `instanceId` and to be self-describing in JSON.
+- DRY: the `actionId` + `chargesCost` field pair is duplicated across all three UseAction variants (ApplyCondition / CastSpell / Toggle). Considered extracting a `UseActionBase` shared shape; declined because Zod's `z.discriminatedUnion` doesn't compose cleanly with shared optional fields (the consumer of `UseAction` types would lose the discriminated-narrowing). Three duplicated optional fields × three variants is below the abstraction threshold.
+- SRP: `selectFiredActions` does one thing — resolve which actions to fire. Charge computation lives in the main planner. The "actionId required" gate is a single helpful throw with the available IDs listed. The planner body itself didn't gain new responsibilities; the action loop just iterates a smaller `firedActions` array instead of `def.onUse`.
+- Magic numbers: chargesCost values (2 for Lesser Restoration, 5 for Mass Cure Wounds) are RAW-derived from the Staff of Healing SRD table. No new engine-side magic numbers introduced.
+- `at`-threading: still single `nowIso()` resolution; unchanged from slice 240.
+- Error messages: include the offending value AND the available alternatives (`"has no action with id 'X'; available: A, B"`, `"has 4 charges remaining, needs 5"`). Future tightening: emit the action's `actionId` in the ItemChargeConsumed `forEffect` field so the journal records which arm fired (currently records `use:<itemId>` without per-action granularity — flagged as a TODO if a transcript ever needs it).
+- Back-compat: slice 240's single-action items (Wings of Flying, Boots of Speed, Hat of Disguise, Boots of Levitation) all work without changes (no actionId on the intent, no chargesCost on the action → chargesCost defaults to 1, exactly as before).
+- Mechanical outcomes asserted: 6 new unit cases. Mass Cure Wounds happy path (5 charges spent, wired spell cast emits SpellCastDeclared). Lesser Restoration happy path (2 charges spent, instance persists). Multi-action without actionId throws with available-ids message. Unknown actionId throws. Insufficient charges (4 remaining, needs 5) throws. Single-action back-compat verified via Wings of Flying. Total 17 cases in [tests/unit/engine/plan-use-item.test.ts](tests/unit/engine/plan-use-item.test.ts).
+
 **Engine: `Toggle` UseAction variant + Boots of Speed canonical user (slice 242)**
 
 Extends slice 240's `UseAction` union with `Toggle { conditionId }`. The planner inspects the target's current applied conditions: if the conditionId is already present, emit `ConditionRemoved` (click-off); otherwise emit `ConditionApplied` (click-on). Distinct semantic from `ApplyCondition`, which always applies (the reducer dedupes by id but the per-use intent stays "always activate") — `Toggle` is the explicit two-state semantic for click-on / click-off magic items. Unblocks Boots of Speed and lays the foundation for any future click-toggle item.
