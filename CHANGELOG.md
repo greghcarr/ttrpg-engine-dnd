@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell damage dice + upcast scaling (slice 185)**
+
+Audited spell damage dice and upcast scaling against SRD body text across the full pack. Three drifts fixed:
+
+- circle-of-death (L6): damage 8d6 to 8d8, upcast 1 extra die to 2 extra dice (per SRD: "8d8 Necrotic damage on a failed save... damage increases by 2d8 for each spell slot level above 6"). Both dimensions had drifted.
+- weird (L9): damage 4d10 to 10d10 (pack value was wrong on the base die count by 6).
+- wall-of-ice (L6): added `extraDicePerSlotLevel: 2` (SRD: "the damage the wall deals when it appears increases by 2d6 for each spell slot level above 6"). Pack had base 10d6 correct but missed the upcast.
+
+The audit also surfaced apparent "missing extraDicePerSlotLevel" on conjure-minor-elementals / conjure-woodland-beings / conjure-elemental / conjure-animals / searing-smite / glyph-of-warding, but these use different mechanical shapes (summons / buffs / traps) where the upcast scaling lives in a different field on a different mechanical primitive. Not classed as drift; those entries are correct for their shape.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: weapon properties + mastery (slice 184)**
 
 Compared every pack weapon to the SRD 5.2.1 Simple Melee / Martial Melee / Simple Ranged / Martial Ranged weapon tables on damage, properties, and mastery. 35 of 39 pack weapons matched an SRD entry; two had drift:
