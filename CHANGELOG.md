@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: planPaladinsSmite + Paladin L2 Paladin's Smite (slice 210)**
+
+Adds a dedicated planner for Paladin's Smite (the 2024 reframing of Divine Smite as a class feature, not a spell). RAW: "When you hit a creature with a melee weapon or an Unarmed Strike, you can use a Bonus Action to expend a Paladin spell slot to deal Radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 plus 1d8 for each spell slot level higher than 1st. The damage increases by 1d8 if the target is an Undead or a Fiend."
+
+The planner ([src/engine/plan/paladins-smite.ts](src/engine/plan/paladins-smite.ts)) is invoked by the consumer after a confirmed melee hit. Inputs: `paladinId`, `targetId`, `slotLevel` (1-5, the paladin slot range), `triggeringAttackEventId` (the AttackRolled that landed; the smite's emitted DamageApplied carries this as `causedByEventId`), `targetIsUndeadOrFiend?` (true adds +1d8). Slot availability is computed via `computeAvailableSpellSlots`; bonus action is consumed when invoked on the paladin's turn in an active encounter. The radiant damage is sourced as magical so resistance-qualifier checks (Stoneskin, etc.) treat it correctly. The triggering attack's own damage chain is unaffected; the smite stacks on top via a second DamageApplied event.
+
+Canonical user: Paladin L2 Paladin's Smite, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) with `{ kind: 'Custom', handlerId: 'paladins-smite' }` to point consumers at the planner.
+
+Tests: 5-case planner test in [tests/unit/engine/plan-paladins-smite.test.ts](tests/unit/engine/plan-paladins-smite.test.ts) (slot 1 = 2d8, slot 2 = 3d8, Undead/Fiend +1d8, slot-range throw, no-slot throw). Golden scenario with transcript at [tests/golden/s210-paladins-smite.test.ts](tests/golden/s210-paladins-smite.test.ts) walks the hit + smite-on-Undead flow.
+
+No new effect kind; EFFECT_KINDS stays at 45.
+
 **Engine: planSuperiorDefense + Monk L18 Superior Defense (slice 209)**
 
 Adds a dedicated planner for the Monk L18 capstone-tier defensive cooldown. RAW: "As a Bonus Action, you can spend 3 Focus Points to give yourself Resistance to all damage except Force damage for 1 minute."
