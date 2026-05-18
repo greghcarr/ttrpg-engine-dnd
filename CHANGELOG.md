@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 5.11 (SRD 5.2.1 closure)**
+
+SRD 5.2.1 closure (10 entries): Gargoyle (CR 2), Ogre Zombie (CR 2), Swarm of Crawling Claws (CR 3), Guard Captain (CR 4), Tough Boss (CR 4), Half-Dragon (CR 5), Gorgon (CR 5), Spirit Naga (CR 8), Guardian Naga (CR 10), Archmage (CR 12). Closes the SRD 5.2.1 monster catalog at 234 of 235 entries (Troll Limb deferred pending Loathsome Limbs spawn primitive from batch 5.6). Broadest type-spread per-batch in the pack (7 creature types): Undead 17 to 19, Elemental 16 to 17, Construct 9 to 10, Celestial 9 to 10, Humanoid 23 to 26, Dragon 44 to 45, Fiend 28 to 29. Pack monster total 242 to 252. Every entry sourced verbatim from `references/srd-markdown/monsters-A-Z.md` on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB.
+
+Pack records: Swarm of Crawling Claws ships the largest condition-immunity profile in the pack (11 entries — full "swarm-of-Tiny" immunity bundle); Guardian Naga 5-save profile at CR 10 is the densest single-statblock 5-save profile outside the Tarrasque tier; Archmage's Cone of Cold level-9 cast is the highest spell-cast tier in the pack (previous high was Succubus Dominate Person level-8 from 5.8); Archmage Arcane Burst 150-ft range is the longest single-attack ranged attack in the pack; Half-Dragon ships variable-resistance + variable-breath-damage-type that the schema cannot represent (shipped as empty array + no breathWeapon field, conditional deferred).
+
+GrantMagicResistance cohort 35 to 36 (Archmage). All ten ship `traits: []` except Archmage. Notable deferred mechanics: Swarm trait (occupy-other-creature's-space + no-regen + no-temp-HP composite), Swarm Bloodied-conditional damage decrease (first such), Ogre Zombie Undead Fortitude (save-to-survive-0-HP, first such in pack), Gorgon Petrifying Breath two-failure escalation (third user of shape), Tough Boss Warhammer push-target-10-ft (first push-on-hit primitive), Half-Dragon Draconic Origin variable-resistance + variable-breath (novel conditional primitive), Spirit Naga + Guardian Naga + Rakshasa restoration family (3 users of the per-deity-restoration auto-revive primitive), Archmage Mind Blank conditional-immunity-from-precast-spell, Archmage Misty Step bonus-action 3/Day (first per-day-spell-as-bonus-action variant).
+
+Slice 5 closure summary: 11 batches added 71 statblocks (5.1 Aberrations 5 + 5.2 Construct/Sphinx 6 + 5.3 Undead 5 + 5.4 Goblinoid 6 + 5.5 Flying/Kraken 5 + 5.6 Plant/Misc 6 + 5.7 Aquatic/Pirate 6 + 5.8 Fiend/Salamander 7 + 5.9 Iconic/Tarrasque 7 + 5.10 Pack/Elemental 8 + 5.11 SRD closure 10). Pack now ships 252 of ~370 MM (68%) and 234 of 235 SRD 5.2.1 (99.6%; only Troll Limb deferred). Wired-breath-weapon cohort 42 to 44; GrantMagicResistance 30 to 36; Legendary Resistance 11 to 16; Legendary Actions 7 to 12; Pack Tactics 0 to 5. All 14 MM creature types now have meaningful depth in the pack.
+
+Tests: pre-existing suite, no engine changes.
+
 **Content authoring: monsters batch 5.10**
 
 Pack predators + Elemental fill (8 entries): Axe Beak (CR 1/4), Grimlock (CR 1/4), Gnoll Warrior (CR 1/2), Magmin (CR 1/2), Worg (CR 1/2), Azer Sentinel (CR 2), Winter Wolf (CR 3), Xorn (CR 5). Adds the canonical pack-predator cohort (Axe Beak / Worg / Winter Wolf + Gnoll Warrior + Grimlock) plus three Elemental fills.
