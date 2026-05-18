@@ -117,6 +117,7 @@ export class EffectAccumulator {
   private innateSorcerySpendAlternativeFlag: boolean = false;
   private selfRestorationFlag: boolean = false;
   private maxHealingDiceFlag: boolean = false;
+  private unarmedAsMagicalFlag: boolean = false;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -485,6 +486,15 @@ export class EffectAccumulator {
   hasMaxHealingDice(): boolean {
     return this.maxHealingDiceFlag;
   }
+  // Slice 207: marker that flags the bearer's unarmed strikes as
+  // magical for resistance/immunity-piercing purposes. Set by Monk
+  // L6 Empowered Strikes via `GrantUnarmedAsMagical`.
+  markUnarmedAsMagical(): void {
+    this.unarmedAsMagicalFlag = true;
+  }
+  hasUnarmedAsMagical(): boolean {
+    return this.unarmedAsMagicalFlag;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -627,6 +637,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantMaxHealingDice':
       acc.markMaxHealingDice();
+      return;
+    case 'GrantUnarmedAsMagical':
+      acc.markUnarmedAsMagical();
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

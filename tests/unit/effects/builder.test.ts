@@ -304,6 +304,17 @@ describe('EffectAccumulator', () => {
     expect(acc.hasMaxHealingDice()).toBe(true);
   });
 
+  it('GrantUnarmedAsMagical marker propagates via hasUnarmedAsMagical()', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.hasUnarmedAsMagical()).toBe(false);
+    applyEffectToBuilder(
+      { kind: 'GrantUnarmedAsMagical' },
+      acc,
+      { source: 'monk-l6' },
+    );
+    expect(acc.hasUnarmedAsMagical()).toBe(true);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,

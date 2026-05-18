@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: GrantUnarmedAsMagical + Monk L6 Empowered Strikes (slice 207)**
+
+Adds the `GrantUnarmedAsMagical` marker primitive (44 to 45 EFFECT_KINDS). RAW Monk L6 Empowered Strikes: "Your Unarmed Strikes count as magical for the purposes of overcoming Resistance and Immunity to nonmagical damage."
+
+Plumbing: `isMagicWeaponAttack` in [src/derive/magicality.ts](src/derive/magicality.ts) gains an optional `attackerHasUnarmedAsMagical: boolean` parameter (default false). When the weapon is the synthetic `unarmed-strike` item AND the attacker carries the marker, the helper returns `true`, threading `sourceIsMagical: true` into `mitigateDamage`. Three call sites updated: [src/engine/plan/attack.ts](src/engine/plan/attack.ts) and [src/engine/plan/offhand-attack.ts](src/engine/plan/offhand-attack.ts) pass the attacker's `effects.hasUnarmedAsMagical()`; [src/engine/triggers/dispatch.ts](src/engine/triggers/dispatch.ts)'s `isRiderMagical` builds a thin effect-stack query when the triggering weapon is unarmed-strike so rider damage (e.g. Stunning Strike's poison rider, future class-feature riders) also pierces. weapon-mastery.ts's `isMagicWeaponAttack` call stays default-false (Mastery activations don't apply to unarmed strikes).
+
+Canonical user: Monk L6 Empowered Strikes, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) with a single `GrantUnarmedAsMagical` effect.
+
+Tests: 2-case planner test in [tests/unit/engine/plan-empowered-strikes.test.ts](tests/unit/engine/plan-empowered-strikes.test.ts) (L6 Monk unarmed strike on stoneskinned target: no resistance mitigation; L5 Monk control: damage halved as expected); accumulator marker test in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s207-empowered-strikes.test.ts](tests/golden/s207-empowered-strikes.test.ts).
+
 **Engine: AttackRolled.isOpportunityAttack flag + Hunter L7 Escape the Horde (slice 206)**
 
 Adds an optional `isOpportunityAttack` boolean to [src/schemas/events/attack.ts](src/schemas/events/attack.ts)'s `AttackRolledEvent`. The field is stamped `true` only when the attack flows through `planOpportunityAttack`; regular attacks omit it (treated as `false` by predicates). The flag is also threaded into:

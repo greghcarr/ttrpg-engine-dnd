@@ -287,6 +287,14 @@ export type Effect =
   // Flat modifiers (CHA mod, Disciple of Life boost) compose
   // unchanged on top.
   | { kind: 'GrantMaxHealingDice' }
+  // Slice 207. Marker primitive: the bearer's unarmed strikes count
+  // as magical attacks for the purposes of overcoming Resistance and
+  // Immunity to nonmagical damage. RAW Monk L6 Empowered Strikes.
+  // `isMagicWeaponAttack` in src/derive/magicality.ts consults this
+  // when the weapon's id is `unarmed-strike`. Doesn't change the
+  // damage dice or the attack roll, just the `sourceIsMagical` flag
+  // passed to `mitigateDamage`.
+  | { kind: 'GrantUnarmedAsMagical' }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -538,6 +546,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantMaxHealingDice'),
     }),
     z.object({
+      kind: z.literal('GrantUnarmedAsMagical'),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -613,6 +624,7 @@ export const EFFECT_KINDS = [
   'GrantInnateSorcerySpendAlternative',
   'GrantSelfRestoration',
   'GrantMaxHealingDice',
+  'GrantUnarmedAsMagical',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',

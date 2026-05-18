@@ -669,7 +669,7 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     content,
     rawComponents,
     characters: state.characters,
-    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef),
+    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef, attackerEffects.hasUnarmedAsMagical()),
   });
   // Slice 111: simulate prior-rider damage so the Death Ward intercept
   // sees the target's HP at the moment the main damage event commits.

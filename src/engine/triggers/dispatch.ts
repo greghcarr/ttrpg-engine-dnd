@@ -291,7 +291,22 @@ const isRiderMagical = (
     if (weaponInst === undefined) return false;
     const def = content.items.get(weaponInst.definitionId);
     if (def === undefined) return false;
-    return isMagicWeaponAttack(weaponInst, def);
+    // Slice 207: unarmed strikes by an Empowered Strikes bearer count
+    // as magical. Build a thin effect-stack query just for the marker.
+    let attackerHasUnarmedAsMagical = false;
+    if (def.id === 'unarmed-strike') {
+      const attacker = state.characters[event.attackerId];
+      if (attacker !== undefined) {
+        const effects = collectEffectsFromCharacter({
+          character: attacker,
+          content,
+          itemInstances: state.itemInstances,
+          pendingChoices: state.pendingChoices,
+        });
+        attackerHasUnarmedAsMagical = effects.some((e) => e.kind === 'GrantUnarmedAsMagical');
+      }
+    }
+    return isMagicWeaponAttack(weaponInst, def, attackerHasUnarmedAsMagical);
   }
   return false;
 };

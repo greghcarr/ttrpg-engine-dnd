@@ -225,7 +225,7 @@ export const planOffHandAttack = (
     content,
     rawComponents: [{ amount: Math.max(0, damageTotal), type: weaponDef.damageType }],
     characters: state.characters,
-    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef),
+    sourceIsMagical: isMagicWeaponAttack(weaponInstance, weaponDef, attackerEffects.hasUnarmedAsMagical()),
   });
   const intercept = interceptFatalDamage({
     state: applyAll(state, [...economyEvents, attackRolled, damageRolled]),
