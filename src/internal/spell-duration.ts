@@ -22,8 +22,12 @@ export const parseSpellDurationMinutes = (duration: string): number | undefined 
     return undefined;
   }
   if (normalized === 'special') return undefined;
+  // SRD 5.2.1 phrasing is "Concentration, up to N units" for concentration
+  // spells. Strip the optional "concentration, " prefix before matching the
+  // numeric duration; the engine treats "concentration" as one signal among
+  // many (it's also expressed by the spell's `concentration: true` flag).
   // "Up to N units" phrasing matches the same N units.
-  const m = /^(?:up to\s+)?(\d+)\s+(round|rounds|minute|minutes|hour|hours|day|days)/.exec(normalized);
+  const m = /^(?:concentration,?\s+)?(?:up to\s+)?(\d+)\s+(round|rounds|minute|minutes|hour|hours|day|days)/.exec(normalized);
   if (m === null) return undefined;
   const count = Number.parseInt(m[1]!, 10);
   const unit = m[2]!;
