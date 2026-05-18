@@ -295,6 +295,17 @@ export type Effect =
   // damage dice or the attack roll, just the `sourceIsMagical` flag
   // passed to `mitigateDamage`.
   | { kind: 'GrantUnarmedAsMagical' }
+  // Slice 221. Marker primitive that unlocks the Wish branch of
+  // `planDivineIntervention`. Without the marker, the planner only
+  // accepts Cleric spells of level 5 or lower; with it, the consumer
+  // may pass `spellId: 'wish'` even though Wish is level 9 and not
+  // on the Cleric list. Canonical user: Cleric L20 Greater Divine
+  // Intervention. RAW: "When you use your Divine Intervention
+  // feature, you can choose Wish when you select a spell." The
+  // 2d4-long-rest cooldown on the Wish branch is a separate concern,
+  // pending a `ResourceCooldownExtended` primitive that the rest
+  // reducer can honor.
+  | { kind: 'GrantDivineInterventionWish' }
   // Slice 211. Additive bonus to the range of every aura the bearer
   // projects. Canonical user: Paladin L18 Aura Expansion (10 ft to
   // 30 ft → addFeet: 20). The engine doesn't auto-project auras
@@ -557,6 +568,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       kind: z.literal('GrantUnarmedAsMagical'),
     }),
     z.object({
+      kind: z.literal('GrantDivineInterventionWish'),
+    }),
+    z.object({
       kind: z.literal('ExpandAuraRange'),
       addFeet: z.number().int().min(0),
     }),
@@ -637,6 +651,7 @@ export const EFFECT_KINDS = [
   'GrantSelfRestoration',
   'GrantMaxHealingDice',
   'GrantUnarmedAsMagical',
+  'GrantDivineInterventionWish',
   'ExpandAuraRange',
   'GrantAura',
   'GrantFallingProtection',

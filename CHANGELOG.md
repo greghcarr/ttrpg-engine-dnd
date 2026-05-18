@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: Cleric L20 Greater Divine Intervention (Wish branch) (slice 221)**
+
+Wires the first arm of Cleric L20 Greater Divine Intervention via a new marker primitive that extends slice 220's `planDivineIntervention`.
+
+- **Primitive**: new `GrantDivineInterventionWish` Effect kind (45 → 46... → 47 wired primitives). Pure marker, no parameters. The accumulator exposes `markDivineInterventionWish()` and `hasDivineInterventionWish()`. The builder dispatch routes `GrantDivineInterventionWish` → `markDivineInterventionWish`.
+- **Planner change**: `planDivineIntervention` now special-cases `spellId === 'wish'`. When the chosen spell is Wish, the bearer must have the marker; the Cleric-list and L5-or-lower gates are bypassed for Wish specifically. Other Cleric spells still go through the normal gates. RAW: "When you use your Divine Intervention feature, you can choose Wish when you select a spell."
+
+Pack: Cleric L20 `greater-divine-intervention` feature now ships `[{ kind: 'GrantDivineInterventionWish' }]` (was `effects: []`).
+
+Still deferred: the second arm of Greater Divine Intervention is the 2d4-long-rest cooldown when Wish is the chosen spell. This needs a `ResourceCooldownExtended` (or similar) primitive that the rest reducer can honor by skipping `divine-intervention` recharge until the cooldown count reaches zero. That's its own slice; the marker by itself is the right size for one slice.
+
+Tests: 4-case planner test in [tests/unit/engine/greater-divine-intervention.test.ts](tests/unit/engine/greater-divine-intervention.test.ts) covering the L20 Wish-cast happy path (no slot consumed), the L10 rejection (no marker → no Wish), the residual non-Wish above-L5 gate (Fire Bolt still rejected even at L20), and the L20 normal-DI path (a Cleric L1 cast still works). Updated wired-features snapshot.
+
 **Engine: Cleric L10 Divine Intervention planner + `ignorePreparation` flag (slice 220)**
 
 Closes one of the three deferred-with-reason main-class features from the slice-217 audit pass. Ships in two pieces:

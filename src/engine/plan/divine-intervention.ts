@@ -8,10 +8,12 @@ import type { RNG } from '../../rng/index.js';
 import type { ULID } from '../ids-utils.js';
 import type { CasterChoice } from './cast-spell.js';
 import { planCastSpell } from './cast-spell.js';
+import { buildEffectStack } from '../../derive/effect-stack.js';
 
 const DIVINE_INTERVENTION_RESOURCE_ID = 'divine-intervention';
 const CLERIC_CLASS_ID = 'cleric';
 const MAX_DIVINE_INTERVENTION_SPELL_LEVEL = 5;
+const WISH_SPELL_ID = 'wish';
 
 export interface DivineInterventionIntent {
   readonly type: 'DivineIntervention';
@@ -46,9 +48,12 @@ export interface DivineInterventionIntent {
  * - Spell's castingTime is not "Reaction"
  * - Bearer has at least 1 use of the `divine-intervention` resource
  *
- * The L20 Greater Divine Intervention Wish variant is a follow-up
- * slice: it needs to add Wish to the selectable set and impose a
- * 2d4 long-rest cooldown override when Wish is the chosen spell.
+ * Slice 221 wires the L20 Greater Divine Intervention Wish branch:
+ * the `GrantDivineInterventionWish` marker primitive makes Wish
+ * specifically eligible (overriding both the Cleric-list and
+ * L5-or-lower gates). The 2d4-long-rest cooldown when Wish is the
+ * chosen spell still defers; it needs a `ResourceCooldownExtended`
+ * primitive that the rest reducer can honor.
  */
 export const planDivineIntervention = (
   state: CampaignState,
@@ -61,12 +66,33 @@ export const planDivineIntervention = (
 
   const spell = content.spells.get(intent.spellId);
   if (!spell) throw new Error(`Unknown spell ${intent.spellId}`);
-  if (!spell.classes.includes(CLERIC_CLASS_ID)) {
+
+  // Slice 221: when the bearer has the GrantDivineInterventionWish
+  // marker (Cleric L20 Greater Divine Intervention), Wish becomes
+  // specifically eligible even though it's level 9 and not on the
+  // Cleric list. Without the marker, Wish is rejected by both gates
+  // below.
+  const isWishCast = intent.spellId === WISH_SPELL_ID;
+  const hasWishMarker = isWishCast
+    ? buildEffectStack({
+        character: cleric,
+        content,
+        itemInstances: state.itemInstances,
+        pendingChoices: state.pendingChoices,
+      }).hasDivineInterventionWish()
+    : false;
+
+  if (isWishCast && !hasWishMarker) {
+    throw new Error(
+      `${cleric.name} cannot cast Wish via Divine Intervention without Greater Divine Intervention`,
+    );
+  }
+  if (!isWishCast && !spell.classes.includes(CLERIC_CLASS_ID)) {
     throw new Error(
       `Divine Intervention requires a Cleric spell; ${spell.name} is not on the Cleric list`,
     );
   }
-  if (spell.level > MAX_DIVINE_INTERVENTION_SPELL_LEVEL) {
+  if (!isWishCast && spell.level > MAX_DIVINE_INTERVENTION_SPELL_LEVEL) {
     throw new Error(
       `Divine Intervention requires a spell of level ${MAX_DIVINE_INTERVENTION_SPELL_LEVEL} or lower; ${spell.name} is level ${spell.level}`,
     );

@@ -483,7 +483,7 @@
         "17": { "proficiencyBonus": 6, "features": [], "columns": {} },
         "18": { "proficiencyBonus": 6, "features": [{ "id": "channel-divinity-cleric-3", "name": "Channel Divinity (4/rest)", "effects": [{ "kind": "GrantResource", "resourceId": "channel-divinity", "max": 4, "recharge": "shortRest" }] }], "columns": {} },
         "19": { "proficiencyBonus": 6, "features": [], "columns": {} },
-        "20": { "proficiencyBonus": 6, "features": [{ "id": "greater-divine-intervention", "name": "Greater Divine Intervention", "effects": [] }], "columns": {} }
+        "20": { "proficiencyBonus": 6, "features": [{ "id": "greater-divine-intervention", "name": "Greater Divine Intervention", "effects": [{ "kind": "GrantDivineInterventionWish" }] }], "columns": {} }
       },
       "spellcasting": { "ability": "WIS", "type": "full" }
     },

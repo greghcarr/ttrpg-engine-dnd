@@ -118,6 +118,7 @@ export class EffectAccumulator {
   private selfRestorationFlag: boolean = false;
   private maxHealingDiceFlag: boolean = false;
   private unarmedAsMagicalFlag: boolean = false;
+  private divineInterventionWishFlag: boolean = false;
   private auraRangeBonusTotal: number = 0;
   private grantedSpellEntries: Array<{
     spellId: string;
@@ -501,6 +502,15 @@ export class EffectAccumulator {
   hasUnarmedAsMagical(): boolean {
     return this.unarmedAsMagicalFlag;
   }
+  // Slice 221: marker that unlocks the Wish branch of
+  // planDivineIntervention. Set by Cleric L20 Greater Divine
+  // Intervention via the `GrantDivineInterventionWish` effect.
+  markDivineInterventionWish(): void {
+    this.divineInterventionWishFlag = true;
+  }
+  hasDivineInterventionWish(): boolean {
+    return this.divineInterventionWishFlag;
+  }
   // Slice 211: additive bonus to every aura the bearer projects.
   // Canonical user: Paladin L18 Aura Expansion (+20 ft). Multiple
   // sources stack additively. The engine doesn't auto-project auras
@@ -681,6 +691,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantUnarmedAsMagical':
       acc.markUnarmedAsMagical();
+      return;
+    case 'GrantDivineInterventionWish':
+      acc.markDivineInterventionWish();
       return;
     case 'ExpandAuraRange':
       acc.addAuraRangeBonus(effect.addFeet);
