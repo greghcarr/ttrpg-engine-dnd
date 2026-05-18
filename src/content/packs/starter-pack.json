@@ -2157,7 +2157,15 @@
     { "id": "gaming-set-dice", "itemKind": "tool", "name": "Gaming Set, Dice", "category": "gaming" },
     { "id": "gaming-set-dragonchess", "itemKind": "tool", "name": "Gaming Set, Dragonchess", "category": "gaming" },
     { "id": "gaming-set-playing-cards", "itemKind": "tool", "name": "Gaming Set, Playing Cards", "category": "gaming" },
-    { "id": "gaming-set-three-dragon-ante", "itemKind": "tool", "name": "Gaming Set, Three-Dragon Ante", "category": "gaming" }
+    { "id": "gaming-set-three-dragon-ante", "itemKind": "tool", "name": "Gaming Set, Three-Dragon Ante", "category": "gaming" },
+    { "id": "musical-bagpipes", "itemKind": "tool", "name": "Bagpipes", "category": "musical" },
+    { "id": "musical-drum", "itemKind": "tool", "name": "Drum", "category": "musical" },
+    { "id": "musical-dulcimer", "itemKind": "tool", "name": "Dulcimer", "category": "musical" },
+    { "id": "musical-flute", "itemKind": "tool", "name": "Flute", "category": "musical" },
+    { "id": "musical-horn", "itemKind": "tool", "name": "Horn", "category": "musical" },
+    { "id": "musical-lyre", "itemKind": "tool", "name": "Lyre", "category": "musical" },
+    { "id": "musical-pan-flute", "itemKind": "tool", "name": "Pan Flute", "category": "musical" },
+    { "id": "musical-shawm", "itemKind": "tool", "name": "Shawm", "category": "musical" }
   ],
   "monsters": [
     {

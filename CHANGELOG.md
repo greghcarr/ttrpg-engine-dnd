@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.14, 8 SRD 5.2.1 Musical Instrument sub-forms**
+
+Continues the tools catalog walk against `references/srd-markdown/equipment.md`. Eight new `itemKind: 'tool'` entries with `category: 'musical'`, covering 8 of the 9 unship Musical Instrument variants from the SRD's multi-form Musical Instrument entry (line 749).
+
+- New ids: `musical-bagpipes`, `musical-drum`, `musical-dulcimer`, `musical-flute`, `musical-horn`, `musical-lyre`, `musical-pan-flute`, `musical-shawm`. Source: equipment.md line 749 "**Variants:** Bagpipes (30 GP, 6 lb.), drum (6 GP, 3 lb.), dulcimer (25 GP, 10 lb.), flute (2 GP, 1 lb.), horn (3 GP, 2 lb.), lute (35 GP, 2 lb.), lyre (30 GP, 2 lb.), pan flute (12 GP, 2 lb.), shawm (2 GP, 1 lb.), viol (30 GP, 1 lb.)".
+- Cohort theme: 8 of 9 unship Musical Instrument variants. Viol deferred to a future closure batch to keep this batch at the 8-entry convention; Viol's combination of name-recognition (less common in modern parlance than the others) and cost (30 GP, on par with Bagpipes / Lute / Lyre) made it the natural cut.
+- ID convention: `musical-{instrument}` family-prefix matching the existing alpha.5-seed `musical-lute`. Two-word variants get kebab-cased (`musical-pan-flute`).
+- Name convention: bare instrument name (no comma-form qualifier), matching `musical-lute`'s shipped `name: "Lute"` rather than the comma-form qualifier convention used for batch 4.8 focus subforms and batch 4.13 Gaming Set variants. The asymmetry exists because alpha.5 set the precedent.
+- SRD source uses lowercase variant names ("drum", "dulcimer", "flute", "horn", "lute", "lyre", "pan flute", "shawm", "viol") except Bagpipes which is capitalized. Pack normalizes to title case across all entries, same stylistic-inconsistency-in-source treatment as batch 4.13's Gaming Set variants.
+
+Coverage bump: items 316 to 324 total, tools 28 to 36. Musical Instrument variants now 9/10 shipped (Viol the only remaining variant); SRD 5.2.1 tools catalog is one variant away from complete.
+
 **Content authoring: items batch 4.13, 8 SRD 5.2.1 Other Tools + Gaming Set sub-forms**
 
 Continues the tools catalog walk against `references/srd-markdown/equipment.md` (`## Tools` section). Eight new `itemKind: 'tool'` entries split between `category: 'other'` (4 entries) and `category: 'gaming'` (4 Gaming Set variants).
