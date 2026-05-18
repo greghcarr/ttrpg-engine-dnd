@@ -1,0 +1,3 @@
+[submodule "references/srd-markdown"]
+	path = references/srd-markdown
+	url = https://github.com/greghcarr/dnd-5e-srd-markdown.git

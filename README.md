@@ -20,11 +20,13 @@ A live demo of the engine — combat sandbox + event inspector + import/export w
 The engine is not currently published to a package registry. Clone the repo and work against source:
 
 ```sh
-git clone https://github.com/greghcarr/ttrpg-engine-dnd.git
+git clone --recurse-submodules https://github.com/greghcarr/ttrpg-engine-dnd.git
 cd ttrpg-engine-dnd
 npm install
 npm test
 ```
+
+The `--recurse-submodules` flag pulls in the SRD 5.2.1 markdown at `references/srd-markdown/` (CC-BY-4.0, sourced from [`greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown)). If you forgot the flag, run `git submodule update --init --recursive` afterward. The markdown is the canonical source of truth for SRD rules text; contributors authoring or auditing content slices need it.
 
 Then import from `src/` (or a local path alias) the same shapes the planned public API surfaced:
 

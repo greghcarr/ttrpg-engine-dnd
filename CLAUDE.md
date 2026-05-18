@@ -50,7 +50,8 @@ If anything in the working norms below conflicts with how you would normally ope
 - `references/srd-markdown/` is the **only** source of truth for SRD 5.2.1 rules text (spells, monsters, magic items, conditions, classes, species, backgrounds, feats).
 - **Never WebFetch D&D content.** Web sources (Roll20 wiki, dndbeyond, third-party fan sites) are 2014-PHB-flavored or third-party variants and have introduced drift bugs in past slices.
 - If you need an SRD lookup, grep `references/srd-markdown/`. The drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) catches regressions automatically.
-- If the symlink is missing (fresh worktree, recent clone), ask the user to symlink it from the primary worktree (`ln -s ../ttrpg-engine-dnd/references references`) rather than proceeding with web sources.
+- The markdown ships as a **git submodule** pointing to [`github.com/greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown) (CC-BY-4.0). Clone the repo with `git clone --recurse-submodules`, or run `git submodule update --init --recursive` post-clone, to populate it. If the directory is empty after clone, that's the cause.
+- The PDF source at `references/SRD_CC_v5.2.1.pdf` (heavy, downloadable from WotC) stays gitignored. The markdown is the canonical surface; the PDF is for occasional spot-checking.
 
 Detailed SRD layout under "SRD source of truth" below.
 
@@ -113,7 +114,7 @@ This is a long-running build. The roadmap lives in [README.md](README.md) as six
 
 The drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) parses the markdown clone and asserts every pack spell, monster, and magic item matches SRD on the script-detectable fields (school, level, components, classes, concentration, ritual, casting time / range / duration, V/S/M presence, AC, HP, CR, ability scores, rarity, attunement, etc.). It skips itself when the clone is absent (e.g., a fresh worktree without the symlink). Slices 177-194 used this same logic ad-hoc and shipped ~310 drift fixes; the harness now catches regressions automatically.
 
-When auditing content (monsters, spells, items, class features, magic items) against RAW, grep `references/srd-markdown/` and treat its text as authoritative. The PDF source at `references/SRD_CC_v5.2.1.pdf` is the original; the markdown is a faithful fork that was spot-checked against the PDF during the monster audit. Both are gitignored (per-worktree local files).
+When auditing content (monsters, spells, items, class features, magic items) against RAW, grep `references/srd-markdown/` and treat its text as authoritative. The PDF source at `references/SRD_CC_v5.2.1.pdf` is the original; the markdown is a faithful fork that was spot-checked against the PDF during the monster audit. The markdown ships as a git submodule (slice 245); the PDF stays gitignored.
 
 Layout:
 - `references/srd-markdown/classes.md` — class + subclass features tables and body text
@@ -123,7 +124,7 @@ Layout:
 - `references/srd-markdown/character-creation.md` — species, backgrounds, feats
 - `references/srd-markdown/rules-glossary.md` — conditions, damage types, generic rules
 
-If `references/srd-markdown/` is absent (fresh worktree, recent clone), surface that immediately and ask the user to symlink it from the primary worktree (`ln -s ../ttrpg-engine-dnd/references references`) rather than proceeding with web sources.
+If `references/srd-markdown/` is empty (fresh clone without `--recurse-submodules`), surface that immediately and run `git submodule update --init --recursive` rather than proceeding with web sources. Never substitute web lookups.
 
 ## Engineering standards (internal, not for marketing copy)
 

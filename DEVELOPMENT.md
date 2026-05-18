@@ -21,6 +21,24 @@ Two long-lived branches:
 - For parallel engine + content authoring, see [docs/parallel-authoring.md](docs/parallel-authoring.md). Worktrees still target `dev` (or per-worktree feature branches that merge to `dev`).
 - Never create branches that target `main` directly.
 
+## First-time setup
+
+Clone with submodules so the SRD markdown comes along:
+
+```
+git clone --recurse-submodules https://github.com/greghcarr/ttrpg-engine-dnd.git
+cd ttrpg-engine-dnd
+npm install
+```
+
+If you cloned without `--recurse-submodules`, populate the submodule afterward:
+
+```
+git submodule update --init --recursive
+```
+
+`references/srd-markdown/` is the canonical SRD 5.2.1 source (CC-BY-4.0). All content audits, drift checks, and RAW citations point at it. See [CLAUDE.md](CLAUDE.md#srd-is-canon-use-the-local-clone) for why web lookups are off the table.
+
 ## Commands
 
 ```

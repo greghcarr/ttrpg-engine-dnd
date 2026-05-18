@@ -11,7 +11,7 @@ Thanks for your interest. This engine is built to be the foundation that other D
 1. Read [README.md](README.md) for the user-facing pitch and roadmap.
 2. Read [CLAUDE.md](CLAUDE.md). This is the working manual: quality bar, branch structure, commit conventions, SRD canon, slice cadence, Uncle Bob pre-commit audit, architecture (locked).
 3. Read [DEVELOPMENT.md](DEVELOPMENT.md) for the branch flow, dev commands, and house rules.
-4. Confirm `references/srd-markdown/` is present in your worktree. SRD lookups happen there, not on the web.
+4. Confirm `references/srd-markdown/` is populated in your worktree. SRD lookups happen there, not on the web. If you cloned without `--recurse-submodules`, run `git submodule update --init --recursive` to populate it. See [DEVELOPMENT.md](DEVELOPMENT.md#first-time-setup).
 
 ## Working with an AI agent (Claude Code or similar)
 

@@ -4,6 +4,35 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Infra: SRD 5.2.1 markdown as git submodule (slice 245)**
+
+Closes the blocker that prevented a fresh contributor from doing SRD-aligned content work. Previously `references/srd-markdown/` was gitignored and lived only on Greg's machine; a stranger cloning the repo had no documented path to obtain it. Now the directory lands as a git submodule pointing at [`github.com/greghcarr/dnd-5e-srd-markdown`](https://github.com/greghcarr/dnd-5e-srd-markdown) (CC-BY-4.0, derived from the Wizards-released SRD 5.2.1).
+
+Contributors clone with `git clone --recurse-submodules` (or `git submodule update --init --recursive` post-clone) to populate the directory. The submodule is reference-only: the engine code under `src/` doesn't import from it at build or run time, no SRD-derived text is embedded in the published package, and the build / test pipeline still runs green without the submodule populated (the SRD drift audit skips itself when the directory is absent).
+
+Plumbing:
+
+- New `.gitmodules` at repo root registers `references/srd-markdown` → upstream URL. Submodule pinned at commit `1b4b99d` (master HEAD at the time of slice 245).
+- [.gitignore](.gitignore) — the previous blanket `references/` ignore is replaced with a whitelist: `references/*` ignored, `!references/srd-markdown` un-ignored. Keeps the PDF source + Greg's local extraction artifacts out, lets the submodule pointer in.
+- [NOTICE](NOTICE) gains section 3 documenting the submodule attribution + CC-BY-4.0 inheritance from the upstream repo's own LICENSE file. Trademarks section renumbered to 4.
+- [CLAUDE.md](CLAUDE.md) "SRD is canon" section: the prior "ask the user to symlink it from the primary worktree" instruction (which only worked for Greg) is replaced with the submodule clone / update commands. The "SRD source of truth" detail section below it gets the same update.
+- [DEVELOPMENT.md](DEVELOPMENT.md) gains a "First-time setup" section above "Commands" with the `--recurse-submodules` clone command and the post-clone init command.
+- [README.md](README.md) Quick Start switches to `git clone --recurse-submodules` and explains what the flag pulls in.
+- [CONTRIBUTING.md](CONTRIBUTING.md) "Before you start" step 4 updated with the submodule init command.
+
+**Why a submodule rather than copying the markdown into the repo**: pure DRY. The upstream `dnd-5e-srd-markdown` repo is the canonical maintained copy; copying in would create a divergence trap (the engine repo would silently drift from upstream over time, and re-syncs would be heavy multi-MB-diff commits). Submodules let the engine pin to a known-good upstream commit while inheriting upstream improvements (typo fixes, formatting cleanups, new errata) explicitly when the maintainer chooses to bump.
+
+**What this unblocks for fresh contributors**: any content slice that needs to cite RAW. Specifically: spell wirings (slices like 239), monster statblock authoring, magic item wirings (slices 240-243), class feature audits, condition definitions, the SRD drift audit's gate. Previously, all of this required Greg's worktree.
+
+Pre-commit Uncle Bob audit:
+- Names: `references/srd-markdown/` matches the upstream repo's natural directory name (`dnd-5e-srd-markdown` would also have worked but `srd-markdown` is shorter and contextually clear inside a `references/` parent). The submodule registration in `.gitmodules` uses the same `references/srd-markdown` path as the project tree (no surprise indirection).
+- DRY: submodule chosen specifically to avoid the duplicate-content drift trap. The license attribution lives at the upstream repo's own LICENSE; NOTICE points there rather than embedding it (which would also drift).
+- SRP: each file edited has one job. `.gitmodules` registers the submodule. `.gitignore` whitelists. NOTICE attributes. CLAUDE.md / DEVELOPMENT.md / CONTRIBUTING.md / README.md each update their own contributor-facing surface with the new clone command. None of the docs cross-define what another doc owns.
+- Magic numbers: the pinned submodule commit `1b4b99d` is the only "magic number" — it's documented in the CHANGELOG and the submodule's own log lets a reviewer verify it matches the upstream `master` branch HEAD at slice time. Future submodule bumps will be explicit slice commits, not silent drift.
+- at-threading: N/A (no events).
+- Mechanical outcomes asserted: `git clone --recurse-submodules` on a fresh checkout populates `references/srd-markdown/` with the SRD markdown files (verifiable by `ls references/srd-markdown/*.md` after init). The build / test pipeline runs green both with and without the submodule populated (the drift audit's self-skip is the gate). The PDF source stays out of the repo (heavy, not the canonical surface).
+- Tests: no new test code. The existing SRD drift audit at [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) now has a discoverable populate-path for fresh contributors; this slice doesn't change its behavior, just removes the friction that prevented it from running on someone else's machine.
+
 **Docs + workflow: onboarding refresh + dev-branch convention (slice 244)**
 
 Pure documentation and workflow change; no engine or content surface touched. Two motivations:
