@@ -291,6 +291,16 @@ The session cadence settled into a "primitive + canonical content user" shape: e
 
 *Illusion-interaction primitive: Silent Image + Major Image + Investigate action* (slice 137). New `Illusion` runtime entity (`state.illusions: Record<IllusionId, Illusion>`) modeled on the slice-94 Trap / slice-135 Sensor pattern: id + label + free-text location + `kind: 'visual' \| 'audiovisual'` + casterId + sourceSpellId + sourceEffectInstanceId + a baked `investigationDC` (the caster's spell save DC at cast time) + `disbelievedBy: CharacterId[]` set. Three new event types (`IllusionCreated`, `IllusionInvestigated`, `IllusionDismissed`) drive the lifecycle; reducers in [src/engine/reducers/illusion.ts](src/engine/reducers/illusion.ts). Four planners in [src/engine/plan/illusion.ts](src/engine/plan/illusion.ts): `planSilentImage` (1st-level visual), `planMajorImage` (3rd-level audiovisual), `planInvestigateIllusion` (a creature spends an action to Study the illusion, rolls INT (Investigation) against the baked DC, success adds them to `disbelievedBy`), `planDismissIllusion` (caster ends spell voluntarily). `clearConcentrationEffect` sweeps illusions linked to a dropped concentration via `sourceEffectInstanceId`, mirroring the slice-135 sensor sweep. The engine surfaces the disbelief set but doesn't itself act on it; consumers / DMs decide what disbelieving creatures see and do. RAW edge cases not modeled this slice: the caster's bonus-action move (Silent Image) and action-recolour (Major Image) of the illusion's shape (a consumer can re-emit IllusionCreated with new label / location until a future schema extension lets the planner mutate the existing entity). Twelve tests cover both cast paths, both Investigate outcomes, the unknown-spell rejection, voluntary dismiss, concentration-drop cleanup, and the multi-creature belief state (two investigators on the same illusion track independently).
 
+*SRD 5.2.1 content drift: 3 more spells (Chill Touch, Poison Spray, Black Tentacles)* (slice 170). Continued spell mining:
+
+- **Chill Touch**: range `"120 feet"` → `"Touch"`; mechanicalEffects gained `attackKind: "melee"`; damage `1d8 necrotic` → `1d10 necrotic`; cantripScalingDice `1d8` → `1d10`. The 2024 PHB rebuilt Chill Touch from a ranged necrotic ray to a melee spell attack with a heavier damage die.
+- **Poison Spray**: `kind: save` (CON) → `kind: attack` (ranged spell attack). 2024 PHB switched it from a save-or-take to a ranged spell attack. Damage 1d12 poison + cantrip scaling unchanged.
+- **Black Tentacles**: `saveAbility: DEX` → `STR`. 2024 SRD: Strength save (was Dexterity in 2014). Damage / restrained-on-fail / area unchanged.
+
+Test ripple: `spell-coverage.test.ts` `'poison-spray': { kind: 'save' }` → `{ kind: 'attack' }`. Suite green (1452 passed, 197 skipped).
+
+14 spell drift fixes shipped across slices 167-170.
+
 *SRD 5.2.1 content drift: 3 more spells (Hypnotic Pattern, Inflict Wounds, False Life)* (slice 169). Continued spell mechanicalEffects audit:
 
 - **Hypnotic Pattern**: `conditionOnFail: incapacitated` → `charmed`. Per SRD 5.2.1, the primary condition is Charmed (with Incapacitated + Speed 0 as riders that the pack's single-condition schema doesn't model). The pack was applying just Incapacitated, missing the Charmed primary.

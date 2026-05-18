@@ -91,7 +91,7 @@ const SPELL_EXPECTATIONS: Record<string, Expectation> = {
   'starry-wisp': { kind: 'attack' },
   // Additional PHB 2024 cantrips with saves
   'acid-splash': { kind: 'save' },
-  'poison-spray': { kind: 'save' },
+  'poison-spray': { kind: 'attack' },
   'vicious-mockery': { kind: 'save' },
   // Utility / narrative cantrips with no wired mechanical effect yet.
   'blade-ward': { kind: 'buff', conditionId: 'blade-warded-active' },
