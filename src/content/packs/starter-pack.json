@@ -1977,7 +1977,7 @@
     { "id": "grease", "name": "Grease", "level": 1, "school": "conjuration", "castingTime": "Action", "range": "60 feet", "components": { "verbal": true, "somatic": true, "material": "a bit of pork rind or butter" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["sorcerer", "wizard"], "targeting": { "shape": "cube", "size": 10 }, "mechanicalEffects": [{ "kind": "aura-damage", "rangeFeet": 10, "saveAbility": "DEX", "halfOnSuccess": false, "conditionOnFail": "prone" }] },
     { "id": "heroism", "name": "Heroism", "level": 1, "school": "enchantment", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true }, "duration": "Concentration, up to 1 minute", "concentration": true, "ritual": false, "classes": ["bard", "paladin"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "heroic-active" }, { "kind": "recurring", "effect": "temp-hp", "addCasterAbilityMod": "CHA" }] },
     { "id": "hex", "name": "Hex", "level": 1, "school": "enchantment", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true, "somatic": true, "material": "the petrified eye of a newt" }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["warlock"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "hexed-active" }] },
-    { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [] },
+    { "id": "hunters-mark", "name": "Hunter's Mark", "level": 1, "school": "divination", "castingTime": "Bonus Action", "range": "90 feet", "components": { "verbal": true }, "duration": "Concentration, up to 1 hour", "concentration": true, "ritual": false, "classes": ["ranger"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "hunters-mark-active" }] },
     { "id": "jump", "name": "Jump", "level": 1, "school": "transmutation", "castingTime": "Bonus Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a grasshopper's hind leg" }, "duration": "1 minute", "concentration": false, "ritual": false, "classes": ["druid", "ranger", "sorcerer", "wizard"], "mechanicalEffects": [] },
     { "id": "longstrider", "name": "Longstrider", "level": 1, "school": "transmutation", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a pinch of dirt" }, "duration": "1 hour", "concentration": false, "ritual": false, "classes": ["bard", "druid", "ranger", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "longstrider-active" }] },
     { "id": "protection-from-evil-and-good", "name": "Protection from Evil and Good", "level": 1, "school": "abjuration", "castingTime": "Action", "range": "Touch", "components": { "verbal": true, "somatic": true, "material": "a flask of Holy Water worth 25+ GP, which the spell consumes" }, "duration": "Concentration, up to 10 minutes", "concentration": true, "ritual": false, "classes": ["cleric", "druid", "paladin", "warlock", "wizard"], "mechanicalEffects": [{ "kind": "buff", "conditionId": "protection-from-evil-and-good-active" }] },
@@ -7800,6 +7800,24 @@
             "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackerIsSource", "value": true }] }
           },
           "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "necrotic" }]
+        }
+      ]
+    },
+    {
+      "id": "hunters-mark-active",
+      "name": "Hunter's Mark",
+      "description": "Slice 222. The Ranger spell Hunter's Mark concentrates on a target; while the spell holds, the marking ranger deals an extra 1d6 Force damage on hits against that target. Same target-with-source-link shape as Hexed: condition lives on the marked target with sourceCharacterId set to the caster, and the OnEvent rider fires only when `event.targetIsSelf && event.hit && event.attackerIsSource`. Deferred RAW arms: Advantage on the caster's WIS (Perception or Survival) checks to find the target, the bonus-action remark on the target's death, and the upcast-driven duration extension.",
+      "stackable": false,
+      "endsOn": [],
+      "effects": [
+        {
+          "kind": "OnEvent",
+          "id": "hunters-mark-damage-rider",
+          "trigger": {
+            "eventType": "AttackRolled",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "eq", "path": "event.hit", "value": true }, { "kind": "eq", "path": "event.attackerIsSource", "value": true }] }
+          },
+          "actions": [{ "kind": "AddDamage", "dice": "1d6", "damageType": "force" }]
         }
       ]
     },

@@ -4,6 +4,24 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Hunter's Mark damage-rider wire (slice 222)**
+
+Pure-content slice that wires Hunter's Mark (Ranger L1 spell) for its primary on-hit damage rider. The spell had `mechanicalEffects: []` since the catalog landed; ranger players couldn't actually feel the +1d6 force damage at the table. This slice closes the main wired arm.
+
+Mechanism: Hunter's Mark installs a new `hunters-mark-active` condition on the targeted creature with `sourceCharacterId` set to the casting ranger. The condition carries an `OnEvent` + `AddDamage` rider that fires +1d6 Force damage when `event.targetIsSelf && event.hit && event.attackerIsSource` (the precedent is the Hexed condition wired in slice 88; Hunter's Mark uses the identical 3-way join shape, just with Force damage on Ranger casts).
+
+Deferred RAW arms (each is a separate slice's worth of work and not required for the main on-hit benefit):
+
+- Advantage on the caster's WIS (Perception or Survival) checks to find the target. Needs a new effect kind (e.g., `GrantAdvantageToBearersOfMyCondition`) so the *caster's* skill checks read the marked target's condition rather than something on the caster's own effect stack.
+- Bonus-action remark when the marked target drops to 0 HP. Needs a planner that consumes a bonus action and moves the condition to a new target.
+- Upcast-driven duration extension (L3-4: 8 hours, L5+: 24 hours). The concentration system uses round-based expiry today; the durations beyond 1 hour aren't differentiated in encounter flow.
+
+Slice 222 unblocks one of the audit's deferred-with-reason main-class features: Ranger L17 Precise Hunter, which needs exactly this `hunters-mark-active`-with-source-link condition before its Advantage-vs-bearer arm can be wired. Slice 223+ can ship the Precise Hunter primitive on top.
+
+Tests: 3-case planner test in [tests/unit/engine/plan-cast-spell-hunters-mark.test.ts](tests/unit/engine/plan-cast-spell-hunters-mark.test.ts) verifying (1) the condition installs on the target with the caster as source, (2) the marking ranger's hit fires +1d6 force, (3) a non-caster's hit on the marked target does NOT fire the rider. Updated wired-conditions snapshot.
+
+No engine changes; no schema changes.
+
 **Engine: Cleric L20 Greater Divine Intervention (Wish branch) (slice 221)**
 
 Wires the first arm of Cleric L20 Greater Divine Intervention via a new marker primitive that extends slice 220's `planDivineIntervention`.
