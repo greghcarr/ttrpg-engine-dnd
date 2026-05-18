@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.3 (Chromatic Wyrmling ladder)**
+
+Five new SRD 5.2.1 statblocks: Black Dragon Wyrmling (CR 2), Green Dragon Wyrmling (CR 2), White Dragon Wyrmling (CR 2), Blue Dragon Wyrmling (CR 3), Red Dragon Wyrmling (CR 4). Opens the Chromatic Wyrmling tier below the existing Young + Adult Chromatic ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage immunities / senses / CR / XP / PB. Each ships a `breathWeapon` field (slice-140 primitive), bringing the wired-breath-weapon cohort from 12 to 17 statblocks. Cone shapes for Green / Red / White, line shapes for Black / Blue (canonical Chromatic-by-color breath geometry); DCs 11 / 12 / 13 scale by tier; damage dice 5d8 acid / 5d8 cold / 6d6 lightning / 6d6 poison / 7d6 fire match RAW. Pack monster total moves from 121 to 126.
+
+Defers under existing engine gaps: Multiattack (all five); Amphibious (Black, Green — narrative); Ice Walk (White — narrative, joins existing Adult/Young White Ice Walk deferral); on-hit elemental damage rider on Rend (1d4 / 1d6 / 1d6 / 1d6 / 1d4 by color) folds into the existing unconditional-elemental-rider-on-bite gap.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.2 (upper Devil ladder)**
 
 Four new SRD 5.2.1 statblocks: Horned Devil (CR 11), Erinyes (CR 12), Ice Devil (CR 14), Pit Fiend (CR 20). Closes the SRD 5.2.1 devil ladder above Bone Devil (CR 9, batch 1.19) and brings the Fiend type to symmetric demon / devil coverage after batch 4.1 closed the Type I-VI demon ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB. All four wire Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 user count moves from 22 to 26). Pit Fiend at CR 20 ties for the new highest-CR statblock alongside Adult Red (CR 17) and just below Solar (CR 21). The pack's monster total moves from 117 to 121.
