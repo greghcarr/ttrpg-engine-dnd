@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.6**
+
+Extends the Fiend Patron (Warlock subclass) entry beyond its L3 row. Two of three remaining SRD 5.2.1 features wire as partials with documented caveats; one defers.
+
+- L6 Dark One's Own Luck: partial wire. `GrantResource` with max=max(1, CHA-mod), diceSize=10, recharge=longRest tracks the per-LR counter and mirrors the Bardic Inspiration shape. The "spend to add 1d10 to a check or save after seeing the roll" spend mechanic has no dedicated planner — same as Fighter Second Wind ships today (resource tracked, no engine-side spend planner).
+- L10 Fiendish Resilience: near wire. `OfferChoice` with 12 options covering every damage type except Force, each granting `GrantResistance` for the chosen type. RAW divergence: the choice fires once at acquire (when='onAcquire'). RAW says the warlock can re-pick the damage type after each short or long rest, but OfferChoice when='onLongRest' is schema-defined yet has no rest-time re-offer mechanism in the engine (level-up just excludes it from the level-up choice list, no replacement trigger fires anywhere else). Using 'onLongRest' would silently never prompt; 'onAcquire' gives a functional one-time pick.
+- L14 Hurl Through Hell: `effects: []` (deferred). RAW is "once per turn when you hit, target makes a CHA save against your spell save DC; on fail, 8d10 psychic damage (unless Fiend) and Incapacitated until end of your next turn; once per long rest, restorable by spending a Pact Magic spell slot." `TriggerAction` can't express save-then-conditional-damage-then-condition (its kinds are AddDamage / Heal / ApplyCondition / SpendResource / ModifyDamageTaken / EmitEvent — none accept a save as a gate). Spend-Pact-slot-to-restore also has no recovery primitive.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up two new wired entries (`fiend-patron L6 dark-ones-own-luck` and `fiend-patron L10 fiendish-resilience`).
+
 **Content authoring: subclass batch 1.5**
 
 Extends the Oath of Devotion (Paladin subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (self-immunity only); two defer. Also cleans up one audit-script false positive (L3 Sacred Weapon was flagged as missing but is already wired in the pack as a Custom handler under feature id `sacred-weapon`).

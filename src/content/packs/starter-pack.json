@@ -986,6 +986,57 @@
             "name": "Fiend Patron Spells",
             "effects": []
           }
+        ],
+        "6": [
+          {
+            "id": "dark-ones-own-luck",
+            "name": "Dark One's Own Luck",
+            "effects": [
+              {
+                "kind": "GrantResource",
+                "resourceId": "dark-ones-own-luck",
+                "max": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] },
+                "recharge": "longRest",
+                "diceSize": 10
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "fiendish-resilience",
+            "name": "Fiendish Resilience",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "fiendish-resilience",
+                "prompt": "Choose a damage type (other than Force) to gain Resistance to.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }] },
+                  { "id": "bludgeoning", "label": "Bludgeoning", "effects": [{ "kind": "GrantResistance", "damageType": "bludgeoning" }] },
+                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "necrotic", "label": "Necrotic", "effects": [{ "kind": "GrantResistance", "damageType": "necrotic" }] },
+                  { "id": "piercing", "label": "Piercing", "effects": [{ "kind": "GrantResistance", "damageType": "piercing" }] },
+                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] },
+                  { "id": "psychic", "label": "Psychic", "effects": [{ "kind": "GrantResistance", "damageType": "psychic" }] },
+                  { "id": "radiant", "label": "Radiant", "effects": [{ "kind": "GrantResistance", "damageType": "radiant" }] },
+                  { "id": "slashing", "label": "Slashing", "effects": [{ "kind": "GrantResistance", "damageType": "slashing" }] },
+                  { "id": "thunder", "label": "Thunder", "effects": [{ "kind": "GrantResistance", "damageType": "thunder" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "hurl-through-hell",
+            "name": "Hurl Through Hell",
+            "effects": []
+          }
         ]
       }
     },
