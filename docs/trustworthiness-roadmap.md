@@ -2,7 +2,7 @@
 
 What it takes for `ttrpg-engine-dnd` to be safely usable for an unsupervised tabletop session against 5.5e (2024) rules. This is a planning doc, not a marketing one — pessimistic about current state, optimistic only about where the work is going.
 
-Last calibrated: 2026-05-16, post-slice-100.
+Last calibrated: 2026-05-17, post-slice-196.
 
 ---
 
@@ -17,9 +17,10 @@ Non-goals: homebrew system support, optional variant rules (sanity / mass combat
 ## Current state honest summary
 
 - **48-probe RAW-compliance audit passes in full** ([tests/audit/raw-compliance.test.ts](../tests/audit/raw-compliance.test.ts)). 0 🔴 / 0 🟡 open. Two ⚪ items remain (sanity, mass-combat variant rules; their flags toggle but the rule interpretation isn't wired).
+- **15-check SRD drift audit harness ships** ([tests/audit/srd-drift.test.ts](../tests/audit/srd-drift.test.ts), slice 195). Compares every pack spell, monster, and magic item against the SRD 5.2.1 markdown clone on the script-detectable fields (schools, levels, components, classes, casting time / range / duration, concentration / ritual flags, halfOnSuccess, attackKind, damage dice; monster AC/HP/CR/abilities; magic-item rarity + attunement). Zero drift today. Slices 177-196 used the same comparison logic ad-hoc to ship ~310 drift fixes before formalizing it as a checked-in test.
 - **The audit's scope is 48 specific rules out of hundreds.** It's a floor, not a ceiling. Adversarial probing keeps finding edge cases that didn't make the initial list (Frightened source-tracking, Charmed attack-blocking, exhaustion progression beyond level 1, multiclass spell-slot edge cases, etc.). Each new category surfaces work the audit didn't anticipate.
 - **Engine vocabulary is still expanding.** Each remaining engine slice adds a small primitive (~50–200 LoC) that closes one named category from [docs/starter-pack-gaps.md](starter-pack-gaps.md). The architectural skeleton is locked; the long tail of "X mechanic for Y spell-cohort" is still being walked.
-- **Content slice is substantial but uneven.** 399 spells (every PHB 2024 entry; ~152 mechanically wired), 12 classes with full L1–L20 tables, 16/16 backgrounds, 25 conditions, 12 subclasses (L3 only). The big remaining gaps: ~250 schema-only spells, the L7+ subclass features, ~365 missing monster statblocks, the DMG magic-item catalog.
+- **Content slice is substantial but uneven.** 336 spells (324 SRD 5.2.1 + 12 wired-non-SRD; ~141 mechanically wired), 181 monsters across all 14 creature types (CR 0-24, both dragon ladders fully closed), 330 items including 122 magic items (full SRD 5.2.1 adventuring-gear / tools / consumables surface closed), 12 classes with full L1-L20 tables, 19 backgrounds (4 SRD + 15 PHB 2024 extras), 33 feats (16 SRD + 17 PHB 2024 extras), 97 conditions (15 RAW + 82 rider variants), 12 subclasses (L3 only). The big remaining gaps: the L7+ subclass features (41 SRD-listed), ~189 missing monster statblocks, the long tail of DMG magic items beyond the SRD subset.
 
 ---
 

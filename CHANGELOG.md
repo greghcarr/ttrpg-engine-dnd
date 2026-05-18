@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: rollup pass (slice 197)**
+
+Updates README + SRD-audit docs + trustworthiness roadmap to reflect the slice 177-196 sweep and the lane-B/lane-C merges. No content or engine changes; documentation only.
+
+- README: test count 1471 to 1466, file count 203 to 205; monster row 111 to 181; weapons / armors / tools / gear row updated to current counts (39 weapons + 13 armors + 37 tools + 77 gear + 42 consumables); the SRD-compliance row references slices 177-196 and slice 195's harness; Layer 11 (SRD drift harness) added to the test infrastructure description.
+- All six SRD-audit docs now carry a "Status (as of slice 196)" header pointing at slice 195's [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) harness as the canonical re-runnable replacement for the hand-built audit scripts. The classes audit doc additionally records the slice 174-176 resource-pool fixes; the character-creation audit doc records the slice 187 Epic Boon prerequisite fixes.
+- Trustworthiness roadmap recalibrated from "post-slice-100" to "post-slice-196". Content-summary line updated with current counts (336 spells / 181 monsters / 330 items / 19 backgrounds / 33 feats / 97 conditions).
+
+Tests: 1466 pass, tsc --noEmit clean.
+
 **Content audit: tool categorization (slice 196)**
 
 Items lane flagged two alpha.5-seed miscategorizations during batches 4.11-4.16 but couldn't fix per the content-lane "don't modify existing entries" rule. Engine session applies the fix:

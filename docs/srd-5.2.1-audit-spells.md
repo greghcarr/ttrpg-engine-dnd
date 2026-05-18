@@ -1,5 +1,7 @@
 # SRD 5.2.1 spell audit
 
+**Status (as of slice 196):** Slice 151's findings (name + variant audit) are historical. Subsequent slices closed every detected secondary-field drift: schools (slice 177, 13 fixes), castingTime / range / duration / concentration (slices 178 + 188 + 190 + 191, 48 fixes), components (slice 179, 5 fixes), attackKind (slice 180, 6 fixes), Enhance Ability variant alignment (slice 181, 4 fixes), class lists (slice 182, 50 fixes), damage dice + upcast scaling (slice 185, 3 fixes), AoE sizes (slice 186, 2 fixes), halfOnSuccess (slice 189, 1 fix), material text (slice 193, 126 fixes), AoE targeting backfill (slice 194, 28 entries). Slice 195's [tests/audit/srd-drift.test.ts](../tests/audit/srd-drift.test.ts) now re-runs the core comparisons on every test run.
+
 Audit of the spells shipped in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) against the SRD 5.2.1 spell catalog. Companion to the monster audit at [docs/srd-5.2.1-audit.md](srd-5.2.1-audit.md) and the magic-item audit at [docs/srd-5.2.1-audit-items.md](srd-5.2.1-audit-items.md).
 
 Source of truth for the SRD text is `references/SRD_CC_v5.2.1.pdf` (gitignored); the markdown fork at `references/srd-markdown/spells.md` was spot-checked against the PDF at the start of the monster audit and is faithful.

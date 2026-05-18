@@ -4,6 +4,8 @@ Companion to the monster ([docs/srd-5.2.1-audit.md](srd-5.2.1-audit.md)), magic-
 
 Outcome (slice 152): documented hybrid. The pack ships PHB 2024 content beyond SRD 5.2.1's narrower scope because character creation needs the breadth and these are non-controversial PHB 2024 names that downstream consumers can adopt freely with attribution to WotC.
 
+**Slice 187 update**: feat prerequisite drift swept. All six SRD-derived Epic Boons (Combat Prowess, Dimensional Travel, Irresistible Offense, Spell Recall, the Night Spirit, Truesight) had empty prerequisites; added `["Level 19+"]` to each (plus `"Spellcasting Feature"` to Boon of Spell Recall). The audit also surfaced that all 9 Epic Boons remain schema-only (empty `effects`); modeling their multi-mechanic bodies (ASI choice + situational benefits) is future content authoring.
+
 ## Status counts
 
 | Category | Pack count | SRD 5.2.1 count | SRD-derived in pack | Non-SRD (PHB 2024 only) in pack | Action |

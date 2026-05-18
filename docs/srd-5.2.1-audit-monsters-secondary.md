@@ -1,5 +1,7 @@
 # SRD 5.2.1 audit: secondary monster fields
 
+**Status (as of slice 196):** All secondary fields swept clean. Slice 180's monster-stat sweep verified zero drift on speeds + senses across all monsters. Slice 195's harness re-runs AC / HP / CR / ability scores on every test run. Field-level audits not yet in the harness (speed, skills, immunities, save proficiencies) all returned zero drift when re-run manually in the slice 196 cleanup pass.
+
 Follow-up audit to the slice 141 to 149 monster initiative, which standardized the 111 starter-pack monsters on AC, HP, abilities, and CR. This slice (154) covers the secondary fields the primary audit script didn't check: size, type, alignment, speed, saving throw proficiencies, skill proficiencies, senses (darkvision / blindsight / tremorsense / truesight / passive perception override), damage resistances / immunities / vulnerabilities, condition immunities.
 
 Companion to [docs/srd-5.2.1-audit.md](srd-5.2.1-audit.md). Actions / traits / reactions text bodies are still not covered; they remain a tangential cleanup item.

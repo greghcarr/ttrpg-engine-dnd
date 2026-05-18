@@ -1,5 +1,7 @@
 # SRD 5.2.1 monster audit
 
+**Status (as of slice 196):** The findings below are historical (slices 141-149, when the pack carried 118 monsters). All flagged entries were closed during those slices, and slice 195's [tests/audit/srd-drift.test.ts](../tests/audit/srd-drift.test.ts) harness now re-runs the AC / HP / CR / ability-score comparisons on every test run, including the 63 monsters added by lane B (batches 4.1-4.14, pack monster count now 181). The hand-built audit logic captured in this doc is preserved as the design record for the harness.
+
 Audit of the 118 monsters in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) against the SRD 5.2.1 (the official 2024 5e SRD published by WotC under CC-BY-4.0). The audit is the source of truth for an upcoming slice queue that standardizes the entire starter pack on SRD 5.2.1.
 
 The audit is scripted: a Node parser reads the markdown SRD in `references/srd-markdown/` (gitignored), extracts AC / HP / abilities / CR for each H3 stat block, and diffs against the pack JSON. Source-of-truth for the SRD text itself is `references/SRD_CC_v5.2.1.pdf` (also gitignored). Spot-check verification of the markdown fork against the PDF was done at audit time; the markdown is faithful.

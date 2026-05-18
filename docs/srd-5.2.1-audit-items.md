@@ -1,5 +1,7 @@
 # SRD 5.2.1 magic item audit
 
+**Status (as of slice 196):** The findings below are historical (slice 150, when the pack carried 138 magic items). All flagged entries were closed during that slice, plus 8 additional drifts caught and fixed in slice 183 (rarity + attunement) and slice 192 (attunement conditions). Slice 195's [tests/audit/srd-drift.test.ts](../tests/audit/srd-drift.test.ts) harness now re-runs rarity + attunement comparisons against the SRD type-line on every test run.
+
 Audit of the 138 magic items in [src/content/packs/starter-pack.json](../src/content/packs/starter-pack.json) against the SRD 5.2.1 magic-item catalog. Companion to the monster audit at [docs/srd-5.2.1-audit.md](srd-5.2.1-audit.md).
 
 Source of truth for the SRD text is `references/SRD_CC_v5.2.1.pdf` (gitignored); the markdown fork at `references/srd-markdown/magic-items.md` was spot-checked against the PDF at the start of the monster audit and is faithful.
