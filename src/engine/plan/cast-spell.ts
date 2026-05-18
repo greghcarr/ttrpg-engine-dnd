@@ -295,6 +295,20 @@ const planAttackMechanic = (
   const bonusDice = (mechanic.extraDicePerSlotLevel ?? 0) * Math.max(0, intent.slotLevel - spell.level);
   const cantripSteps = spell.level === CANTRIP_LEVEL ? cantripExtraDice(computeTotalLevel(character)) : 0;
   const damageType = resolveAttackDamageType(mechanic, intent, spell.id);
+  // Slice 204: spell damage now consults the caster's effect stack
+  // for `AddModifier { target: 'damage' }` contributions, gated on the
+  // `event.damageType` fact. Canonical user: Draconic Sorcery L6
+  // Elemental Affinity (+CHA-mod to one damage roll of the chosen
+  // type). Mirrors the analogous query in attack.ts:618 for weapon
+  // attacks.
+  const casterEffects = buildEffectStack({
+    character,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const damageFacts = new Map<string, unknown>([['event.damageType', damageType]]);
+  const damageModifierBonus = casterEffects.modifierSum('damage', damageFacts);
   const events: Event[] = [];
   for (const targetId of intent.targetIds) {
     const target = state.characters[targetId];
@@ -340,7 +354,7 @@ const planAttackMechanic = (
     const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, isCrit);
     const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, isCrit);
     const rolls = [...baseRolls, ...scalingRolls];
-    const damageTotal = rolls.reduce((s, v) => s + v, 0) + modifier;
+    const damageTotal = rolls.reduce((s, v) => s + v, 0) + modifier + damageModifierBonus;
     const damageRolled: DamageRolledEvent = {
       id: newEventId() as ULID,
       at,
@@ -352,7 +366,7 @@ const planAttackMechanic = (
         {
           expression: mechanic.damageDice,
           rolls,
-          modifier,
+          modifier: modifier + damageModifierBonus,
           type: damageType,
         } satisfies DamageRoll,
       ],
@@ -428,11 +442,23 @@ const planSaveMechanic = (
 
   // Per PHB 2024 "Areas of Effect" — damage is rolled once for the spell and
   // applied to every target (halved on a successful save where applicable).
+  // Slice 204: AOE damage also consults the caster's effect-stack
+  // damage-modifier contributions (Elemental Affinity-style riders),
+  // gated on `event.damageType`.
   let rawDamage = 0;
+  let saveDamageModifierBonus = 0;
   if (mechanic.damageDice !== undefined && mechanic.damageType !== undefined) {
+    const casterEffects = buildEffectStack({
+      character,
+      content,
+      itemInstances: state.itemInstances,
+      pendingChoices: state.pendingChoices,
+    });
+    const damageFacts = new Map<string, unknown>([['event.damageType', mechanic.damageType]]);
+    saveDamageModifierBonus = casterEffects.modifierSum('damage', damageFacts);
     const { rolls: baseRolls, modifier } = rollDamage(mechanic.damageDice, bonusDice, rng, false);
     const scalingRolls = rollCantripScaling(mechanic.cantripScalingDice, cantripSteps, rng, false);
-    rawDamage = [...baseRolls, ...scalingRolls].reduce((s, v) => s + v, 0) + modifier;
+    rawDamage = [...baseRolls, ...scalingRolls].reduce((s, v) => s + v, 0) + modifier + saveDamageModifierBonus;
   }
 
   for (const targetId of intent.targetIds) {

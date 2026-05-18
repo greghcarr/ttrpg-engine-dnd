@@ -1016,11 +1016,11 @@
                 "oneOf": 1,
                 "when": "onAcquire",
                 "options": [
-                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }] },
-                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
-                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
-                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
-                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] }
+                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }, { "kind": "AddModifier", "target": "damage", "value": { "kind": "abilityMod", "ability": "CHA" }, "condition": { "kind": "eq", "path": "event.damageType", "value": "acid" } }] },
+                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }, { "kind": "AddModifier", "target": "damage", "value": { "kind": "abilityMod", "ability": "CHA" }, "condition": { "kind": "eq", "path": "event.damageType", "value": "cold" } }] },
+                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }, { "kind": "AddModifier", "target": "damage", "value": { "kind": "abilityMod", "ability": "CHA" }, "condition": { "kind": "eq", "path": "event.damageType", "value": "fire" } }] },
+                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }, { "kind": "AddModifier", "target": "damage", "value": { "kind": "abilityMod", "ability": "CHA" }, "condition": { "kind": "eq", "path": "event.damageType", "value": "lightning" } }] },
+                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }, { "kind": "AddModifier", "target": "damage", "value": { "kind": "abilityMod", "ability": "CHA" }, "condition": { "kind": "eq", "path": "event.damageType", "value": "poison" } }] }
                 ]
               }
             ]

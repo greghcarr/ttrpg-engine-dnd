@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: cast-spell damage-modifier effect-stack fold + Elemental Affinity CHA rider (slice 204)**
+
+Threads `EffectAccumulator.modifierSum('damage', {event.damageType})` into both cast-spell paths so `AddModifier { target: 'damage' }` effects on the caster now compose with spell damage. Pre-slice 204 the call existed only in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) for weapon attacks; spell damage silently dropped any effect-stack contributions, which is why Draconic Sorcery's Elemental Affinity rider was the canonical "partial-wire, CHA-mod-not-yet-firing" gap recorded in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) by subclass batch 1.4.
+
+Two cast-spell branches changed:
+
+- Attack-mechanic path ([src/engine/plan/cast-spell.ts](src/engine/plan/cast-spell.ts) `planAttackMechanic`): builds the caster's effect stack once before the per-target loop, queries `modifierSum('damage', new Map([['event.damageType', damageType]]))`, folds the bonus into each target's damage total and surfaces it on the `DamageRoll.modifier` field for transcript readability.
+- Save-mechanic path (`planSaveMechanic`): same query, applied once to the spell-wide `rawDamage` since 2024 RAW rolls AOE damage once per spell (not per target).
+
+A consistency touch in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) added `event.damageType` (sourced from `weaponDef.damageType`) to the existing damageFacts map so future content that wants per-weapon-damage-type predicates on weapon attacks wires for free; no canonical user today.
+
+Canonical user wired: Draconic Sorcery L6 Elemental Affinity. Each of the 5 OfferChoice options (Acid / Cold / Fire / Lightning / Poison) now ships with both the existing `GrantResistance` for the chosen type AND an `AddModifier { target: 'damage', value: { kind: 'abilityMod', ability: 'CHA' }, condition: { kind: 'eq', path: 'event.damageType', value: <type> } }`. Closes the "partial-wire" annotation in the classes-audit doc.
+
+Future content unlocked at zero engine cost: Evoker L10 Empowered Evocation (+INT-mod to one evocation-damage roll), Tempest Cleric's Wrath of the Storm (+CHA-mod to lightning), Bear / Wolf totem riders, any per-damage-type bonus rider on the caster.
+
+Tests: 3-case planner test in [tests/unit/engine/plan-cast-spell-damage-modifier.test.ts](tests/unit/engine/plan-cast-spell-damage-modifier.test.ts) (matching-type attack mechanic adds CHA; mismatched-type does NOT; save-mechanic rolls once with CHA folded in). Golden scenario with transcript at [tests/golden/s204-elemental-affinity.test.ts](tests/golden/s204-elemental-affinity.test.ts) walks the choose-fire + cast fire-bolt flow and snapshots the `+4` modifier on the DamageRoll. tsc --noEmit clean.
+
 **Engine: Monk L14 Disciplined Survivor + save-proficiency effect-stack fix (slice 203)**
 
 Ships Monk L14 Disciplined Survivor as four `GrantProficiency { target: 'save' }` effects (CON, INT, WIS, CHA — Monk has STR + DEX from the class baseline). RAW (SRD 5.2.1): "Your physical and mental discipline grant you proficiency in all saving throws."

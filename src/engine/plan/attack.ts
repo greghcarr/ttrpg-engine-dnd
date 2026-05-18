@@ -614,6 +614,10 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   const damageFacts = new Map<string, unknown>([
     ['event.attackKind', weaponDef.attackKind],
     ['bearer.offHandHasWeapon', offHandDef?.itemKind === 'weapon'],
+    // Slice 204: damage type fact for consistency with cast-spell.ts.
+    // Lets predicate-gated AddModifier effects scope to weapon-attack
+    // damage types (no canonical user today; future content can use it).
+    ['event.damageType', weaponDef.damageType],
   ]);
   const damageModifierBonus = attackerEffects.modifierSum('damage', damageFacts);
   const damageRollPayload: DamageRoll = {
