@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.5 (Young Metallic Dragon opener)**
+
+Five new SRD 5.2.1 statblocks: Young Brass Dragon (CR 6), Young Copper Dragon (CR 7), Young Bronze Dragon (CR 8), Young Silver Dragon (CR 9), Young Gold Dragon (CR 10). Opens the Metallic Dragon ladder with the canonical Young tier, mirroring slice 1.17 (Young Chromatics). First non-Chromatic dragons in the pack; first cluster of Good-aligned Dragons (3 LG: Bronze, Silver, Gold; 2 CG: Brass, Copper). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 22 to 27). Pack monster total moves from 131 to 136.
+
+Defers under existing engine gaps: Multiattack on all five (with the optional-secondary-breath-substitution variant — a new "multiattack-with-options" sub-shape); secondary non-damaging breath weapons (Brass Sleep Breath, Copper Slowing Breath, Bronze Repulsion Breath, Silver Paralyzing Breath, Gold Weakening Breath) under a new gap family. Brass / Silver introduce a "consecutive-failures escalation" save shape (incapacitated then unconscious / paralyzed); Bronze adds 30-or-40-ft forced push (overlaps with the Balor pull-and-prone gap, push variant); Gold introduces a STR-based-D20-tests disadvantage rider with recurring-save / 1-minute-auto-success duration cap. Amphibious narrative on Bronze + Gold. Metallic Rend exercises the absence-of-elemental-damage-rider case (every Chromatic Rend carries an elemental damage rider; Metallic Rend does not).
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.4 (Ancient Chromatic Dragon ladder)**
 
 Five new SRD 5.2.1 statblocks: Ancient White Dragon (CR 20), Ancient Black Dragon (CR 21), Ancient Green Dragon (CR 22), Ancient Blue Dragon (CR 23), Ancient Red Dragon (CR 24). Completes the full chromatic dragon ladder across all three age tiers (Wyrmling + Young + Adult + Ancient = 20 statblocks). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) (non-lair stats only). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 17 to 22). Pack monster total moves from 126 to 131; CR ceiling moves from 21 (Solar) to 24 (Ancient Red). Ancient Black / Green / Blue / Red ship `proficiencyBonus: 7` (the first PB +7 statblocks in the pack).
