@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: Epic Boon prerequisites (slice 187)**
+
+Audited feat prerequisites against SRD 5.2.1 type-line. All six SRD-derived Epic Boons (Combat Prowess, Dimensional Travel, Irresistible Offense, Spell Recall, the Night Spirit, Truesight) had empty `prerequisites` arrays but SRD 5.2.1 lists them all as requiring Level 19+. Spell Recall additionally requires the Spellcasting Feature.
+
+Added the missing prerequisites:
+
+- boon-of-combat-prowess: `["Level 19+"]`
+- boon-of-dimensional-travel: `["Level 19+"]`
+- boon-of-irresistible-offense: `["Level 19+"]`
+- boon-of-spell-recall: `["Level 19+", "Spellcasting Feature"]`
+- boon-of-the-night-spirit: `["Level 19+"]`
+- boon-of-truesight: `["Level 19+"]`
+
+The audit also flagged that all 9 Epic Boons in the pack are still schema-only (empty `effects` arrays). The slice-152 audit classified them as wired, but they actually need engine work to model their multi-mechanic bodies (ASI choice between abilities + situational benefits). Noted for future content authoring; not in this slice's scope.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell AoE sizes (slice 186)**
 
 Audited spell `targeting.shape` + `targeting.size` against SRD body text. Two real drifts (others were script artifacts where cylinder height vs radius are both present in the body):

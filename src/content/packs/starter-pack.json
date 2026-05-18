@@ -80,15 +80,15 @@
     { "id": "fighting-style-great-weapon", "name": "Fighting Style: Great Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "GrantGreatWeaponFighting" }] },
     { "id": "fighting-style-protection", "name": "Fighting Style: Protection", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "GrantProtectionFightingStyle" }] },
     { "id": "fighting-style-two-weapon", "name": "Fighting Style: Two-Weapon Fighting", "category": "fighting-style", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "GrantTwoWeaponFighting" }] },
-    { "id": "boon-of-combat-prowess", "name": "Boon of Combat Prowess", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "boon-of-dimensional-travel", "name": "Boon of Dimensional Travel", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "boon-of-combat-prowess", "name": "Boon of Combat Prowess", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+"], "effects": [] },
+    { "id": "boon-of-dimensional-travel", "name": "Boon of Dimensional Travel", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+"], "effects": [] },
     { "id": "boon-of-energy-resistance", "name": "Boon of Energy Resistance", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
     { "id": "boon-of-fortitude", "name": "Boon of Fortitude", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "boon-of-irresistible-offense", "name": "Boon of Irresistible Offense", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
+    { "id": "boon-of-irresistible-offense", "name": "Boon of Irresistible Offense", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+"], "effects": [] },
     { "id": "boon-of-skill", "name": "Boon of Skill", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "boon-of-spell-recall", "name": "Boon of Spell Recall", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "boon-of-the-night-spirit", "name": "Boon of the Night Spirit", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [] },
-    { "id": "boon-of-truesight", "name": "Boon of Truesight", "category": "epic-boon", "repeatable": false, "prerequisites": [], "effects": [{ "kind": "GrantSense", "sense": "truesight", "range": 60 }] }
+    { "id": "boon-of-spell-recall", "name": "Boon of Spell Recall", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+", "Spellcasting Feature"], "effects": [] },
+    { "id": "boon-of-the-night-spirit", "name": "Boon of the Night Spirit", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+"], "effects": [] },
+    { "id": "boon-of-truesight", "name": "Boon of Truesight", "category": "epic-boon", "repeatable": false, "prerequisites": ["Level 19+"], "effects": [{ "kind": "GrantSense", "sense": "truesight", "range": 60 }] }
   ],
   "classes": [
     {
