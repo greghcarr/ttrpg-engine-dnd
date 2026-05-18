@@ -639,6 +639,27 @@
             "name": "Frenzy",
             "effects": [{ "kind": "Custom", "handlerId": "frenzy" }]
           }
+        ],
+        "6": [
+          {
+            "id": "mindless-rage",
+            "name": "Mindless Rage",
+            "effects": []
+          }
+        ],
+        "10": [
+          {
+            "id": "retaliation",
+            "name": "Retaliation",
+            "effects": []
+          }
+        ],
+        "14": [
+          {
+            "id": "intimidating-presence",
+            "name": "Intimidating Presence",
+            "effects": []
+          }
         ]
       }
     },

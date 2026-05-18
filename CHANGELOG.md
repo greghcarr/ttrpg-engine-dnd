@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.2**
+
+Extends the Path of the Berserker (Barbarian subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary. Documents the gaps in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) so future engine slices know exactly what primitives unblock these.
+
+- L6 Mindless Rage: `effects: []` (deferred). RAW gates Charmed / Frightened immunity on "while Rage is active." Rage is currently modeled as a resource counter only, with no rage-active condition or predicate path. Unconditional `GrantConditionImmunity` would be wrong.
+- L10 Retaliation: `effects: []` (deferred). RAW is a reaction to make a melee attack against a creature within 5 ft that damaged you. TriggerAction vocabulary has no "make an attack" action (kinds: AddDamage / AddDamageToAttacker / Heal / ApplyCondition / ApplyConditionToAttacker / SpendResource / ModifyDamageTaken / EmitEvent). No per-attacker range predicate either.
+- L14 Intimidating Presence: `effects: []` (deferred). Bonus-action emanation-save primitive doesn't exist, and the "spend a use of Rage to restore the feature" recovery shape has no primitive.
+
+No engine code changed; no test snapshots moved (pure-stub additions don't trip the wired-features catalog).
+
 **Content authoring: subclass batch 1.1**
 
 Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four remaining SRD 5.2.1 features. Two ship wired and two ship as deferred stubs with audit-doc reasons. Closes 2 of the 41 Layer 4 entries in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md), 2 deferred-with-reason.

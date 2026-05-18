@@ -103,11 +103,11 @@ About 17 main-class features. Follow-up content-authoring slices.
 
 This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / L10 / L14 / L17 (or similar progression). Pack subclasses mostly ship only the L3 features.
 
-### Missing subclass features (39 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 2 deferred-with-reason)
+### Missing subclass features (36 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 5 deferred-with-reason across batches 1.1-1.2)
 
 | Subclass | Missing features |
 |---|---|
-| Path of the Berserker | L6 Mindless Rage, L10 Retaliation, L14 Intimidating Presence |
+| Path of the Berserker | L6 Mindless Rage (deferred-stub, subclass batch 1.2: no rage-active condition or predicate path; rage is a resource counter, not a stateful effect), L10 Retaliation (deferred-stub, subclass batch 1.2: TriggerAction vocabulary has no "make an attack" action; no per-attacker range predicate), L14 Intimidating Presence (deferred-stub, subclass batch 1.2: no bonus-action emanation-save primitive, no spend-other-resource-to-restore recovery shape) |
 | College of Lore | L6 Magical Discoveries, L14 Peerless Skill |
 | Life Domain | L3 Life Domain Spells, L3 Preserve Life, L6 Blessed Healer, L17 Supreme Healing |
 | Circle of the Land | L3 Circle of the Land Spells, L6 Natural Recovery, L10 Nature's Ward, L14 Nature's Sanctuary |
