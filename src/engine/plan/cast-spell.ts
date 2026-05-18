@@ -93,6 +93,13 @@ export interface CastSpellIntent {
   // (Chromatic Orb picks acid / cold / fire / lightning / poison /
   // thunder at cast). Ignored otherwise.
   readonly casterChoice?: CasterChoice;
+  // Slice 219: when true, the cast skips both the slot-availability
+  // gate and the SpellSlotConsumed / PactSlotConsumed emission. The
+  // chosen `slotLevel` still drives any per-slot upcast scaling. Used
+  // by features that grant a free cast: Cleric Divine Intervention,
+  // Warlock Contact Patron `oncePerLongRest` preparation, magic-item
+  // "casts X without expending a slot" riders.
+  readonly noSlotCost?: boolean;
   readonly at?: string;
 }
 
@@ -1173,7 +1180,8 @@ export const planCastSpell = (
     throw new Error(`Spell ${spell.id} cannot be cast as a ritual`);
   }
 
-  if (spell.level > CANTRIP_LEVEL && !castAsRitual) {
+  const noSlotCost = intent.noSlotCost === true;
+  if (spell.level > CANTRIP_LEVEL && !castAsRitual && !noSlotCost) {
     const available = computeAvailableSpellSlots(character, content.classes);
     if (slotSource === 'pact') {
       if (available.pact === undefined || available.pact.count <= 0) {
@@ -1269,7 +1277,7 @@ export const planCastSpell = (
     }
   }
 
-  if (spell.level > CANTRIP_LEVEL && !castAsRitual) {
+  if (spell.level > CANTRIP_LEVEL && !castAsRitual && !noSlotCost) {
     if (slotSource === 'pact') {
       const consumed: PactSlotConsumedEvent = {
         id: newEventId() as ULID,

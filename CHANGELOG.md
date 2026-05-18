@@ -4,6 +4,21 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `noSlotCost` flag on CastSpellIntent (slice 219)**
+
+Adds `noSlotCost?: boolean` to `CastSpellIntent`. When true, `planCastSpell` skips both the slot-availability gate and the `SpellSlotConsumed` / `PactSlotConsumed` emission; the chosen `slotLevel` still drives any per-slot upcast scaling. The default (false / unset) preserves the existing paid-cast behavior exactly.
+
+Unblocks several "free cast" features that previously had no engine-side mechanism:
+
+- **Cleric L10 Divine Intervention** ("you cast that spell without expending a spell slot or needing Material components"). Next slice can ship `planDivineIntervention` that consumes a per-LR resource and delegates here.
+- **Cleric L20 Greater Divine Intervention** (adds Wish to the selectable set; same free-cast plumbing).
+- **Warlock L9 Contact Patron** (slice 217's `oncePerLongRest` preparation; once-per-LR free cast of Contact Other Plane).
+- Magic-item "casts X without expending a slot" riders (Ring of Spell Storing, certain wand entries).
+
+No new event types; no schema changes; no public-API additions beyond the intent flag.
+
+Tests: 4-case planner test in [tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts](tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts) verifying (1) no `SpellSlotConsumed` emission, (2) caster's slot pool unchanged after the cast, (3) the paid-cast path still emits `SpellSlotConsumed` (regression guard), (4) the flag bypasses the no-slots-available gate when the bearer is fully out of L1 slots.
+
 **Content: subclass higher-tier spell-list sweep (slice 218)**
 
 Cashes in slice 212's `GrantSpell` engine consumer by wiring the L5/L7/L9 spell-list tiers for three subclasses that previously shipped only the L3 tier:
