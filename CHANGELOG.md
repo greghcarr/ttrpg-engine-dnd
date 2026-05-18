@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: tool categorization (slice 196)**
+
+Items lane flagged two alpha.5-seed miscategorizations during batches 4.11-4.16 but couldn't fix per the content-lane "don't modify existing entries" rule. Engine session applies the fix:
+
+- thieves-tools: category `artisan` to `other` (SRD 5.2.1 equipment.md line 760, in the "Other Tools" section, not "Artisan's Tools").
+- herbalism-kit: category `artisan` to `other` (SRD 5.2.1 equipment.md line 741, also "Other Tools").
+
+The pack's artisan's-tools catalog now matches SRD 5.2.1 exactly: 17/17 entries (Alchemist's, Brewer's, Calligrapher's, Carpenter's, Cartographer's, Cobbler's, Cook's, Glassblower's, Jeweler's, Leatherworker's, Mason's, Painter's, Potter's, Smith's, Tinker's, Weaver's, Woodcarver's). The two reassigned entries join 4 other "Other Tools" entries (Disguise Kit, Forgery Kit, Navigator's Tools, Poisoner's Kit) shipped by items batch 4.13.
+
+Tests: 1466 pass, tsc --noEmit clean.
+
 **Engine: SRD 5.2.1 drift audit harness (slice 195)**
 
 Adds [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts), a checked-in vitest suite that parses the SRD 5.2.1 markdown clone at `references/srd-markdown/` and asserts every pack spell, monster, and magic item matches SRD on script-detectable fields. Slices 177-194 used the same logic ad-hoc to ship ~310 drift fixes; the harness now catches regressions automatically.
