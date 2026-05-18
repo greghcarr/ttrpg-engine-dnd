@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.6, 8 SRD 5.2.1 writing + small-vessel utility gear entries**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the 4.1 / 4.3 / 4.4 / 4.5 cohorts.
+
+- New ids: `book`, `ink`, `ink-pen`, `map`, `paper`, `parchment`, `string`, `vial`. Source lines in equipment.md: 1334, 1504, 1508, 1546, 1570, 1574, 1658, 1674.
+- Cohort theme: writing + small-vessel utility, the precision-craft items used by scribes, scholars, and spellcasters. Six core writing entries (Book, Ink, Ink Pen, Map, Paper, Parchment) plus two utility stragglers (String, Vial).
+- Verified non-presence in SRD 5.2.1 via grep: Sealing Wax, Whetstone, Soap are NOT in `equipment.md`, dropped from the 2024 PHB / SRD 5.2.1 catalog. Did not author them.
+- Vial closes the batch-4.2 deferral note: it ships as gear (the small glass container itself), not consumable (the agents like Antitoxin and Poison Basic that come pre-filled in a vial were shipped in 4.2 as their own ids).
+- One more container-shape candidate (Bottle, Glass, equipment.md line 1338) stays deferred for a future batch alongside Pot Iron and Case Crossbow Bolt.
+
+Coverage bump: items 256 to 264 total, gear 39 to 47. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~26 SRD adventuring-gear entries remain unship.
+
 **Content authoring: items batch 4.5, 8 SRD 5.2.1 clothing + camp gear entries**
 
 Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new pure-stub `itemKind: 'gear'` entries matching the existing alpha.5 seed gear shape and the 4.1 / 4.3 / 4.4 cohorts.

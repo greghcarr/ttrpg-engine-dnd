@@ -2097,7 +2097,15 @@
     { "id": "flask", "itemKind": "gear", "name": "Flask" },
     { "id": "jug", "itemKind": "gear", "name": "Jug" },
     { "id": "robe", "itemKind": "gear", "name": "Robe" },
-    { "id": "tent", "itemKind": "gear", "name": "Tent" }
+    { "id": "tent", "itemKind": "gear", "name": "Tent" },
+    { "id": "book", "itemKind": "gear", "name": "Book" },
+    { "id": "ink", "itemKind": "gear", "name": "Ink" },
+    { "id": "ink-pen", "itemKind": "gear", "name": "Ink Pen" },
+    { "id": "map", "itemKind": "gear", "name": "Map" },
+    { "id": "paper", "itemKind": "gear", "name": "Paper" },
+    { "id": "parchment", "itemKind": "gear", "name": "Parchment" },
+    { "id": "string", "itemKind": "gear", "name": "String" },
+    { "id": "vial", "itemKind": "gear", "name": "Vial" }
   ],
   "monsters": [
     {
