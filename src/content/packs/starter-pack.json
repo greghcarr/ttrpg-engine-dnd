@@ -707,7 +707,12 @@
           {
             "id": "life-domain-spells",
             "name": "Life Domain Spells",
-            "effects": []
+            "effects": [
+              { "kind": "GrantSpell", "spellId": "bless", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "cure-wounds", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "healing-word", "preparation": "always-prepared" },
+              { "kind": "GrantSpell", "spellId": "sanctuary", "preparation": "always-prepared" }
+            ]
           },
           {
             "id": "preserve-life",

@@ -119,6 +119,11 @@ export class EffectAccumulator {
   private maxHealingDiceFlag: boolean = false;
   private unarmedAsMagicalFlag: boolean = false;
   private auraRangeBonusTotal: number = 0;
+  private grantedSpellEntries: Array<{
+    spellId: string;
+    preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest';
+    spellcastingAbility?: AbilityScore;
+  }> = [];
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -508,6 +513,29 @@ export class EffectAccumulator {
   auraRangeBonus(): number {
     return this.auraRangeBonusTotal;
   }
+  // Slice 212: collected GrantSpell entries from the bearer's effect
+  // stack. Canonical users: subclass domain spell lists (Life Domain
+  // L3, Circle of the Land L3, Draconic Sorcery L3, Fiend Patron L3,
+  // Oath of Devotion L3) and other "extra spell" features (Bard L20
+  // Words of Creation, Cleric Divine Order Thaumaturge cantrip).
+  // Consumers query `grantedSpells()` to get the full list with
+  // preparation/spellcastingAbility metadata; the derive helper
+  // `effectiveSpellList` returns a flat string array union'd with
+  // `character.preparedSpells` + `character.knownSpells`.
+  addGrantedSpell(entry: {
+    spellId: string;
+    preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest';
+    spellcastingAbility?: AbilityScore;
+  }): void {
+    this.grantedSpellEntries.push(entry);
+  }
+  grantedSpells(): ReadonlyArray<{
+    readonly spellId: string;
+    readonly preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest';
+    readonly spellcastingAbility?: AbilityScore;
+  }> {
+    return this.grantedSpellEntries;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -678,9 +706,17 @@ export const applyEffectToBuilder = (
     case 'GrantSense':
       acc.grantSense(effect.sense, effect.range);
       return;
+    case 'GrantSpell':
+      acc.addGrantedSpell({
+        spellId: effect.spellId,
+        preparation: effect.preparation,
+        ...(effect.spellcastingAbility !== undefined
+          ? { spellcastingAbility: effect.spellcastingAbility }
+          : {}),
+      });
+      return;
     case 'ModifySpeed':
     case 'GrantSpellSlots':
-    case 'GrantSpell':
     case 'OnEvent':
     case 'RecoverResource':
     case 'GrantAction':

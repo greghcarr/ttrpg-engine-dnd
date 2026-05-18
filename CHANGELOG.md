@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: GrantSpell consumer + Life Domain L3 Spells (slice 212)**
+
+Closes one of Lane B's highest-leverage engine gaps: the `GrantSpell` effect primitive existed in the schema but had no engine consumer, so every subclass domain-spell entry was schema-only — Life Domain Spells, Circle of the Land Spells, Draconic Spells, Fiend Spells, Devotion Spells, plus single-spell grants like Bard L20 Words of Creation all sat at `effects: []`.
+
+Plumbing:
+
+- New accumulator collector in [src/effects/builder.ts](src/effects/builder.ts): `EffectAccumulator.grantedSpells()` returns the list of `{ spellId, preparation, spellcastingAbility? }` entries from every `GrantSpell` effect on the bearer's effect stack. The builder dispatch case replaces the prior fall-through.
+- New derive helper [src/derive/effective-spell-list.ts](src/derive/effective-spell-list.ts): `effectiveSpellList(input)` returns the union of `character.preparedSpells`, `character.knownSpells`, and every granted spell id.
+- [src/engine/plan/cast-spell.ts](src/engine/plan/cast-spell.ts)'s `characterKnowsSpell` now consults `effectiveSpellList` after the direct-list check, so granted spells pass the "does the character know this spell?" gate.
+
+Canonical user wired: Life Domain L3 Life Domain Spells, now shipping 4 always-prepared `GrantSpell` entries (Bless, Cure Wounds, Healing Word, Sanctuary). Closes the L3 Life Domain Spells deferred-stub that subclass batch 1.8 left in the audit doc. The full RAW per-cleric-level list (L5 Aid + Lesser Restoration, L7 Mass Healing Word + Revivify, L9 Aura of Life + Death Ward, L11 Greater Restoration + Mass Cure Wounds) is a follow-up content-only sweep — each higher tier just adds more `GrantSpell` entries at the corresponding cleric-level row.
+
+Future content unlocked at zero engine cost: every other "X Spells" subclass feature (Circle of the Land, Draconic, Fiend, Devotion), Bard L20 Words of Creation (always-prepared Power Word Heal), Cleric L1 Divine Order Thaumaturge cantrip grant, Druid L1 Primal Order Magician cantrip grant, magic-item always-prepared spell lists (Ring of Spell Storing-like patterns), and warlock invocations that grant at-will spell casts.
+
+Tests: 4-case planner test in [tests/unit/engine/grant-spell-consumer.test.ts](tests/unit/engine/grant-spell-consumer.test.ts) (accumulator collection, derive union behavior, an L3 Life Domain cleric can cast Cure Wounds without it being in `preparedSpells`, a no-subclass cleric still throws). No new effect kind. EFFECT_KINDS stays at 46.
+
 **Engine: ExpandAuraRange + Paladin L18 Aura Expansion (slice 211)**
 
 Adds the `ExpandAuraRange { addFeet: number }` effect primitive (45 to 46 EFFECT_KINDS). Each entry contributes additively to `EffectAccumulator.auraRangeBonus()`. The engine doesn't auto-project auras (positions are consumer territory), so the primitive is purely a surfaced accumulator value — consumers (dndbnb, VTTs) read it alongside the bearer's `GrantAura` effects to compute effective aura range as `GrantAura.rangeFeet + auraRangeBonus()`.

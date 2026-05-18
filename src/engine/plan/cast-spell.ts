@@ -42,6 +42,7 @@ import {
   newTrapId,
 } from '../../ids.js';
 import { computeSpellSaveDC, computeSpellAttackBonus } from '../../derive/spell-dc.js';
+import { effectiveSpellList } from '../../derive/effective-spell-list.js';
 import { computeAvailableSpellSlots } from '../../derive/spell-slots.js';
 import { computeAC } from '../../derive/ac.js';
 import { computeSavingThrow } from '../../derive/save.js';
@@ -108,8 +109,28 @@ const findCastingClass = (
   throw new Error(`Character has no spellcasting class`);
 };
 
-const characterKnowsSpell = (character: Character, spellId: string): boolean =>
-  character.knownSpells.includes(spellId) || character.preparedSpells.includes(spellId);
+const characterKnowsSpell = (
+  state: CampaignState,
+  content: ResolvedContent,
+  character: Character,
+  spellId: string,
+): boolean => {
+  // Slice 212: also consult the effect stack for GrantSpell entries
+  // (subclass domain spell lists, "extra cantrip" feature grants,
+  // magic-item always-prepared spells). Pre-slice 212 the engine
+  // ignored these even though the GrantSpell primitive existed in
+  // the schema.
+  if (character.knownSpells.includes(spellId) || character.preparedSpells.includes(spellId)) {
+    return true;
+  }
+  const effective = effectiveSpellList({
+    character,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  return effective.includes(spellId);
+};
 
 const chooseSlotSource = (
   spell: Spell,
@@ -1135,7 +1156,7 @@ export const planCastSpell = (
   assertActorCanAct(character, 'cast a spell');
   const spell = content.spells.get(intent.spellId);
   if (!spell) throw new Error(`Unknown spell ${intent.spellId}`);
-  if (!characterKnowsSpell(character, intent.spellId)) {
+  if (!characterKnowsSpell(state, content, character, intent.spellId)) {
     throw new Error(`Character does not know or prepare spell ${intent.spellId}`);
   }
   if (intent.slotLevel < spell.level) {
