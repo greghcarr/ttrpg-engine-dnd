@@ -50,6 +50,7 @@ const isSaveProficient = (character: Character, ability: AbilityScore, content: 
 
 export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   const breakdown: SaveBreakdownEntry[] = [];
+  const effects = buildEffectStack(input);
 
   // Slice 130: when the character is a creature with a statblock that
   // lists this ability's save bonus, RAW says the listed number is the
@@ -69,12 +70,19 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
     breakdown.push({ source: `${input.ability}-mod`, value: abilityMod });
 
     const totalLevel = computeTotalLevel(input.character);
-    if (isSaveProficient(input.character, input.ability, input.content)) {
+    // Slice 203: a character is save-proficient if the class baseline
+    // covers it OR an effect-stack contribution (e.g. Monk L14
+    // Disciplined Survivor, Rogue L15 Slippery Mind, Ranger L9
+    // Expertise, racial / feat grants) flags it. Prior to slice 203
+    // the effect-stack path was silently dropped here, so Slippery
+    // Mind's WIS+CHA grant didn't actually take effect.
+    const effectProfLevel = effects.proficiencyLevel('save', input.ability);
+    const proficientViaEffect = effectProfLevel === 'proficient' || effectProfLevel === 'expertise';
+    if (isSaveProficient(input.character, input.ability, input.content) || proficientViaEffect) {
       breakdown.push({ source: 'proficiency', value: proficiencyBonus(totalLevel) });
     }
   }
 
-  const effects = buildEffectStack(input);
   const target = { kind: 'save', ability: input.ability } as const;
   const modifierBonus = effects.modifierSum(target);
   if (modifierBonus !== 0) {

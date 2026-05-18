@@ -547,7 +547,7 @@
         "11": { "proficiencyBonus": 4, "features": [{ "id": "martial-arts-die-d10", "name": "Martial Arts (d10)", "effects": [] }], "columns": {} },
         "12": { "proficiencyBonus": 4, "features": [], "columns": {} },
         "13": { "proficiencyBonus": 5, "features": [{ "id": "deflect-energy", "name": "Deflect Energy", "effects": [] }], "columns": {} },
-        "14": { "proficiencyBonus": 5, "features": [], "columns": {} },
+        "14": { "proficiencyBonus": 5, "features": [{ "id": "disciplined-survivor", "name": "Disciplined Survivor", "effects": [{ "kind": "GrantProficiency", "target": "save", "id": "CON", "level": "proficient" }, { "kind": "GrantProficiency", "target": "save", "id": "INT", "level": "proficient" }, { "kind": "GrantProficiency", "target": "save", "id": "WIS", "level": "proficient" }, { "kind": "GrantProficiency", "target": "save", "id": "CHA", "level": "proficient" }] }], "columns": {} },
         "15": { "proficiencyBonus": 5, "features": [{ "id": "perfect-focus", "name": "Perfect Focus", "effects": [] }], "columns": {} },
         "16": { "proficiencyBonus": 5, "features": [], "columns": {} },
         "17": { "proficiencyBonus": 6, "features": [{ "id": "martial-arts-die-d12", "name": "Martial Arts (d12)", "effects": [] }], "columns": {} },

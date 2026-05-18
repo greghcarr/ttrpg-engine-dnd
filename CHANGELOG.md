@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: Monk L14 Disciplined Survivor + save-proficiency effect-stack fix (slice 203)**
+
+Ships Monk L14 Disciplined Survivor as four `GrantProficiency { target: 'save' }` effects (CON, INT, WIS, CHA — Monk has STR + DEX from the class baseline). RAW (SRD 5.2.1): "Your physical and mental discipline grant you proficiency in all saving throws."
+
+Wiring the feature surfaced a pre-existing bug: [src/derive/save.ts](src/derive/save.ts)'s `isSaveProficient` only consulted the class's baseline `savingThrowProficiencies` and never queried the effect stack. So `GrantProficiency { target: 'save' }` effects were silently dropped on every save resolution. The Rogue L15 Slippery Mind feature (slice 60, WIS + CHA save grant) and any other content using the same shape have been quietly inert since they shipped. Slice 203 fixes `computeSavingThrow` to honor effect-stack proficiency contributions in addition to the class baseline; Slippery Mind now actually grants the WIS + CHA proficiency the pack always claimed it did.
+
+Tests: [tests/unit/derive/disciplined-survivor.test.ts](tests/unit/derive/disciplined-survivor.test.ts) carries 4 cases: a Monk L13 baseline check (STR + DEX only proficient), the Monk L14 all-six-proficient check, and a Rogue L14-vs-L15 pair pinning Slippery Mind's WIS + CHA grant so the regression can't return.
+
+Closes another of the missing main-class features in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) (~12 remaining after slices 199-203). Pure-content slice + one bug-fix line in the derive layer; no new primitives, no new events.
+
 **Engine: planSelfRestoration + Monk L10 Self-Restoration (slice 202)**
 
 Adds `engine.plan.selfRestoration` for the Monk L10 condition-shed ability plus a `GrantSelfRestoration` marker primitive (42 to 43 EFFECT_KINDS). RAW (SRD 5.2.1): "Through sheer force of will, you can remove one of the following conditions from yourself at the end of each of your turns: Charmed, Frightened, or Poisoned."
