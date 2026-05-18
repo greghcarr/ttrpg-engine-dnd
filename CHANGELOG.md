@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.4 (Ancient Chromatic Dragon ladder)**
+
+Five new SRD 5.2.1 statblocks: Ancient White Dragon (CR 20), Ancient Black Dragon (CR 21), Ancient Green Dragon (CR 22), Ancient Blue Dragon (CR 23), Ancient Red Dragon (CR 24). Completes the full chromatic dragon ladder across all three age tiers (Wyrmling + Young + Adult + Ancient = 20 statblocks). Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) (non-lair stats only). Each ships a `breathWeapon` field consumed by the slice-140 primitive (wired-breath-weapon cohort moves from 17 to 22). Pack monster total moves from 126 to 131; CR ceiling moves from 21 (Solar) to 24 (Ancient Red). Ancient Black / Green / Blue / Red ship `proficiencyBonus: 7` (the first PB +7 statblocks in the pack).
+
+Defers under existing engine gaps: Multiattack (all five); on-hit elemental damage riders (2d8 acid / 3d6 poison / 2d6 cold / 2d10 lightning / 3d6 fire); Legendary Resistance 4/Day on all five (six total LR 4/Day users in the pack after Pit Fiend); full Legendary Actions menus (3 uses/round per dragon, drawing from Pounce / Tail Swipe / Cloud of Insects / Cloaked Flight / Sonic Boom / Mind Invasion / Noxious Miasma / Commanding Presence / Fiery Rays / Freezing Burst / Frightful Presence with several legendary-action-specific composite riders — Cloud of Insects concentration-disadvantage, Noxious Miasma AC-penalty-until-end-of-turn, Freezing Burst speed-0-until-end-of-turn — all fold into the existing on-hit-save-or-condition family); innate Spellcasting envelopes (Black / Blue / Green / Red carry full at-will + 1/Day-each lists; Ancient White has no Spellcasting per RAW, the only Chromatic without it). Ancient Black + Green Amphibious + Ancient White Ice Walk are narrative deferrals.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.3 (Chromatic Wyrmling ladder)**
 
 Five new SRD 5.2.1 statblocks: Black Dragon Wyrmling (CR 2), Green Dragon Wyrmling (CR 2), White Dragon Wyrmling (CR 2), Blue Dragon Wyrmling (CR 3), Red Dragon Wyrmling (CR 4). Opens the Chromatic Wyrmling tier below the existing Young + Adult Chromatic ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage immunities / senses / CR / XP / PB. Each ships a `breathWeapon` field (slice-140 primitive), bringing the wired-breath-weapon cohort from 12 to 17 statblocks. Cone shapes for Green / Red / White, line shapes for Black / Blue (canonical Chromatic-by-color breath geometry); DCs 11 / 12 / 13 scale by tier; damage dice 5d8 acid / 5d8 cold / 6d6 lightning / 6d6 poison / 7d6 fire match RAW. Pack monster total moves from 121 to 126.
