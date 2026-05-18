@@ -16,7 +16,7 @@ import { computeAttackBonus } from '../../derive/attack.js';
 import { computeAC } from '../../derive/ac.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
 import { getCreatureType } from '../../derive/creature-type.js';
-import { abilityModifier } from '../../derive/ability.js';
+import { abilityModifier, effectiveAbilityScore } from '../../derive/ability.js';
 import { computeActionEconomyBudget } from '../../derive/action-economy.js';
 import { mitigateDamage } from '../../derive/damage-mitigation.js';
 import { interceptFatalDamage } from '../../derive/fatal-damage-intercept.js';
@@ -557,7 +557,9 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   }
 
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
-  const damageAbilityMod = abilityModifier(attacker.abilityScores[damageAbility]);
+  const damageBaseScore = attacker.abilityScores[damageAbility];
+  const damageScoreFloor = attackerEffects.effectiveAbilityScoreFloor(damageAbility)?.value;
+  const damageAbilityMod = abilityModifier(effectiveAbilityScore(damageBaseScore, damageScoreFloor));
   // Flex mastery: a versatile weapon wielded two-handed (off-hand empty)
   // uses the larger versatileDice instead of damageDice. RAW 2024.
   const wieldedTwoHanded =
@@ -913,9 +915,19 @@ export const planCleave = (
 
   // Strip the attacker's ability modifier from the DamageRolled and
   // DamageApplied events on the cleave hit, per RAW. Keep negative
-  // ability modifiers (a -1 STR penalty still applies).
+  // ability modifiers (a -1 STR penalty still applies). Slice 229:
+  // honor the OverrideAbilityScore floor so cleave's strip matches
+  // whatever the primary hit used (Gauntlets of Ogre Power etc.).
   const damageAbility = chooseDamageAbility(attacker, weaponDef);
-  const abilityMod = abilityModifier(attacker.abilityScores[damageAbility]);
+  const cleaveAttackerEffects = buildEffectStack({
+    character: attacker,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  const cleaveBaseScore = attacker.abilityScores[damageAbility];
+  const cleaveScoreFloor = cleaveAttackerEffects.effectiveAbilityScoreFloor(damageAbility)?.value;
+  const abilityMod = abilityModifier(effectiveAbilityScore(cleaveBaseScore, cleaveScoreFloor));
   const abilityModToStrip = abilityMod > 0 ? abilityMod : 0;
 
   for (const evt of resolution) {

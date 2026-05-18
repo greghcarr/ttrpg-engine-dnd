@@ -97,6 +97,7 @@ export class EffectAccumulator {
   private readonly conditionImmunities = new Map<string, Array<{ predicate?: Predicate }>>();
   private readonly acOverrides: ACOverride[] = [];
   private readonly acFloors: { value: number; source: string }[] = [];
+  private readonly abilityScoreFloors = new Map<AbilityScore, { value: number; source: string }[]>();
   private readonly resourceGrants: ResourceGrant[] = [];
   // Slice 127: granted senses (darkvision / blindsight / tremorsense /
   // truesight). Stored as sense -> max-range (feet) where multiple
@@ -207,6 +208,15 @@ export class EffectAccumulator {
   }
   addACFloor(value: number, source: string): void {
     this.acFloors.push({ value, source });
+  }
+  // Slice 229. Records a floor on an ability score; the highest floor
+  // across all sources wins. `effectiveAbilityScoreFloor` returns the
+  // highest floor recorded for the given ability, or `undefined` if
+  // none. Mirrors the AC-floor shape.
+  addAbilityScoreFloor(ability: AbilityScore, value: number, source: string): void {
+    const existing = this.abilityScoreFloors.get(ability) ?? [];
+    existing.push({ value, source });
+    this.abilityScoreFloors.set(ability, existing);
   }
   addResourceGrant(grant: ResourceGrant): void {
     this.resourceGrants.push(grant);
@@ -401,6 +411,11 @@ export class EffectAccumulator {
     return this.acFloors.reduce((best, current) =>
       current.value > best.value ? current : best,
     );
+  }
+  effectiveAbilityScoreFloor(ability: AbilityScore): { value: number; source: string } | undefined {
+    const entries = this.abilityScoreFloors.get(ability);
+    if (entries === undefined || entries.length === 0) return undefined;
+    return entries.reduce((best, current) => (current.value > best.value ? current : best));
   }
   resources(): ReadonlyArray<ResourceGrant> {
     return this.resourceGrants;
@@ -636,6 +651,9 @@ export const applyEffectToBuilder = (
       return;
     case 'SetACFloor':
       acc.addACFloor(effect.value, ctx.source);
+      return;
+    case 'OverrideAbilityScore':
+      acc.addAbilityScoreFloor(effect.ability, effect.value, ctx.source);
       return;
     case 'GrantResource':
       if (typeof effect.max === 'number') {

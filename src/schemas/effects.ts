@@ -198,6 +198,15 @@ export type Effect =
   // OverrideACFormula (which replaces the formula entirely and only
   // applies when unarmored).
   | { kind: 'SetACFloor'; value: number }
+  // Slice 229. Floor on an ability score: bumps the bearer's named
+  // ability score up to `value` if it would otherwise be lower; has
+  // no effect if the bearer's base score is already at or above
+  // `value`. Multiple floors on the same ability fold to the highest.
+  // Mirrors the SetACFloor shape (slice 74). Canonical users: Amulet
+  // of Health (CON 19), Gauntlets of Ogre Power (STR 19), the 6
+  // Belt of Giant Strength variants (STR 21/23/25/27/29). Future
+  // users: Headband of Intellect, Tome of *, Manual of *.
+  | { kind: 'OverrideAbilityScore'; ability: AbilityScore; value: number }
   | { kind: 'GrantResource'; resourceId: string; max: number | Formula; recharge: Recharge; diceSize?: number }
   | { kind: 'GrantSpellSlots'; level: SpellLevel; count: number; source: 'full' | 'half' | 'third' | 'pact' }
   | { kind: 'GrantSpell'; spellId: string; preparation: 'always-prepared' | 'prepared' | 'known' | 'at-will' | 'oncePerLongRest' | 'oncePerShortRest'; spellcastingAbility?: AbilityScore }
@@ -428,6 +437,11 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       priority: z.number().int().optional(),
     }),
     z.object({
+      kind: z.literal('OverrideAbilityScore'),
+      ability: AbilityScoreSchema,
+      value: z.number().int().min(1).max(30),
+    }),
+    z.object({
       kind: z.literal('SetACFloor'),
       value: z.number().int().min(1),
     }),
@@ -626,6 +640,7 @@ export const EFFECT_KINDS = [
   'GrantConditionImmunity',
   'GrantMagicResistance',
   'OverrideACFormula',
+  'OverrideAbilityScore',
   'SetACFloor',
   'GrantResource',
   'GrantSpellSlots',

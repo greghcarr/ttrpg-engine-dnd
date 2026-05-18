@@ -1,7 +1,8 @@
 import type { Character } from '../schemas/runtime/character.js';
 import type { ItemInstance } from '../schemas/runtime/item-instance.js';
 import type { ResolvedContent } from '../content/pack.js';
-import { abilityModifier } from './ability.js';
+import type { AbilityScore } from '../schemas/primitives.js';
+import { abilityModifier, effectiveAbilityScore } from './ability.js';
 import { buildEffectStack } from './effect-stack.js';
 import type { EffectAccumulator } from '../effects/builder.js';
 
@@ -65,18 +66,23 @@ const computeUnarmoredOverrideAC = (
   const override = effects.effectiveACOverride();
   if (!override) return null;
   const breakdown: ACBreakdownEntry[] = [];
+  const modForAbility = (ability: AbilityScore): number => {
+    const baseScore = character.abilityScores[ability];
+    const floor = effects.effectiveAbilityScoreFloor(ability)?.value;
+    return abilityModifier(effectiveAbilityScore(baseScore, floor));
+  };
   const baseValue =
     typeof override.base === 'number'
       ? override.base
       : override.base === 'dex'
-        ? abilityModifier(character.abilityScores.DEX)
+        ? modForAbility('DEX')
         : override.base === 'con'
-          ? abilityModifier(character.abilityScores.CON)
-          : abilityModifier(character.abilityScores.WIS);
+          ? modForAbility('CON')
+          : modForAbility('WIS');
   breakdown.push({ source: `override-base:${override.source}`, value: baseValue });
 
   for (const ability of override.abilityModifiers) {
-    const mod = abilityModifier(character.abilityScores[ability]);
+    const mod = modForAbility(ability);
     const capped = override.dexCap !== undefined && ability === 'DEX'
       ? Math.min(mod, override.dexCap)
       : mod;

@@ -1,7 +1,7 @@
 import type { Character } from '../schemas/runtime/character.js';
 import type { ItemInstance } from '../schemas/runtime/item-instance.js';
 import type { ResolvedContent } from '../content/pack.js';
-import { abilityModifier, proficiencyBonus } from './ability.js';
+import { abilityModifier, effectiveAbilityScore, proficiencyBonus } from './ability.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { buildEffectStack } from './effect-stack.js';
 
@@ -42,12 +42,15 @@ export const computeSpellSaveDC = (input: ComputeSpellDCInput): SpellDCResult =>
   if (ability === undefined) {
     return { total: 0, breakdown: [] };
   }
+  const effects = buildEffectStack(input);
+  const baseScore = input.character.abilityScores[ability];
+  const floor = effects.effectiveAbilityScoreFloor(ability)?.value;
+  const abilityMod = abilityModifier(effectiveAbilityScore(baseScore, floor));
   const breakdown: SpellDCBreakdownEntry[] = [
     { source: 'base', value: SPELL_DC_BASE },
     { source: 'proficiency', value: proficiencyBonus(computeTotalLevel(input.character)) },
-    { source: `${ability}-mod`, value: abilityModifier(input.character.abilityScores[ability]) },
+    { source: `${ability}-mod`, value: abilityMod },
   ];
-  const effects = buildEffectStack(input);
   const bonus = effects.modifierSum('spellSaveDC');
   if (bonus !== 0) breakdown.push({ source: 'modifier', value: bonus });
   const total = breakdown.reduce((acc, e) => acc + e.value, 0);
@@ -59,11 +62,14 @@ export const computeSpellAttackBonus = (input: ComputeSpellDCInput): SpellDCResu
   if (ability === undefined) {
     return { total: 0, breakdown: [] };
   }
+  const effects = buildEffectStack(input);
+  const baseScore = input.character.abilityScores[ability];
+  const floor = effects.effectiveAbilityScoreFloor(ability)?.value;
+  const abilityMod = abilityModifier(effectiveAbilityScore(baseScore, floor));
   const breakdown: SpellDCBreakdownEntry[] = [
     { source: 'proficiency', value: proficiencyBonus(computeTotalLevel(input.character)) },
-    { source: `${ability}-mod`, value: abilityModifier(input.character.abilityScores[ability]) },
+    { source: `${ability}-mod`, value: abilityMod },
   ];
-  const effects = buildEffectStack(input);
   const bonus = effects.modifierSum('spellAttack');
   if (bonus !== 0) breakdown.push({ source: 'modifier', value: bonus });
   const total = breakdown.reduce((acc, e) => acc + e.value, 0);

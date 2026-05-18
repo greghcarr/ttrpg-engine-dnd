@@ -1,7 +1,7 @@
 import type { Character } from '../schemas/runtime/character.js';
 import type { ItemInstance } from '../schemas/runtime/item-instance.js';
 import type { ResolvedContent } from '../content/pack.js';
-import { abilityModifier, proficiencyBonus } from './ability.js';
+import { abilityModifier, effectiveAbilityScore, proficiencyBonus } from './ability.js';
 import { buildEffectStack } from './effect-stack.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import type { Weapon } from '../schemas/content/item.js';
@@ -70,8 +70,11 @@ export const computeAttackBonus = (input: ComputeAttackInput): AttackResult => {
   const weapon = def;
 
   const ability = chooseAttackAbility(input.character, weapon);
+  const effects = buildEffectStack(input);
+  const baseScore = input.character.abilityScores[ability];
+  const floor = effects.effectiveAbilityScoreFloor(ability)?.value;
   const breakdown: AttackBreakdownEntry[] = [
-    { source: `${ability}-mod`, value: abilityModifier(input.character.abilityScores[ability]) },
+    { source: `${ability}-mod`, value: abilityModifier(effectiveAbilityScore(baseScore, floor)) },
   ];
 
   if (isWeaponProficient(input.character, weapon, input.content)) {
@@ -80,8 +83,6 @@ export const computeAttackBonus = (input: ComputeAttackInput): AttackResult => {
       value: proficiencyBonus(computeTotalLevel(input.character)),
     });
   }
-
-  const effects = buildEffectStack(input);
   // Slice 115: build a facts map for predicate-gated modifiers
   // (Archery's "ranged-only" +2, future Defense / Dueling / TWF
   // gates). Currently carries `event.attackKind` — additional facts

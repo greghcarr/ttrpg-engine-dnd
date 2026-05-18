@@ -216,6 +216,13 @@ exports[`feature-coverage matrix: feats > wired feats catalog is stable 1`] = `
 exports[`feature-coverage matrix: magic items > magic-item wire and charge state is stable 1`] = `
 {
   "wiredIds": [
+    "amulet-of-health",
+    "belt-of-cloud-giant-strength",
+    "belt-of-fire-giant-strength",
+    "belt-of-frost-giant-strength",
+    "belt-of-hill-giant-strength",
+    "belt-of-stone-giant-strength",
+    "belt-of-storm-giant-strength",
     "boots-of-the-winterlands",
     "brooch-of-shielding",
     "cloak-of-arachnida",
@@ -223,6 +230,7 @@ exports[`feature-coverage matrix: magic items > magic-item wire and charge state
     "cloak-of-the-bat",
     "cloak-of-the-manta-ray",
     "eyes-of-the-eagle",
+    "gauntlets-of-ogre-power",
     "gloves-of-swimming-and-climbing",
     "goggles-of-night",
     "ioun-stone-protection",

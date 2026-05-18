@@ -4,6 +4,43 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `OverrideAbilityScore` primitive (slice 229)**
+
+New effect kind that floors an ability score at a specific value: if the bearer's base score is below `value`, derivations use `value` instead; if at or above, no effect. Mirrors the `SetACFloor` shape from slice 74. Multiple floors on the same ability fold to the highest. Closes 9 backlog rows in one slice.
+
+**Plumbing**:
+
+- New `OverrideAbilityScore { ability, value }` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 46 → 47 wired primitives.
+- `EffectAccumulator` gains `addAbilityScoreFloor(ability, value, source)` and `effectiveAbilityScoreFloor(ability): { value, source } | undefined`. Builder dispatch routes the effect to the accumulator.
+- New pure helper `effectiveAbilityScore(baseScore, floor?): number` in [src/derive/ability.ts](src/derive/ability.ts).
+- Threaded the helper into 5 derive surfaces (save, ability-check, attack-bonus, spell-DC, AC) plus plan/attack's damage path and the cleave action's mod-strip math. Every consumer that reads `character.abilityScores[X]` for a roll bonus now honors the floor.
+
+**Content wirings (8 items)**:
+
+- **Amulet of Health** (canonical user, exact RAW): `OverrideAbilityScore CON 19`.
+- **Gauntlets of Ogre Power**: `OverrideAbilityScore STR 19`.
+- **Belt of Hill Giant Strength**: STR 21.
+- **Belt of Stone Giant Strength**: STR 23.
+- **Belt of Frost Giant Strength**: STR 23.
+- **Belt of Fire Giant Strength**: STR 25.
+- **Belt of Cloud Giant Strength**: STR 27.
+- **Belt of Storm Giant Strength**: STR 29.
+
+Pack wired-items count: **18 → 26**. Closes backlog rows for "Amulet of Health / Gauntlets of Ogre Power / Belt of Dwarvenkind partial" + the 6 Giant Strength belt entries.
+
+**Bug noted during slice (not fixed here, added to backlog)**: The Belt of *Giant Strength variants in the pack have drifted rarities (pack: Hill=rare; SRD: Uncommon). The drift audit misses this because the variant-unrolled names don't match SRD's parent "Belt of Giant Strength" entry. Adding to the deferred-primitives backlog under "audit: variant-unroll rarity validation".
+
+**Future users** (not wired this slice, but the primitive is now available): Headband of Intellect (INT 19), Tome of Bodily Health / Clear Thought / Gainful Exercise / Leadership and Influence / Quickness of Action / Understanding (each permanently raises one ability score by 2, capped at 24 — distinct shape: not a floor, but a permanent base bump; could share the primitive with a "permanent" flag).
+
+Pre-commit Uncle Bob audit:
+- Helper is a 3-line pure function with intention-revealing name; mirrors the SetACFloor pattern.
+- 5 derive call sites threaded uniformly; 2 plan/attack call sites threaded.
+- Tests assert mechanical values (+4 STR mod, +9 STR mod) not just shape.
+- No magic numbers: 19/21/23/25/27/29 are SRD-derived.
+- The pre-existing belt-rarity drift was surfaced during audit and added to the backlog rather than silently fixed in-slice (separate concern).
+
+Tests: 10-case test in [tests/unit/engine/override-ability-score.test.ts](tests/unit/engine/override-ability-score.test.ts) covering the helper math, accumulator collection, multi-source fold-to-highest, save / ability-check / attack-bonus / damage-roll derivation paths. 1597 pass, 209 skipped. tsc clean. Wired-items snapshot updated additively.
+
 **Content: magic-item mechanical wiring (slice 227)**
 
 Wires 4 SRD magic items that were `effects: []` to their existing-primitive shapes. No new engine vocabulary; pure content slice. Each item maps cleanly to a primitive the engine already supports (`GrantConditionImmunity`, `GrantImmunity`, `GrantResistance`, `ModifySpeed`, `SetAdvantage`).

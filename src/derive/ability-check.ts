@@ -4,7 +4,7 @@ import type { PendingChoice } from '../schemas/runtime/pending-choice.js';
 import type { ResolvedContent } from '../content/pack.js';
 import type { AbilityScore, Skill } from '../schemas/primitives.js';
 import { SKILL_ABILITY, PROFICIENCY_MULTIPLIER } from '../schemas/primitives.js';
-import { abilityModifier, proficiencyBonus } from './ability.js';
+import { abilityModifier, effectiveAbilityScore, proficiencyBonus } from './ability.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { buildEffectStack } from './effect-stack.js';
 import { EXHAUSTION_SAVE_PENALTY_PER_LEVEL } from '../internal/constants.js';
@@ -40,11 +40,13 @@ const exhaustionPenalty = (level: number): number =>
   EXHAUSTION_SAVE_PENALTY_PER_LEVEL * level;
 
 export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityCheckResult => {
-  const breakdown: AbilityCheckBreakdownEntry[] = [
-    { source: `${input.ability}-mod`, value: abilityModifier(input.character.abilityScores[input.ability]) },
-  ];
-
   const effects = buildEffectStack(input);
+  const baseScore = input.character.abilityScores[input.ability];
+  const floor = effects.effectiveAbilityScoreFloor(input.ability)?.value;
+  const abilityMod = abilityModifier(effectiveAbilityScore(baseScore, floor));
+  const breakdown: AbilityCheckBreakdownEntry[] = [
+    { source: `${input.ability}-mod`, value: abilityMod },
+  ];
 
   const fullProfBonus = proficiencyBonus(computeTotalLevel(input.character));
   // Track whether any explicit proficiency contribution is applied to

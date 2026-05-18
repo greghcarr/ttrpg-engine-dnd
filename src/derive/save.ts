@@ -2,7 +2,7 @@ import type { Character } from '../schemas/runtime/character.js';
 import type { ItemInstance } from '../schemas/runtime/item-instance.js';
 import type { ResolvedContent } from '../content/pack.js';
 import type { AbilityScore } from '../schemas/primitives.js';
-import { abilityModifier, proficiencyBonus } from './ability.js';
+import { abilityModifier, effectiveAbilityScore, proficiencyBonus } from './ability.js';
 import { buildEffectStack } from './effect-stack.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { EXHAUSTION_SAVE_PENALTY_PER_LEVEL } from '../internal/constants.js';
@@ -66,7 +66,9 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   if (monsterSaveBonus !== undefined) {
     breakdown.push({ source: `monster:${statblock!.id}:save`, value: monsterSaveBonus });
   } else {
-    const abilityMod = abilityModifier(input.character.abilityScores[input.ability]);
+    const baseScore = input.character.abilityScores[input.ability];
+    const floor = effects.effectiveAbilityScoreFloor(input.ability)?.value;
+    const abilityMod = abilityModifier(effectiveAbilityScore(baseScore, floor));
     breakdown.push({ source: `${input.ability}-mod`, value: abilityMod });
 
     const totalLevel = computeTotalLevel(input.character);

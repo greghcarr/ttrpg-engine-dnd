@@ -5,6 +5,18 @@ export const ABILITY_SCORE_MAX = 30;
 export const PROFICIENCY_BONUS_LEVEL_MIN = 1;
 export const PROFICIENCY_BONUS_LEVEL_MAX = 20;
 
+// Slice 229. Applies an `OverrideAbilityScore`-style floor to a base
+// ability score: if `floor` is provided and greater than `baseScore`,
+// returns `floor`; otherwise returns `baseScore`. Callers that build
+// an EffectAccumulator pass `effects.effectiveAbilityScoreFloor(ability)?.value`
+// here so the canonical AbilityScore-floor primitive (Amulet of
+// Health, Gauntlets of Ogre Power, Belt of Giant Strength variants)
+// participates in every derivation that consumes the score.
+export const effectiveAbilityScore = (baseScore: number, floor?: number): number => {
+  if (floor === undefined) return baseScore;
+  return Math.max(baseScore, floor);
+};
+
 export const abilityModifier = (score: number): number => {
   if (!Number.isInteger(score)) {
     throw new Error(`abilityModifier requires an integer; got ${score}`);
