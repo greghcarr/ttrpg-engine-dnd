@@ -90,7 +90,35 @@ At the close of every slice, update the docs the slice touched:
 - [CHANGELOG.md](CHANGELOG.md) — **always**. One entry per slice under `## Unreleased`. Include the Uncle Bob audit summary.
 - [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) — when a deferred row is closed (strike it through with `~~...~~`), when a new deferral is noted, or when "Coverage at a glance" counts change.
 - [docs/api-overview.md](docs/api-overview.md) — when the public surface changes.
-- [README.md](README.md) — when "Known gaps" closes, when a status row's cell shifts, or when the test count moves significantly.
+- [docs/status.md](docs/status.md) — when "Known gaps" closes, when a status row's cell shifts, or when the test count moves significantly.
+- [docs/roadmap.md](docs/roadmap.md) — when a phase-level milestone closes.
+- [README.md](README.md) — only when the at-a-glance Status / Roadmap summary needs to reflect the new state. Most slices don't touch README directly.
+
+### Doc size discipline (the single-Read ceiling)
+
+Index-type docs in this repo (README.md, CHANGELOG.md, docs/status.md, docs/roadmap.md, docs/starter-pack-gaps.md, the docs/gaps-*.md per-category catalogs, and every file under docs/changelog/) must each fit in a single Read tool call. The Claude Code Read tool refuses files over **~25,000 tokens** (roughly **60 KB** for our dense technical prose, give or take). Beyond that ceiling an agent has to read with offset/limit, which is fine for spot lookups but breaks the fresh-agent discovery path (the very first Read on the front-door doc errors out).
+
+**How to check** if a file fits:
+
+- `wc -c <file>` — anything safely under **60,000 bytes** will fit. **40-50 KB** is comfortable; **55+** is borderline and worth verifying with an actual Read.
+- Or, attempt to read the file with the Read tool (no offset/limit). If it returns the content, you're fine. If it errors with "exceeds maximum allowed tokens", split it.
+
+**When a file gets too big**, split with the playbook below. Don't bypass with offset/limit — the goal is that any agent or contributor can read the front-door doc in one call.
+
+**Splitting playbook:**
+
+1. **Pick a clean boundary.** For CHANGELOG, that's slice numbers; for README, that's H2 sections; for archives, that's natural cohorts (slice ranges, content batches, or topical groupings).
+2. **Move the bulk to a focused sub-doc.** Examples in this repo:
+   - CHANGELOG-Unreleased archived to per-cohort files under [docs/changelog/](docs/changelog/) (`archive-slices-NNN-MMM.md`, `archive-monsters-batch-X.md`, `archive-items-batch-X.md`, `archive-rollup-narrative-X.md`).
+   - CHANGELOG released versions split out to [docs/changelog/released-versions.md](docs/changelog/released-versions.md).
+   - README "Status" / "Coverage at a glance" / "Known gaps" split out to [docs/status.md](docs/status.md).
+   - README "Roadmap" split out to [docs/roadmap.md](docs/roadmap.md).
+3. **Leave a pointer** in the original doc — a one-paragraph summary plus a markdown link to the new sub-doc. The pointer should be enough that an agent reading the front-door doc still understands the topology.
+4. **Update cross-references.** Every doc that linked to the old structure (sibling archives' "see also" lines, the CHANGELOG pointer block, any source-map mentions) needs to point at the new files. `grep -rn '<old-filename>' docs/ CHANGELOG.md README.md` to find them.
+5. **Verify each new sub-doc also fits** the ceiling. Some splits need to be split again. Don't leave a 100 KB archive thinking "it's an archive, agents won't read it whole" — they will.
+6. **Add an entry to this slice's CHANGELOG** noting the split, so a future reader can trace why files moved.
+
+**Where pointers live:** the live CHANGELOG.md has an in-file pointer block listing every archive; the live README.md has prose summaries pointing to docs/status.md and docs/roadmap.md. When you split a new doc, decide where its pointer belongs (usually the parent that previously contained the content) and add it there.
 
 ### Pre-commit checks
 
@@ -106,7 +134,7 @@ If a check fails, fix the cause. Never `--no-verify` or skip.
 
 **Full mechanical coverage of˜ the 2024 PHB + DMG + MM.** The engine models every printed mechanic: every class, subclass, species, background, feat, spell, weapon, armor, magic item, condition, monster statblock. Rules that are genuinely DM-discretion (improvised actions, narrative rulings, houserules) drop to the `CustomEffect` code-handler escape hatch.
 
-This is a long-running build. The roadmap lives in [README.md](README.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The exact slice count drifts; check `git log --oneline | head -5` for the latest. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
+This is a long-running build. The roadmap lives in [docs/roadmap.md](docs/roadmap.md) as six phases (A: engine mechanics, B: state schemas, C: combat fill-in, D: adoption surface, E: 2024 content, F: optional core extraction). Phases A through E completed at slice 46 (alpha.5). Slice 47 (Phase F, optional `ttrpg-engine-core` extraction) is still unstarted. Work since alpha.5 has been "primitive + canonical user" vocabulary expansion: each slice adds a focused Effect kind, TriggerAction, or planner that unblocks a cohort of currently schema-only content. The exact slice count drifts; check `git log --oneline | head -5` for the latest. The per-primitive future-slice queue and per-spell wired/schema-only catalog live in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md).
 
 ## SRD source of truth
 
