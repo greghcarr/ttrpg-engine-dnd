@@ -155,6 +155,89 @@ Aberration sweep (5 entries): Chuul (CR 4), Cloaker (CR 8), Darkmantle (CR 1/2),
 
 Tests: pre-existing suite, no engine changes.
 
+**Content authoring: subclass batch 1.8**
+
+Extends the Life Domain (Cleric subclass) entry beyond its L3 baseline. All four remaining SRD 5.2.1 features defer because each blocks on a distinct missing engine capability; two new L3 entries also defer pending the same primitives.
+
+- L3 Life Domain Spells: new `effects: []` entry (deferred). Per-cleric-level prepared spell list (Aid / Bless / Cure Wounds / Lesser Restoration at L3, Mass Healing Word / Revivify at L5, Aura of Life / Death Ward at L7, Greater Restoration / Mass Cure Wounds at L9 — all 10 spells exist in the pack). The `GrantSpell` primitive is schema-defined but has no engine consumer: `src/effects/builder.ts:577` falls through, and no derivation reads `GrantSpell` effects to populate a character's prepared spell list. Wiring would need an `EffectAccumulator.grantSpell` collector plus a `derivedPreparedSpells` derivation that consults it.
+- L3 Preserve Life: new `effects: []` entry (deferred). RAW expends a Channel Divinity use to evoke healing equal to 5 × cleric level distributed among Bloodied creatures within 30 ft (capped at half HP max per recipient). Same shape as Sacred Weapon — a Channel Divinity action needing a dedicated planner. Every existing `Custom` handlerId in the pack (frenzy, sacred-weapon, reckless-attack, wild-companion, martial-arts, slow-fall, stunning-strike, metamagic, cutting-words) pairs with an engine planner; shipping a `preserve-life` handlerId without one would break that invariant and inflate the wired-features snapshot.
+- L6 Blessed Healer: `effects: []` (deferred). RAW triggers when *you* cast a healing spell that restores HP to a creature *other than yourself*, with the heal-back amount = 2 + spell slot level. Two engine gaps: (1) `HealedEvent` payload has `targetId`, `amount`, `source` — no `casterId`, so an OnEvent rider can't confirm the bearer was the caster; (2) `buildEventFacts` in `src/engine/triggers/dispatch.ts` only generates relative facts (`event.targetIsSelf`, `event.attackerIsSelf`, etc.) for `AttackRolled` and `DamageApplied` events, so a filter referencing `event.targetIsSelf` on a Healed event sees `undefined` and never fires.
+- L17 Supreme Healing: `effects: []` (deferred). RAW: "When you would normally roll one or more dice to restore HP with a spell or Channel Divinity, don't roll those dice; use the highest possible value instead." No "max-roll healing dice instead of rolling" primitive exists; `cast-spell.ts` always rolls via `rollDamage`. Closing this would need a `MaxHealingDice` flag in the effect stack plus a check in the healing branch of cast-spell.
+
+Tests: 1466 pass, tsc --noEmit clean. No snapshot moves (all four are pure stubs).
+
+**Content authoring: subclass batch 1.7**
+
+Extends the Circle of the Land (Druid subclass) entry beyond its L3 row. Two of four remaining SRD 5.2.1 features wire (one partial, one near-wire); two defer. Also adds a missing L3 entry to the existing array.
+
+- L3 Circle of the Land Spells: new `effects: []` entry (deferred). RAW grants a per-land-type prepared spell list (Arid / Polar / Temperate / Tropical) with 3-4 spells per land per druid level (L3 / L5 / L7 / L9). Wiring would need 4 OfferChoice options × 4 level rows of always-prepared `GrantSpell` entries, blocked on the same `OfferChoice when='onLongRest'` non-implementation that gates Fiendish Resilience and many other rest-swappable features.
+- L6 Natural Recovery: partial wire. `GrantResource { resourceId: "natural-recovery", max: 1, recharge: "longRest" }` tracks the once-per-LR cap shared by both halves (no-slot circle-spell cast + short-rest slot recovery up to half druid level). Neither spend mechanic has a planner; the resource is bookkeeping that consumers can surface as "Natural Recovery (1/LR)" — same shape as Fighter Second Wind, Fiend Patron Dark One's Own Luck.
+- L10 Nature's Ward: near wire. `GrantConditionImmunity { conditionId: "poisoned" }` covers the Poisoned-condition immunity cleanly. The damage-resistance half ships as `OfferChoice` with 4 options (Arid→Fire, Polar→Cold, Temperate→Lightning, Tropical→Poison) per the SRD Nature's Ward table. RAW divergence: the land choice happens at L10 standalone rather than inheriting from the L3 Circle of the Land Spells land choice, because L3 is currently schema-only and the engine has no way to share a single OfferChoice answer across two distinct level-grant features.
+- L14 Nature's Sanctuary: `effects: []` (deferred). RAW spends a Wild Shape use to place a 15-ft cube within 120 ft for 1 min, granting Half Cover and the bearer's current Nature's Ward resistance to allies inside. Movable as a bonus action. None of the cube placement, half-cover, ally-area-resistance-share, or generic Wild Shape consumption primitives exist.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up two new wired entries (`circle-of-the-land L6 natural-recovery` and `circle-of-the-land L10 natures-ward`).
+
+**Content authoring: subclass batch 1.6**
+
+Extends the Fiend Patron (Warlock subclass) entry beyond its L3 row. Two of three remaining SRD 5.2.1 features wire as partials with documented caveats; one defers.
+
+- L6 Dark One's Own Luck: partial wire. `GrantResource` with max=max(1, CHA-mod), diceSize=10, recharge=longRest tracks the per-LR counter and mirrors the Bardic Inspiration shape. The "spend to add 1d10 to a check or save after seeing the roll" spend mechanic has no dedicated planner — same as Fighter Second Wind ships today (resource tracked, no engine-side spend planner).
+- L10 Fiendish Resilience: near wire. `OfferChoice` with 12 options covering every damage type except Force, each granting `GrantResistance` for the chosen type. RAW divergence: the choice fires once at acquire (when='onAcquire'). RAW says the warlock can re-pick the damage type after each short or long rest, but OfferChoice when='onLongRest' is schema-defined yet has no rest-time re-offer mechanism in the engine (level-up just excludes it from the level-up choice list, no replacement trigger fires anywhere else). Using 'onLongRest' would silently never prompt; 'onAcquire' gives a functional one-time pick.
+- L14 Hurl Through Hell: `effects: []` (deferred). RAW is "once per turn when you hit, target makes a CHA save against your spell save DC; on fail, 8d10 psychic damage (unless Fiend) and Incapacitated until end of your next turn; once per long rest, restorable by spending a Pact Magic spell slot." `TriggerAction` can't express save-then-conditional-damage-then-condition (its kinds are AddDamage / Heal / ApplyCondition / SpendResource / ModifyDamageTaken / EmitEvent — none accept a save as a gate). Spend-Pact-slot-to-restore also has no recovery primitive.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up two new wired entries (`fiend-patron L6 dark-ones-own-luck` and `fiend-patron L10 fiendish-resilience`).
+
+**Content authoring: subclass batch 1.5**
+
+Extends the Oath of Devotion (Paladin subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (self-immunity only); two defer. Also cleans up one audit-script false positive (L3 Sacred Weapon was flagged as missing but is already wired in the pack as a Custom handler under feature id `sacred-weapon`).
+
+- L7 Aura of Devotion: partial wire. `GrantConditionImmunity { conditionId: "charmed" }` on the paladin captures the self-immunity half ("You [...] have Immunity to the Charmed condition while in your Aura of Protection"). The ally-side aura half ("and your allies have Immunity to the Charmed condition while in your Aura of Protection") needs a new `aura-of-devotion-active` condition added to `conditions[]` plus a `GrantAura` marker on the paladin; the conditions[] array is outside this session's allowed-edit surface. Pattern mirrors the existing L10 Aura of Courage Paladin entry which uses GrantAura + a sibling `aura-of-courage-active` condition for Frightened.
+- L15 Smite of Protection: `effects: []` (deferred). RAW triggers off casting Divine Smite, but there's no Divine-Smite-usage trigger event. The "Half Cover" benefit also has no primitive — cover is positional and the engine doesn't model spatial relationships beyond what individual planners encode.
+- L20 Holy Nimbus: `effects: []` (deferred). Bonus-action toggle with 10-min duration, once per long rest, restorable by expending a 5th-level slot. Stacks an advantage-on-saves-from-fiends/undead rider, a "radiant damage to enemies starting their turn in the aura" rider, and a sunlight emission. None of these compose cleanly today.
+
+Bonus: audit-doc cleanup. The 41 originally-flagged Layer 4 missing features included Sacred Weapon, which the audit script flagged because the pack uses feature id `sacred-weapon` rather than the name the script was searching for. Sacred Weapon ships fully wired at L3 via a Custom handler. True count corrected to 40.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up the new `oath-of-devotion L7 aura-of-devotion` wired entry.
+
+**Content authoring: subclass batch 1.4**
+
+Extends the Draconic Sorcery (Sorcerer subclass) entry beyond its L3 row. One of three remaining SRD 5.2.1 features lands as a partial wire (Resistance only); two defer.
+
+- L6 Elemental Affinity: partial wire. `OfferChoice` with 5 options (Acid / Cold / Fire / Lightning / Poison), each granting `GrantResistance` for the chosen damage type. The CHA-damage rider ("when you cast a spell that deals damage of that type, add your Charisma modifier to one damage roll") doesn't wire because `cast-spell.ts` doesn't consult `modifierSum('damage', ...)` against the bearer's effect stack; that flow exists only in `attack.ts` for weapon attacks. Documented in the audit doc; closing the partial requires either extending `cast-spell.ts` to consume damage modifiers or adding a `BoostSpellDamage` primitive parallel to `BoostHealing`.
+- L14 Dragon Wings: `effects: []` (deferred). RAW is a bonus-action toggle to gain Fly Speed 60 for 1 hour, once per long rest, restorable by spending 3 Sorcery Points. No fly-buff-with-duration toggle primitive exists, and the spend-other-resource-to-restore recovery shape has no primitive.
+- L18 Dragon Companion: `effects: []` (deferred). The "cast Summon Dragon once per long rest without a slot" portion would partially wire via `GrantSpell { preparation: 'oncePerLongRest' }`, but `summon-dragon` isn't in the pack's spell catalog so the reference would dangle. The no-material-component and optional-concentration-removal riders have no primitive either.
+
+Tests: 1466 pass, tsc --noEmit clean, snapshot picks up the new `draconic-sorcery L6 elemental-affinity` wired entry.
+
+**Content authoring: subclass batch 1.3**
+
+Extends the Hunter (Ranger subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary; documents the engine-primitive gaps in the audit doc.
+
+- L7 Defensive Tactics: `effects: []` (deferred). RAW is a choice between Escape the Horde (OAs against you have Disadvantage) and Multiattack Defense (an attacker that hits you has Disadvantage on their other attacks against you this turn). Escape the Horde needs an OA-flag on `AttackRolled` so a predicate can isolate opportunity attacks; `AttackKindSchema` is `melee | ranged` only, and the OA planner emits a vanilla `AttackRolled`. Multiattack Defense needs a new condition (`multiattack-defense-active`) plus `SetAdvantageVsSource`, but the conditions[] array is outside the subclass-session edit surface.
+- L11 Superior Hunter's Prey: `effects: []` (deferred). RAW is "once per turn when you deal damage to a creature marked by your Hunter's Mark, you can also deal that spell's extra damage to a different creature within 30 ft." No predicate gates on the target being the Hunter's-Mark source (needs an "event.targetIsMyHuntersMarkTarget" path), and `TriggerAction` has no "emit damage to a second chosen target" action.
+- L15 Superior Hunter's Defense: `effects: []` (deferred). RAW is a reaction granting Resistance to the damage type just taken (and any other damage of that type until end of turn). `TriggerAction` has no way to read the triggering event's damage type and pass it as a parameter to a follow-up `GrantResistance` effect.
+
+No engine code changed; no test snapshots moved.
+
+**Content authoring: subclass batch 1.2**
+
+Extends the Path of the Berserker (Barbarian subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary. Documents the gaps in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) so future engine slices know exactly what primitives unblock these.
+
+- L6 Mindless Rage: `effects: []` (deferred). RAW gates Charmed / Frightened immunity on "while Rage is active." Rage is currently modeled as a resource counter only, with no rage-active condition or predicate path. Unconditional `GrantConditionImmunity` would be wrong.
+- L10 Retaliation: `effects: []` (deferred). RAW is a reaction to make a melee attack against a creature within 5 ft that damaged you. TriggerAction vocabulary has no "make an attack" action (kinds: AddDamage / AddDamageToAttacker / Heal / ApplyCondition / ApplyConditionToAttacker / SpendResource / ModifyDamageTaken / EmitEvent). No per-attacker range predicate either.
+- L14 Intimidating Presence: `effects: []` (deferred). Bonus-action emanation-save primitive doesn't exist, and the "spend a use of Rage to restore the feature" recovery shape has no primitive.
+
+No engine code changed; no test snapshots moved (pure-stub additions don't trip the wired-features catalog).
+
+**Content authoring: subclass batch 1.1**
+
+Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four remaining SRD 5.2.1 features. Two ship wired and two ship as deferred stubs with audit-doc reasons. Closes 2 of the 41 Layer 4 entries in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md), 2 deferred-with-reason.
+
+- L7 Additional Fighting Style: wired via `OfferChoice` mirroring the L1 Fighter choice (six options: Archery, Defense, Dueling, Great Weapon Fighting, Protection, Two-Weapon Fighting), separate `choiceId` (`fighting-style-champion-l7`) so it doesn't collide with the L1 selection.
+- L10 Heroic Warrior: ships `effects: []` (deferred). Needs a `HeroicInspiration` tracker on character state plus a turn-start trigger that grants it if absent. Not in current engine vocabulary.
+- L15 Superior Critical: wired via `ExpandCritRange` with threshold 18 (same shape as L3 Improved Critical's threshold 19).
+- L18 Survivor: ships `effects: []` (deferred). Defy Death needs a death-save-advantage primitive and a "natural N counts as 20" promotion primitive; Heroic Rally needs a Bloodied predicate plus a conditional recurring heal at turn start. None in current engine vocabulary.
+
 **Distribution: drop npm-publish posture (slice 198)**
 
 Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:

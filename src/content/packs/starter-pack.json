@@ -639,6 +639,27 @@
             "name": "Frenzy",
             "effects": [{ "kind": "Custom", "handlerId": "frenzy" }]
           }
+        ],
+        "6": [
+          {
+            "id": "mindless-rage",
+            "name": "Mindless Rage",
+            "effects": []
+          }
+        ],
+        "10": [
+          {
+            "id": "retaliation",
+            "name": "Retaliation",
+            "effects": []
+          }
+        ],
+        "14": [
+          {
+            "id": "intimidating-presence",
+            "name": "Intimidating Presence",
+            "effects": []
+          }
         ]
       }
     },
@@ -682,6 +703,30 @@
             "id": "disciple-of-life",
             "name": "Disciple of Life",
             "effects": [{ "kind": "BoostHealing", "flat": 2, "perSpellLevel": 1 }]
+          },
+          {
+            "id": "life-domain-spells",
+            "name": "Life Domain Spells",
+            "effects": []
+          },
+          {
+            "id": "preserve-life",
+            "name": "Channel Divinity: Preserve Life",
+            "effects": []
+          }
+        ],
+        "6": [
+          {
+            "id": "blessed-healer",
+            "name": "Blessed Healer",
+            "effects": []
+          }
+        ],
+        "17": [
+          {
+            "id": "supreme-healing",
+            "name": "Supreme Healing",
+            "effects": []
           }
         ]
       }
@@ -700,6 +745,54 @@
           {
             "id": "lands-aid",
             "name": "Land's Aid",
+            "effects": []
+          },
+          {
+            "id": "circle-of-the-land-spells",
+            "name": "Circle of the Land Spells",
+            "effects": []
+          }
+        ],
+        "6": [
+          {
+            "id": "natural-recovery",
+            "name": "Natural Recovery",
+            "effects": [
+              {
+                "kind": "GrantResource",
+                "resourceId": "natural-recovery",
+                "max": 1,
+                "recharge": "longRest"
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "natures-ward",
+            "name": "Nature's Ward",
+            "effects": [
+              { "kind": "GrantConditionImmunity", "conditionId": "poisoned" },
+              {
+                "kind": "OfferChoice",
+                "choiceId": "natures-ward-land",
+                "prompt": "Choose your land type to gain its associated damage Resistance.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "arid", "label": "Arid (Fire)", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "polar", "label": "Polar (Cold)", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "temperate", "label": "Temperate (Lightning)", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "tropical", "label": "Tropical (Poison)", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "natures-sanctuary",
+            "name": "Nature's Sanctuary",
             "effects": []
           }
         ]
@@ -722,6 +815,50 @@
             "effects": [
               { "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 5 }
             ]
+          }
+        ],
+        "7": [
+          {
+            "id": "additional-fighting-style",
+            "name": "Additional Fighting Style",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "fighting-style-champion-l7",
+                "prompt": "Choose another Fighting Style.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "archery", "label": "Archery", "effects": [{ "kind": "AddModifier", "target": "attack", "value": 2 }] },
+                  { "id": "defense", "label": "Defense", "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1, "condition": { "kind": "eq", "path": "bearer.wearingArmor", "value": true } }] },
+                  { "id": "dueling", "label": "Dueling", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2, "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackKind", "value": "melee" }, { "kind": "eq", "path": "bearer.offHandHasWeapon", "value": false }] } }] },
+                  { "id": "great-weapon", "label": "Great Weapon Fighting", "effects": [{ "kind": "GrantGreatWeaponFighting" }] },
+                  { "id": "protection", "label": "Protection", "effects": [{ "kind": "GrantProtectionFightingStyle" }] },
+                  { "id": "two-weapon", "label": "Two-Weapon Fighting", "effects": [{ "kind": "GrantTwoWeaponFighting" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "heroic-warrior",
+            "name": "Heroic Warrior",
+            "effects": []
+          }
+        ],
+        "15": [
+          {
+            "id": "superior-critical",
+            "name": "Superior Critical",
+            "effects": [{ "kind": "ExpandCritRange", "threshold": 18 }]
+          }
+        ],
+        "18": [
+          {
+            "id": "survivor",
+            "name": "Survivor",
+            "effects": []
           }
         ]
       }
@@ -756,6 +893,29 @@
             "name": "Channel Divinity: Sacred Weapon",
             "effects": [{ "kind": "Custom", "handlerId": "sacred-weapon" }]
           }
+        ],
+        "7": [
+          {
+            "id": "aura-of-devotion",
+            "name": "Aura of Devotion",
+            "effects": [
+              { "kind": "GrantConditionImmunity", "conditionId": "charmed" }
+            ]
+          }
+        ],
+        "15": [
+          {
+            "id": "smite-of-protection",
+            "name": "Smite of Protection",
+            "effects": []
+          }
+        ],
+        "20": [
+          {
+            "id": "holy-nimbus",
+            "name": "Holy Nimbus",
+            "effects": []
+          }
         ]
       }
     },
@@ -773,6 +933,27 @@
           {
             "id": "hunters-prey",
             "name": "Hunter's Prey",
+            "effects": []
+          }
+        ],
+        "7": [
+          {
+            "id": "defensive-tactics",
+            "name": "Defensive Tactics",
+            "effects": []
+          }
+        ],
+        "11": [
+          {
+            "id": "superior-hunters-prey",
+            "name": "Superior Hunter's Prey",
+            "effects": []
+          }
+        ],
+        "15": [
+          {
+            "id": "superior-hunters-defense",
+            "name": "Superior Hunter's Defense",
             "effects": []
           }
         ]
@@ -822,6 +1003,42 @@
             "name": "Draconic Sorcery Spells",
             "effects": []
           }
+        ],
+        "6": [
+          {
+            "id": "elemental-affinity",
+            "name": "Elemental Affinity",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "elemental-affinity",
+                "prompt": "Choose your draconic damage type.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }] },
+                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "dragon-wings",
+            "name": "Dragon Wings",
+            "effects": []
+          }
+        ],
+        "18": [
+          {
+            "id": "dragon-companion",
+            "name": "Dragon Companion",
+            "effects": []
+          }
         ]
       }
     },
@@ -839,6 +1056,57 @@
           {
             "id": "fiend-spells",
             "name": "Fiend Patron Spells",
+            "effects": []
+          }
+        ],
+        "6": [
+          {
+            "id": "dark-ones-own-luck",
+            "name": "Dark One's Own Luck",
+            "effects": [
+              {
+                "kind": "GrantResource",
+                "resourceId": "dark-ones-own-luck",
+                "max": { "kind": "max", "terms": [{ "kind": "const", "value": 1 }, { "kind": "abilityMod", "ability": "CHA" }] },
+                "recharge": "longRest",
+                "diceSize": 10
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "fiendish-resilience",
+            "name": "Fiendish Resilience",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "fiendish-resilience",
+                "prompt": "Choose a damage type (other than Force) to gain Resistance to.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "acid", "label": "Acid", "effects": [{ "kind": "GrantResistance", "damageType": "acid" }] },
+                  { "id": "bludgeoning", "label": "Bludgeoning", "effects": [{ "kind": "GrantResistance", "damageType": "bludgeoning" }] },
+                  { "id": "cold", "label": "Cold", "effects": [{ "kind": "GrantResistance", "damageType": "cold" }] },
+                  { "id": "fire", "label": "Fire", "effects": [{ "kind": "GrantResistance", "damageType": "fire" }] },
+                  { "id": "lightning", "label": "Lightning", "effects": [{ "kind": "GrantResistance", "damageType": "lightning" }] },
+                  { "id": "necrotic", "label": "Necrotic", "effects": [{ "kind": "GrantResistance", "damageType": "necrotic" }] },
+                  { "id": "piercing", "label": "Piercing", "effects": [{ "kind": "GrantResistance", "damageType": "piercing" }] },
+                  { "id": "poison", "label": "Poison", "effects": [{ "kind": "GrantResistance", "damageType": "poison" }] },
+                  { "id": "psychic", "label": "Psychic", "effects": [{ "kind": "GrantResistance", "damageType": "psychic" }] },
+                  { "id": "radiant", "label": "Radiant", "effects": [{ "kind": "GrantResistance", "damageType": "radiant" }] },
+                  { "id": "slashing", "label": "Slashing", "effects": [{ "kind": "GrantResistance", "damageType": "slashing" }] },
+                  { "id": "thunder", "label": "Thunder", "effects": [{ "kind": "GrantResistance", "damageType": "thunder" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "14": [
+          {
+            "id": "hurl-through-hell",
+            "name": "Hurl Through Hell",
             "effects": []
           }
         ]
