@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell components (slice 179)**
+
+SRD 5.2.1 follow-up to slice 178. Compared V/S/M presence across all pack spells against SRD bodies; five mismatches found and fixed.
+
+- conjure-woodland-beings: dropped material component (holly berry per creature), now V, S.
+- conjure-elemental: dropped material component (per-element materials), now V, S.
+- power-word-heal: dropped somatic, now V only (per SRD).
+- resistance: dropped material component (miniature cloak), now V, S.
+- true-strike: dropped verbal, switched to S, M with the SRD 5.2.1 material text (a weapon with which you have proficiency, worth 1+ CP), where the 2014 form was a different shape.
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: spell castingTime / range / duration / concentration (slice 178)**
 
 SRD 5.2.1 follow-up to slice 177's spell-school sweep. Audited every pack spell against SRD on castingTime, range, duration, and the concentration flag.
