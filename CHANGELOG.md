@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: deferred-feature inventory (slice 217)**
+
+Docs-only sweep marking the three remaining missing-main-class-features in the SRD 5.2.1 classes audit as deferred-with-reason. Each has a multi-slice prerequisite that needs to ship first; documenting the blockers so future slices know what unblocks them.
+
+- **Cleric L20 Greater Divine Intervention**: needs base Divine Intervention (Cleric L10) as a dedicated planner. RAW L20 just adds Wish to the spell-selection list, so there's nothing to wire on top of an empty base. Prerequisite: ship `planDivineIntervention` (resource consume, optional spell selection from cleric list, 2d4-LR cooldown on success per RAW), then L20 becomes a marker primitive adding Wish to the selectable set.
+- **Monk L10 Heightened Focus**: needs Flurry of Blows / Patient Defense / Step of the Wind wired as dedicated planners. All three are content stubs today; Heightened Focus's RAW benefit ("each gains the following benefits") has nothing to extend until they ship.
+- **Ranger L17 Precise Hunter**: needs Hunter's Mark (Ranger L1 spell) as a dedicated planner. The spell currently has `mechanicalEffects: []`; no `hunters-mark-active` condition exists on targets with a source link. Precise Hunter's RAW needs a 3-way join (bearer-marker, target-condition, condition.sourceCharacterId === attacker.id). Prerequisite: ship `planHuntersMark`, then add a `GrantAdvantageVsBearersOfMyCondition { conditionId }` marker primitive that the attack planner consults.
+
+Cumulative session-progress: **14 of 17 originally-missing main-class features closed across slices 199-216**. The audit doc reads in full at [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md).
+
 **Content: Bard L20 Words of Creation + Warlock L9 Contact Patron (slice 216)**
 
 Two pure-content GrantSpell wires cashing in slice 212's engine consumer:
