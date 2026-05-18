@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: spell castingTime / range / duration / concentration (slice 178)**
+
+SRD 5.2.1 follow-up to slice 177's spell-school sweep. Audited every pack spell against SRD on castingTime, range, duration, and the concentration flag.
+
+Real drift fixes (36 field edits across 27 spells):
+
+- Castings: lesser-restoration to Bonus Action; produce-flame to Bonus Action; jump to Bonus Action; conjure-elemental + conjure-celestial to Action (were 1 minute); guards-and-wards to 1 hour (was 10 minutes); divination "1 action" normalized to "Action".
+- Ranges: banishment 60 ft to 30 ft; conjure-elemental 90 to 60; conjure-fey 90 to 60; conjure-minor-elementals / conjure-woodland-beings 60-90 ft to Self; giant-insect 30 to 60 ft; arcane-sword 60 to 90 ft; sleep 90 to 60 ft; power-word-heal Touch to 60 feet; tsunami / storm-of-vengeance Sight to 1 mile; heroes-feast 30 ft to Self; produce-flame "Self / 30 feet" to Self.
+- Durations: chill-touch 1 round to Instantaneous; color-spray 1 round to Instantaneous; command 1 round to Instantaneous; thaumaturgy "1 minute" to "Up to 1 minute"; goodberry Instantaneous to 24 hours; secret-chest Instantaneous to Until dispelled; astral-projection Special to Until dispelled; conjure-minor-elementals / conjure-woodland-beings / conjure-elemental / conjure-celestial / conjure-fey all 1 hour to 10 minutes (concentration limit lowered); forcecage "1 hour" to "Concentration, up to 1 hour"; animal-shapes / divine-favor / searing-smite all stripped of "Concentration, up to" prefix per SRD 5.2.1.
+- Concentration flag flipped to match duration text: divine-favor, searing-smite, animal-shapes to false; forcecage to true.
+
+The "ritual" castingTime variants (Action or Ritual, 1 minute or Ritual, etc.) are not drift because the pack uses a separate `ritual: true` flag with the bare castingTime; verified across all 14 affected spells. "Reaction, which you take when X" variants are likewise pack convention (terse "Reaction"; trigger condition lives in the spell's mechanical model). Self+shape range strings ("Self (15-foot cone)", "Self (15-foot radius)") were kept because they carry shape information that downstream consumers may rely on; the SRD body always describes the same shape and the pack's range string is informationally a superset.
+
+Test update: `tests/golden/s61-smite-onhit.test.ts` no longer asserts that Searing Smite and Divine Favor establish a concentration slot or that Searing Smite's consume-on-trigger fires a ConcentrationBroken event. Per SRD 5.2.1 neither is a concentration spell. The rider mechanics (single-fire-then-consume for Searing Smite; every-hit for Divine Favor) are unchanged and still proved by the test.
+
+Tests: 1452 pass, tsc --noEmit clean.
+
 **Content audit: spell schools (slice 177)**
 
 Audit pass over every spell in the pack against SRD 5.2.1 school + level. The slice-151 spell audit had explicitly deferred secondary fields including school; this slice closes that gap. 13 school drifts found and fixed; spell level had zero drift.

@@ -2,17 +2,20 @@
 //
 // Searing Smite (one-shot): Paladin casts as a Bonus Action; on the next
 // weapon attack that hits, +1d6 fire fires via the `OnEvent` rider, and
-// the spell's concentration breaks via the new `consumeOnTrigger` path.
-// A subsequent attack does not fire the smite (the condition is gone).
+// the bearing condition lifts via the `consumeOnTrigger` path. A
+// subsequent attack does not fire the smite (the condition is gone).
+// SRD 5.2.1 removed concentration from this spell, so the consume path
+// no longer touches the concentration slot.
 //
 // Divine Favor (duration): Paladin casts; every weapon attack that hits
 // for the spell's duration fires +1d4 radiant. The rider does NOT consume
-// on trigger — concentration persists until something else ends it.
+// on trigger; the bearing condition persists for the spell's duration.
+// SRD 5.2.1 removed concentration from this spell too.
 //
 // Together these prove the two halves of the on-hit trigger primitive:
-// the `consumeOnTrigger` flag lifts the parent condition (and breaks
-// concentration when tracked) after firing, and the default behavior is
-// the existing every-hit rider that Sneak Attack already exercises.
+// the `consumeOnTrigger` flag lifts the parent condition after firing,
+// and the default behavior is the existing every-hit rider that Sneak
+// Attack already exercises.
 
 import { describe, expect, it } from 'vitest';
 import { createEngine } from '../../src/engine/index.js';
@@ -51,7 +54,7 @@ const buildTarget = (): Character =>
   });
 
 describe('golden: on-hit trigger primitive (smite cohort)', () => {
-  it('Searing Smite fires once on first hit, breaks concentration, second hit does not fire', () => {
+  it('Searing Smite fires once on first hit and the rider is consumed, second hit does not fire', () => {
     const STARTER_PACK = loadStarterPack();
     // Seed-search: find a seed where the paladin's first weapon attack
     // after casting Searing Smite is a hit. The smite rider needs a hit
@@ -89,7 +92,8 @@ describe('golden: on-hit trigger primitive (smite cohort)', () => {
       }).events;
       campaign = commit(campaign, castEvents);
 
-      expect(campaign.state.characters[paladin.id]?.concentrationEffectId).toBeDefined();
+      // SRD 5.2.1 Searing Smite is not a concentration spell; the bearing
+      // condition is what tracks the rider.
       expect(
         campaign.state.characters[paladin.id]?.appliedConditions.some(
           (c) => c.conditionId === 'searing-smite-active',
@@ -110,16 +114,11 @@ describe('golden: on-hit trigger primitive (smite cohort)', () => {
         (e) => e.type === 'TriggerFired' && e.triggerId.endsWith('searing-smite-rider'),
       );
       expect(firstFire).toBeDefined();
-      const concentrationBroken = firstAttack.find(
-        (e) => e.type === 'ConcentrationBroken' && e.reason === 'used',
-      );
-      expect(concentrationBroken).toBeDefined();
 
       campaign = commit(campaign, firstAttack);
 
-      // After commit, the smite condition is gone and the paladin no
-      // longer holds concentration.
-      expect(campaign.state.characters[paladin.id]?.concentrationEffectId).toBeUndefined();
+      // After commit, the smite condition is gone (consumeOnTrigger
+      // lifted it after the first hit).
       expect(
         campaign.state.characters[paladin.id]?.appliedConditions.some(
           (c) => c.conditionId === 'searing-smite-active',
@@ -143,7 +142,7 @@ describe('golden: on-hit trigger primitive (smite cohort)', () => {
     expect(proven, `Searing Smite test could not find a hit across ${attempt} seeds`).toBe(true);
   });
 
-  it('Divine Favor fires +1d4 radiant on every hit; concentration persists', () => {
+  it('Divine Favor fires +1d4 radiant on every hit; bearing condition persists', () => {
     const STARTER_PACK = loadStarterPack();
     let attempt = 0;
     let proven = false;
@@ -192,15 +191,10 @@ describe('golden: on-hit trigger primitive (smite cohort)', () => {
         (e) => e.type === 'TriggerFired' && e.triggerId.endsWith('divine-favor-rider'),
       );
       expect(firstFire).toBeDefined();
-      // The duration rider does NOT consume; no ConcentrationBroken
-      // event fires from this trigger path.
-      const concentrationBroken = firstAttack.find(
-        (e) => e.type === 'ConcentrationBroken' && e.reason === 'used',
-      );
-      expect(concentrationBroken).toBeUndefined();
 
       campaign = commit(campaign, firstAttack);
-      expect(campaign.state.characters[paladin.id]?.concentrationEffectId).toBeDefined();
+      // The duration rider does NOT consume; the bearing condition
+      // persists for subsequent hits within the spell's duration.
       expect(
         campaign.state.characters[paladin.id]?.appliedConditions.some(
           (c) => c.conditionId === 'divine-favor-active',
