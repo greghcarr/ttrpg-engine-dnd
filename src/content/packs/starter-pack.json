@@ -2142,7 +2142,14 @@
     { "id": "cobblers-tools", "itemKind": "tool", "name": "Cobbler's Tools", "category": "artisan" },
     { "id": "cooks-utensils", "itemKind": "tool", "name": "Cook's Utensils", "category": "artisan" },
     { "id": "glassblowers-tools", "itemKind": "tool", "name": "Glassblower's Tools", "category": "artisan" },
-    { "id": "jewelers-tools", "itemKind": "tool", "name": "Jeweler's Tools", "category": "artisan" }
+    { "id": "jewelers-tools", "itemKind": "tool", "name": "Jeweler's Tools", "category": "artisan" },
+    { "id": "leatherworkers-tools", "itemKind": "tool", "name": "Leatherworker's Tools", "category": "artisan" },
+    { "id": "masons-tools", "itemKind": "tool", "name": "Mason's Tools", "category": "artisan" },
+    { "id": "painters-supplies", "itemKind": "tool", "name": "Painter's Supplies", "category": "artisan" },
+    { "id": "potters-tools", "itemKind": "tool", "name": "Potter's Tools", "category": "artisan" },
+    { "id": "tinkers-tools", "itemKind": "tool", "name": "Tinker's Tools", "category": "artisan" },
+    { "id": "weavers-tools", "itemKind": "tool", "name": "Weaver's Tools", "category": "artisan" },
+    { "id": "woodcarvers-tools", "itemKind": "tool", "name": "Woodcarver's Tools", "category": "artisan" }
   ],
   "monsters": [
     {

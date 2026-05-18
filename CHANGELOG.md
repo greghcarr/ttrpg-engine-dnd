@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.12, 7 SRD 5.2.1 artisan's tools (second wave; closes the catalog)**
+
+Closes the SRD 5.2.1 artisan's tools catalog with the alphabetical second wave. Seven new `itemKind: 'tool'` entries with `category: 'artisan'`, pure-stub shape per the ToolSchema.
+
+- New ids: `leatherworkers-tools`, `masons-tools`, `painters-supplies`, `potters-tools`, `tinkers-tools`, `weavers-tools`, `woodcarvers-tools`. Source lines in equipment.md: 680, 686, 692, 698, 710, 715, 720.
+- Cohort theme: alphabetical second wave closing the SRD 5.2.1 artisan's tools section. With this batch the pack now ships 17/17 SRD artisan's tools: Calligrapher's Supplies and Smith's Tools (alpha.5 seed) plus 15 from batches 4.11 / 4.12.
+- 7-entry batch rather than 8 because closing the exact SRD section boundary is cleaner than padding with one arbitrary Other Tools entry. Prior batches have varied in size (4.10 was 5 entries, 4.2 / 4.4 / etc were 8).
+- **Pre-existing miscategorization caught during the audit pass**: the alpha.5-seed `thieves-tools` and `herbalism-kit` ship with `category: 'artisan'` (file lines 1874, 1876) but SRD 5.2.1 places both under the "Other Tools" section (equipment.md lines 741 and 760, NOT under the "Artisan's Tools" subsection at line 622). This is a pre-existing drift, not introduced by this batch. Per the content-lane "do not modify existing entries" rule, the fix stays as a flagged note for the engine session to address at merge time. Effect: pack-level `category: 'artisan'` queries currently return 19 entries (15 from this batch + 2 from alpha.5 correctly + 2 miscategorized alpha.5); after the fix it should return 17.
+
+Coverage bump: items 301 to 308 total, tools 13 to 20. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. SRD artisan's tools catalog now 17/17 complete (modulo the noted alpha.5 miscategorization). Remaining tool gaps: 4 Other Tools entries, 4 Gaming Set sub-forms, 9 Musical Instrument sub-forms.
+
 **Content authoring: items batch 4.11, 8 SRD 5.2.1 artisan's tools (first wave)**
 
 Opens the tools catalog walk against `references/srd-markdown/equipment.md` (`## Tools` section, lines 604 to 763). Eight new `itemKind: 'tool'` entries with `category: 'artisan'`, matching the existing pure-stub tool shape `{ id, itemKind, name, category }` used by the alpha.5 seed tools (the ToolSchema has no description field, unlike Gear and Consumable).
