@@ -4,6 +4,15 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: subclass batch 1.1**
+
+Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four remaining SRD 5.2.1 features. Two ship wired and two ship as deferred stubs with audit-doc reasons. Closes 2 of the 41 Layer 4 entries in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md), 2 deferred-with-reason.
+
+- L7 Additional Fighting Style: wired via `OfferChoice` mirroring the L1 Fighter choice (six options: Archery, Defense, Dueling, Great Weapon Fighting, Protection, Two-Weapon Fighting), separate `choiceId` (`fighting-style-champion-l7`) so it doesn't collide with the L1 selection.
+- L10 Heroic Warrior: ships `effects: []` (deferred). Needs a `HeroicInspiration` tracker on character state plus a turn-start trigger that grants it if absent. Not in current engine vocabulary.
+- L15 Superior Critical: wired via `ExpandCritRange` with threshold 18 (same shape as L3 Improved Critical's threshold 19).
+- L18 Survivor: ships `effects: []` (deferred). Defy Death needs a death-save-advantage primitive and a "natural N counts as 20" promotion primitive; Heroic Rally needs a Bloodied predicate plus a conditional recurring heal at turn start. None in current engine vocabulary.
+
 **Distribution: drop npm-publish posture (slice 198)**
 
 Earlier alpha versions (alpha.0 through alpha.5) were unpublished from npm in May 2026 on IP-cleanup grounds (the older starter-pack snapshots carried non-SRD monsters / spells / items that were caught and removed across slices 141-151 but still shipped in the published tarballs). The package will not be republished. Mechanical changes:

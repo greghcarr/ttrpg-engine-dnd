@@ -103,7 +103,7 @@ About 17 main-class features. Follow-up content-authoring slices.
 
 This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / L10 / L14 / L17 (or similar progression). Pack subclasses mostly ship only the L3 features.
 
-### Missing subclass features (41 total across 12 subclasses)
+### Missing subclass features (39 outstanding of 41 across 12 subclasses; 2 wired in subclass batch 1.1, 2 deferred-with-reason)
 
 | Subclass | Missing features |
 |---|---|
@@ -111,7 +111,7 @@ This is the largest gap. SRD 5.2.1 ships 4-5 features per subclass at L3 / L6 / 
 | College of Lore | L6 Magical Discoveries, L14 Peerless Skill |
 | Life Domain | L3 Life Domain Spells, L3 Preserve Life, L6 Blessed Healer, L17 Supreme Healing |
 | Circle of the Land | L3 Circle of the Land Spells, L6 Natural Recovery, L10 Nature's Ward, L14 Nature's Sanctuary |
-| Champion | L7 Additional Fighting Style, L10 Heroic Warrior, L15 Superior Critical, L18 Survivor |
+| Champion | ~~L7 Additional Fighting Style~~ (wired, subclass batch 1.1), L10 Heroic Warrior (deferred, no HeroicInspiration tracker / grant primitive), ~~L15 Superior Critical~~ (wired, subclass batch 1.1), L18 Survivor (deferred: needs death-save advantage primitive, "natural N counts as 20" primitive, bloodied predicate, and a conditional recurring heal) |
 | Warrior of the Open Hand | L6 Wholeness of Body, L11 Fleet Step, L17 Quivering Palm |
 | Oath of Devotion | L3 Sacred Weapon, L7 Aura of Devotion, L15 Smite of Protection, L20 Holy Nimbus |
 | Hunter | L7 Defensive Tactics, L11 Superior Hunter's Prey, L15 Superior Hunter's Defense |

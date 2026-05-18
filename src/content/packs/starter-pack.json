@@ -723,6 +723,50 @@
               { "kind": "ModifySpeed", "mode": "walk", "op": "add", "value": 5 }
             ]
           }
+        ],
+        "7": [
+          {
+            "id": "additional-fighting-style",
+            "name": "Additional Fighting Style",
+            "effects": [
+              {
+                "kind": "OfferChoice",
+                "choiceId": "fighting-style-champion-l7",
+                "prompt": "Choose another Fighting Style.",
+                "oneOf": 1,
+                "when": "onAcquire",
+                "options": [
+                  { "id": "archery", "label": "Archery", "effects": [{ "kind": "AddModifier", "target": "attack", "value": 2 }] },
+                  { "id": "defense", "label": "Defense", "effects": [{ "kind": "AddModifier", "target": "ac", "value": 1, "condition": { "kind": "eq", "path": "bearer.wearingArmor", "value": true } }] },
+                  { "id": "dueling", "label": "Dueling", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2, "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.attackKind", "value": "melee" }, { "kind": "eq", "path": "bearer.offHandHasWeapon", "value": false }] } }] },
+                  { "id": "great-weapon", "label": "Great Weapon Fighting", "effects": [{ "kind": "GrantGreatWeaponFighting" }] },
+                  { "id": "protection", "label": "Protection", "effects": [{ "kind": "GrantProtectionFightingStyle" }] },
+                  { "id": "two-weapon", "label": "Two-Weapon Fighting", "effects": [{ "kind": "GrantTwoWeaponFighting" }] }
+                ]
+              }
+            ]
+          }
+        ],
+        "10": [
+          {
+            "id": "heroic-warrior",
+            "name": "Heroic Warrior",
+            "effects": []
+          }
+        ],
+        "15": [
+          {
+            "id": "superior-critical",
+            "name": "Superior Critical",
+            "effects": [{ "kind": "ExpandCritRange", "threshold": 18 }]
+          }
+        ],
+        "18": [
+          {
+            "id": "survivor",
+            "name": "Survivor",
+            "effects": []
+          }
         ]
       }
     },

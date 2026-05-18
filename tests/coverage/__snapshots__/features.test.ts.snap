@@ -250,6 +250,8 @@ exports[`feature-coverage matrix: subclasses > wired subclass features catalog i
 [
   "champion L3 improved-critical",
   "champion L3 remarkable-athlete",
+  "champion L7 additional-fighting-style",
+  "champion L15 superior-critical",
   "college-of-lore L3 cutting-words",
   "college-of-lore L3 lore-bonus-proficiencies",
   "draconic-sorcery L3 draconic-resilience-ac",

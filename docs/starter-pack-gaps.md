@@ -342,7 +342,7 @@ One canonical L3 subclass ships per class:
 
 - path-of-the-berserker, college-of-lore, life-domain, circle-of-the-land, champion, warrior-of-the-open-hand, oath-of-devotion, hunter, thief, draconic-sorcery, fiend-patron, evoker.
 
-Each entry's `levelGrants` only has an L3 row. L7 / L10 / L14 (the standard subclass progression points) are unstarted across every subclass. The additional 3–4 subclasses per class in the PHB are not in the pack.
+Each entry's `levelGrants` only has an L3 row. L7 / L10 / L14 (the standard subclass progression points) are unstarted across every subclass except Champion, which subclass batch 1.1 extended with L7 Additional Fighting Style (wired via `OfferChoice`), L10 Heroic Warrior (deferred-stub: needs HeroicInspiration tracker), L15 Superior Critical (wired via `ExpandCritRange` threshold 18), and L18 Survivor (deferred-stub: needs death-save advantage, "natural N counts as 20", bloodied predicate, conditional recurring heal). The additional 3-4 subclasses per class in the PHB are not in the pack.
 
 Even within the L3 row, several subclass features ship as content stubs (the names appear but no mechanical wiring): Wild Shape forms (druid), Patron Spells (warlock fiend, paladin devotion), Hunter's Lore + Hunter's Prey (ranger hunter), Fast Hands (rogue thief), Open Hand Technique (monk), Land's Aid (druid circle of the land), Sculpt Spells (evoker wizard), Dark One's Blessing (warlock fiend).
 
