@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.14 (Mid-tier Monstrosity sweep)**
+
+Six new SRD 5.2.1 statblocks: Chimera (CR 6), Drider (CR 6), Medusa (CR 6), Hydra (CR 8), Behir (CR 11), Remorhaz (CR 11). Extends the Monstrosity ladder from the batch-4.13 low-tier sweep into mid-to-upper-mid tier (CR 6-11). Monstrosity roster moves from 17 to 23. Type-tagging note: SRD 5.2.1 reclassified Gorgon → Construct, Troll → Giant, Lamia → Fiend, Roper → Aberration; batch ships only SRD-typed Monstrosities. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Pack monster total moves from 175 to 181.
+
+Defers under existing engine gaps: Multiattack on all six (three-flavor on Chimera, three-attack-any-combination on Drider, or-branch on Medusa, head-count-equals-bites on Hydra, Bite-plus-Constrict on Behir, single-Bite-plus-bonus-Swallow on Remorhaz); Recharge 5-6 area-save breaths on Behir Lightning Breath + Chimera Fire Breath (both wireable under slice-140 but deferred for dragon-vs-monstrosity-breath coherence); Drider Sunlight Sensitivity joins the existing Shadow / Wight / Specter gap; Medusa + Basilisk-style self-target-on-reflection Petrifying Gaze identical-shape across the two-failure escalation Petrification family; Hydra Multiple Heads + Reactive Heads + regrow-unless-fire-damage form a novel head-count tracker composite; Behir Constrict-and-Restrained + Swallow with regurgitate-on-30-damage; Remorhaz Heat Aura folds into the existing aura-trigger family (Hezrou Stench / Balor Fire Aura / Pit Fiend Fear Aura — fourth user); Remorhaz Swallow with up-to-two-creatures cap; Drider Foreleg / Medusa Snake Hair / Poison Ray riders fold into the on-hit-poison-damage gap.
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.13 (Low-CR Monstrosity sweep)**
 
 Five new SRD 5.2.1 statblocks: Cockatrice (CR 1/2), Death Dog (CR 1), Mimic (CR 2), Basilisk (CR 3), Phase Spider (CR 3). Opens the low-CR-to-mid Monstrosity tier with five canonical adventure-staple Monstrosities below CR 4. The Monstrosity type roster moves from 12 to 17 entries. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md). Pack monster total moves from 170 to 175.
