@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: monsters batch 4.2 (upper Devil ladder)**
+
+Four new SRD 5.2.1 statblocks: Horned Devil (CR 11), Erinyes (CR 12), Ice Devil (CR 14), Pit Fiend (CR 20). Closes the SRD 5.2.1 devil ladder above Bone Devil (CR 9, batch 1.19) and brings the Fiend type to symmetric demon / devil coverage after batch 4.1 closed the Type I-VI demon ladder. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB. All four wire Magic Resistance via `{kind: "GrantMagicResistance"}` (slice-131 user count moves from 22 to 26). Pit Fiend at CR 20 ties for the new highest-CR statblock alongside Adult Red (CR 17) and just below Solar (CR 21). The pack's monster total moves from 117 to 121.
+
+Defers under existing engine gaps: Multiattack (all four); Diabolical Restoration (narrative); on-hit elemental damage riders (Horned Devil Searing Fork fire, Erinyes Withering Sword necrotic, Ice Devil Ice Spear + Tail cold, Pit Fiend Devilish Claw necrotic + Fiery Mace force + fire); Horned Devil Hurl Flame ranged elemental attack; Horned Devil Infernal Tail infernal-wound recurring-damage rider; Ice Devil Ice Spear on-hit speed-and-action-economy restriction; Ice Devil Ice Wall spell-as-monster-action; Pit Fiend Bite composite poisoned-condition / wound-no-heal / recurring damage rider; Pit Fiend Hellfire Spellcasting Recharge 4-6 spell-as-monster-action; Pit Fiend Fear Aura (DC 21 WIS save vs Frightened with per-target 24-hour immunity stamp, identical shape to Adult-Chromatic Frightful Presence minus the recurring-save pathway); Pit Fiend Legendary Resistance 4/Day (first 4/day variant — Balor + Aboleth + Adult Chromatics are 3/Day); Erinyes Parry reaction (folds into the existing Bandit Captain / Knight / Gladiator monster-reaction gap); Erinyes Magic Rope action with the per-statblock attached-stateful-item-entity gap (genuinely new mechanic deferral — the magic rope itself has AC 20 / HP 90 / typed damage immunities and a recovery lifecycle tied to short / long rest, not modeled today).
+
+Tests: pending vitest + tsc.
+
 **Content authoring: monsters batch 4.1 (mid-tier Demon ladder)**
 
 Six new SRD 5.2.1 statblocks: Vrock (CR 6), Hezrou (CR 8), Glabrezu (CR 9), Nalfeshnee (CR 13), Marilith (CR 16), Balor (CR 19). Closes the canonical Type I-VI demon ladder started by Dretch (CR 1/4) and Quasit (CR 1) in batch 1.7. Every entry sourced verbatim from [references/srd-markdown/monsters-A-Z.md](references/srd-markdown/monsters-A-Z.md) on AC / HP / abilities / saves / damage R/I/V / condition immunities / senses / CR / XP / PB. All six wire Magic Resistance via `{kind: "GrantMagicResistance"}` (bringing the slice-131 user count from 16 to 22). The pack's monster total moves from 111 to 117.

@@ -4256,6 +4256,104 @@
       "traits": [
         { "kind": "GrantMagicResistance" }
       ]
+    },
+    {
+      "id": "horned-devil",
+      "name": "Horned Devil",
+      "size": "Large",
+      "type": "Fiend",
+      "subtype": "devil",
+      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
+      "ac": 18,
+      "hp": { "average": 199, "formula": "19d10+95" },
+      "speed": { "walk": 30, "fly": 60 },
+      "abilityScores": { "STR": 22, "DEX": 17, "CON": 21, "INT": 12, "WIS": 16, "CHA": 18 },
+      "savingThrows": { "STR": 10, "DEX": 7, "WIS": 7, "CHA": 8 },
+      "damageResistances": ["cold"],
+      "damageImmunities": ["fire", "poison"],
+      "conditionImmunities": ["poisoned"],
+      "senses": { "darkvision": 150, "passivePerceptionOverride": 13 },
+      "cr": 11,
+      "xp": 7200,
+      "proficiencyBonus": 4,
+      "languages": ["infernal", "telepathy 120 ft"],
+      "traits": [
+        { "kind": "GrantMagicResistance" }
+      ]
+    },
+    {
+      "id": "erinyes",
+      "name": "Erinyes",
+      "size": "Medium",
+      "type": "Fiend",
+      "subtype": "devil",
+      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
+      "ac": 18,
+      "hp": { "average": 178, "formula": "21d8+84" },
+      "speed": { "walk": 30, "fly": 60 },
+      "abilityScores": { "STR": 18, "DEX": 16, "CON": 18, "INT": 14, "WIS": 14, "CHA": 18 },
+      "savingThrows": { "DEX": 7, "CON": 8, "CHA": 8 },
+      "skills": { "perception": 6, "persuasion": 8 },
+      "damageResistances": ["cold"],
+      "damageImmunities": ["fire", "poison"],
+      "conditionImmunities": ["poisoned"],
+      "senses": { "truesight": 120, "passivePerceptionOverride": 16 },
+      "cr": 12,
+      "xp": 8400,
+      "proficiencyBonus": 4,
+      "languages": ["infernal", "telepathy 120 ft"],
+      "traits": [
+        { "kind": "GrantMagicResistance" }
+      ]
+    },
+    {
+      "id": "ice-devil",
+      "name": "Ice Devil",
+      "size": "Large",
+      "type": "Fiend",
+      "subtype": "devil",
+      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
+      "ac": 18,
+      "hp": { "average": 228, "formula": "24d10+96" },
+      "speed": { "walk": 40 },
+      "abilityScores": { "STR": 21, "DEX": 14, "CON": 18, "INT": 18, "WIS": 15, "CHA": 18 },
+      "savingThrows": { "DEX": 7, "CON": 9, "WIS": 7, "CHA": 9 },
+      "skills": { "insight": 7, "perception": 7, "persuasion": 9 },
+      "damageImmunities": ["cold", "fire", "poison"],
+      "conditionImmunities": ["poisoned"],
+      "senses": { "blindsight": 120, "passivePerceptionOverride": 17 },
+      "cr": 14,
+      "xp": 11500,
+      "proficiencyBonus": 5,
+      "languages": ["infernal", "telepathy 120 ft"],
+      "traits": [
+        { "kind": "GrantMagicResistance" }
+      ]
+    },
+    {
+      "id": "pit-fiend",
+      "name": "Pit Fiend",
+      "size": "Large",
+      "type": "Fiend",
+      "subtype": "devil",
+      "alignment": { "lawChaos": "lawful", "goodEvil": "evil" },
+      "ac": 21,
+      "hp": { "average": 337, "formula": "27d10+189" },
+      "speed": { "walk": 30, "fly": 60 },
+      "abilityScores": { "STR": 26, "DEX": 14, "CON": 24, "INT": 22, "WIS": 18, "CHA": 24 },
+      "savingThrows": { "DEX": 8, "WIS": 10 },
+      "skills": { "perception": 10, "persuasion": 19 },
+      "damageResistances": ["cold"],
+      "damageImmunities": ["fire", "poison"],
+      "conditionImmunities": ["poisoned"],
+      "senses": { "truesight": 120, "passivePerceptionOverride": 20 },
+      "cr": 20,
+      "xp": 25000,
+      "proficiencyBonus": 6,
+      "languages": ["infernal", "telepathy 120 ft"],
+      "traits": [
+        { "kind": "GrantMagicResistance" }
+      ]
     }
   ],
   "conditions": [
