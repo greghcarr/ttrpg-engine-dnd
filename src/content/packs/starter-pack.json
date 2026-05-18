@@ -2073,7 +2073,15 @@
     { "id": "caltrops", "itemKind": "consumable", "name": "Caltrops", "onConsume": [], "description": "Spread as a Utilize action over a 5-foot-square area within 5 ft; a creature entering the area for the first time on a turn makes a DC 15 Dexterity saving throw or takes 1 Piercing damage and has its Speed reduced to 0 until the start of its next turn. Takes 10 minutes to recover." },
     { "id": "holy-water", "itemKind": "consumable", "name": "Holy Water", "onConsume": [], "description": "Thrown as part of the Attack action (range 20 ft); target makes a Dexterity saving throw (DC 8 + Dexterity modifier + Proficiency Bonus) or takes 2d8 Radiant damage if it is a Fiend or an Undead." },
     { "id": "oil", "itemKind": "consumable", "name": "Oil", "onConsume": [], "description": "A 1-pint flask of oil. Three uses: (1) thrown as part of the Attack action (range 20 ft) to douse a target on a failed Dexterity saving throw (DC 8 + Dexterity modifier + Proficiency Bonus), causing an extra 5 Fire damage from any Fire damage taken within 1 minute; (2) poured as a Utilize action over a 5-foot-square area within 5 ft and lit, dealing 5 Fire damage to creatures entering or ending their turn in the area (once per turn) until the end of the turn 2 rounds after ignition; (3) burned in a Lamp or Lantern as fuel for 6 hours." },
-    { "id": "poison-basic", "itemKind": "consumable", "name": "Poison, Basic", "onConsume": [], "description": "Applied as a Bonus Action to coat one weapon or up to three pieces of ammunition; a creature that takes Piercing or Slashing damage from the poisoned weapon or ammunition takes an extra 1d4 Poison damage. Potency lasts 1 minute or until the damage is dealt, whichever comes first." }
+    { "id": "poison-basic", "itemKind": "consumable", "name": "Poison, Basic", "onConsume": [], "description": "Applied as a Bonus Action to coat one weapon or up to three pieces of ammunition; a creature that takes Piercing or Slashing damage from the poisoned weapon or ammunition takes an extra 1d4 Poison damage. Potency lasts 1 minute or until the damage is dealt, whichever comes first." },
+    { "id": "candle", "itemKind": "gear", "name": "Candle" },
+    { "id": "lamp", "itemKind": "gear", "name": "Lamp" },
+    { "id": "lantern-bullseye", "itemKind": "gear", "name": "Lantern, Bullseye" },
+    { "id": "lantern-hooded", "itemKind": "gear", "name": "Lantern, Hooded" },
+    { "id": "magnifying-glass", "itemKind": "gear", "name": "Magnifying Glass" },
+    { "id": "mirror", "itemKind": "gear", "name": "Mirror" },
+    { "id": "signal-whistle", "itemKind": "gear", "name": "Signal Whistle" },
+    { "id": "spyglass", "itemKind": "gear", "name": "Spyglass" }
   ],
   "monsters": [
     {

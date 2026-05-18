@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content authoring: items batch 4.3, 8 SRD 5.2.1 light-sources + observation gear entries**
+
+Continues the adventuring-gear catalog walk against `references/srd-markdown/equipment.md`. Eight new entries shipping as pure-stub `itemKind: 'gear'` with no description, matching the existing alpha.5 seed gear shape and the batch-4.1 dungeoneering-utility cohort.
+
+- New ids: `candle`, `lamp`, `lantern-bullseye`, `lantern-hooded`, `magnifying-glass`, `mirror`, `signal-whistle`, `spyglass`. Source lines in equipment.md: 1354, 1520, 1524, 1528, 1536, 1550, 1640, 1654. Names per SRD canonical including the comma form ("Lantern, Bullseye" / "Lantern, Hooded").
+- Cohort theme: extended perception, illumination + magnification + reflection + signaling. All 8 are gear-kind (reusable physical objects without per-use mechanical effects) per the pack convention that distinguishes gear from consumable.
+- Magnifying Glass's RAW "Advantage on appraise / inspect ability checks" and Hooded Lantern's RAW "Bonus Action to lower / raise the hood" stay narrative for now; the gear schema has no `effects` array, so the mechanics live in the SRD source-of-truth rather than the pack. Future engine slices could add gear-effect projection; not deepening the schema for content reasons.
+- All four light sources (Candle, Lamp, Lantern Bullseye, Lantern Hooded) ship without engine-modeled illumination state; the SRD radius / cone / dim-light values stay consumer-narrative until the engine models lighting zones (existing deferral, same gap shape as Lantern of Revealing's invisibility-reveal arm).
+
+Coverage bump: items 232 to 240 total, gear 15 to 23. Items section and Coverage at a glance row in `docs/starter-pack-gaps.md` updated. ~50 SRD adventuring-gear entries remain unship (containers, clothing, foci, writing supplies, traps + restraints, misc utility) for future batches.
+
 **Content authoring: items batch 4.2, 8 SRD 5.2.1 alchemical-hazard consumables**
 
 Continues the adventuring-gear catalog walk against the SRD 5.2.1 equipment table (source: `references/srd-markdown/equipment.md`). Eight new entries shipping as `itemKind: 'consumable'` with `onConsume: []` stubs and SRD-verbatim mechanical text in the `description` field, matching the existing alpha.5 potion shape (e.g., Potion of Greater Healing).
