@@ -85,6 +85,22 @@ export const ProtectionUsedEventSchema = EventEnvelopeSchema.extend({
 });
 export type ProtectionUsedEvent = z.infer<typeof ProtectionUsedEventSchema>;
 
+// Slice 200. Record-only event surfaced by `planUncannyDodge` when a
+// Rogue L5+ spends their reaction to halve an attack's damage (RAW:
+// "When an attacker that you can see hits you with an attack roll,
+// you can take a Reaction to halve the attack's damage against you").
+// The triggering DamageApplied has already committed when the planner
+// runs, so the engine refunds the half via a compensating `Healed`
+// event of `floor(damage / 2)`. This notification surfaces the
+// halved-amount + the triggering event id for transcript readability.
+export const UncannyDodgeUsedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('UncannyDodgeUsed'),
+  characterId: ULIDSchema,
+  triggeringDamageEventId: ULIDSchema,
+  halvedAmount: z.number().int().min(0),
+});
+export type UncannyDodgeUsedEvent = z.infer<typeof UncannyDodgeUsedEventSchema>;
+
 export const GuidanceUsedEventSchema = EventEnvelopeSchema.extend({
   type: z.literal('GuidanceUsed'),
   targetId: ULIDSchema,

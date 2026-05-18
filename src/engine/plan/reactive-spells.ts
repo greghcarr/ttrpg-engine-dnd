@@ -23,6 +23,7 @@ import type {
   SanctuaryProtectedEvent,
   ProtectionUsedEvent,
   GuidanceUsedEvent,
+  UncannyDodgeUsedEvent,
 } from '../../schemas/events/reactive-spells.js';
 import { buildEffectStack } from '../../derive/effect-stack.js';
 import type { Character } from '../../schemas/runtime/character.js';
@@ -577,6 +578,101 @@ export const planAbsorbElements = (
     damageType: intent.damageType,
     halvedAmount,
   } satisfies AbsorbElementsCastEvent);
+
+  return { events, halvedAmount };
+};
+
+const UNCANNY_DODGE_SOURCE = 'uncanny-dodge';
+
+export interface UncannyDodgeIntent {
+  readonly type: 'UncannyDodge';
+  readonly characterId: string;
+  // The DamageApplied event id whose damage prompted the reaction.
+  // Recorded on the UncannyDodgeUsed event for the transcript.
+  readonly triggeringDamageEventId: string;
+  // The original damage amount from the triggering event. The planner
+  // halves it (rounded down per RAW) and emits a compensating `Healed`
+  // event so the bearer's HP nets out at half the original damage.
+  readonly damageAmount: number;
+  readonly at?: string;
+}
+
+export interface UncannyDodgeOutcome {
+  readonly events: ReadonlyArray<Event>;
+  // The damage absorbed back via the `Healed` event. Returned in the
+  // outcome for transcript / consumer convenience; also surfaced on
+  // the UncannyDodgeUsed notification.
+  readonly halvedAmount: number;
+}
+
+/**
+ * RAW 2024 PHB Rogue L5 Uncanny Dodge: when an attacker that you can
+ * see hits you with an attack roll, you can take a Reaction to halve
+ * the attack's damage against you (round down).
+ *
+ * Event-sourcing approach mirrors Absorb Elements: the triggering
+ * DamageApplied has already committed when the planner runs, so
+ * rather than mutate that event we emit a compensating `Healed`
+ * event for `floor(damage / 2)`. The bearer's HP nets out at half
+ * the original damage and the audit trail preserves both the full
+ * hit and the reaction outcome.
+ *
+ * The "you can see the attacker" gate is consumer-side: the engine
+ * doesn't model line of sight. Consumers that want to enforce it can
+ * skip calling this planner when the attacker is invisible / behind
+ * total cover. The reaction-economy gate (one reaction per round)
+ * runs via the shared `assertReactionAvailable` helper.
+ */
+export const planUncannyDodge = (
+  state: CampaignState,
+  content: ResolvedContent,
+  intent: UncannyDodgeIntent,
+): UncannyDodgeOutcome => {
+  const character = state.characters[intent.characterId];
+  invariant(character !== undefined, `Character ${intent.characterId} not found`);
+
+  if (intent.damageAmount < 0) {
+    throw new Error('Uncanny Dodge damageAmount must be non-negative');
+  }
+
+  const effects = buildEffectStack({
+    character,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  });
+  if (!effects.hasUncannyDodge()) {
+    throw new Error(`${character.name} does not have Uncanny Dodge`);
+  }
+
+  assertReactionAvailable(state, intent.characterId, 'use Uncanny Dodge');
+
+  const at = intent.at ?? nowIso();
+  const halvedAmount = Math.floor(intent.damageAmount / 2);
+
+  const events: Event[] = [];
+  const reaction = economyConsumedIfEncountered(state, intent.characterId, at, 'reaction');
+  if (reaction !== undefined) events.push(reaction);
+
+  if (halvedAmount > 0) {
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'Healed',
+      targetId: intent.characterId as ULID,
+      amount: halvedAmount,
+      source: UNCANNY_DODGE_SOURCE,
+    } satisfies HealedEvent);
+  }
+
+  events.push({
+    id: newEventId() as ULID,
+    at,
+    type: 'UncannyDodgeUsed',
+    characterId: intent.characterId as ULID,
+    triggeringDamageEventId: intent.triggeringDamageEventId as ULID,
+    halvedAmount,
+  } satisfies UncannyDodgeUsedEvent);
 
   return { events, halvedAmount };
 };

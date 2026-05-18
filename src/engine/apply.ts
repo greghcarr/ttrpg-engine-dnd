@@ -454,6 +454,13 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         // alongside this event. The d4 value is informational; the
         // consumer adds it to whatever ability check it applies to.
         break;
+      case 'UncannyDodgeUsed':
+        // Pure notification — the damage refund flows through `Healed`
+        // and the reaction bookkeeping rides on the
+        // ActionEconomyConsumed event the planner also emits. This
+        // event surfaces the halved-amount + the triggering
+        // DamageApplied id for transcript readability.
+        break;
       case 'MirrorImageDeflected':
         applyMirrorImageDeflected(draft, event);
         break;

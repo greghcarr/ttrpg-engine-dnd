@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: planUncannyDodge + Rogue L5 Uncanny Dodge (slice 200)**
+
+Adds a dedicated reaction planner for Uncanny Dodge plus a `GrantUncannyDodge` marker primitive (40 to 41 EFFECT_KINDS). RAW (SRD 5.2.1): "When an attacker that you can see hits you with an attack roll, you can take a Reaction to halve the attack's damage against you (round down)."
+
+Mechanism follows the existing Absorb Elements pattern, since the triggering DamageApplied has already committed by the time the consumer reacts: the planner emits a compensating `Healed` event for `floor(damageAmount / 2)`, an `ActionEconomyConsumed` (reaction) when inside an encounter, and a record-only `UncannyDodgeUsed` notification carrying the triggering DamageApplied id + the refunded amount for transcript readability. The planner gates on the bearer's effect stack carrying `GrantUncannyDodge` and on `assertReactionAvailable`; the RAW "you can see the attacker" preconditions stay consumer-side (the engine has no line-of-sight model).
+
+New event: `UncannyDodgeUsed` ([src/schemas/events/reactive-spells.ts](src/schemas/events/reactive-spells.ts)), pure-notification dispatcher case in [src/engine/apply.ts](src/engine/apply.ts). New planner: `engine.plan.uncannyDodge(state, intent)` ([src/engine/plan/reactive-spells.ts](src/engine/plan/reactive-spells.ts)). New transcript formatter for `UncannyDodgeUsed` ([tests/transcript.ts](tests/transcript.ts)).
+
+Canonical user: Rogue L5 Uncanny Dodge, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) alongside Sneak Attack (3d6) and Cunning Strike. Closes another of the missing main-class features in the SRD 5.2.1 classes audit (~17 to ~16, with slice 199 already having closed Elusive).
+
+Tests: 8-case planner test in [tests/unit/engine/plan-uncanny-dodge.test.ts](tests/unit/engine/plan-uncanny-dodge.test.ts) (halve, floor, zero, no-feature throw, negative throw, in / out of encounter, reaction-already-used throw); accumulator marker test alongside slice 199's tests in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s200-uncanny-dodge.test.ts](tests/golden/s200-uncanny-dodge.test.ts) walks an attack-hit then reaction-halve flow. 1497 tests pass, tsc --noEmit clean.
+
 **Engine: CancelAdvantageOnAttackers + Rogue L18 Elusive (slice 199)**
 
 Adds the `CancelAdvantageOnAttackers` effect primitive (39 to 40 EFFECT_KINDS): a predicate-gated marker that suppresses every advantage contribution against the bearer at attack-roll time. Wired in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) just before the 2024 advantage / disadvantage resolution block; an explicit `input.advantage === 'advantage'` from the caller is also nullified when the bearer carries the marker. Disadvantage contributions are unaffected, matching RAW ("no attack roll can have Advantage against you").

@@ -449,6 +449,10 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const attacker = characterName(stateBefore, event.attackerId);
       return `**${protector}** uses their reaction (Protection); **${attacker}**'s attack now has disadvantage (new d20: ${event.newD20}).`;
     }
+    case 'UncannyDodgeUsed': {
+      const who = characterName(stateBefore, event.characterId);
+      return `**${who}** uses their reaction (Uncanny Dodge); halves the attack's damage by ${event.halvedAmount}.`;
+    }
     case 'HPMaxBonusChanged': {
       const who = characterName(stateBefore, event.targetId);
       const sign = event.delta >= 0 ? '+' : '';

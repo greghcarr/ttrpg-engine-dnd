@@ -151,6 +151,7 @@ export {
   planSanctuaryWardSave,
   planProtection,
   planConsumeGuidance,
+  planUncannyDodge,
   type CounterspellIntent,
   type DispelMagicIntent,
   type RemoveCurseIntent,
@@ -165,6 +166,8 @@ export {
   type ProtectionOutcome,
   type ConsumeGuidanceIntent,
   type ConsumeGuidanceOutcome,
+  type UncannyDodgeIntent,
+  type UncannyDodgeOutcome,
 } from './reactive-spells.js';
 export { planWeaponMastery, type WeaponMasteryIntent } from './weapon-mastery.js';
 export {

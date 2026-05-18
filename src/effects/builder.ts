@@ -113,6 +113,7 @@ export class EffectAccumulator {
   private healingBoostFlat: number = 0;
   private healingBoostPerSpellLevel: number = 0;
   private evasionFlag: boolean = false;
+  private uncannyDodgeFlag: boolean = false;
   // Slice 119: marker for the Two-Weapon Fighting Fighting Style.
   // When set, planOffHandAttack adds the wielder's ability mod to
   // off-hand damage even when positive (RAW: only negative mods
@@ -447,6 +448,14 @@ export class EffectAccumulator {
   hasEvasion(): boolean {
     return this.evasionFlag;
   }
+  // Slice 200: marker that gates `planUncannyDodge`. Set by Rogue L5+
+  // via the `GrantUncannyDodge` effect on the Uncanny Dodge feature.
+  markUncannyDodge(): void {
+    this.uncannyDodgeFlag = true;
+  }
+  hasUncannyDodge(): boolean {
+    return this.uncannyDodgeFlag;
+  }
   markTwoWeaponFighting(): void {
     this.twoWeaponFightingFlag = true;
   }
@@ -577,6 +586,9 @@ export const applyEffectToBuilder = (
       return;
     case 'GrantEvasion':
       acc.markEvasion();
+      return;
+    case 'GrantUncannyDodge':
+      acc.markUncannyDodge();
       return;
     case 'GrantTwoWeaponFighting':
       acc.markTwoWeaponFighting();

@@ -117,6 +117,7 @@ import {
   SanctuaryProtectedEventSchema,
   ProtectionUsedEventSchema,
   GuidanceUsedEventSchema,
+  UncannyDodgeUsedEventSchema,
 } from './reactive-spells.js';
 import { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 import {
@@ -276,6 +277,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   SanctuaryProtectedEventSchema,
   ProtectionUsedEventSchema,
   GuidanceUsedEventSchema,
+  UncannyDodgeUsedEventSchema,
   WeaponMasteryActivatedEventSchema,
   MountedEventSchema,
   DismountedEventSchema,
@@ -413,6 +415,7 @@ export const EVENT_TYPES = [
   'SanctuaryProtected',
   'ProtectionUsed',
   'GuidanceUsed',
+  'UncannyDodgeUsed',
   'WeaponMasteryActivated',
   'Mounted',
   'Dismounted',
@@ -713,6 +716,7 @@ export {
   SanctuaryProtectedEventSchema,
   ProtectionUsedEventSchema,
   GuidanceUsedEventSchema,
+  UncannyDodgeUsedEventSchema,
 } from './reactive-spells.js';
 export type {
   SpellCounteredEvent,
@@ -723,6 +727,7 @@ export type {
   SanctuaryProtectedEvent,
   ProtectionUsedEvent,
   GuidanceUsedEvent,
+  UncannyDodgeUsedEvent,
 } from './reactive-spells.js';
 export { WeaponMasteryActivatedEventSchema } from './weapon-mastery.js';
 export type { WeaponMasteryActivatedEvent } from './weapon-mastery.js';

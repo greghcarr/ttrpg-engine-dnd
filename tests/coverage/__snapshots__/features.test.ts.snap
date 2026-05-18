@@ -76,6 +76,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "rogue L1 weapon-mastery-rogue",
   "rogue L3 sneak-attack",
   "rogue L5 sneak-attack",
+  "rogue L5 uncanny-dodge",
   "rogue L6 expertise-rogue-2",
   "rogue L7 evasion-rogue",
   "rogue L7 sneak-attack",

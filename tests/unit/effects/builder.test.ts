@@ -260,6 +260,17 @@ describe('EffectAccumulator', () => {
     ).toBe(false);
   });
 
+  it('GrantUncannyDodge marker propagates via hasUncannyDodge()', () => {
+    const acc = new EffectAccumulator();
+    expect(acc.hasUncannyDodge()).toBe(false);
+    applyEffectToBuilder(
+      { kind: 'GrantUncannyDodge' },
+      acc,
+      { source: 'rogue-l5' },
+    );
+    expect(acc.hasUncannyDodge()).toBe(true);
+  });
+
   it('GrantSense keeps the larger range when the same sense is granted twice', () => {
     // RAW: a creature with overlapping sense grants keeps the longer
     // range (Dwarf's 60 ft darkvision + Devil's Sight 120 ft = 120 ft,

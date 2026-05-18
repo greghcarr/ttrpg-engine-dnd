@@ -251,6 +251,14 @@ export type Effect =
   // Future users: Wizard / Sorcerer Foresight, similar "advantage
   // immunity" features.
   | { kind: 'CancelAdvantageOnAttackers'; condition?: Predicate }
+  // Slice 200. Marker primitive that flags a character as eligible to
+  // spend their reaction to halve damage from a hit. Consumed by
+  // `planUncannyDodge`, which checks `EffectAccumulator.hasUncannyDodge()`
+  // before allowing the reaction. Canonical user: Rogue L5 Uncanny
+  // Dodge. The reaction itself is consumer-driven (RAW: "you can
+  // take a Reaction") — the engine doesn't auto-fire it; it just
+  // gates the planner.
+  | { kind: 'GrantUncannyDodge' }
   // A "this character projects an aura" marker. Auras are inherently
   // position-dependent (RAW typically "creatures within X feet"), and
   // the engine doesn't model continuous position. So this effect is
@@ -490,6 +498,9 @@ export const EffectSchema: z.ZodType<Effect> = z.lazy(() =>
       condition: PredicateSchema.optional(),
     }),
     z.object({
+      kind: z.literal('GrantUncannyDodge'),
+    }),
+    z.object({
       kind: z.literal('GrantAura'),
       auraId: z.string(),
       rangeFeet: z.number().int().min(0),
@@ -561,6 +572,7 @@ export const EFFECT_KINDS = [
   'GrantAdvantageToAttackers',
   'ImposeDisadvantageOnAttackers',
   'CancelAdvantageOnAttackers',
+  'GrantUncannyDodge',
   'GrantAura',
   'GrantFallingProtection',
   'PreventFatalDamage',
