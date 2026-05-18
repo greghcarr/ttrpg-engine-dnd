@@ -76,3 +76,22 @@ export const ItemConsumedEventSchema = EventEnvelopeSchema.extend({
   targetId: ULIDSchema,
 });
 export type ItemConsumedEvent = z.infer<typeof ItemConsumedEventSchema>;
+
+// Slice 240: a magic item is used by a character (activate-as-action
+// shape). Unlike ItemConsumed, the instance persists after use; this
+// event is a journal marker for the use, after the planner has
+// already emitted the charge decrement (ItemChargeConsumed) and the
+// onUse action effects (ConditionApplied for ApplyCondition variants,
+// etc.). The reducer is a sanity check rather than a state mutator.
+// `targetId` is the recipient of the onUse effects (defaults to the
+// user when the user activates an item on themselves; can be a
+// different character when one character activates an item on
+// another).
+export const ItemUsedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ItemUsed'),
+  characterId: ULIDSchema,
+  instanceId: ULIDSchema,
+  definitionId: z.string(),
+  targetId: ULIDSchema,
+});
+export type ItemUsedEvent = z.infer<typeof ItemUsedEventSchema>;

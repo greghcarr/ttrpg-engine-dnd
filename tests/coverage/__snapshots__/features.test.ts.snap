@@ -279,6 +279,7 @@ exports[`feature-coverage matrix: magic items > magic-item wire and charge state
     "wand-of-web",
     "wand-of-wonder",
     "wind-fan",
+    "wings-of-flying",
   ],
 }
 `;

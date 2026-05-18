@@ -50,6 +50,29 @@ export const ToolSchema = ItemBaseSchema.extend({
 });
 export type Tool = z.infer<typeof ToolSchema>;
 
+// Slice 240: magic-item activate-as-action action set. Mirror of
+// slice 235's ConsumeActionSchema but for items that persist after
+// use (charge-driven instead of single-use). The planner consumes 1
+// charge from the item's `charges` shape (if defined) before walking
+// the action list, and emits ItemUsed at the end instead of
+// ItemConsumed (no retirement). For slice 240 only the ApplyCondition
+// variant lands; future slices add CastSpell (for spell-grant items
+// like Hat of Disguise), Toggle (for toggleable buffs like Boots of
+// Speed), etc. as their canonical users come online.
+//
+// Duration on ApplyCondition: same shape as slice 236 — the engine's
+// auto-expiry primitive is round-based and source-keyed; minute /
+// hour durations are consumer-managed (the planner emits
+// ConditionApplied without expiresOnRound and the consumer removes it
+// when the in-fiction timer runs out).
+export const UseActionSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('ApplyCondition'),
+    conditionId: z.string(),
+  }),
+]);
+export type UseAction = z.infer<typeof UseActionSchema>;
+
 export const MagicItemSchema = ItemBaseSchema.extend({
   itemKind: z.literal('magic'),
   rarity: z.enum(['common', 'uncommon', 'rare', 'very-rare', 'legendary', 'artifact']),
@@ -63,6 +86,7 @@ export const MagicItemSchema = ItemBaseSchema.extend({
     })
     .optional(),
   effects: z.array(EffectSchema).default([]),
+  onUse: z.array(UseActionSchema).default([]),
 });
 export type MagicItem = z.infer<typeof MagicItemSchema>;
 

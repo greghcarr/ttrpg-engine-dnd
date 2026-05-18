@@ -9,6 +9,7 @@ import type {
   ItemEquippedEvent,
   ItemUnattunedEvent,
   ItemUnequippedEvent,
+  ItemUsedEvent,
 } from '../../schemas/events/inventory.js';
 import { invariant } from '../../internal/invariants.js';
 
@@ -129,4 +130,26 @@ export const applyItemConsumed = (
   invariant(character !== undefined, `Character ${event.characterId} not found`);
   character.inventory = character.inventory.filter((id) => id !== event.instanceId);
   delete state.itemInstances[event.instanceId];
+};
+
+// Slice 240. Sanity check for the activate-as-action path: the
+// planner has already emitted the charge decrement (ItemChargeConsumed)
+// and the onUse action effects (ConditionApplied, etc.). The
+// instance persists after use, so the only thing this reducer
+// guarantees is that the character and instance still exist at
+// commit time. Unlike ItemConsumed, no retirement.
+export const applyItemUsed = (
+  state: Draft<CampaignState>,
+  event: ItemUsedEvent,
+): void => {
+  const character = state.characters[event.characterId];
+  invariant(character !== undefined, `Character ${event.characterId} not found`);
+  invariant(
+    character.inventory.includes(event.instanceId),
+    `Item ${event.instanceId} not in ${character.name}'s inventory`,
+  );
+  invariant(
+    state.itemInstances[event.instanceId] !== undefined,
+    `Item instance ${event.instanceId} not found`,
+  );
 };

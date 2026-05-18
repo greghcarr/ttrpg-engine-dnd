@@ -44,6 +44,7 @@ import {
   applyItemEquipped,
   applyItemUnattuned,
   applyItemUnequipped,
+  applyItemUsed,
 } from './reducers/inventory.js';
 import {
   applyChoiceRequired,
@@ -347,6 +348,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemConsumed':
         applyItemConsumed(draft, event);
+        break;
+      case 'ItemUsed':
+        applyItemUsed(draft, event);
         break;
       case 'PartyCreated':
         applyPartyCreated(draft, event);

@@ -4,6 +4,47 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `UseItem` planner + Wings of Flying canonical user (slice 240)**
+
+Adds the magic-item activate-as-action sibling of slice 235's `ConsumeItem`. Where ConsumeItem retires the instance (potions, scrolls), UseItem persists the instance and consumes 1 charge from the definition's existing `charges` shape. Canonical user: Wings of Flying (rare wondrous, attunement; 1/dawn charge; activates `flying-active`).
+
+**Plumbing**:
+
+- New `UseAction` discriminated union in [src/schemas/content/item.ts](src/schemas/content/item.ts) — `ApplyCondition { conditionId }` for slice 240; future slices add `CastSpell` (for Hat of Disguise / Helm of Telepathy / Decanter of Endless Water) and `Toggle` (for Boots of Speed's click-on / click-off shape).
+- New `onUse: UseAction[]` field on `MagicItemSchema`, parallel to `onConsume` on `ConsumableSchema`.
+- New `ItemUsed` event in [src/schemas/events/inventory.ts](src/schemas/events/inventory.ts): `{ characterId, instanceId, definitionId, targetId }`. Mirrors `ItemConsumed`'s shape; reducer just sanity-checks (the actual state changes — charge decrement, condition application — are emitted by separate events ahead of this one).
+- `applyItemUsed` reducer in [src/engine/reducers/inventory.ts](src/engine/reducers/inventory.ts). Wired into [src/engine/apply.ts](src/engine/apply.ts).
+- New [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts) with `planUseItem`. Validates the instance + inventory + magic-item kind, emits `ItemChargeConsumed` if the definition has charges (gating on `chargesRemaining >= 1`), walks the `onUse` action list emitting the corresponding effects (`ConditionApplied` for `ApplyCondition` variants), then emits `ItemUsed`.
+- `engine.plan.useItem(state, intent)` on the [Engine](src/engine/index.ts) interface, parallel to `engine.plan.consumeItem`.
+
+**Content wired (1 magic item)**:
+
+- **Wings of Flying** — `charges: { max: 1, recharge: 'dawn' }` + `onUse: [{ kind: 'ApplyCondition', conditionId: 'flying-active' }]`. RAW shape: bonus action → gain fly speed for 1 hour, once per dawn. The fly speed mechanic itself rides on the existing `flying-active` condition (60 ft fixed; same condition the Fly spell + Potion of Flying use).
+
+**RAW deviations to be tightened later**:
+
+- No action-economy cost (the planner doesn't model the bonus-action consumption — same shape as ConsumeItem's lack of Magic-action consumption).
+- No attunement gate (Wings of Flying RAW requires attunement; the engine has attunement state but the planner doesn't check it).
+- Duration consumer-managed (RAW: 1 hour; the engine's auto-expiry is round-based, so the consumer removes `flying-active` when the in-fiction hour passes — same shape as the slice-236 / 239 ApplyCondition wires).
+- Fly speed uses the fixed-60-ft `flying-active`, not the RAW per-creature walking-speed. Same condition the Fly spell + Potion of Flying use; same approximation.
+- Wings of Flying RAW says "If you're still flying when the duration expires, you descend at a rate of 30 feet per round until you land." Not modeled — the engine doesn't track height.
+
+**Future SRD users this unblocks** (each one shipping as a pure-JSON wiring once the matching `UseAction` variant lands):
+
+- **Boots of Speed** — needs a `Toggle` variant for the click-on / click-off shape, plus a cumulative time-budget mechanic that doesn't exist today.
+- **Boots of Levitation** — needs `CastSpell` variant (item casts Levitate on the wearer at will).
+- **Cloak of the Bat** — needs `CastSpell` + the deferred light-level predicate (see slice 227 deferred backlog row).
+- **Hat of Disguise**, **Helm of Telepathy**, **Decanter of Endless Water** — `CastSpell` variant for at-will / charged spell-grant items.
+- **Pearl of Power**, **Pipes of Haunting**, **Wind Fan**, **Circlet of Blasting** — `CastSpell` plus the existing `charges` shape (already in-pack).
+
+Pre-commit Uncle Bob audit:
+- Names: `UseAction` / `planUseItem` / `ItemUsed` mirror `ConsumeAction` / `planConsumeItem` / `ItemConsumed`. The split is deliberate: consume retires, use persists.
+- DRY: `ApplyCondition`'s emit shape (`ConditionApplied` with `sourceCharacterId = user`) is identical to the slice-236 consume path. The schemas are separated because the future variant sets diverge (Heal makes sense on consume, not on use; Toggle makes sense on use, not on consume).
+- SRP: planner does one thing per action kind; reducer just sanity-checks (the actual state mutation is in the upstream ItemChargeConsumed + ConditionApplied reducers).
+- Magic numbers: charges-cost is hardcoded to 1 per use. Items with per-use cost > 1 (e.g. Gem of Brightness's 5-charge cone) will need a per-action `chargesCost?: number` extension later; deferred until a real second user lands.
+- `at`-timestamp threading: single `at = intent.at ?? nowIso()` resolved once, passed through to every emitted event in the chain (same pattern as planConsumeItem).
+- Tests: 6 unit cases asserting the resolution chain shape, charge spend, instance persistence after commit, charges-out error path, non-inventory error path, non-magic-item error path, and the multi-target seam (use-on-ally). No RNG → no RNG-capture test needed; no golden scenario added (matches the slice-235 ConsumeItem precedent for deterministic-planner slices).
+
 **Content: consumable-pack wiring sweep on existing ConsumeAction variants (slice 239)**
 
 Pure content sweep with no engine changes. Walks the 33 still-empty `onConsume` arrays on consumables in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) and wires the 14 that map cleanly onto the existing three `ConsumeAction` variants (`Heal` from slice 235, `ApplyCondition` from slice 236, `CastSpell` from slice 237). 6 new content-side conditions added (Giant Strength potion family) — each wraps the slice-229 `OverrideAbilityScore` floor-semantic primitive in a temporary condition for use via `ApplyCondition`.

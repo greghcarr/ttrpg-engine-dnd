@@ -2812,7 +2812,18 @@
     {"id": "wand-of-the-war-mage-plus1-plus2-or-plus3", "itemKind": "magic", "name": "Wand of the War Mage, +1, +2, or +3", "rarity": "uncommon", "requiresAttunement": true, "effects": []},
     {"id": "weapon-of-warning", "itemKind": "magic", "name": "Weapon of Warning", "rarity": "uncommon", "requiresAttunement": true, "effects": []},
     {"id": "well-of-many-worlds", "itemKind": "magic", "name": "Well of Many Worlds", "rarity": "legendary", "requiresAttunement": false, "effects": []},
-    {"id": "wings-of-flying", "itemKind": "magic", "name": "Wings of Flying", "rarity": "rare", "requiresAttunement": true, "effects": []},
+    {
+      "id": "wings-of-flying",
+      "itemKind": "magic",
+      "name": "Wings of Flying",
+      "rarity": "rare",
+      "requiresAttunement": true,
+      "charges": { "max": 1, "recharge": "dawn" },
+      "effects": [],
+      "onUse": [
+        { "kind": "ApplyCondition", "conditionId": "flying-active" }
+      ]
+    },
     {"id": "potion-of-supreme-healing", "itemKind": "consumable", "name": "Potion of Supreme Healing", "onConsume": [{ "kind": "Heal", "dice": "10d4", "flatAmount": 20 }], "description": "Heals 10d4+20 hit points when consumed (Very Rare)."},
     {"id": "figurine-of-wondrous-power-bronze-griffon", "itemKind": "magic", "name": "Figurine of Wondrous Power, Bronze Griffon", "rarity": "rare", "requiresAttunement": false, "effects": []},
     {"id": "figurine-of-wondrous-power-ebony-fly", "itemKind": "magic", "name": "Figurine of Wondrous Power, Ebony Fly", "rarity": "rare", "requiresAttunement": false, "effects": []},

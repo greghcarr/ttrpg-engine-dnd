@@ -76,6 +76,7 @@ import {
   ItemBuffAppliedEventSchema,
   ItemBuffRemovedEventSchema,
   ItemConsumedEventSchema,
+  ItemUsedEventSchema,
 } from './inventory.js';
 import {
   PartyCreatedEventSchema,
@@ -247,6 +248,7 @@ export const EventSchema = z.discriminatedUnion('type', [
   ItemBuffAppliedEventSchema,
   ItemBuffRemovedEventSchema,
   ItemConsumedEventSchema,
+  ItemUsedEventSchema,
   PartyCreatedEventSchema,
   PartyMembersChangedEventSchema,
   CurrencyAcquiredEventSchema,
@@ -559,6 +561,7 @@ export {
   ItemBuffAppliedEventSchema,
   ItemBuffRemovedEventSchema,
   ItemConsumedEventSchema,
+  ItemUsedEventSchema,
   EquipSlotSchema,
   EQUIP_SLOTS,
 } from './inventory.js';
@@ -571,6 +574,7 @@ export type {
   ItemBuffAppliedEvent,
   ItemBuffRemovedEvent,
   ItemConsumedEvent,
+  ItemUsedEvent,
   EquipSlot,
 } from './inventory.js';
 export {
