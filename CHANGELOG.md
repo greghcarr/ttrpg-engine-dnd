@@ -4,6 +4,17 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content audit: magic item attunement conditions (slice 192)**
+
+Audited every pack magic item's `attunementCondition` against the SRD 5.2.1 type-line restriction. Four real drifts (others were pack-convention normalization: pack uses bare class nouns like "Spellcaster" / "Paladin" / "Dwarf" where SRD uses "a Spellcaster" / "a Paladin"; that's a normalization choice, not drift):
+
+- staff-of-charming: condition "Spellcaster" to "Bard, Cleric, Druid, Sorcerer, Warlock, or Wizard". SRD restricts to a specific class list, not a generic spellcaster.
+- dwarven-thrower: condition "Dwarf" to "Dwarf or a creature attuned to a Belt of Dwarvenkind". SRD 5.2.1 adds the alternative attunement path.
+- wand-of-wonder: removed condition. SRD requires plain attunement, no class restriction; pack had added a "Spellcaster" gate that doesn't exist in RAW.
+- wand-of-binding: same as wand-of-wonder.
+
+Tests: 1451 pass, tsc --noEmit clean.
+
 **Content audit: spell range text (slice 191)**
 
 Strict full-text range audit against the SRD Range line, with allowance for the pack's "Self (15-foot cone)" / "Self (X-foot radius)" descriptive variants that wrap SRD's bare "Self". One real drift:
