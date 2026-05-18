@@ -27,6 +27,7 @@ exports[`feature-coverage matrix: class features > wired class features catalog 
   "cleric L7 blessed-strikes",
   "cleric L18 channel-divinity-cleric-3",
   "druid L1 druidic",
+  "druid L1 primal-order",
   "druid L2 wild-companion",
   "druid L2 wild-shape",
   "druid L6 wild-shape-uses-3",

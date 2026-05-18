@@ -4,6 +4,19 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Druid L1 Primal Order (slice 215)**
+
+Mirror of slice 214's Cleric Divine Order, scoped to the druid. 2-option `OfferChoice`:
+
+- **Magician**: `GrantSpell spellId=druidcraft preparation=always-prepared` + two `AddModifier` entries on Arcana / Nature with `max(1, abilityMod WIS)` value. RAW: "You know one extra cantrip from the Druid spell list. In addition, your mystical connection to nature gives you a bonus to your Intelligence (Arcana or Nature) checks. The bonus equals your Wisdom modifier (minimum bonus of +1)."
+- **Warden**: `GrantProficiency target=weapon id=martial` + `GrantProficiency target=armor id=medium`. RAW: "Trained for battle, you gain proficiency with Martial weapons and training with Medium armor."
+
+Same Thaumaturge-style compromise on the Magician cantrip — RAW lets the player pick any druid cantrip; the pack hardcodes Druidcraft for simplicity. Future content can swap.
+
+Closes another missing main-class feature in the audit. Pure-content slice; no engine changes.
+
+Tests: 2-case planner test verifying each variant's effect-stack contribution; the Magician test runs end-to-end ability-check showing INT (Arcana / Nature) = 0 + 3 (WIS-mod bonus) = 3 for an INT-10 / WIS-16 druid.
+
 **Content: Cleric L1 Divine Order (slice 214)**
 
 Wires Cleric L1 Divine Order as a 2-option `OfferChoice`:
