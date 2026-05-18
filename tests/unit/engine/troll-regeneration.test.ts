@@ -57,7 +57,6 @@ describe('Troll Regeneration (slice 232)', () => {
       campaign,
       engine.plan.rollInitiative(campaign.state, {
         encounterId: enc.encounterId,
-        rolls: [{ combatantId: hero.id, initiative: 20 }, { combatantId: troll.id, initiative: 10 }],
       }).events,
     );
     campaign = commit(
@@ -97,7 +96,6 @@ describe('Troll Regeneration (slice 232)', () => {
       campaign,
       engine.plan.rollInitiative(campaign.state, {
         encounterId: enc.encounterId,
-        rolls: [{ combatantId: hero.id, initiative: 20 }, { combatantId: troll.id, initiative: 10 }],
       }).events,
     );
     campaign = commit(
@@ -144,7 +142,6 @@ describe('Troll Regeneration (slice 232)', () => {
       campaign,
       engine.plan.rollInitiative(campaign.state, {
         encounterId: enc.encounterId,
-        rolls: [{ combatantId: hero.id, initiative: 20 }, { combatantId: troll.id, initiative: 10 }],
       }).events,
     );
     campaign = commit(
@@ -191,7 +188,6 @@ describe('Troll Regeneration (slice 232)', () => {
       campaign,
       engine.plan.rollInitiative(campaign.state, {
         encounterId: enc.encounterId,
-        rolls: [{ combatantId: hero.id, initiative: 20 }, { combatantId: troll.id, initiative: 10 }],
       }).events,
     );
     campaign = commit(

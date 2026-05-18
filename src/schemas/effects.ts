@@ -99,6 +99,16 @@ export type TriggerAction =
   | { kind: 'ApplyConditionToAttacker'; conditionId: string; durationRounds?: number; sourceFromEventTarget?: boolean }
   | { kind: 'SpendResource'; resourceId: string; amount: number }
   | { kind: 'ModifyDamageTaken'; amount: number | Formula; cap?: number }
+  // Slice 233. Spawns a new Character instance from a content
+  // statblock when an OnEvent rider fires. Canonical user: Troll's
+  // Loathsome Limbs (on slashing damage, spawns a Troll Limb). The
+  // statblockId references a monster in the resolved content; the
+  // dispatch helper builds a Character from that statblock (HP =
+  // statblock average, ability scores + senses + traits copied) and
+  // emits a CharacterCreated event for the spawn. Position is
+  // narrative (engine doesn't model space). `count` defaults to 1
+  // when omitted.
+  | { kind: 'SpawnCreature'; statblockId: string; count?: number }
   | { kind: 'EmitEvent'; eventType: string; payload?: unknown };
 
 export const TriggerActionSchema: z.ZodType<TriggerAction> = z.union([
@@ -136,6 +146,11 @@ export const TriggerActionSchema: z.ZodType<TriggerAction> = z.union([
     kind: z.literal('ModifyDamageTaken'),
     amount: z.union([z.number(), FormulaSchema]),
     cap: z.number().optional(),
+  }),
+  z.object({
+    kind: z.literal('SpawnCreature'),
+    statblockId: z.string(),
+    count: z.number().int().min(1).optional(),
   }),
   z.object({
     kind: z.literal('EmitEvent'),

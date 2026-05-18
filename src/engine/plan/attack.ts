@@ -712,12 +712,25 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     damageApplied.id,
     at,
   );
+  // Slice 233: dispatch triggers on DamageApplied for OnEvent riders
+  // that watch incoming damage (Troll's Loathsome Limbs spawns a
+  // Troll Limb on 15+ slashing damage). Run after applying the
+  // damage so any triggered effects see post-damage state.
+  const stateAfterDamage = applyAll(stateAfterAttack, [damageRolled, damageApplied]);
+  const damageTriggers = dispatchTriggers({
+    state: stateAfterDamage,
+    content,
+    rng,
+    event: damageApplied,
+    at,
+  });
 
   return [
     attackRolled,
     ...attackTriggers,
     damageRolled,
     damageApplied,
+    ...damageTriggers,
     ...intercept.extraEvents,
     ...concentrationBreak,
   ];

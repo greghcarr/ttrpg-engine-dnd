@@ -30,6 +30,7 @@ type AddDamageAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDam
 type AddDamageToAttackerAction = Extract<OnEventEffect['actions'][number], { kind: 'AddDamageToAttacker' }>;
 type ApplyConditionAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyCondition' }>;
 type ApplyConditionToAttackerAction = Extract<OnEventEffect['actions'][number], { kind: 'ApplyConditionToAttacker' }>;
+type SpawnCreatureAction = Extract<OnEventEffect['actions'][number], { kind: 'SpawnCreature' }>;
 
 // When an OnEvent rider lives inside a condition that was applied by
 // some caster (Hex, Bestow Curse, etc.), the `appliedFrom` argument
@@ -90,6 +91,18 @@ const buildEventFacts = (
     }
   } else if (event.type === 'DamageApplied') {
     facts.set('event.targetIsSelf', event.targetId === characterId);
+    // Slice 233: cumulative damage-per-type facts for predicate-gated
+    // riders on DamageApplied (Troll Loathsome Limbs needs
+    // `event.damageOfType.slashing >= 15`). One fact per damage type
+    // that appears in this event's components, summed in case the
+    // event carries multiple components of the same type.
+    const byType = new Map<string, number>();
+    for (const c of event.components) {
+      byType.set(c.type, (byType.get(c.type) ?? 0) + c.amount);
+    }
+    for (const [type, amount] of byType) {
+      facts.set(`event.damageOfType.${type}`, amount);
+    }
   }
   return facts;
 };
@@ -398,6 +411,66 @@ const fireApplyConditionToAttacker = (
   return [applied];
 };
 
+// Slice 233. Builds a Character snapshot from a monster statblock
+// and emits CharacterCreated. Canonical user: Troll's Loathsome
+// Limbs spawning a Troll Limb. HP = statblock average; ability
+// scores + speed copied; minimal runtime state (no inventory,
+// no spells, no equipment). The runtime monster-trait fold in
+// `collectMonsterEffects` (slice 129) reads through `statblockId`
+// so the spawn picks up its own traits at runtime without further
+// content authoring.
+const fireSpawnCreature = (
+  action: SpawnCreatureAction,
+  content: ResolvedContent,
+  at: string,
+): Event[] => {
+  const statblock = content.monsters.get(action.statblockId);
+  if (statblock === undefined) return [];
+  const count = action.count ?? 1;
+  const events: Event[] = [];
+  for (let i = 0; i < count; i++) {
+    const spawnId = newEventId() as ULID;
+    const snapshot: Character = {
+      id: spawnId as unknown as Character['id'],
+      kind: 'creature',
+      name: statblock.name,
+      speciesId: 'companion',
+      backgroundId: 'companion',
+      statblockId: statblock.id,
+      classes: [{ classId: 'companion', level: 1, hitDiceRemaining: 1 }],
+      abilityScores: statblock.abilityScores,
+      hp: { current: statblock.hp.average, max: statblock.hp.average, temp: 0, maxBonus: 0 },
+      deathSaves: { successes: 0, failures: 0, stable: false },
+      exhaustion: 0,
+      speedFeet: statblock.speed.walk ?? 30,
+      armorClass: statblock.ac,
+      inventory: [],
+      equipped: { attuned: [] },
+      resources: [],
+      appliedConditions: [],
+      knownSpells: [],
+      preparedSpells: [],
+      spellSlotsUsed: {},
+      pactSlotsUsed: 0,
+      triggerCounters: {},
+      featsTaken: [],
+      pendingChoiceIds: [],
+      breathWeaponExpended: false,
+      damageTypesTakenThisTurn: [],
+      heroPoints: 0,
+      xp: 0,
+      moraleBroken: false,
+    };
+    events.push({
+      id: newEventId() as ULID,
+      at,
+      type: 'CharacterCreated',
+      snapshot,
+    });
+  }
+  return events;
+};
+
 const fireTrigger = (
   effect: OnEventEffect,
   character: Character,
@@ -469,6 +542,8 @@ const fireTrigger = (
           parentEffectInstanceId,
         ),
       );
+    } else if (action.kind === 'SpawnCreature') {
+      events.push(...fireSpawnCreature(action, content, at));
     }
   }
   return { events, triggerId, cadence };

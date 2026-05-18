@@ -6801,7 +6801,19 @@
       "xp": 1800,
       "proficiencyBonus": 3,
       "languages": ["giant"],
-      "traits": [{ "kind": "Regeneration", "perTurn": 15, "suppressedBy": ["acid", "fire"] }]
+      "traits": [
+        { "kind": "Regeneration", "perTurn": 15, "suppressedBy": ["acid", "fire"] },
+        {
+          "kind": "OnEvent",
+          "id": "loathsome-limbs",
+          "trigger": {
+            "eventType": "DamageApplied",
+            "filter": { "kind": "all", "terms": [{ "kind": "eq", "path": "event.targetIsSelf", "value": true }, { "kind": "gte", "path": "event.damageOfType.slashing", "value": 15 }] }
+          },
+          "actions": [{ "kind": "SpawnCreature", "statblockId": "troll-limb" }],
+          "oncePer": "turn"
+        }
+      ]
     },
     {
       "id": "troll-limb",

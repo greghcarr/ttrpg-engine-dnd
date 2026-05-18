@@ -4,6 +4,37 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `SpawnCreature` TriggerAction + Troll Loathsome Limbs (slice 233)**
+
+Completes the Troll → Troll Limb arc started in slices 226 + 232. New TriggerAction kind that spawns a Character instance from a content statblock when an OnEvent rider fires. Canonical user: Troll's Loathsome Limbs trait. After this slice, hitting a Troll with 15+ slashing damage actually emits a CharacterCreated event for a Troll Limb — for the first time since alpha.5, the Troll behaves in combat the way the SRD describes.
+
+**Plumbing**:
+
+- New `SpawnCreature { statblockId, count? }` TriggerAction in [src/schemas/effects.ts](src/schemas/effects.ts) (alongside `AddDamage`, `ApplyCondition`, etc.).
+- New `fireSpawnCreature` helper in [src/engine/triggers/dispatch.ts](src/engine/triggers/dispatch.ts) that builds a Character snapshot from the named statblock (HP = statblock average; ability scores + speed + AC copied; minimal runtime state; no inventory / spells / equipment). The runtime monster-trait fold from slice 129 reads through `statblockId`, so spawned creatures automatically pick up their own traits (Troll Limb's Regeneration fires from slice 232 on subsequent turns).
+- New predicate facts for DamageApplied events: `event.damageOfType.<type>` carries the cumulative amount of each damage type in the event's components. Lets OnEvent filters express thresholds like `gte event.damageOfType.slashing 15`.
+- Attack planner now dispatches triggers on the DamageApplied event (after the existing AttackRolled dispatch). This is a new architectural capability — OnEvent riders can now watch damage events directly, not just attack rolls.
+
+**Content (Troll's Loathsome Limbs)**: OnEvent rider on the Troll's `traits` array, filtering on `targetIsSelf && damageOfType.slashing >= 15`, with `oncePer: 'turn'` and a SpawnCreature action targeting `troll-limb`.
+
+**RAW deviations** (documented for the deferred-primitives backlog):
+
+- The "Bloodied" gate is not enforced; the troll spawns a limb even at full HP if a single hit deals 15+ slashing. RAW: "If the troll ends any turn Bloodied and took 15+ Slashing damage during that turn..."
+- The turn-end timing is replaced with on-hit (spawn fires immediately on the qualifying damage, not at the troll's turn end).
+- The 4/Day lifetime cap is approximated by `oncePer: 'turn'` (one spawn per turn round, no per-day total enforced).
+
+Closes "Troll Loathsome Limbs (SpawnCreature TriggerAction)" backlog row.
+
+Pre-commit Uncle Bob audit:
+- Names: `SpawnCreature`, `fireSpawnCreature`, `event.damageOfType.<type>` all descriptive.
+- DRY: spawn-character builder mirrors the existing summons reducer's Character construction shape.
+- SRP: schema kind / dispatch helper / per-type damage facts / attack-planner dispatch wiring — each does one thing.
+- Magic numbers: 15-slashing threshold is RAW; HP/AC come from the statblock; no arbitrary constants.
+- The attack planner's new damage-dispatch call is a deliberate architectural surface widening, not a regression.
+- Tests assert mechanical outcomes (CharacterCreated with `statblockId === 'troll-limb'`), not just event presence.
+
+Tests: 3-case test in [tests/unit/engine/troll-loathsome-limbs.test.ts](tests/unit/engine/troll-loathsome-limbs.test.ts) covering (1) 15+ slashing spawns a Troll Limb, (2) low slashing damage does NOT spawn, (3) high acid damage does NOT spawn (slashing filter). 1611 pass, 209 skipped. tsc clean.
+
 **Engine: `Regeneration` monster trait primitive (slice 232)**
 
 New effect kind for the classic regenerating-monster trait: bearer regains `perTurn` HP at the start of each of their turns, suppressed on the next turn after taking damage of a type in `suppressedBy`. Canonical users: Troll (15 HP/turn, suppressed by Acid/Fire), Troll Limb (5 HP/turn, same suppression). Closes 2 backlog rows; the slice-226 Troll Limb statblock becomes mechanically real.
