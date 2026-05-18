@@ -4,6 +4,14 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Ranger L9 Expertise (slice 208)**
+
+Pure-content slice. Wires Ranger L9 Expertise as an `OfferChoice` with 2 selections from the Ranger skill list (animal-handling, athletics, insight, investigation, nature, perception, stealth, survival), each option granting `GrantProficiency { target: 'skill', level: 'expertise' }`. Mirrors the existing Rogue L1 / L6 Expertise pattern.
+
+Closes one of the remaining missing main-class features in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) without engine surface (the slice-203 save-derivation fix is what made `GrantProficiency` effects actually compose; skill-side proficiency was already wired).
+
+Tests: 2-case derive test in [tests/unit/derive/ranger-expertise.test.ts](tests/unit/derive/ranger-expertise.test.ts) (L8 baseline has no expertise; L9 with resolved choice folds expertise on the two selected skills via the effect stack). No new event, no new primitive, no schema change.
+
 **Engine: GrantUnarmedAsMagical + Monk L6 Empowered Strikes (slice 207)**
 
 Adds the `GrantUnarmedAsMagical` marker primitive (44 to 45 EFFECT_KINDS). RAW Monk L6 Empowered Strikes: "Your Unarmed Strikes count as magical for the purposes of overcoming Resistance and Immunity to nonmagical damage."
