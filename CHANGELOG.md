@@ -4,6 +4,46 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: variable `chargesCost` on `CastSpell` UseAction + Wand of Magic Missiles canonical user (slice 253)**
+
+Closes the deferred-primitives row pointing at this primitive: Wand of Magic Missiles / Wand of Fireballs / Wand of Lightning Bolts / Staff of Healing's Cure Wounds arm all RAW-specify a variable per-use charge cost (1-3, 1-7, or 1-4 charges) that scales the cast slot level by the same amount. Slice 243 generalized fixed per-action `chargesCost`; this slice adds the variable shape on top.
+
+**Plumbing**:
+
+- New `chargesCostMax?: number` field on the `CastSpell` UseAction variant in [src/schemas/content/item.ts](src/schemas/content/item.ts). When set, the action is variable-cost: `chargesCost` becomes the *minimum* and `chargesCostMax` the maximum. Variable cost is only allowed on `CastSpell` (the only variant whose effect intensity has a per-charge scaling axis, slot level).
+- New `chargesCost?: number` field on `UseItemIntent` in [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts). The consumer's dial; required for variable-cost actions, optional for fixed-cost actions (but if passed, must equal the action's fixed cost).
+- New `resolveActionCharge(action, intent, itemDefId)` helper that folds the dial into per-action resolution: returns `{ action, chargesCost, slotLevel? }`. For variable CastSpell, computes `slotLevel = action.slotLevel + (intent.chargesCost - action.chargesCost)`. Throws on (a) variable action with no dial, (b) dial out of range, (c) dial-on-fixed-action mismatch.
+- planUseItem's charge gate and emission loop now read from the dial-folded `resolvedActions` array so the charge total and effective slot use the right values.
+
+**Content wired (1 magic item)**:
+
+- **Wand of Magic Missiles** (uncommon, no attunement; 7 charges, recharge 1d6+1 at dawn) → `onUse: [{ kind: 'CastSpell', spellId: 'magic-missile', slotLevel: 1, chargesCost: 1, chargesCostMax: 3, castingClassId: 'wizard' }]`. RAW: spend 1-3 charges to cast Magic Missile at L1-L3.
+
+**Future SRD users this unblocks** (now content-only follow-ups):
+
+- Wand of Fireballs (1-7 charges → L3-L9 Fireball).
+- Wand of Lightning Bolts (1-7 charges → L3-L9 Lightning Bolt).
+- Staff of Healing's Cure Wounds arm (1-4 charges → L1-L4 Cure Wounds). Wire as an additional `onUse` action with `actionId: 'cure-wounds'`.
+
+**RAW deviations documented on the wand**:
+
+- The "expend the last charge, roll 1d20; on a 1 the wand crumbles into ashes" degradation roll stays deferred (per-item degradation primitive doesn't exist yet; same shape as Staff of Healing's vanish roll and Wind Fan's 20% per-use tear).
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `chargesCostMax` mirrors the existing `chargesCost` shape from slice 243. Considered `chargesCostUpperBound`; picked `chargesCostMax` because it pairs cleanly as min/max with `chargesCost` as the implicit minimum.
+- **DRY**: the per-action resolution logic lives in a single helper (`resolveActionCharge`) called once per fired action. The three validation messages are bespoke per failure mode (variable-without-dial / dial-out-of-range / dial-on-fixed-mismatch); merging them into one generic "invalid chargesCost" error would lose the consumer-facing specificity that slice 243 introduced.
+- **SRP**: `resolveActionCharge` does one thing, fold the dial into a resolved action. The planner's emission loop reads the resolved record without needing to know about the dial. The schema change is purely additive (new optional field on `CastSpell` only).
+- **Magic numbers**: `chargesCost: 1, chargesCostMax: 3` on Wand of Magic Missiles is RAW (SRD 5.2.1 `magic-items.md`). The slot scaling formula `slotLevel + (intent.chargesCost - action.chargesCost)` is the RAW pattern across all four canonical users, not a magic number.
+- **`at`-threading**: unchanged from slice 241, single `nowIso()` resolved once and threaded through planCastSpell's inner intent.
+- **Mechanical outcomes asserted**: 6 new unit cases. Wand at min cost (chargesCost=1 → slot 1, charge=1). Wand upcast (chargesCost=3 → slot 3, charge=3). Variable without dial throws. Dial out of range (above 3, below 1) throws. Insufficient charges (2 remaining, needs 3) throws. Fixed-action with mismatching dial throws (Wings of Flying, slice 240). Matching fixed-cost dial still works.
+- **Tests**: 23 cases total in [tests/unit/engine/plan-use-item.test.ts](tests/unit/engine/plan-use-item.test.ts) (was 17). No new event types so no `formatEvent` case needed. No new RNG-capture test needed: planCastSpell already has RNG-capture coverage and the new path is pure delegation with a different slot-level argument. Full suite 1649 tests across 244 files (was 1643), all green.
+
+**Open follow-ups (none critical)**:
+
+- The feature-coverage matrix at [tests/coverage/features.test.ts](tests/coverage/features.test.ts) classifies magic items as "wired" based on the `effects` array only; `onUse` wires (slices 240-243 + 253) are invisible to the matrix. The unwired-items list still shows `wand-of-magic-missiles` (and the other onUse-wired items: `wings-of-flying`, `boots-of-speed`, `boots-of-levitation`, `hat-of-disguise`, `staff-of-healing`) as if nothing happened. A snapshot fix that counts items with non-empty `onUse` would close this hole; not done here to keep the slice focused on the primitive.
+- Variable cost on the `Toggle` and `ApplyCondition` UseAction variants stays deliberately unsupported. Neither has a per-charge scaling axis. If a future canonical user needs variable cost on those kinds, the same helper can be extended.
+
 **Docs + infra: alpha.6 slice detail archived + archive-path correctness sweep (slice 252)**
 
 Two same-shape cleanups:

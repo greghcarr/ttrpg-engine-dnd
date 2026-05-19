@@ -87,9 +87,21 @@ export type Tool = z.infer<typeof ToolSchema>;
 // Restoration is 2 charges, Mass Cure Wounds is 5). When `onUse`
 // has more than one entry, the consumer MUST pass `actionId` on
 // UseItemIntent to disambiguate; single-action items keep the
-// slice-240 back-compat (no actionId required). Future slice adds
-// variable per-use chargesCost (consumer picks 1-3 charges to
-// upcast Wand of Magic Missiles).
+// slice-240 back-compat (no actionId required).
+//
+// Slice 253. Variable per-use chargesCost on `CastSpell` only. When
+// `chargesCostMax` is set, `chargesCost` becomes the *minimum* and
+// the consumer picks a value in [chargesCost, chargesCostMax] at use
+// time via `UseItemIntent.chargesCost`. The effective slot level is
+// computed as `slotLevel + (intent.chargesCost - chargesCost)`, so
+// spending an extra charge raises the cast slot by 1. Canonical RAW
+// users: Wand of Magic Missiles (1-3 charges → L1-L3 Magic Missile);
+// Wand of Fireballs / Lightning Bolts (1-7 charges → L3-L9); Staff
+// of Healing's Cure Wounds arm (1-4 charges → L1-L4). When
+// `chargesCostMax` is omitted, the action is fixed-cost (slice 243
+// shape). Variable cost is supported only on `CastSpell` because the
+// scaling axis (slot level) is meaningful only there; ApplyCondition
+// and Toggle don't carry a comparable per-use intensity dial.
 //
 // Duration on ApplyCondition: same shape as slice 236 — the engine's
 // auto-expiry primitive is round-based and source-keyed; minute /
@@ -110,6 +122,7 @@ export const UseActionSchema = z.discriminatedUnion('kind', [
     castingClassId: z.string().optional(),
     actionId: z.string().optional(),
     chargesCost: z.number().int().min(0).optional(),
+    chargesCostMax: z.number().int().min(1).optional(),
   }),
   z.object({
     kind: z.literal('Toggle'),

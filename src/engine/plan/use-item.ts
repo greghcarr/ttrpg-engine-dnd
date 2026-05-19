@@ -14,6 +14,58 @@ import type { RNG } from '../../rng/index.js';
 import type { UseAction } from '../../schemas/content/item.js';
 import type { ULID } from '../ids-utils.js';
 
+// Slice 253. Per-action resolved charge cost + effective CastSpell
+// slot level. For variable-cost CastSpell actions (slice 253), the
+// consumer's `intent.chargesCost` dial is in [chargesCost,
+// chargesCostMax] and the slot scales as `slotLevel + (dial -
+// chargesCost)`. For fixed-cost actions, intent.chargesCost must
+// either be omitted or equal the action's baseCost (mirrors slice
+// 243's actionId-must-match-or-throw discipline; silent-ignore
+// would let a UI think it's varying the cost when it's not).
+interface ResolvedAction {
+  readonly action: UseAction;
+  readonly chargesCost: number;
+  readonly slotLevel?: number;
+}
+
+const resolveActionCharge = (
+  action: UseAction,
+  intent: UseItemIntent,
+  itemDefId: string,
+): ResolvedAction => {
+  const baseCost = action.chargesCost ?? 1;
+
+  if (action.kind === 'CastSpell' && action.chargesCostMax !== undefined) {
+    if (intent.chargesCost === undefined) {
+      throw new Error(
+        `Item ${itemDefId}: action '${action.actionId ?? action.kind}' has variable chargesCost ` +
+          `(range ${baseCost}-${action.chargesCostMax}); UseItemIntent.chargesCost is required`,
+      );
+    }
+    if (intent.chargesCost < baseCost || intent.chargesCost > action.chargesCostMax) {
+      throw new Error(
+        `Item ${itemDefId}: chargesCost ${intent.chargesCost} must be in [${baseCost}, ${action.chargesCostMax}]`,
+      );
+    }
+    return {
+      action,
+      chargesCost: intent.chargesCost,
+      slotLevel: action.slotLevel + (intent.chargesCost - baseCost),
+    };
+  }
+
+  if (intent.chargesCost !== undefined && intent.chargesCost !== baseCost) {
+    throw new Error(
+      `Item ${itemDefId}: action '${action.actionId ?? action.kind}' has fixed chargesCost ${baseCost}; UseItemIntent.chargesCost ${intent.chargesCost} does not match`,
+    );
+  }
+  return {
+    action,
+    chargesCost: baseCost,
+    slotLevel: action.kind === 'CastSpell' ? action.slotLevel : undefined,
+  };
+};
+
 // Slice 243. Resolve which actions to fire on this use. Single-action
 // items keep the slice-240 back-compat (fire the only entry); multi-
 // action items REQUIRE the consumer to pass `actionId` so the planner
@@ -78,6 +130,16 @@ export interface UseItemIntent {
   // fires only that action. When `onUse` has exactly 1 entry, this
   // field is optional (back-compat with slice 240).
   readonly actionId?: string;
+  // Slice 253. Variable-cost dial for CastSpell actions with
+  // `chargesCostMax` set (Wand of Magic Missiles: 1-3 charges → L1-L3
+  // Magic Missile; Wand of Fireballs: 1-7 → L3-L9; Staff of Healing's
+  // Cure Wounds arm: 1-4 → L1-L4). Required for variable actions;
+  // must be omitted (or equal the fixed cost) for fixed actions. The
+  // CastSpell's effective slot level scales linearly with the dial:
+  // `slotLevel + (chargesCost - action.chargesCost)`. The total
+  // charge debit is `chargesCost`, replacing the default of 1 per
+  // fired action.
+  readonly chargesCost?: number;
   readonly at?: string;
 }
 
@@ -144,20 +206,22 @@ export const planUseItem = (
   // 240-242). If actionId is set but doesn't match any onUse entry,
   // throw.
   const firedActions = selectFiredActions(def.onUse, intent.actionId, def.id);
+  // Slice 253. Per-action resolution: fold the variable-cost dial
+  // (intent.chargesCost) into each fired action up front so the charge
+  // gate sees the right total and CastSpell sees the right effective
+  // slot. Validation throws (variable action without a dial, dial out
+  // of range, dial-on-fixed-mismatch) happen here, not later.
+  const resolvedActions = firedActions.map((a) => resolveActionCharge(a, intent, def.id));
 
-  // Charge gate: when the definition carries `charges`, total
-  // chargesCost is the sum of fired-action chargesCosts (defaults to
-  // 1 per fired action). Validate the item has at least that many
-  // charges and emit a single ItemChargeConsumed for the total. When
-  // the definition has no `charges` shape, fired actions still
-  // resolve but no charge decrement happens (and a non-zero
-  // chargesCost on an action is silently ignored, since the item
-  // carries no charge pool to draw from).
+  // Charge gate: when the definition carries `charges`, sum the
+  // resolved chargesCost across fired actions. Validate the item has
+  // at least that many charges and emit a single ItemChargeConsumed
+  // for the total. When the definition has no `charges` shape, fired
+  // actions still resolve but no charge decrement happens (and a
+  // non-zero chargesCost is silently ignored, since the item carries
+  // no charge pool to draw from).
   if (def.charges !== undefined) {
-    const totalChargesCost = firedActions.reduce(
-      (sum, action) => sum + (action.chargesCost ?? 1),
-      0,
-    );
+    const totalChargesCost = resolvedActions.reduce((sum, r) => sum + r.chargesCost, 0);
     const remaining = instance.chargesRemaining ?? 0;
     if (remaining < totalChargesCost) {
       throw new Error(
@@ -178,7 +242,7 @@ export const planUseItem = (
     }
   }
 
-  for (const action of firedActions) {
+  for (const { action, slotLevel } of resolvedActions) {
     if (action.kind === 'ApplyCondition') {
       // Mirror of slice 236's ConsumeAction ApplyCondition: stamp
       // `sourceCharacterId` to the user so the condition can be
@@ -239,11 +303,16 @@ export const planUseItem = (
       // Disguise, Boots of Levitation) Just Work without
       // consumer-side target selection.
       const castTargetIds = intent.castTargetIds ?? [intent.characterId];
+      // Slice 253: `slotLevel` comes from the resolved action so the
+      // variable-cost dial scales the cast (e.g. Wand of Magic
+      // Missiles fired with chargesCost=3 casts at slot 3). For
+      // fixed-cost CastSpell, `slotLevel` is the action's static
+      // `slotLevel`, unchanged from slice 241.
       const castEvents = planCastSpell(state, content, rng, {
         type: 'CastSpell',
         characterId: intent.characterId,
         spellId: action.spellId,
-        slotLevel: action.slotLevel,
+        slotLevel: slotLevel ?? action.slotLevel,
         targetIds: castTargetIds,
         castingClassId: action.castingClassId,
         noSlotCost: true,
