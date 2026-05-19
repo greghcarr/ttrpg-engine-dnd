@@ -4,6 +4,36 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Bracers of Archery +2 damage with longbow / shortbow (slice 275)**
+
+Closes the slice-224 deferred row that has been waiting on weapon-id specificity. RAW: "Proficiency with the longbow and the shortbow, and gain a +2 bonus to damage rolls on ranged attacks made with such weapons." Pre-275 Bracers of Archery shipped unwired (`effects: []`). This slice ships the +2 damage arm (the higher-payoff mechanical wire); the proficiency arm stays deferred until conditional `GrantProficiency` lands.
+
+**Plumbing**:
+
+- New `event.weaponId: string` predicate fact on the attack planner's `damageFacts` map (carrying the weapon instance's `definitionId`). Sits alongside `event.attackKind`, `event.damageType`, and `bearer.offHandHasWeapon`. Unblocks any future weapon-specific item buff with the same shape (Sun Blade vs. specific sword types, Dwarven Thrower vs. specific hammers, etc.).
+
+**Content wired (1 magic item)**:
+
+- **Bracers of Archery** (was `effects: []`): new `AddModifier { target: 'damage', value: 2, condition: { kind: 'any', terms: [{ kind: 'eq', path: 'event.weaponId', value: 'longbow' }, { kind: 'eq', path: 'event.weaponId', value: 'shortbow' }] } }`. Description rewrites the RAW spec and notes the deferred proficiency arm.
+
+**Pattern-check sweep**: searched the pack for sibling items with weapon-id-specific damage gates — none currently. Sun Blade gates on weapon TYPE (radiant) which the existing `event.damageType` covers. Dwarven Thrower, Trident of Fish Command, and other "specific weapon type" items mostly ship as `effects: []` and would benefit from `event.weaponId` when wired; tracking those as a future content sweep rather than this slice.
+
+**RAW deviation tracked**: the proficiency arm of Bracers of Archery (RAW: grants longbow/shortbow proficiency regardless of class) is not yet wired. Conditional `GrantProficiency` would be the cleanest path (a `condition` field on the existing `GrantProficiency` shape, mirror of slice 258's `SetAdvantage.condition` plumbing). No current canonical user other than this; tracked as deferred and waiting for a second use case before adding the schema field.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `event.weaponId` lives in the existing `event.*` namespace alongside `event.attackKind` and `event.damageType`. Mirrors the slice-263 / 274 `event.sense` / `event.athleticsSubAction` pattern.
+- **DRY**: same fact-map-then-AddModifier shape as Dueling fighting style (`event.attackKind == melee`) and Archery fighting style (`event.attackKind == ranged`). The Bracers wire reads consistently with both.
+- **SRP**: one new fact, one content wire, no API change. The damageFacts map already existed and already routed predicates; this slice extends it by one key.
+- **Magic numbers**: `2` (the damage bonus) is RAW; `'longbow'` / `'shortbow'` are content ids (RAW-named).
+- **at-threading**: N/A (damage modifier, no new event emitted).
+- **Plan/commit split preserved**: derive-only (modifier sum), no RNG.
+- **Pattern-check applied**: confirmed Bracers of Archery is the only currently-applicable user of weapon-id-specific damage gates. Future "specific weapon type" items (Dwarven Thrower, Trident of Fish Command, etc.) plug in by gating on `event.weaponId`.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1711 tests across 250 files, was 1706) green. 5 cases: Bracers + longbow gets +2; Bracers + shortbow gets +2; Bracers + heavy crossbow gets +0 (RAW bows only); no Bracers baseline; Bracers carried but not attuned stays at baseline (slice-132 projection gate).
+- **Tests**: 5 cases in new [tests/unit/engine/bracers-of-archery.test.ts](tests/unit/engine/bracers-of-archery.test.ts). Coverage snapshot: `bracers-of-archery` joins `wiredIds` (was unwired).
+
+Pack snapshot drift: `bracers-of-archery.effects` goes from `[]` to a single AddModifier entry. Coverage matrix: 1 new entry in `wiredIds`.
+
 **Engine+content: Gloves of Swimming and Climbing sub-action gate (slice 274)**
 
 Closes the deferred row from slice 263's pattern-check sweep. RAW: "Advantage on any Strength (Athletics) check you make to climb or swim." Pre-274 the wire was broader (advantage on every Athletics check). Mirror of slice 263's `sense?` field pattern on a different axis (skill sub-action vs. environmental sense).

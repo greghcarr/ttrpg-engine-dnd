@@ -698,6 +698,12 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     // Lets predicate-gated AddModifier effects scope to weapon-attack
     // damage types (no canonical user today; future content can use it).
     ['event.damageType', weaponDef.damageType],
+    // Slice 275: weapon-id fact for predicate-gated AddModifier
+    // effects scoped to specific weapons (Bracers of Archery's RAW
+    // "+2 damage on ranged attacks made with a longbow or shortbow"
+    // is the canonical user; future weapon-specific item buffs plug
+    // in by gating on the same fact).
+    ['event.weaponId', weaponInstance.definitionId],
   ]);
   const damageModifierBonus = attackerEffects.modifierSum('damage', damageFacts);
   const damageRollPayload: DamageRoll = {
