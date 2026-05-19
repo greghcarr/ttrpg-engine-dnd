@@ -4,6 +4,30 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: poisoned condition disadvantage extended to all 6 ability checks (slice 264)**
+
+Pattern-check continuation from slice 263. After fixing Eyes of the Eagle (broader-than-RAW SetAdvantage in items), the same shape sweep was extended to non-item content (class features / conditions / feats / species). The sweep surfaced **3 narrow-ability-check disadvantage entries** in conditions; cross-checked against SRD 5.2.1 narrowed it to:
+
+1. **poisoned**: only STR + DEX disadvantage in pack. SRD 5.2.1: "Disadvantage on attack rolls and ability checks" (all 6 abilities). **Closed this slice**.
+2. **frightened**: only STR disadvantage in pack. SRD 5.2.1: all 6 ability checks, BUT gated on "source of fear within line of sight." **Dual bug** — narrow on breadth AND broader on LoS axis. Tracked as deferred row; fixing only the breadth would worsen the LoS over-application. Needs `bearer.canSeeFearSource` predicate fact + consumer state (mirror of slice 263's Cloak of the Bat row).
+3. **reduced-active** (Reduce spell): only STR disadvantage. SRD 5.2.1: "Disadvantage on Strength checks and Strength saving throws" (STR-only). RAW-correct, no fix needed.
+
+What changed:
+
+- **Poisoned condition in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json)** gains 4 missing `SetAdvantage on:check.{CON, INT, WIS, CHA} mode:disadvantage` entries alongside the existing STR + DEX. Now matches RAW: a poisoned character has disadvantage on every ability check.
+
+Pre-commit short audit (content + correctness fix):
+
+- **RAW citation**: SRD 5.2.1 `rules-glossary.md` Poisoned: "Disadvantage on attack rolls and ability checks." Confirmed against the local submodule.
+- **DRY**: 4 new entries follow the same shape as the 2 existing STR / DEX entries. Could be replaced by a future `{ kind: 'check' }` (no ability) RollTarget variant for all-ability-check entries — same shape that would simplify Mantle of Spell Resistance's 6-entry verbosity. Tracked implicitly as a refactor opportunity but not done here (scope: this slice fixes correctness; a RollTarget-wildcard refactor would be its own slice).
+- **Pattern-check applied**: sweep extended to non-item content (3 conditions found, 1 fixed, 1 dual-bug deferred with tracking, 1 verified RAW-correct).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1678 tests across 244 files, was 1676) green. 2 new ability-check unit cases (poisoned has disadvantage on all 6 checks; unpoisoned has none). The previously-tested STR + DEX paths still pass via the loop; CON / INT / WIS / CHA are the newly-covered behaviors.
+
+**Open follow-ups**:
+
+- Frightened dual-bug (tracked).
+- Potential `{ kind: 'check' }` no-ability RollTarget refactor (would simplify poisoned's 6 entries + Mantle of Spell Resistance's 6 entries; not done here).
+
 **Engine: `sense?` on ability-check input + Eyes of the Eagle sight gate + ModifySpeed pattern-check finding (slice 263)**
 
 First canonical user of slice 258's `SetAdvantage.condition` plumbing on ability checks (Mantle of Spell Resistance was the canonical user for saves). RAW: "Eyes of the Eagle — Advantage on WIS (Perception) checks that rely on sight." Prior wire was broader — advantage on every Perception check.

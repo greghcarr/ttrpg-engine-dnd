@@ -7995,7 +7995,11 @@
       "effects": [
         { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
         { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "disadvantage" }
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "CON" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "INT" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "WIS" }, "mode": "disadvantage" },
+        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "CHA" }, "mode": "disadvantage" }
       ]
     },
     {

@@ -4,7 +4,8 @@ import { buildFighter, TEST_CONTENT } from '../../fixtures/index.js';
 import { loadStarterPack } from '../../../src/content/packs/starter.js';
 import { resolveContent } from '../../../src/content/pack.js';
 import { ItemInstanceSchema, type ItemInstance } from '../../../src/schemas/runtime/item-instance.js';
-import { newItemInstanceId } from '../../../src/ids.js';
+import { newAppliedConditionId, newItemInstanceId } from '../../../src/ids.js';
+import type { AbilityScore } from '../../../src/schemas/primitives.js';
 
 describe('computeAbilityCheck', () => {
   it('raw ability check: just the ability modifier', () => {
@@ -150,5 +151,49 @@ describe('Eyes of the Eagle (slice 263)', () => {
       sense: 'sight',
     });
     expect(r.hasAdvantage).toBe(false);
+  });
+});
+
+// Slice 264: poisoned condition disadvantage extended to all 6 ability
+// checks per SRD 5.2.1 ("Disadvantage on attack rolls and ability
+// checks"). Prior wire only penalized STR + DEX (narrower than RAW).
+// Pattern-check sibling: frightened has the same narrow-checks bug
+// PLUS a missing source-in-LoS gate; tracked as a deferred dual-bug
+// row in starter-pack-gaps.md.
+const ABILITIES: ReadonlyArray<AbilityScore> = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+
+const buildPoisonedFighter = () => {
+  const base = buildFighter({ STR: 14, DEX: 14, CON: 14, INT: 14, WIS: 14, CHA: 14 });
+  return {
+    ...base,
+    appliedConditions: [{ id: newAppliedConditionId(), conditionId: 'poisoned' }],
+  };
+};
+
+describe('Poisoned condition disadvantage on all ability checks (slice 264)', () => {
+  it('disadvantage applies on every ability check (RAW: all 6 abilities)', () => {
+    const fighter = buildPoisonedFighter();
+    for (const ability of ABILITIES) {
+      const r = computeAbilityCheck({
+        character: fighter,
+        itemInstances: {},
+        content: STARTER_CONTENT,
+        ability,
+      });
+      expect(r.hasDisadvantage, `Poisoned should give disadvantage on ${ability} check`).toBe(true);
+    }
+  });
+
+  it('unpoisoned character has no disadvantage (regression check)', () => {
+    const fighter = buildFighter({ STR: 14 });
+    for (const ability of ABILITIES) {
+      const r = computeAbilityCheck({
+        character: fighter,
+        itemInstances: {},
+        content: STARTER_CONTENT,
+        ability,
+      });
+      expect(r.hasDisadvantage, `Unpoisoned ${ability} check should not have disadvantage`).toBe(false);
+    }
   });
 });
