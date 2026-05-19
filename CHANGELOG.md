@@ -4,6 +4,34 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Wand of Fireballs + Wand of Lightning Bolts + Staff of Healing Cure Wounds arm (slice 255)**
+
+Closes the three remaining variable-cost canonical users surfaced by slice 253. Pure JSON wires against the variable-`chargesCost` primitive shipped in slice 253; no engine surface touched.
+
+Content wired:
+
+- **Wand of Fireballs** (rare, requires attunement by a Spellcaster; 7 charges, 1d6+1 dawn recharge) → `onUse: [{ kind: 'CastSpell', spellId: 'fireball', slotLevel: 3, chargesCost: 1, chargesCostMax: 3, castingClassId: 'wizard' }]`. RAW: spend 1-3 charges to cast Fireball at L3-L5.
+- **Wand of Lightning Bolts** (rare, requires attunement by a Spellcaster; 7 charges, 1d6+1 dawn recharge) → identical shape with `spellId: 'lightning-bolt'`. RAW: spend 1-3 charges to cast Lightning Bolt at L3-L5.
+- **Staff of Healing** Cure Wounds arm appended to existing `onUse` array (joining slice 243's Lesser Restoration + Mass Cure Wounds): `{ kind: 'CastSpell', actionId: 'cure-wounds', spellId: 'cure-wounds', slotLevel: 1, chargesCost: 1, chargesCostMax: 4, castingClassId: 'cleric' }`. RAW: 1-4 charges → L1-L4 Cure Wounds. All three Staff of Healing arms now wire.
+
+RAW correction: slice 253's CHANGELOG narrative misstated the wands' charge ranges as 1-7 → L3-L9. The SRD 5.2.1 `magic-items.md` explicitly caps charges-per-use at 3 ("you can expend no more than 3 charges to cast _Fireball_"); the correct range is 1-3 → L3-L5. Slice 253's entry updated to match RAW.
+
+RAW deviations carried forward from slice 253:
+
+- The wands' fixed item-DC ("save DC 15") is not enforced; the engine computes the save DC from the consumer's stats via `castingClassId: 'wizard'`. Same shape as slice 241's scroll-of-fireball parity convention.
+- The "expend the last charge, roll 1d20; on a 1 the wand crumbles" degradation roll stays deferred (per-item degradation primitive doesn't exist yet).
+- Attunement gate not enforced (same shape as slice 240-243).
+
+Coverage matrix:
+
+- `wand-of-fireballs` and `wand-of-lightning-bolts` join `wiredIds` (slice 254 extended the matrix to count `onUse` wires). `staff-of-healing` was already in `wiredIds` (it had Lesser Restoration + Mass Cure Wounds wired since slice 243); adding the third arm doesn't change membership.
+
+Pre-commit short audit (content sweep):
+
+- **RAW citations**: each wire's parameters cite the SRD 5.2.1 magic-items entry verbatim (wand-of-fireballs / wand-of-lightning-bolts / staff-of-healing). The base slot level on each wand is 3 (the floor of the spell's RAW level); `chargesCostMax: 3` matches the SRD "no more than 3 charges" cap exactly.
+- **DRY**: the two wands share an identical shape with only `spellId` differing; not abstracted because two siblings is below the threshold and an abstracted helper would be one-call-site-deep with no future call sites.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1649 tests across 244 files) green; coverage snapshot diff is exactly the 2 newly-wired wands joining `wiredIds` (Staff of Healing already present); the slice 253 RAW correction in the CHANGELOG entry text is a non-code edit; no test code change needed (slice 253's planner tests already cover the shape).
+
 **Tests: feature-coverage matrix counts `onUse` wires as wired (slice 254)**
 
 Closes the open follow-up from slice 253: the `magic-item wire and charge state is stable` snapshot at [tests/coverage/features.test.ts](tests/coverage/features.test.ts) classified items as "wired" based on the `effects` array only. Items wired via the `onUse` action shape (slices 240-243 + 253) were invisible to the audit; six magic items (Wings of Flying, Boots of Speed, Boots of Levitation, Hat of Disguise, Staff of Healing, Wand of Magic Missiles) showed as unwired even though their RAW mechanics are fully wired through the planUseItem path.
@@ -35,11 +63,11 @@ Closes the deferred-primitives row pointing at this primitive: Wand of Magic Mis
 
 - **Wand of Magic Missiles** (uncommon, no attunement; 7 charges, recharge 1d6+1 at dawn) → `onUse: [{ kind: 'CastSpell', spellId: 'magic-missile', slotLevel: 1, chargesCost: 1, chargesCostMax: 3, castingClassId: 'wizard' }]`. RAW: spend 1-3 charges to cast Magic Missile at L1-L3.
 
-**Future SRD users this unblocks** (now content-only follow-ups):
+**Future SRD users this unblocks** (shipped as content wires in slice 255):
 
-- Wand of Fireballs (1-7 charges → L3-L9 Fireball).
-- Wand of Lightning Bolts (1-7 charges → L3-L9 Lightning Bolt).
-- Staff of Healing's Cure Wounds arm (1-4 charges → L1-L4 Cure Wounds). Wire as an additional `onUse` action with `actionId: 'cure-wounds'`.
+- Wand of Fireballs (1-3 charges → L3-L5 Fireball).
+- Wand of Lightning Bolts (1-3 charges → L3-L5 Lightning Bolt).
+- Staff of Healing's Cure Wounds arm (1-4 charges → L1-L4 Cure Wounds). Wired as an additional `onUse` action with `actionId: 'cure-wounds'`.
 
 **RAW deviations documented on the wand**:
 
