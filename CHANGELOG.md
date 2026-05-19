@@ -4,6 +4,16 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: refresh front-door counts + api-overview consumer-state pattern + 2 new tracking rows (slice 280)**
+
+Pre-bump hygiene before promoting Unreleased to alpha.7. Three same-shape docs updates:
+
+- **Test counts**: README.md and docs/status.md (2 spots) updated from "1643 tests across 244 files" to "1728 tests across 253 files." 85 new tests and 9 new files across the slice 251-279 window.
+- **api-overview.md**: new paragraph documenting the consumer-supplied scene-state fact pattern (slices 263, 274, 276, 278, 279). Lists each of the five optional input fields, their host shapes (`AttackIntent` vs. `ComputeAbilityCheckInput`), their default semantic (default-apply vs. opt-in), and the framing distinction between negative penalties (default-apply) and positive benefits (opt-in).
+- **starter-pack-gaps.md**: 2 new deferred-backlog rows. (1) Doc-size CI check (slice 270 + 277 each had to archive when the front-door doc went over ceiling silently; a `wc -c`-based pre-commit script would catch this earlier). (2) Consumer-half tracking for engine-half-only RAW fixes (slices 276 / 278 / 279 ship engine-side fact slots that no consumer currently populates; the bug fixes are silent in production until consumers wire them).
+
+No code changes; no test changes; coverage snapshot unchanged. tsc clean; full vitest suite (1728 tests across 253 files) still green.
+
 **Engine+content: Cloak of the Bat dim-light Stealth gate (slice 279)**
 
 Closes the slice-263 deferred Cloak of the Bat Stealth row. RAW: "Advantage on Dexterity (Stealth) checks while wearing this cloak in an area of dim light or darkness." Pre-279 the SetAdvantage applied unconditionally (broader than RAW).
