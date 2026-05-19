@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: filter-shape refinement codified into pattern-check norm (slice 268)**
+
+Promotes the slice 267 meta-finding into [CLAUDE.md](CLAUDE.md). Slice 267 said "if this lesson recurs in a future sweep, codify it" — but the user redirected: the lesson is concrete and earned, no need to wait for a second instance.
+
+What changed:
+
+- **CLAUDE.md "Pattern-check on bugs" subsection** gains a new paragraph after the "Same shape, elsewhere?" trigger: **"Filter shape determines what a sweep can find."** Cites the slice-264 narrow-filter example and the three broader-than-RAW wires slice 267 surfaced (Dodge's LoS gate, Dodge's Incap/Speed-0 disabler, Blur's attacker-sense bypass). Frames the operational refinement: "what's the family of effects that can express this RAW intent?" then check all members.
+- **Auto-memory entry [pattern-check-on-bugs.md](file:///Users/greghcarr/.claude/projects/-Users-greghcarr-Documents-Visual-Studio-Code-dnd-srd-engine/memory/pattern-check-on-bugs.md)** mirrors the addition so future sessions in this directory pick it up without re-reading CLAUDE.md.
+- CLAUDE.md size: 33.7 KB → 34.6 KB. Comfortably under the single-Read ceiling.
+
+Pre-commit short audit (docs slice):
+
+- **Names**: "Filter shape determines what a sweep can find" — declarative, drops the slice-267 framing of "meta-finding" and replaces it with a working principle.
+- **DRY**: the norm lives in CLAUDE.md (authoritative); the memory entry mirrors. Linked memory entries don't duplicate the prose; they restate concisely with a slice-268 origin pointer.
+- **SRP**: pure docs slice. No engine / test surface touched.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1686 tests across 244 files) green; CLAUDE.md still fits in a single Read.
+
 **Docs: track 3 outstanding broader-than-RAW bugs slice 264's sweep missed (slice 267)**
 
 Honesty pass on the pattern-check chain (slices 262-266). The user asked "do we have outstanding bugs to fix from the chain?" — answering forced a wider sweep than slice 264's original Python script ran, surfacing three previously-untracked correctness gaps. None are new bugs; all existed before the chain started but weren't surfaced until now.

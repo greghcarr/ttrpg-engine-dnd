@@ -95,6 +95,8 @@ Claude wrote most of this code across hundreds of slices. A mistake made once is
 
 Reading "found a bug" or "noticed an inconsistency" in your own thinking is the trigger. Before fixing, ask: "Same shape, elsewhere?" — grep for the pattern, check sibling files, look at recent CHANGELOG entries for similar-shape work. Then fix all of it in one slice if scoped right, or fix the canonical case + add concrete tracking for the others.
 
+**Filter shape determines what a sweep can find.** The starting bug's shape is a clue, not the boundary. If the bug you spotted is "narrow disadvantage on per-ability check," widening past the literal filter (`kind:'check' + mode:'disadvantage'`) to its conceptual family (`SetAdvantage` / `ImposeDisadvantageOnAttackers` / `GrantAdvantageToAttackers`, any mode, any target) and cross-checking each result against RAW catches adjacent shapes. Slice 264 swept narrowly for the literal filter and missed three RAW-deviating wires in adjacent shapes (Dodge's missing LoS gate on `ImposeDisadvantageOnAttackers`, Dodge's missing Incapacitated/Speed-0 disabler on its DEX-save advantage, Blur's missing attacker-sense bypass on `ImposeDisadvantageOnAttackers`); slice 267 tracked them after a wider sweep. When sweeping, ask: "what's the family of effects that can express this RAW intent?" then check all members.
+
 When a later slice closes a tracked follow-up, mark the original line in the prior slice's CHANGELOG entry with `~~strikethrough~~` + `**Closed by slice N.**` (slice 260's convention). Items that stay open get an explicit `**Still open.**` so a reader can tell "open" from "stale, not yet annotated."
 
 ### Doc updates per slice
