@@ -133,6 +133,24 @@ export const UseActionSchema = z.discriminatedUnion('kind', [
 ]);
 export type UseAction = z.infer<typeof UseActionSchema>;
 
+// Slice 256. Per-item degradation roll. RAW canonical shape: "If you
+// expend the last charge, roll 1d20. On a 1, the wand crumbles into
+// ashes" (Wand of Magic Missiles / Fireballs / Lightning Bolts) and
+// "the staff vanishes in a flash of light" (Staff of Healing). The
+// `trigger: 'lastChargeExpended'` shape fires after the planner
+// consumes the item's last charge; the planner rolls a `die`-sided
+// die and, if the result is in `destroyOn`, emits ItemDestroyed.
+// Distinct from Wind Fan's "20% per-use tear" shape, which fires on
+// every use independent of charges and would need a separate
+// `trigger: 'eachUse'` variant (deferred until a canonical user
+// drives it; Wind Fan is the only RAW user today).
+export const DestructionRollSchema = z.object({
+  trigger: z.literal('lastChargeExpended'),
+  die: z.number().int().min(2),
+  destroyOn: z.array(z.number().int().positive()).min(1),
+});
+export type DestructionRoll = z.infer<typeof DestructionRollSchema>;
+
 export const MagicItemSchema = ItemBaseSchema.extend({
   itemKind: z.literal('magic'),
   rarity: z.enum(['common', 'uncommon', 'rare', 'very-rare', 'legendary', 'artifact']),
@@ -147,6 +165,7 @@ export const MagicItemSchema = ItemBaseSchema.extend({
     .optional(),
   effects: z.array(EffectSchema).default([]),
   onUse: z.array(UseActionSchema).default([]),
+  destructionRoll: DestructionRollSchema.optional(),
 });
 export type MagicItem = z.infer<typeof MagicItemSchema>;
 

@@ -41,6 +41,7 @@ import {
   applyItemBuffApplied,
   applyItemBuffRemoved,
   applyItemConsumed,
+  applyItemDestroyed,
   applyItemEquipped,
   applyItemUnattuned,
   applyItemUnequipped,
@@ -351,6 +352,9 @@ export const apply = (state: CampaignState, event: Event): CampaignState =>
         break;
       case 'ItemUsed':
         applyItemUsed(draft, event);
+        break;
+      case 'ItemDestroyed':
+        applyItemDestroyed(draft, event);
         break;
       case 'PartyCreated':
         applyPartyCreated(draft, event);

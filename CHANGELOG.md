@@ -4,6 +4,50 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: per-item degradation roll primitive + Wand of Magic Missiles canonical user (slice 256)**
+
+Closes the deferred-primitives row that slice 243 explicitly gated on "defer until a second item lands." With 3 wands + Staff of Healing all RAW-specifying the same shape ("expend the last charge, roll 1d20; on a 1 the wand crumbles / the staff vanishes"), the gate is met.
+
+Architecture: planner consumes the d20, bakes the result on the emitted event, and apply() retires the instance. Same plan/commit-split discipline as every other RNG-consuming planner in the engine.
+
+**Plumbing**:
+
+- New `ItemDestroyed` event in [src/schemas/events/inventory.ts](src/schemas/events/inventory.ts): `{ characterId, instanceId, definitionId, reason: 'degradation-roll', rollDie, rollResult }`. The roll outcome is baked at plan time so apply() stays RNG-free and replay reproduces the same destruction outcome. Wired into [src/schemas/events/index.ts](src/schemas/events/index.ts) (import + union + array) and [src/engine/apply.ts](src/engine/apply.ts) (dispatch case).
+- New `applyItemDestroyed` reducer in [src/engine/reducers/inventory.ts](src/engine/reducers/inventory.ts): mirrors `applyItemConsumed`'s retirement path (remove instance from character's inventory + delete from `state.itemInstances`).
+- New `destructionRoll?: { trigger: 'lastChargeExpended', die, destroyOn }` field on MagicItemSchema in [src/schemas/content/item.ts](src/schemas/content/item.ts). The `trigger` discriminator leaves room for a future `'eachUse'` variant (Wind Fan's 20% per-use tear) without breaking the shape; for now only `'lastChargeExpended'` is supported.
+- planUseItem extension in [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts): tracks `lastChargeExpended` inside the existing charge gate (remaining === totalChargesCost), then after the action effects and ItemUsed journal marker, rolls `def.destructionRoll.die` and emits `ItemDestroyed` if the result is in `destroyOn`. Event order in the stream: ItemChargeConsumed → action effects (SpellCastDeclared, etc.) → ItemUsed → ItemDestroyed.
+- `formatEvent` case for ItemDestroyed in [tests/transcript.ts](tests/transcript.ts): renders as "{item} crumbles to ashes (degradation roll: {result} on d{die}). **{owner}** loses the item."
+
+**Content wired (1 magic item)**:
+
+- **Wand of Magic Missiles**: `destructionRoll: { trigger: 'lastChargeExpended', die: 20, destroyOn: [1] }`. RAW: "If you expend the wand's last charge, roll 1d20. On a 1, the wand crumbles into ashes and is destroyed."
+
+**Future SRD users this unblocks** (now content-only follow-ups, identical shape):
+
+- Wand of Fireballs (`destroyOn: [1]`).
+- Wand of Lightning Bolts (`destroyOn: [1]`).
+- Staff of Healing (`destroyOn: [1]`; RAW: "the staff vanishes in a flash of light, lost forever").
+
+**Deferred (different trigger shape)**:
+
+- Wind Fan's "20% per-use chance the air-elemental gust knocks the fan from the user's hand and the fan tears" — uses `trigger: 'eachUse'`, fires every use independent of charges. Not modeled this slice (no canonical user other than Wind Fan, and Wind Fan is itself currently `effects: []`). When a second `eachUse` user lands, extend the trigger union.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `destructionRoll` field name carries the RAW intent (the roll exists to determine destruction); `trigger: 'lastChargeExpended'` reads as English ("trigger fires when last charge is expended"). `ItemDestroyed.reason: 'degradation-roll'` keeps the door open for future destruction causes (e.g., `'sundered'` for a weapon-sundering effect) without overloading a single event.
+- **DRY**: `applyItemDestroyed` is a near-twin of `applyItemConsumed` (both retire an instance + remove from inventory). Considered a shared `retireInstance(state, characterId, instanceId)` helper — declined for now because each reducer's preconditions diverge (ItemConsumed's instance has a `definitionId` from the event payload; ItemDestroyed's same, but the future trigger variants might have different invariants). Single-call-site twins of 4 lines each is below the abstraction threshold.
+- **SRP**: schema field, event, reducer, planner extension, transcript case each own one concern. The planner extension lives inside the existing planUseItem rather than as a separate planner because the destruction check is intrinsic to the use action (it conditions on the same `lastChargeExpended` boolean the charge gate computes).
+- **Magic numbers**: `die: 20` and `destroyOn: [1]` on Wand of Magic Missiles are RAW (SRD 5.2.1 `magic-items.md`). No engine-side magic numbers introduced; the formula `result ∈ destroyOn` is the rule itself.
+- **`at`-threading**: single `at = intent.at ?? nowIso()` resolved at the top of planUseItem (unchanged from slice 241); the `ItemDestroyed.at` re-uses that same timestamp so the destruction lands at the same wall-time as the use that triggered it.
+- **Plan/commit split preserved**: `rollDie(die, rng)` is consumed in the planner; `rollResult` baked on the emitted ItemDestroyed; the reducer is pure (no RNG). Replay reproduces byte-identical state.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1657 tests across 244 files, was 1649) green. 6 new planner unit cases (d20=1 destroys, d20≠1 persists, non-last-charge no roll, no-destructionRoll no roll, upcast-to-final-charge triggers roll, committed destruction retires from state). 2 new reducer unit cases (happy path + character-not-found throws). All 8 prior `wand-of-magic-missiles` tests still pass — the new fields don't disturb the existing planner paths.
+- **Tests**: planner tests use a `fixedRng(value)` inline helper to control the d20 outcome deterministically (rng.next() in [0, 0.05) → rollDie(20) = 1; in [0.05, 1) → 2-20). Reducer tests construct state via `applyAll(CharacterCreated + ItemAcquired)` matching the established pattern. transcript snapshots not yet regenerated for any golden scenario that exercises ItemDestroyed (none of the existing goldens do); future goldens that destroy an item will surface the new transcript line at snapshot time.
+
+**Open follow-ups**:
+
+- **Content sweep** (small, 3 items): wire Wand of Fireballs, Wand of Lightning Bolts, Staff of Healing with identical `destructionRoll: { trigger: 'lastChargeExpended', die: 20, destroyOn: [1] }`. Pure JSON edit + snapshot update.
+- **Wind Fan `eachUse` trigger** (small, 1 item): extend the trigger union to include `'eachUse'`. The probabilistic-tear shape (20% per use) maps cleanly: `destructionRoll: { trigger: 'eachUse', die: 20, destroyOn: [1, 2, 3, 4] }` (4/20 = 20%) or `{ die: 5, destroyOn: [1] }`. Defer until Wind Fan itself gets onUse wires (currently `effects: []`).
+
 **Content: Wand of Fireballs + Wand of Lightning Bolts + Staff of Healing Cure Wounds arm (slice 255)**
 
 Closes the three remaining variable-cost canonical users surfaced by slice 253. Pure JSON wires against the variable-`chargesCost` primitive shipped in slice 253; no engine surface touched.

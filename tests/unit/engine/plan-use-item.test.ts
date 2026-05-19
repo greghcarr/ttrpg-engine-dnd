@@ -10,9 +10,10 @@ import type {
   ConditionAppliedEvent,
   ConditionRemovedEvent,
 } from '../../../src/schemas/events/combat.js';
-import type { ItemUsedEvent } from '../../../src/schemas/events/inventory.js';
+import type { ItemDestroyedEvent, ItemUsedEvent } from '../../../src/schemas/events/inventory.js';
 import type { ItemChargeConsumedEvent } from '../../../src/schemas/events/charges.js';
 import type { SpellCastDeclaredEvent } from '../../../src/schemas/events/spellcasting.js';
+import type { RNG } from '../../../src/rng/index.js';
 import { eventId, isoTimestamp, makeItemInstance } from '../../fixtures/index.js';
 
 // Slice 240: planUseItem activates a magic item without retiring it.
@@ -617,5 +618,154 @@ describe('planUseItem variable chargesCost (slice 253)', () => {
         chargesCost: 1,
       }),
     ).not.toThrow();
+  });
+});
+
+// Slice 256: per-item degradation roll. Canonical user: Wand of Magic
+// Missiles ("If you expend the last charge, roll 1d20. On a 1, the
+// wand crumbles into ashes"). The planner rolls a d20 only when (a)
+// the def carries a `destructionRoll` with `trigger:
+// 'lastChargeExpended'`, and (b) the use spent the item's final
+// charge. The roll outcome is baked on the emitted ItemDestroyed.
+//
+// Tests use a fixed-value RNG so the d20 outcome is deterministic:
+// rng.next() in [0, 0.05) rolls a 1 (destruction); in [0.05, 1)
+// rolls 2-20 (instance persists).
+const fixedRng = (value: number): RNG => ({ next: () => value });
+
+describe('planUseItem degradation roll (slice 256)', () => {
+  it('using the final charge of Wand of Magic Missiles with d20=1 destroys the wand', () => {
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0) });
+    const wand = makeItemInstance('wand-of-magic-missiles', { chargesRemaining: 1, maxCharges: 7 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [wand.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wand-destruction' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: wand.id,
+      chargesCost: 1,
+    });
+    const destroyed = events.find((e) => e.type === 'ItemDestroyed') as ItemDestroyedEvent | undefined;
+    expect(destroyed).toBeDefined();
+    expect(destroyed!.rollDie).toBe(20);
+    expect(destroyed!.rollResult).toBe(1);
+    expect(destroyed!.reason).toBe('degradation-roll');
+    expect(destroyed!.definitionId).toBe('wand-of-magic-missiles');
+    // ItemDestroyed comes after ItemUsed (journal marker fires before
+    // retirement).
+    const usedIdx = events.findIndex((e) => e.type === 'ItemUsed');
+    const destroyedIdx = events.findIndex((e) => e.type === 'ItemDestroyed');
+    expect(destroyedIdx).toBeGreaterThan(usedIdx);
+  });
+
+  it('using the final charge with d20!=1 does not destroy the wand', () => {
+    // fixedRng(0.5) → rollDie(20) = Math.floor(0.5*20) + 1 = 11.
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0.5) });
+    const wand = makeItemInstance('wand-of-magic-missiles', { chargesRemaining: 1, maxCharges: 7 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [wand.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wand-no-destruction' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: wand.id,
+      chargesCost: 1,
+    });
+    expect(events.some((e) => e.type === 'ItemDestroyed')).toBe(false);
+    expect(events.some((e) => e.type === 'ItemUsed')).toBe(true);
+  });
+
+  it('spending charges that leave the wand non-empty does not roll degradation', () => {
+    // 3 charges remaining, spend 1 → 2 left. The destructionRoll
+    // trigger is "lastChargeExpended"; this use is not the final
+    // charge, so no roll fires (regardless of RNG outcome).
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0) });
+    const wand = makeItemInstance('wand-of-magic-missiles', { chargesRemaining: 3, maxCharges: 7 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [wand.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wand-mid-charge' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: wand.id,
+      chargesCost: 1,
+    });
+    expect(events.some((e) => e.type === 'ItemDestroyed')).toBe(false);
+  });
+
+  it('items without a destructionRoll never destroy regardless of last-charge expenditure', () => {
+    // Wings of Flying is a slice-240 magic item: 1 charge per dawn,
+    // no destructionRoll. Spending the only charge must not emit
+    // ItemDestroyed.
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0) });
+    const cloak = makeItemInstance('wings-of-flying', { chargesRemaining: 1, maxCharges: 1 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [cloak.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wings-no-destruction' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: cloak },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: cloak.id,
+    });
+    expect(events.some((e) => e.type === 'ItemDestroyed')).toBe(false);
+  });
+
+  it('upcasting Wand of Magic Missiles to its limit (3 charges from 3 remaining) triggers the roll', () => {
+    // chargesRemaining=3, chargesCost=3 → all charges spent, last
+    // charge IS expended. With fixedRng(0) → d20=1 → destruction.
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0) });
+    const wand = makeItemInstance('wand-of-magic-missiles', { chargesRemaining: 3, maxCharges: 7 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [wand.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wand-upcast-final' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: wand.id,
+      chargesCost: 3,
+    });
+    const charge = events.find((e) => e.type === 'ItemChargeConsumed') as ItemChargeConsumedEvent | undefined;
+    expect(charge!.amount).toBe(3);
+    const destroyed = events.find((e) => e.type === 'ItemDestroyed') as ItemDestroyedEvent | undefined;
+    expect(destroyed).toBeDefined();
+    expect(destroyed!.rollResult).toBe(1);
+  });
+
+  it('committed ItemDestroyed retires the wand: removed from inventory + itemInstances', () => {
+    // End-to-end: plan a destruction-triggering use, commit the
+    // event stream, verify the wand is gone from state.
+    const engine = createEngine({ contentPacks: [PACK], rng: fixedRng(0) });
+    const wand = makeItemInstance('wand-of-magic-missiles', { chargesRemaining: 1, maxCharges: 7 });
+    const baseHero = buildHero();
+    const hero: Character = { ...baseHero, inventory: [wand.id] };
+    let campaign: Campaign = engine.createCampaign({ name: 'wand-destruction-commit' });
+    campaign = commit(campaign, [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand },
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: hero } satisfies CharacterCreatedEvent,
+    ]);
+    const { events } = engine.plan.useItem(campaign.state, {
+      characterId: hero.id,
+      instanceId: wand.id,
+      chargesCost: 1,
+    });
+    campaign = commit(campaign, events);
+    expect(campaign.state.itemInstances[wand.id]).toBeUndefined();
+    expect(campaign.state.characters[hero.id]?.inventory).not.toContain(wand.id);
   });
 });

@@ -272,6 +272,11 @@ const formatEvent = (event: Event, ctx: FormatterContext): string => {
       const target = event.targetId === event.characterId ? user : targetName;
       return `**${user}** used ${item}${target !== user ? ` (on ${target})` : ''}.`;
     }
+    case 'ItemDestroyed': {
+      const owner = characterName(stateBefore, event.characterId);
+      const item = content.items.get(event.definitionId)?.name ?? event.definitionId;
+      return `${item} crumbles to ashes (degradation roll: ${event.rollResult} on d${event.rollDie}). **${owner}** loses the item.`;
+    }
     case 'PartyCreated': {
       const members = event.memberIds.length === 0
         ? 'no members'

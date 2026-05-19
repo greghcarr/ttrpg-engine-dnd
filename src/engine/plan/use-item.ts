@@ -1,7 +1,10 @@
 import type { CampaignState } from '../../schemas/runtime/campaign.js';
 import type { ResolvedContent } from '../../content/pack.js';
 import type { Event } from '../../schemas/events/index.js';
-import type { ItemUsedEvent } from '../../schemas/events/inventory.js';
+import type {
+  ItemDestroyedEvent,
+  ItemUsedEvent,
+} from '../../schemas/events/inventory.js';
 import type {
   ConditionAppliedEvent,
   ConditionRemovedEvent,
@@ -11,6 +14,7 @@ import { newAppliedConditionId, newEventId } from '../../ids.js';
 import { nowIso } from '../../internal/clock.js';
 import { planCastSpell } from './cast-spell.js';
 import type { RNG } from '../../rng/index.js';
+import { rollDie } from '../../rng/dice.js';
 import type { UseAction } from '../../schemas/content/item.js';
 import type { ULID } from '../ids-utils.js';
 
@@ -220,6 +224,13 @@ export const planUseItem = (
   // actions still resolve but no charge decrement happens (and a
   // non-zero chargesCost is silently ignored, since the item carries
   // no charge pool to draw from).
+  //
+  // Slice 256: track whether this use spent the item's final charge,
+  // so the post-action degradation-roll block (below) can fire when
+  // the def carries a `destructionRoll` with `trigger:
+  // 'lastChargeExpended'`. RAW: "If you expend the last charge, roll
+  // 1d20. On a 1, the wand crumbles into ashes."
+  let lastChargeExpended = false;
   if (def.charges !== undefined) {
     const totalChargesCost = resolvedActions.reduce((sum, r) => sum + r.chargesCost, 0);
     const remaining = instance.chargesRemaining ?? 0;
@@ -239,6 +250,7 @@ export const planUseItem = (
         forEffect: `use:${def.id}`,
       };
       events.push(charge);
+      lastChargeExpended = remaining === totalChargesCost;
     }
   }
 
@@ -333,5 +345,32 @@ export const planUseItem = (
     targetId: targetId as ULID,
   };
   events.push(used);
+
+  // Slice 256. Degradation roll. Fires only when (a) the def carries
+  // a `destructionRoll` with `trigger: 'lastChargeExpended'`, (b) the
+  // charge block above marked `lastChargeExpended = true` (final
+  // charge spent on this use), and (c) the rolled die result is in
+  // the def's `destroyOn` set. The roll is consumed here in the
+  // planner (the only place RNG flows) and the result is baked on
+  // the emitted ItemDestroyed so apply() stays RNG-free and replay
+  // reproduces the same destruction outcome.
+  if (lastChargeExpended && def.destructionRoll?.trigger === 'lastChargeExpended') {
+    const rollResult = rollDie(def.destructionRoll.die, rng);
+    if (def.destructionRoll.destroyOn.includes(rollResult)) {
+      const destroyed: ItemDestroyedEvent = {
+        id: newEventId() as ULID,
+        at,
+        type: 'ItemDestroyed',
+        characterId: intent.characterId as ULID,
+        instanceId: intent.instanceId as ULID,
+        definitionId: instance.definitionId,
+        reason: 'degradation-roll',
+        rollDie: def.destructionRoll.die,
+        rollResult,
+      };
+      events.push(destroyed);
+    }
+  }
+
   return events;
 };
