@@ -8514,11 +8514,12 @@
     {
       "id": "boots-of-speed-active",
       "name": "Boots of Speed (active)",
-      "description": "Slice 242. Walking speed doubled while the wearer's heels are clicked together. RAW also gives Disadvantage on opportunity attacks against the wearer; that arm needs an `event.isOpportunityAttack` predicate fact that the engine doesn't yet carry on AttackRolled (only the `event.attackKind` melee/ranged distinction landed in slice 123), so the opportunity-attack-disadvantage arm stays narrative for now. Cumulative 10-minute-per-long-rest budget is also consumer-managed (the engine's auto-expiry is round-based + source-keyed, not minute-budgeted). Toggled on / off via the slice-240 / 242 UseItem planner; the planner emits ConditionApplied on the first use and ConditionRemoved on the second.",
+      "description": "Walking speed doubled while the wearer's heels are clicked together, plus Disadvantage on opportunity attacks against the wearer (slice 269 closed the OA-disadvantage arm by gating ImposeDisadvantageOnAttackers on `event.isOpportunityAttack === true`, the predicate fact slice 206 added for Hunter L7 Escape the Horde). Cumulative 10-minute-per-long-rest budget is still consumer-managed (the engine's auto-expiry is round-based + source-keyed, not minute-budgeted). Toggled on / off via the slice-240 / 242 UseItem planner; the planner emits ConditionApplied on the first use and ConditionRemoved on the second.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "ModifySpeed", "mode": "walk", "op": "multiply", "value": 2 }
+        { "kind": "ModifySpeed", "mode": "walk", "op": "multiply", "value": 2 },
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "event.isOpportunityAttack", "value": true } }
       ]
     },
     {

@@ -4,6 +4,30 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: Boots of Speed Disadvantage-on-OA arm closed; stale gap row (slice 269)**
+
+Closes the Boots of Speed RAW "Disadvantage on opportunity attacks against the wearer" arm that has been deferred since slice 242. The `boots-of-speed-active` condition now wires a second effect: `ImposeDisadvantageOnAttackers` gated on `{ kind: 'eq', path: 'event.isOpportunityAttack', value: true }`. No engine work — the predicate fact landed in slice 206 (for Hunter L7 Escape the Horde, the first canonical user of the same shape), making this a one-line content edit.
+
+What changed:
+
+- **[src/content/packs/starter-pack.json](src/content/packs/starter-pack.json)** boots-of-speed-active condition: added the `ImposeDisadvantageOnAttackers` entry; rewrote the description to drop the stale "needs an `event.isOpportunityAttack` predicate fact" caveat (slice 206 landed it).
+- **[tests/unit/engine/boots-of-speed-oa-disadvantage.test.ts](tests/unit/engine/boots-of-speed-oa-disadvantage.test.ts)** (new, 3 cases): an OA against the boots-active wearer rolls with disadvantage (2 d20); a regular attack does not (1 d20, used='none'); an OA against a baseline target without the condition does not (1 d20).
+- **[docs/starter-pack-gaps.md](docs/starter-pack-gaps.md)**: struck the deferred row; closure annotation cites the meta-finding below.
+
+**Pattern-check meta-finding**: this row sat 27 slices past the primitive's landing (slice 206 → slice 269 for the second canonical user). Slice 206 wired one canonical user (Escape the Horde) and tested the fact's plumbing, but didn't sweep the deferred-primitives backlog for OTHER content already documented as waiting on the same fact. The pattern-check norm focuses on "did I make this mistake elsewhere?" — this slice surfaces a complementary axis: **when a new predicate fact lands, sweep the deferred-primitives backlog for content awaiting it**. Adding this to the slice-template checklist could be a future docs slice; for now, the lesson is captured in this entry plus the row's closure annotation.
+
+Pre-commit short audit (content slice):
+
+- **Names**: reuses the slice-206 `event.isOpportunityAttack` path verbatim; condition id and effect kind are existing vocabulary.
+- **DRY**: the predicate shape `{ kind: 'eq', path: 'event.isOpportunityAttack', value: true }` matches Escape the Horde's wire (slice 206) byte-for-byte. Two users of the same primitive, factored at the schema layer.
+- **SRP**: the boots condition now does two things (speed × 2 + OA disadvantage) but both arms are RAW from one item, atomic by design.
+- **Magic numbers**: none added. The d20-count (2 vs 1) tested in the new file is the standard advantage/disadvantage shape.
+- **at-threading**: N/A (content-only slice).
+- **Mechanical outcomes asserted**: OA against active wearer → `used='disadvantage'`, d20.length=2; regular attack same wearer → `used='none'`, d20.length=1; OA against inactive baseline → `used='none'`, d20.length=1. Pins the predicate gates on both axes (boots-state and attack-shape).
+- **Tests**: 3 new cases under boots-of-speed-oa-disadvantage.test.ts. The third (baseline-without-boots) ensures the entry is genuinely gated on the condition and isn't a global side effect.
+
+Pack snapshot drift: 1 new entry on `boots-of-speed-active.effects[]`. Coverage matrix counts unchanged (the slice doesn't add a new effect kind).
+
 **Docs: filter-shape refinement codified into pattern-check norm (slice 268)**
 
 Promotes the slice 267 meta-finding into [CLAUDE.md](CLAUDE.md). Slice 267 said "if this lesson recurs in a future sweep, codify it" — but the user redirected: the lesson is concrete and earned, no need to wait for a second instance.
