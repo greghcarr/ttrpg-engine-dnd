@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Tests: feature-coverage matrix counts `onUse` wires as wired (slice 254)**
+
+Closes the open follow-up from slice 253: the `magic-item wire and charge state is stable` snapshot at [tests/coverage/features.test.ts](tests/coverage/features.test.ts) classified items as "wired" based on the `effects` array only. Items wired via the `onUse` action shape (slices 240-243 + 253) were invisible to the audit; six magic items (Wings of Flying, Boots of Speed, Boots of Levitation, Hat of Disguise, Staff of Healing, Wand of Magic Missiles) showed as unwired even though their RAW mechanics are fully wired through the planUseItem path.
+
+What changed:
+
+- **Filter extension**: the `wiredIds` filter now matches items where `(effects ?? []).length > 0 || (onUse ?? []).length > 0`. Pure-stub items (`effects: []`, `onUse: []`, no charges) still don't appear in either list, preserving the slice-240 audit posture ("content sessions can append wondrous items freely without tripping the snapshot").
+- **Snapshot updated**: 6 additions to `wiredIds` (the items above). `withChargesIds` is unchanged. Three items (Wings of Flying, Staff of Healing, Wand of Magic Missiles) now appear in *both* lists, which is correct: they have both charges and onUse mechanics.
+
+Pre-commit short audit (tests-only slice):
+
+- **Names**: filter predicate now reads `effects > 0 || onUse > 0`. The disjunction is the rule: "wired = any shipped mechanical wiring." No new identifiers introduced.
+- **DRY**: single filter expression, single source of truth for the wired classification. Inline disjunction is more readable than extracting an `isWired(item)` helper for one call site.
+- **SRP**: snapshot still owns one job (audit which magic items have shipped mechanics). The two lists (`wiredIds`, `withChargesIds`) stay orthogonal; an item with both attributes appears in both, by design.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1649 tests across 244 files) green; snapshot diff is exactly the 6 onUse-wired items joining `wiredIds` (no spurious additions, no removals); `withChargesIds` byte-identical pre / post.
+
 **Engine: variable `chargesCost` on `CastSpell` UseAction + Wand of Magic Missiles canonical user (slice 253)**
 
 Closes the deferred-primitives row pointing at this primitive: Wand of Magic Missiles / Wand of Fireballs / Wand of Lightning Bolts / Staff of Healing's Cure Wounds arm all RAW-specify a variable per-use charge cost (1-3, 1-7, or 1-4 charges) that scales the cast slot level by the same amount. Slice 243 generalized fixed per-action `chargesCost`; this slice adds the variable shape on top.

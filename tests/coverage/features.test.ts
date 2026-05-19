@@ -231,14 +231,22 @@ describe('feature-coverage matrix: feats', () => {
 
 describe('feature-coverage matrix: magic items', () => {
   it('magic-item wire and charge state is stable', () => {
-    // Pure stub items (effects: [], no charges) don't appear in
-    // either list, so content sessions can append wondrous items
-    // freely without tripping the snapshot. A magic item gaining
-    // effects (engineering wired a new mechanic) or charges (or
-    // losing them) trips, which is the audit signal we want.
+    // Pure stub items (effects: [], onUse: [], no charges) don't
+    // appear in either list, so content sessions can append wondrous
+    // items freely without tripping the snapshot. A magic item gaining
+    // mechanics (engineering wired effects or an onUse action) or
+    // charges (or losing them) trips, which is the audit signal we
+    // want. Slice 254: onUse wires (slices 240-243 + 253: Wings of
+    // Flying, Boots of Speed, Boots of Levitation, Hat of Disguise,
+    // Staff of Healing, Wand of Magic Missiles) now register in
+    // wiredIds; previously the matrix only checked the `effects`
+    // array and the activate-as-action cohort was invisible.
     const items = [...CONTENT.items.values()].filter((i) => i.itemKind === 'magic');
     const wiredIds = items
-      .filter((i) => i.itemKind === 'magic' && (i.effects ?? []).length > 0)
+      .filter(
+        (i) =>
+          i.itemKind === 'magic' && ((i.effects ?? []).length > 0 || (i.onUse ?? []).length > 0),
+      )
       .map((i) => i.id)
       .sort();
     const withChargesIds = items
