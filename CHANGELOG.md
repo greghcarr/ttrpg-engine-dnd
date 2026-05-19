@@ -4,6 +4,35 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Dodge benefits disabled by Incapacitated / Speed 0 (slice 272)**
+
+Closes the second of the slice-267 outstanding bugs. RAW (2024 PHB Dodge action): "You lose these benefits if you have the Incapacitated condition or if your Speed is 0." Pre-272 the `dodged` condition imposed both benefits (disadvantage on attackers + advantage on DEX saves) unconditionally. The gaps row sketched two paths; this slice ships path (a) — per-effect `condition` predicate — because it reuses the slice-103 + slice-258 plumbing already in place without new schema surface. Path (b) (a condition-level `disabledWhile?` field) is deferred unless a second canonical user emerges.
+
+**Plumbing**:
+
+- New `bearer.hasIncapacitated` and `bearer.speedZero` boolean facts populated at the two consumer sites: [src/engine/plan/attack.ts](src/engine/plan/attack.ts) (for the `ImposeDisadvantageOnAttackers` arm) and [src/derive/save.ts](src/derive/save.ts) (for the `SetAdvantage on:save.DEX` arm). The existing `findActorBlockingCondition` helper (slice 199) covers Incapacitated + the four conditions that RAW-include Incapacitated (Stunned, Paralyzed, Petrified, Unconscious) plus HP <= 0; `getEffectiveSpeed` (slice 77) computes the bearer's effective walking speed across the full effect stack.
+- `computeSavingThrow` adds the new facts to the same facts map already carrying `event.isSpellSave`. No API change.
+
+**Content wired (1 condition)**:
+
+- **`dodged`**: both effect entries gain a `condition: { kind: 'all', terms: [{ kind: 'eq', path: 'bearer.hasIncapacitated', value: false }, { kind: 'eq', path: 'bearer.speedZero', value: false }] }` predicate. Description rewritten to cite the RAW disable clause and the slice-267 LoS row that stays deferred.
+
+**Pattern-check sweep** (per slice 261 / 268 norms): the "RAW lose these benefits if X" shape is uniquely Dodge among 2024 conditions. Rage, Concentration, and Hide all *end* on their respective triggers rather than disabling effects while keeping the condition active. No sibling bugs surfaced. The slice-103 `ImposeDisadvantageOnAttackers.condition` plumbing already honored predicates; the only missing piece was the bearer-state facts at the call sites — populated here for both consumer paths.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `bearer.hasIncapacitated` reads as a boolean question; `bearer.speedZero` is concise. Both live in the existing `bearer.*` namespace alongside `bearer.tempHp` (slice 122) and `bearer.wieldingShield` (slice 230). The old Elusive-era `bearerHasIncapacitated` fact (no dot, slice 199) is left untouched because pulling Elusive into the new namespace would be a separate concern.
+- **DRY**: same two facts populated at two call sites (attack planner + save derive). Considered factoring into a helper but the call sites differ (attack consumes the target via its planner state; save consumes `input.character` via its derive input) and the construction is 3 lines each. Inline keeps each consumer self-contained.
+- **SRP**: facts live next to existing predicate facts in the same maps. No new helper. The condition's predicate composition uses existing `all` + `eq` shapes; no new predicate kinds.
+- **Magic numbers**: none added.
+- **at-threading**: N/A (derive-only fact population).
+- **Plan/commit split preserved**: derive-only change. No RNG, no event emission.
+- **Pattern-check applied**: searched for RAW "lose these benefits if..." shape across the 2024 PHB conditions; Dodge is the unique instance. The cleaner path-(b) abstraction (condition-level `disabledWhile?`) is deferred because there's no second user to justify the schema extension.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1695 tests across 247 files, was 1692) green. 3 integration cases: baseline (both arms work), Incapacitated disables both, Grappled (speed 0) disables both. Grappled rather than Restrained for the speed-zero case because Restrained adds its own advantage-on-attackers + DEX-save disadvantage that would muddy the observable.
+- **Tests**: 3 cases in new [tests/unit/engine/dodge-self-disable.test.ts](tests/unit/engine/dodge-self-disable.test.ts).
+
+Pack snapshot drift: `dodged.effects[0]` and `effects[1]` each gain a `condition` field. Coverage matrix counts unchanged.
+
 **Engine+content: Blurred attacker-sense bypass closes the slice-267 outstanding bug (slice 271)**
 
 Closes the third of the slice-267 outstanding bugs: the `blurred-active` condition imposed disadvantage on attackers unconditionally, but Blur RAW says "An attacker is immune to this effect if it doesn't rely on sight, as with Blindsight, or can see through illusions, as with Truesight." The bypass shape is mirror of slice 127's Mirror Image vision-gate (already shipped for that one spell's dedicated deflection branch).

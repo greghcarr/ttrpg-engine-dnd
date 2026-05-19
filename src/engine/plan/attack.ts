@@ -34,7 +34,7 @@ import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
-import { assertActorCanAct, findActorBlockingCondition } from './_actor-state.js';
+import { assertActorCanAct, findActorBlockingCondition, getEffectiveSpeed } from './_actor-state.js';
 import { chebyshevDistance } from './movement.js';
 
 const DEFAULT_MELEE_REACH_FEET = 5;
@@ -425,12 +425,30 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     || attackerEffects.hasSense('tremorsense')
     || attackerEffects.hasSense('truesight')
     || attacker.appliedConditions.some((c) => c.conditionId === 'blinded');
+  // Slice 272: bearer-state facts for the Dodge self-disable
+  // ("you lose these benefits if you have the Incapacitated
+  // condition or if your Speed is 0"). The dodged condition's
+  // ImposeDisadvantageOnAttackers entry gates on these facts being
+  // false; same facts populated in `computeSavingThrow` for the
+  // DEX-save advantage arm. `findActorBlockingCondition` returns the
+  // first incapacitating condition the target carries (incapacitated,
+  // stunned, paralyzed, petrified, unconscious — the last four all
+  // include Incapacitated by RAW); HP <= 0 returns 'unconscious'.
+  const targetBearerHasIncapacitated = findActorBlockingCondition(target) !== undefined;
+  const targetSpeedZero = getEffectiveSpeed({
+    character: target,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  }) === 0;
   const attackerFacts = new Map<string, unknown>([
     ['attackerCreatureType', getCreatureType(attacker, content)],
     // Slice 206: surfaces opportunity-attack-ness to predicate-gated
     // ImposeDisadvantageOnAttackers entries (Hunter Escape the Horde).
     ['event.isOpportunityAttack', input.isOpportunityAttack === true],
     ['attacker.bypassesSightIllusion', attackerBypassesSightIllusion],
+    ['bearer.hasIncapacitated', targetBearerHasIncapacitated],
+    ['bearer.speedZero', targetSpeedZero],
   ]);
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers(attackerFacts)
