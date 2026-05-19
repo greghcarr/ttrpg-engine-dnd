@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Content: degradation-roll sweep for the remaining wands + Staff of Healing (slice 257)**
+
+Closes the slice-256 follow-up: wires the three remaining RAW canonical users of the slice-256 `destructionRoll` primitive. Pure JSON, no engine surface touched.
+
+Content wired (3 magic items, identical shape):
+
+- **Wand of Fireballs**: `destructionRoll: { trigger: 'lastChargeExpended', die: 20, destroyOn: [1] }`. RAW: "If you expend the wand's last charge, roll 1d20. On a 1, the wand crumbles into ashes."
+- **Wand of Lightning Bolts**: same shape, same RAW text.
+- **Staff of Healing**: same shape. RAW: "If you expend the last charge, roll 1d20. On a 1, the staff vanishes in a flash of light, lost forever."
+
+Pre-commit short audit (content sweep):
+
+- **RAW citations**: each entry's `destructionRoll` cites the SRD 5.2.1 `magic-items.md` H4 entry verbatim. All four canonical users (3 wands + Staff of Healing) share the identical shape; SRD wording differs only in the destruction narrative (crumbles vs. vanishes), which is irrelevant to the mechanical encoding.
+- **DRY**: the three new wires share an identical inline `destructionRoll` object. Not abstracted because three siblings is below the threshold and an extracted helper would be one-call-site-shallow with no future call sites (Wind Fan's `eachUse` variant has a different `trigger` discriminator and won't share this exact shape).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1657 tests across 244 files) green; coverage matrix snapshot unchanged (all three items were already in `wiredIds` from slices 243 + 255 via their `onUse` entries; `destructionRoll` doesn't affect the wiredIds filter). The slice-256 planner tests for the destruction-roll path remain the audit gate for behavior; this slice just adds three more items to the canonical-user side.
+
 **Engine: per-item degradation roll primitive + Wand of Magic Missiles canonical user (slice 256)**
 
 Closes the deferred-primitives row that slice 243 explicitly gated on "defer until a second item lands." With 3 wands + Staff of Healing all RAW-specifying the same shape ("expend the last charge, roll 1d20; on a 1 the wand crumbles / the staff vanishes"), the gate is met.

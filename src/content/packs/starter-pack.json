@@ -2420,6 +2420,7 @@
       "attunementCondition": "Bard, Cleric, or Druid",
       "charges": { "max": 10, "recharge": "dawn", "rechargeFormula": "1d6+4" },
       "effects": [],
+      "destructionRoll": { "trigger": "lastChargeExpended", "die": 20, "destroyOn": [1] },
       "onUse": [
         {
           "kind": "CastSpell",
@@ -2450,7 +2451,7 @@
     },
     { "id": "wand-of-web", "itemKind": "magic", "name": "Wand of Web", "rarity": "uncommon", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-magic-detection", "itemKind": "magic", "name": "Wand of Magic Detection", "rarity": "uncommon", "requiresAttunement": false, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
-    { "id": "wand-of-fireballs", "itemKind": "magic", "name": "Wand of Fireballs", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [], "onUse": [{ "kind": "CastSpell", "spellId": "fireball", "slotLevel": 3, "chargesCost": 1, "chargesCostMax": 3, "castingClassId": "wizard" }] },
+    { "id": "wand-of-fireballs", "itemKind": "magic", "name": "Wand of Fireballs", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [], "onUse": [{ "kind": "CastSpell", "spellId": "fireball", "slotLevel": 3, "chargesCost": 1, "chargesCostMax": 3, "castingClassId": "wizard" }], "destructionRoll": { "trigger": "lastChargeExpended", "die": 20, "destroyOn": [1] } },
     { "id": "wand-of-wonder", "itemKind": "magic", "name": "Wand of Wonder", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "potion-of-water-breathing", "itemKind": "consumable", "name": "Potion of Water Breathing", "onConsume": [{ "kind": "ApplyCondition", "conditionId": "water-breathing-active" }], "description": "Grants the ability to breathe water for 1 hour when consumed. (Duration consumer-managed.)" },
     { "id": "potion-of-fire-breath", "itemKind": "consumable", "name": "Potion of Fire Breath", "onConsume": [], "description": "After consuming, use a bonus action to exhale fire at a target within 30 ft for 4d6 fire damage (DC 13 DEX save for half), up to three times within 1 hour. The potion's effect ends after the third exhale or when the hour passes." },
@@ -2617,7 +2618,7 @@
     { "id": "ring-of-shooting-stars", "itemKind": "magic", "name": "Ring of Shooting Stars", "rarity": "very-rare", "requiresAttunement": true, "charges": { "max": 6, "recharge": "dawn" }, "effects": [] },
     { "id": "ring-of-spell-turning", "itemKind": "magic", "name": "Ring of Spell Turning", "rarity": "legendary", "requiresAttunement": true, "charges": { "max": 3, "recharge": "dawn", "rechargeFormula": "1d3" }, "effects": [] },
     { "id": "wand-of-fear", "itemKind": "magic", "name": "Wand of Fear", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
-    { "id": "wand-of-lightning-bolts", "itemKind": "magic", "name": "Wand of Lightning Bolts", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [], "onUse": [{ "kind": "CastSpell", "spellId": "lightning-bolt", "slotLevel": 3, "chargesCost": 1, "chargesCostMax": 3, "castingClassId": "wizard" }] },
+    { "id": "wand-of-lightning-bolts", "itemKind": "magic", "name": "Wand of Lightning Bolts", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [], "onUse": [{ "kind": "CastSpell", "spellId": "lightning-bolt", "slotLevel": 3, "chargesCost": 1, "chargesCostMax": 3, "castingClassId": "wizard" }], "destructionRoll": { "trigger": "lastChargeExpended", "die": 20, "destroyOn": [1] } },
     { "id": "wand-of-paralysis", "itemKind": "magic", "name": "Wand of Paralysis", "rarity": "rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-polymorph", "itemKind": "magic", "name": "Wand of Polymorph", "rarity": "very-rare", "requiresAttunement": true, "attunementCondition": "Spellcaster", "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
     { "id": "wand-of-binding", "itemKind": "magic", "name": "Wand of Binding", "rarity": "rare", "requiresAttunement": true, "charges": { "max": 7, "recharge": "dawn", "rechargeFormula": "1d6+1" }, "effects": [] },
