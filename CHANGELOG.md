@@ -4,6 +4,28 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: closure annotations on past CHANGELOG `Open follow-ups` blocks (slice 260)**
+
+Closes the third of the three audit-gap findings: past CHANGELOG entries kept their `Open follow-ups` text frozen, so when a subsequent slice closed one of those follow-ups, the original entry didn't reflect it. A reader landing on slice 253's entry saw an open follow-up that had actually been closed two slices later (slice 254); slice 256's content-sweep follow-up was closed by slice 257 with no back-link in slice 256.
+
+What changed:
+
+- **Slice 253 (live CHANGELOG)**: `~~strikethrough~~` + "Closed by slice 254" annotation on the "feature-coverage matrix doesn't count `onUse` wires" follow-up. The variable-cost-on-Toggle-and-ApplyCondition row kept open with an explicit "Still open (no canonical user yet)" tag.
+- **Slice 256 (live CHANGELOG)**: `~~strikethrough~~` + "Closed by slice 257" annotation on the "Content sweep wiring Wand of Fireballs / Lightning Bolts / Staff of Healing" follow-up. The Wind Fan `eachUse` trigger row kept open with "Still open" tag (Wind Fan's `effects: []` still defers it).
+- **Slice 248 (archived in [docs/changelog/archive-slices-241-250.md](docs/changelog/archive-slices-241-250.md))**: `~~strikethrough~~` + "Closed by slice 249" annotation on the "`docs/starter-pack-gaps.md` is 410 KB and already over the ceiling" follow-up. The CONTRIBUTING.md / DEVELOPMENT.md size row + the archive-files-are-append-mostly row kept open with explicit "Still open" tags.
+- **Convention going forward**: every existing-but-closed follow-up gets a `~~strikethrough~~` + `**Closed by slice N.**` tag. Every still-open one gets an explicit `**Still open.**` tag. New `Open follow-ups` blocks in future slices ship with the same shape from day one (already done for slices 258 + 259, going forward this becomes the norm).
+
+What's unchanged:
+
+- Inline prose mentions of deferred items inside RAW-deviation sections (e.g. slice 253's "the degradation roll stays deferred" line, which described accurate state at slice 253 time before slice 256 closed it). These are historical narrative rather than tracked follow-ups; leaving them avoids retconning each entry's contemporaneous context.
+
+Pre-commit short audit (docs slice):
+
+- **Names**: closure annotations use the `~~...~~ **Closed by slice N.**` shape (struck text + bold annotation). Still-open items use `**Still open.**`. The annotation lives at the end of the item rather than the start so the original text still reads as it did historically.
+- **DRY**: same annotation pattern applied across two CHANGELOG files (live + the slice-252 archive). The pattern is the doc-hygiene convention; the per-item content is unique.
+- **SRP**: pure doc-hygiene change. No code, no schemas, no test surface touched.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1664 tests across 244 files) green. `grep -E "Open follow-ups" CHANGELOG.md docs/changelog/archive-*.md` returns the same blocks pre / post; only the per-item lines changed.
+
 **Tests: `inventory` + `attunedInstanceIds` on `buildFighter` / `buildOgre` fixtures (slice 259)**
 
 Closes the second of the three audit-gap findings: the test fixtures populated `state.itemInstances` (via `ItemAcquired` events) but didn't expose a way to seed the character's `inventory` array. Tests using `planUseItem` / `planConsumeItem` / inventory reducers had to spread + reassign manually (`const hero = { ...buildFighter(), inventory: [item.id] }`). Slice 256's `ItemDestroyed` reducer test hit this footgun.
@@ -115,8 +137,8 @@ Pre-commit Uncle Bob audit:
 
 **Open follow-ups**:
 
-- **Content sweep** (small, 3 items): wire Wand of Fireballs, Wand of Lightning Bolts, Staff of Healing with identical `destructionRoll: { trigger: 'lastChargeExpended', die: 20, destroyOn: [1] }`. Pure JSON edit + snapshot update.
-- **Wind Fan `eachUse` trigger** (small, 1 item): extend the trigger union to include `'eachUse'`. The probabilistic-tear shape (20% per use) maps cleanly: `destructionRoll: { trigger: 'eachUse', die: 20, destroyOn: [1, 2, 3, 4] }` (4/20 = 20%) or `{ die: 5, destroyOn: [1] }`. Defer until Wind Fan itself gets onUse wires (currently `effects: []`).
+- ~~**Content sweep** (small, 3 items): wire Wand of Fireballs, Wand of Lightning Bolts, Staff of Healing with identical `destructionRoll: { trigger: 'lastChargeExpended', die: 20, destroyOn: [1] }`. Pure JSON edit + snapshot update.~~ **Closed by slice 257.**
+- **Wind Fan `eachUse` trigger** (small, 1 item): extend the trigger union to include `'eachUse'`. The probabilistic-tear shape (20% per use) maps cleanly: `destructionRoll: { trigger: 'eachUse', die: 20, destroyOn: [1, 2, 3, 4] }` (4/20 = 20%) or `{ die: 5, destroyOn: [1] }`. Defer until Wind Fan itself gets onUse wires (currently `effects: []`). **Still open.**
 
 **Content: Wand of Fireballs + Wand of Lightning Bolts + Staff of Healing Cure Wounds arm (slice 255)**
 
@@ -199,8 +221,8 @@ Pre-commit Uncle Bob audit:
 
 **Open follow-ups (none critical)**:
 
-- The feature-coverage matrix at [tests/coverage/features.test.ts](tests/coverage/features.test.ts) classifies magic items as "wired" based on the `effects` array only; `onUse` wires (slices 240-243 + 253) are invisible to the matrix. The unwired-items list still shows `wand-of-magic-missiles` (and the other onUse-wired items: `wings-of-flying`, `boots-of-speed`, `boots-of-levitation`, `hat-of-disguise`, `staff-of-healing`) as if nothing happened. A snapshot fix that counts items with non-empty `onUse` would close this hole; not done here to keep the slice focused on the primitive.
-- Variable cost on the `Toggle` and `ApplyCondition` UseAction variants stays deliberately unsupported. Neither has a per-charge scaling axis. If a future canonical user needs variable cost on those kinds, the same helper can be extended.
+- ~~The feature-coverage matrix at [tests/coverage/features.test.ts](tests/coverage/features.test.ts) classifies magic items as "wired" based on the `effects` array only; `onUse` wires (slices 240-243 + 253) are invisible to the matrix. The unwired-items list still shows `wand-of-magic-missiles` (and the other onUse-wired items: `wings-of-flying`, `boots-of-speed`, `boots-of-levitation`, `hat-of-disguise`, `staff-of-healing`) as if nothing happened. A snapshot fix that counts items with non-empty `onUse` would close this hole; not done here to keep the slice focused on the primitive.~~ **Closed by slice 254.**
+- Variable cost on the `Toggle` and `ApplyCondition` UseAction variants stays deliberately unsupported. Neither has a per-charge scaling axis. If a future canonical user needs variable cost on those kinds, the same helper can be extended. **Still open (no canonical user yet).**
 
 **Docs + infra: alpha.6 slice detail archived + archive-path correctness sweep (slice 252)**
 
