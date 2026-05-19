@@ -4,6 +4,46 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `sense?` on ability-check input + Eyes of the Eagle sight gate + ModifySpeed pattern-check finding (slice 263)**
+
+First canonical user of slice 258's `SetAdvantage.condition` plumbing on ability checks (Mantle of Spell Resistance was the canonical user for saves). RAW: "Eyes of the Eagle — Advantage on WIS (Perception) checks that rely on sight." Prior wire was broader — advantage on every Perception check.
+
+**Pattern-check** (per slice 261 norm): swept the pack for sibling SetAdvantage wires that are broader than RAW. Found three:
+
+1. **Eyes of the Eagle** (advantage on Perception → should gate on `event.sense === 'sight'`) — **closed this slice**.
+2. **Cloak of the Bat** (advantage on Stealth → should gate on dim light or darkness) — tracked as a deferred row; needs `bearer.lightLevel` predicate fact and scene/encounter state.
+3. **Gloves of Swimming and Climbing** (advantage on Athletics → should gate on climb/swim sub-action) — tracked as a deferred row; needs sub-action discriminator on the ability-check input.
+
+A fourth sibling (Sentinel Shield's advantage on Perception) was verified RAW-faithful (no sense gate per RAW).
+
+Plumbing:
+
+- New `sense?: 'sight' | 'hearing' | 'smell' | 'touch' | 'taste'` field on [`ComputeAbilityCheckInput`](src/derive/ability-check.ts). The consumer who knows the narrative context populates it; defaults to undefined ("consumer didn't specify").
+- `computeAbilityCheck` populates the facts map with `event.sense: input.sense` and threads to `advantageFor(target, facts)` (slice 258's predicated path). Undefined sense → predicates requiring a specific sense evaluate false.
+
+**Content wired (1 magic item)**:
+
+- **Eyes of the Eagle** wire re-written: `SetAdvantage on:{kind:'skill', skill:'perception'} mode:'advantage'` with `condition: { kind: 'eq', path: 'event.sense', value: 'sight' }`. Previously the SetAdvantage applied unconditionally on every Perception check.
+
+**Bonus pattern-check finding** (different category): while scoping Cloak of Arachnida's deferred row ("climb speed equal to walk speed"), a grep across `src/derive/` and `src/engine/` confirmed **0 consumers read non-walk ModifySpeed entries**. `getEffectiveSpeed` is walk-only; climb / fly / swim / burrow speeds contribute to the effect stack but go nowhere. Cloak of Arachnida's row updated with this finding so the next slice owner knows the real blocker is bigger than the deferred-row name suggested. Slippers of Spider Climbing's existing static-30 wire is RAW-discoverable annotation, not enforced behavior. Closing the climb-speed family requires either (a) extending `getEffectiveSpeed` to all modes + `op: 'matchWalkSpeed'`, or (b) shipping non-walk derives as their own slice first.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `sense` matches the in-fiction vocabulary (sight / hearing / etc.). `event.sense` as a string fact is more extensible than the slice-227-row's projected `event.checkUsesSight` boolean: future predicates can gate on hearing / smell without adding more facts.
+- **DRY**: the slice-258 predicated-SetAdvantage path is reused exactly. The only new code is the `sense?` field, the facts-map population, and the wire on Eyes of the Eagle.
+- **SRP**: ability-check derive owns one new field (`sense`). The fact-population lives in the same place that already calls `advantageFor`. Consumer (UI, planner) decides what sense to specify; the engine just plumbs it.
+- **Pattern-check applied**: 3 sibling broader-than-RAW SetAdvantage wires surfaced; 1 closed, 2 tracked with concrete deferred rows in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md). A 4th adjacent finding (non-walk ModifySpeed has no consumer) tracked on the existing Cloak of Arachnida row.
+- **Magic numbers**: none.
+- **`at`-threading**: N/A (derive-only).
+- **Plan/commit split preserved**: derive-only change.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1676 tests across 244 files, was 1671) green. 5 new ability-check unit cases (Eyes advantage with sense=sight; no advantage with sense=hearing; no advantage when sense omitted; no advantage on non-Perception skills; no advantage without the item).
+
+**Open follow-ups**:
+
+- Cloak of the Bat Stealth gate (tracked in gaps doc).
+- Gloves of Swimming and Climbing Athletics gate (tracked in gaps doc).
+- Non-walk ModifySpeed derives missing (tracked on Cloak of Arachnida row).
+
 **Engine: `condition` field honored on `GrantResistance` / `ModifyActionEconomy` / `GrantAdvantageToAttackers` (slice 262)**
 
 First production application of the slice-261 pattern-check norm. Slice 258 fixed one effect kind (`SetAdvantage`) dropping its `condition` field and surfaced three siblings with the same shape; slice 258's open follow-up tracked them but deferred for lack of canonical users. The norm explicitly says "fix all instances of a pattern in one slice if scoped right" — this slice closes the audit gap categorically with pure plumbing + builder tests. 0 pack entries currently set `condition` on any of these kinds; future canonical users wire as one-line content edits.

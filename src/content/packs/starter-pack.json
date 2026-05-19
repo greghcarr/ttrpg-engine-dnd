@@ -2318,7 +2318,7 @@
     { "id": "brooch-of-shielding", "itemKind": "magic", "name": "Brooch of Shielding", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "GrantResistance", "damageType": "force" }] },
     { "id": "periapt-of-wound-closure", "itemKind": "magic", "name": "Periapt of Wound Closure", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-swimming", "itemKind": "magic", "name": "Ring of Swimming", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 40 }] },
-    { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage" }] },
+    { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.sense", "value": "sight" } }] },
     {
       "id": "hat-of-disguise",
       "itemKind": "magic",

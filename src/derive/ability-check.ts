@@ -34,6 +34,14 @@ export interface ComputeAbilityCheckInput {
   // slice 64; slice 105 closes the same RAW gap for ability checks
   // so the Paladin's L6 Aura of Protection applies to both rolls.
   readonly characters?: Readonly<Record<string, Character>>;
+  // Slice 263: the in-fiction sense the check relies on (sight /
+  // hearing / smell / touch / taste). RAW magic items can gate their
+  // advantage on a specific sense (Eyes of the Eagle: "Advantage on
+  // WIS (Perception) checks that rely on sight"). Populated by the
+  // consumer who knows the narrative context; defaults to undefined
+  // (advantage gated on a specific sense will NOT apply when the
+  // consumer didn't specify).
+  readonly sense?: 'sight' | 'hearing' | 'smell' | 'touch' | 'taste';
 }
 
 const exhaustionPenalty = (level: number): number =>
@@ -93,7 +101,13 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
   const advantageTarget = input.skill !== undefined
     ? { kind: 'skill' as const, skill: input.skill }
     : { kind: 'check' as const, ability: input.ability };
-  const adv = effects.advantageFor(advantageTarget);
+  // Slice 263: thread `event.sense` so predicated SetAdvantage entries
+  // (Eyes of the Eagle's sight-only Perception advantage) can gate on
+  // the in-fiction sense. Undefined sense means "consumer didn't
+  // specify" — predicated entries that require a specific sense
+  // evaluate false.
+  const facts = new Map<string, unknown>([['event.sense', input.sense]]);
+  const adv = effects.advantageFor(advantageTarget, facts);
   const total = breakdown.reduce((sum, e) => sum + e.value, 0);
   return {
     total,
