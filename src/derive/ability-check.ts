@@ -42,6 +42,16 @@ export interface ComputeAbilityCheckInput {
   // (advantage gated on a specific sense will NOT apply when the
   // consumer didn't specify).
   readonly sense?: 'sight' | 'hearing' | 'smell' | 'touch' | 'taste';
+  // Slice 274: the specific Strength (Athletics) sub-action the check
+  // resolves. Mirror of `sense` but on a different axis: RAW magic
+  // items can gate Athletics advantage on a specific sub-action
+  // (Gloves of Swimming and Climbing: "Advantage on any Strength
+  // (Athletics) check you make to climb or swim"). The five-value
+  // enum covers the 2024 PHB-named Athletics applications. Populated
+  // by the consumer; defaults to undefined (advantage gated on a
+  // specific sub-action will NOT apply when the consumer didn't
+  // specify).
+  readonly athleticsSubAction?: 'climb' | 'swim' | 'jump' | 'grapple' | 'shove';
 }
 
 const exhaustionPenalty = (level: number): number =>
@@ -103,7 +113,13 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
   // the in-fiction sense. Undefined sense means "consumer didn't
   // specify" — predicated entries that require a specific sense
   // evaluate false.
-  const facts = new Map<string, unknown>([['event.sense', input.sense]]);
+  // Slice 274: `event.athleticsSubAction` is the sibling axis for
+  // Athletics-only advantage gates (Gloves of Swimming and Climbing).
+  // Same undefined-means-no-match semantics.
+  const facts = new Map<string, unknown>([
+    ['event.sense', input.sense],
+    ['event.athleticsSubAction', input.athleticsSubAction],
+  ]);
   // Slice 265: a skill check IS an ability check (RAW: skill check =
   // ability mod + skill bonus + d20). Pre-slice, `advantageFor` was
   // queried only on the skill target when skill was set, missing

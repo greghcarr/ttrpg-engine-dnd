@@ -4,6 +4,35 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Gloves of Swimming and Climbing sub-action gate (slice 274)**
+
+Closes the deferred row from slice 263's pattern-check sweep. RAW: "Advantage on any Strength (Athletics) check you make to climb or swim." Pre-274 the wire was broader (advantage on every Athletics check). Mirror of slice 263's `sense?` field pattern on a different axis (skill sub-action vs. environmental sense).
+
+**Plumbing**:
+
+- New `athleticsSubAction?: 'climb' | 'swim' | 'jump' | 'grapple' | 'shove'` field on [`ComputeAbilityCheckInput`](src/derive/ability-check.ts). The five-value enum covers 2024 PHB-named Athletics applications. Populated by the consumer who knows the narrative context; defaults to undefined.
+- `computeAbilityCheck` populates `event.athleticsSubAction: input.athleticsSubAction` in the facts map alongside slice 263's `event.sense`. Undefined means "consumer didn't specify" — gates requiring a specific sub-action evaluate false.
+
+**Content wired (1 magic item)**:
+
+- **Gloves of Swimming and Climbing**: existing `SetAdvantage on:{kind:'skill', skill:'athletics'} mode:'advantage'` gains `condition: { kind: 'any', terms: [{ kind: 'eq', path: 'event.athleticsSubAction', value: 'climb' }, { kind: 'eq', path: 'event.athleticsSubAction', value: 'swim' }] }`. The ClimbSpeed / SwimSpeed arms stay unconditional (RAW: granted while the gloves are worn).
+
+**Pattern-check sweep**: searched the pack for other `SetAdvantage on:{kind:'skill', skill:'athletics'}` wires — none. Gloves of Swimming and Climbing is the unique Athletics-targeting SetAdvantage in the pack. The pattern-check chain from slice 263 (which surfaced 3 broader-than-RAW SetAdvantage wires: Eyes of the Eagle closed slice 263; Cloak of the Bat Stealth still open per the deferred light-level row; Gloves closed this slice) is now down to 1 remaining.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `athleticsSubAction` is intention-revealing about its scope (Athletics-only) and the axis (sub-action vs. ambient context). `event.athleticsSubAction` mirrors `event.sense` in the predicate namespace.
+- **DRY**: same shape as slice 263's `sense?` field. The two facts live side-by-side in the same facts map population in `computeAbilityCheck` (3 lines vs. 1 line each); no abstraction needed.
+- **SRP**: the input field, fact population, and content wire each own one concern. No engine API change beyond the optional input field.
+- **Magic numbers**: none. The five sub-action enum values are RAW vocabulary.
+- **at-threading**: N/A (derive-only).
+- **Plan/commit split preserved**: derive-only change.
+- **Pattern-check applied**: confirmed Gloves are the unique Athletics-targeting SetAdvantage. Closing this row leaves Cloak of the Bat Stealth as the only remaining slice-263 deferred sibling (which still needs the `bearer.lightLevel` consumer-state fact).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1706 tests across 249 files, was 1700) green. 6 cases: advantage on climb, advantage on swim, no advantage on jump, no advantage on grapple/shove (loop), no advantage when sub-action omitted, no advantage when Gloves unattuned (slice-132 projection gate still works).
+- **Tests**: 6 cases in new [tests/unit/derive/gloves-of-swimming-and-climbing.test.ts](tests/unit/derive/gloves-of-swimming-and-climbing.test.ts).
+
+Pack snapshot drift: `gloves-of-swimming-and-climbing.effects[2]` gains a `condition` field. Coverage matrix counts unchanged.
+
 **Engine+content: Invisible condition perception-bypass on both arms (slice 273)**
 
 Closes the gap tracked in slice 271's pattern-check secondary finding. The `invisible` condition had a known two-bug shape:
