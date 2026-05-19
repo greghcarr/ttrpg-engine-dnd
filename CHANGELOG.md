@@ -4,6 +4,33 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: track 3 outstanding broader-than-RAW bugs slice 264's sweep missed (slice 267)**
+
+Honesty pass on the pattern-check chain (slices 262-266). The user asked "do we have outstanding bugs to fix from the chain?" — answering forced a wider sweep than slice 264's original Python script ran, surfacing three previously-untracked correctness gaps. None are new bugs; all existed before the chain started but weren't surfaced until now.
+
+**3 new tracking rows in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md)**:
+
+1. **Dodged — `ImposeDisadvantageOnAttackers` missing LoS gate.** RAW (SRD 5.2.1 Dodge): disadvantage on attackers "if you can see the attacker." Current wire is unconditional. Same shape as the deferred frightened LoS gate.
+2. **Dodged — both arms missing Incapacitated / Speed-0 disabler.** RAW: "You lose these benefits if you have the Incapacitated condition or if your Speed is 0." Engine doesn't model bearer-state-based condition self-disable today. Two paths sketched in the gaps row (per-effect predicate vs. condition-level `disabledWhile?` field).
+3. **Blurred-active — `ImposeDisadvantageOnAttackers` missing attacker-sense bypass.** RAW (Blur spell): disadvantage UNLESS attacker has blindsight / truesight / non-sight sense. Slice 127 wired this same bypass on Mirror Image's deflection path; Blur's `ImposeDisadvantageOnAttackers` path wasn't touched.
+
+**Meta-finding**: slice 264's pattern-check sweep filtered specifically for `kind: 'check'` + `mode: 'disadvantage'` (narrow shape). It missed adjacent broader-than-RAW shapes (`ImposeDisadvantageOnAttackers` without LoS gates, `SetAdvantage on:save` without bearer-state disablers). Slice 264's CHANGELOG entry annotated retrospectively with the lesson; the audit's "Pattern-check applied" line now reads as accurate-at-the-time but acknowledges what a wider sweep would have caught.
+
+Tentative lesson, not yet codified into [CLAUDE.md](CLAUDE.md)'s pattern-check norm: **a pattern-check's filter shape determines what it can surface**. A narrow filter (one kind, one mode) catches that kind / mode but misses adjacent shapes. When sweeping for broader-than-RAW gaps, widen the filter to `kind: 'SetAdvantage' | 'ImposeDisadvantageOnAttackers' | 'GrantAdvantageToAttackers'` across all modes, then cross-check each entry against RAW. If a third pattern-check sweep recurs with the same shape lesson, codify it.
+
+What changed:
+
+- 3 new rows in the Deferred primitives backlog of `docs/starter-pack-gaps.md`, each citing the bug, the RAW text, and the unblocker.
+- Slice 264's CHANGELOG entry gets a one-line retrospective annotation noting the sweep's narrow filter.
+- No code or test changes.
+
+Pre-commit short audit (docs slice):
+
+- **Names**: each new row's title states the condition + the missing gate ("Dodged — ImposeDisadvantageOnAttackers missing LoS gate"), readable from the gaps doc's TOC-style row listing.
+- **DRY**: each row cites the canonical RAW source (SRD 5.2.1) and points at the related closed / open rows for pattern context. No content duplication.
+- **SRP**: docs-only change; no engine or test surface touched. The retrospective annotation on slice 264 is one sentence at the END of the audit line — preserves historical narrative while adding closure-style honesty.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1686 tests across 244 files) green. No code paths changed; the tracking rows are documentation only.
+
 **Engine: no-ability `RollTarget` wildcards for save / check (slice 266)**
 
 Closes the simplification opportunity surfaced by slices 263 + 264: Mantle of Spell Resistance and poisoned both needed 6 per-ability `SetAdvantage` entries (one each for STR / DEX / CON / INT / WIS / CHA) because `RollTarget` required a specific ability on every save/check entry. This slice extends `RollTarget` to allow `{ kind: 'save' }` and `{ kind: 'check' }` without an ability, which serves as a wildcard matching every per-ability query.
@@ -83,7 +110,7 @@ Pre-commit short audit (content + correctness fix):
 
 - **RAW citation**: SRD 5.2.1 `rules-glossary.md` Poisoned: "Disadvantage on attack rolls and ability checks." Confirmed against the local submodule.
 - **DRY**: 4 new entries follow the same shape as the 2 existing STR / DEX entries. Could be replaced by a future `{ kind: 'check' }` (no ability) RollTarget variant for all-ability-check entries — same shape that would simplify Mantle of Spell Resistance's 6-entry verbosity. Tracked implicitly as a refactor opportunity but not done here (scope: this slice fixes correctness; a RollTarget-wildcard refactor would be its own slice).
-- **Pattern-check applied**: sweep extended to non-item content (3 conditions found, 1 fixed, 1 dual-bug deferred with tracking, 1 verified RAW-correct).
+- **Pattern-check applied**: sweep extended to non-item content (3 conditions found, 1 fixed, 1 dual-bug deferred with tracking, 1 verified RAW-correct). **Slice-267 retrospective note**: this sweep filtered specifically for "narrow disadvantage on per-ability check" and missed adjacent shapes — `dodged` and `blurred-active` have broader-than-RAW `ImposeDisadvantageOnAttackers` entries that the narrow filter didn't catch. Slice 267 tracked those as deferred rows. Meta-lesson: a pattern-check's filter shape determines what it can surface.
 - **Mechanical outcomes asserted**: tsc clean; full vitest suite (1678 tests across 244 files, was 1676) green. 2 new ability-check unit cases (poisoned has disadvantage on all 6 checks; unpoisoned has none). The previously-tested STR + DEX paths still pass via the loop; CON / INT / WIS / CHA are the newly-covered behaviors.
 
 **Open follow-ups**:
