@@ -6,6 +6,7 @@ import type {
   ItemBuffAppliedEvent,
   ItemBuffRemovedEvent,
   ItemConsumedEvent,
+  ItemDestroyedEvent,
   ItemEquippedEvent,
   ItemUnattunedEvent,
   ItemUnequippedEvent,
@@ -152,4 +153,20 @@ export const applyItemUsed = (
     state.itemInstances[event.instanceId] !== undefined,
     `Item instance ${event.instanceId} not found`,
   );
+};
+
+// Slice 256. Retires a magic item destroyed by a degradation roll.
+// Mirrors ItemConsumed's retirement path: removes the instance from
+// the character's inventory and from state.itemInstances. The
+// planner has already rolled the d20 (RNG-free apply, baked roll on
+// the event) and emitted ItemChargeConsumed for the final charge
+// expenditure plus the action effects before this event in the chain.
+export const applyItemDestroyed = (
+  state: Draft<CampaignState>,
+  event: ItemDestroyedEvent,
+): void => {
+  const character = state.characters[event.characterId];
+  invariant(character !== undefined, `Character ${event.characterId} not found`);
+  character.inventory = character.inventory.filter((id) => id !== event.instanceId);
+  delete state.itemInstances[event.instanceId];
 };

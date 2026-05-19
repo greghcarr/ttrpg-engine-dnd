@@ -91,6 +91,92 @@ describe('EffectAccumulator', () => {
     expect(acc.advantageFor({ kind: 'save', ability: 'DEX' }).advantage).toBe(false);
   });
 
+  // Slice 258: predicated SetAdvantage. Prior to this slice the schema
+  // accepted a `condition: Predicate` field but the builder dropped it.
+  // Canonical user: Mantle of Spell Resistance (advantage on saves
+  // when `event.isSpellSave === true`).
+  it('SetAdvantage with a predicate is gated on caller-supplied facts', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'SetAdvantage',
+        on: { kind: 'save', ability: 'WIS' },
+        mode: 'advantage',
+        condition: { kind: 'eq', path: 'event.isSpellSave', value: true },
+      },
+      acc,
+      { source: 'mantle-of-spell-resistance' },
+    );
+    // No facts: predicate evaluates false, no advantage.
+    expect(acc.advantageFor({ kind: 'save', ability: 'WIS' }).advantage).toBe(false);
+    // Facts say not-a-spell-save: still no advantage.
+    expect(
+      acc.advantageFor(
+        { kind: 'save', ability: 'WIS' },
+        new Map<string, unknown>([['event.isSpellSave', false]]),
+      ).advantage,
+    ).toBe(false);
+    // Facts say spell save: advantage applies.
+    expect(
+      acc.advantageFor(
+        { kind: 'save', ability: 'WIS' },
+        new Map<string, unknown>([['event.isSpellSave', true]]),
+      ).advantage,
+    ).toBe(true);
+  });
+
+  it('Unpredicated SetAdvantage entries still apply regardless of facts (fast path preserved)', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'save', ability: 'CON' }, mode: 'advantage' },
+      acc,
+      { source: 'paladin-aura' },
+    );
+    // No facts: advantage applies.
+    expect(acc.advantageFor({ kind: 'save', ability: 'CON' }).advantage).toBe(true);
+    // Random facts: advantage still applies (unpredicated path doesn't consult facts).
+    expect(
+      acc.advantageFor(
+        { kind: 'save', ability: 'CON' },
+        new Map<string, unknown>([['event.isSpellSave', false]]),
+      ).advantage,
+    ).toBe(true);
+  });
+
+  it('Predicated + unpredicated SetAdvantage merge correctly', () => {
+    const acc = new EffectAccumulator();
+    // One unpredicated advantage on WIS save.
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'save', ability: 'WIS' }, mode: 'advantage' },
+      acc,
+      { source: 'unconditional' },
+    );
+    // One predicated disadvantage on WIS save (gated on event.cursed).
+    applyEffectToBuilder(
+      {
+        kind: 'SetAdvantage',
+        on: { kind: 'save', ability: 'WIS' },
+        mode: 'disadvantage',
+        condition: { kind: 'eq', path: 'event.cursed', value: true },
+      },
+      acc,
+      { source: 'curse' },
+    );
+    // No facts: only the unpredicated advantage applies.
+    const noFacts = acc.advantageFor({ kind: 'save', ability: 'WIS' });
+    expect(noFacts.advantage).toBe(true);
+    expect(noFacts.disadvantage).toBe(false);
+    // Facts trigger the predicated disadvantage: both apply (RAW
+    // advantage / disadvantage cancellation is the caller's job, not
+    // the accumulator's).
+    const cursed = acc.advantageFor(
+      { kind: 'save', ability: 'WIS' },
+      new Map<string, unknown>([['event.cursed', true]]),
+    );
+    expect(cursed.advantage).toBe(true);
+    expect(cursed.disadvantage).toBe(true);
+  });
+
   it('Resistance/immunity/vulnerability are tracked correctly', () => {
     const acc = new EffectAccumulator();
     applyEffectToBuilder({ kind: 'GrantResistance', damageType: 'fire' }, acc, { source: 'x' });

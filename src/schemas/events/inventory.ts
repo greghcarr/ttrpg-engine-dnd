@@ -95,3 +95,25 @@ export const ItemUsedEventSchema = EventEnvelopeSchema.extend({
   targetId: ULIDSchema,
 });
 export type ItemUsedEvent = z.infer<typeof ItemUsedEventSchema>;
+
+// Slice 256. A magic item is destroyed by a degradation roll fired
+// from the planner (canonical RAW shape: "expend the last charge,
+// roll 1d20; on a 1 the wand crumbles to ashes" / "the staff
+// vanishes in a flash of light"). The reducer retires the instance
+// (removes from the character's inventory and from
+// state.itemInstances), mirroring ItemConsumed's retirement path.
+// `rollResult` and `rollDie` are baked at plan time so apply() stays
+// RNG-free and replay reproduces the same destruction outcome. The
+// roll itself is not surfaced as a separate event because no other
+// listener cares; bundling it on ItemDestroyed keeps the journal
+// readable.
+export const ItemDestroyedEventSchema = EventEnvelopeSchema.extend({
+  type: z.literal('ItemDestroyed'),
+  characterId: ULIDSchema,
+  instanceId: ULIDSchema,
+  definitionId: z.string(),
+  reason: z.literal('degradation-roll'),
+  rollDie: z.number().int().positive(),
+  rollResult: z.number().int().positive(),
+});
+export type ItemDestroyedEvent = z.infer<typeof ItemDestroyedEventSchema>;

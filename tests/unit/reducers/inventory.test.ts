@@ -6,6 +6,7 @@ import type { CharacterCreatedEvent } from '../../../src/schemas/events/progress
 import type {
   ItemAcquiredEvent,
   ItemAttunedEvent,
+  ItemDestroyedEvent,
   ItemEquippedEvent,
   ItemUnattunedEvent,
   ItemUnequippedEvent,
@@ -139,5 +140,51 @@ describe('Item attunement', () => {
     };
     const once = apply(state, event);
     expect(() => apply(once, event)).toThrow(/already attuned/);
+  });
+});
+
+describe('Item destruction (slice 256)', () => {
+  it('ItemDestroyed retires the instance: removed from inventory + itemInstances', () => {
+    // Construct a state where the wand is both in state.itemInstances
+    // AND in the character's inventory. Slice 259 added `inventory`
+    // to BuildFighterOptions so this no longer needs a manual spread.
+    const wand = makeItemInstance('wand-of-magic-missiles');
+    const fighter = buildFighter({ inventory: [wand.id] });
+    const state = applyAll(emptyCampaignState(), [
+      { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand } satisfies ItemAcquiredEvent,
+      { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: fighter } satisfies CharacterCreatedEvent,
+    ]);
+    expect(state.itemInstances[wand.id]).toBeDefined();
+    expect(state.characters[fighter.id]?.inventory).toContain(wand.id);
+    const event: ItemDestroyedEvent = {
+      id: eventId(),
+      at: isoTimestamp(),
+      type: 'ItemDestroyed',
+      characterId: fighter.id,
+      instanceId: wand.id,
+      definitionId: 'wand-of-magic-missiles',
+      reason: 'degradation-roll',
+      rollDie: 20,
+      rollResult: 1,
+    };
+    const after = apply(state, event);
+    expect(after.itemInstances[wand.id]).toBeUndefined();
+    expect(after.characters[fighter.id]?.inventory).not.toContain(wand.id);
+  });
+
+  it('ItemDestroyed throws when the character does not exist', () => {
+    const { state, ring1 } = seedFighter();
+    const event: ItemDestroyedEvent = {
+      id: eventId(),
+      at: isoTimestamp(),
+      type: 'ItemDestroyed',
+      characterId: '01H00000000000000000000000' as `01${string}`,
+      instanceId: ring1.id,
+      definitionId: 'healing-potion',
+      reason: 'degradation-roll',
+      rollDie: 20,
+      rollResult: 1,
+    };
+    expect(() => apply(state, event)).toThrow(/not found/);
   });
 });

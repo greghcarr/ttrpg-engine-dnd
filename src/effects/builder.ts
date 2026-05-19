@@ -70,6 +70,18 @@ export interface ResourceGrant {
 export class EffectAccumulator {
   private readonly modifiers = new Map<string, ModifierContribution[]>();
   private readonly advantages = new Map<string, AdvantageState>();
+  // Slice 258: SetAdvantage entries that carry a predicate (e.g. Mantle
+  // of Spell Resistance's "advantage on saves vs spells" gated on
+  // `event.isSpellSave === true`). Kept distinct from the unpredicated
+  // `advantages` map so the existing fast path (no predicate) doesn't
+  // pay any evaluation cost. `advantageFor()` merges both: unpredicated
+  // state plus filtered-by-fact predicated entries. Same shape used by
+  // `conditionImmunities` (slice 66) and `disadvantageOnAttackersEntries`
+  // (slice 91).
+  private readonly predicatedAdvantages = new Map<
+    string,
+    Array<{ mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'; predicate: Predicate }>
+  >();
   // Per-source advantage overrides indexed by `${rollKey}::${sourceCharacterId}`.
   // Recorded by `SetAdvantageVsSource` effects (Bestow Curse's attack-
   // disadvantage variant); queried by consumers that know the relevant
@@ -164,8 +176,23 @@ export class EffectAccumulator {
     list.push(predicate !== undefined ? { source, value, predicate } : { source, value });
   }
 
-  setAdvantage(target: RollTarget, mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'): void {
+  setAdvantage(
+    target: RollTarget,
+    mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail',
+    predicate?: Predicate,
+  ): void {
     const key = rollKey(target);
+    if (predicate !== undefined) {
+      // Slice 258: predicated entry, evaluated at `advantageFor()` time
+      // against caller-supplied facts.
+      let list = this.predicatedAdvantages.get(key);
+      if (list === undefined) {
+        list = [];
+        this.predicatedAdvantages.set(key, list);
+      }
+      list.push({ mode, predicate });
+      return;
+    }
     let state = this.advantages.get(key);
     if (state === undefined) {
       state = emptyAdvantage();
@@ -295,8 +322,23 @@ export class EffectAccumulator {
     );
   }
 
-  advantageFor(target: RollTarget): AdvantageState {
-    return this.advantages.get(rollKey(target)) ?? emptyAdvantage();
+  advantageFor(target: RollTarget, facts?: ReadonlyMap<string, unknown>): AdvantageState {
+    const key = rollKey(target);
+    const unconditional = this.advantages.get(key) ?? emptyAdvantage();
+    const predicated = this.predicatedAdvantages.get(key);
+    if (predicated === undefined || predicated.length === 0) return unconditional;
+    // Slice 258: fold filtered predicated entries on top of the
+    // unconditional state. An entry whose predicate doesn't evaluate
+    // true with the caller-supplied facts contributes nothing.
+    const merged: AdvantageState = { ...unconditional };
+    for (const entry of predicated) {
+      if (!evaluatePredicate(entry.predicate, { facts })) continue;
+      if (entry.mode === 'advantage') merged.advantage = true;
+      else if (entry.mode === 'disadvantage') merged.disadvantage = true;
+      else if (entry.mode === 'auto-crit') merged.autoCrit = true;
+      else merged.autoFail = true;
+    }
+    return merged;
   }
 
   // Per-counterparty advantage state. The bearer's effect stack records
@@ -690,7 +732,10 @@ export const applyEffectToBuilder = (
       return;
     }
     case 'SetAdvantage':
-      acc.setAdvantage(effect.on, effect.mode);
+      // Slice 258: thread `effect.condition` so predicated SetAdvantage
+      // (e.g. Mantle of Spell Resistance's "advantage on saves vs spells")
+      // is honored. Prior to slice 258 the predicate was silently dropped.
+      acc.setAdvantage(effect.on, effect.mode, effect.condition);
       return;
     case 'SetAdvantageVsSource':
       if (ctx.sourceCharacterId !== undefined) {

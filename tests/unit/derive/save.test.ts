@@ -4,7 +4,8 @@ import { buildFighter, TEST_CONTENT } from '../../fixtures/index.js';
 import { loadStarterPack } from '../../../src/content/packs/starter.js';
 import { resolveContent } from '../../../src/content/pack.js';
 import { CharacterSchema, type Character } from '../../../src/schemas/runtime/character.js';
-import { newCharacterId } from '../../../src/ids.js';
+import { ItemInstanceSchema, type ItemInstance } from '../../../src/schemas/runtime/item-instance.js';
+import { newCharacterId, newItemInstanceId } from '../../../src/ids.js';
 
 describe('computeSavingThrow', () => {
   it('STR save (Fighter proficient): mod + prof', () => {
@@ -253,5 +254,102 @@ describe('computeSavingThrow honors Magic Resistance (slice 131)', () => {
       sourceIsMagical: true,
     });
     expect(r.hasAdvantage).toBe(true);
+  });
+});
+
+// Slice 258: predicated SetAdvantage honored end-to-end. Canonical
+// user: Mantle of Spell Resistance (advantage on saves against spells,
+// gated on `event.isSpellSave === true` which the save derive populates
+// from `input.sourceIsMagical`).
+describe('Mantle of Spell Resistance (slice 258)', () => {
+  const makeMantle = (): ItemInstance =>
+    ItemInstanceSchema.parse({
+      id: newItemInstanceId(),
+      definitionId: 'mantle-of-spell-resistance',
+      attuned: true,
+    });
+
+  const buildWearer = (mantleId: string): Character =>
+    CharacterSchema.parse({
+      id: newCharacterId(),
+      name: 'Mantle Wearer',
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'fighter', level: 5, hitDiceRemaining: 5 }],
+      abilityScores: { STR: 14, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 10 },
+      hp: { current: 40, max: 40, temp: 0 },
+      inventory: [mantleId],
+      equipped: { attuned: [mantleId] },
+    });
+
+  it('advantage applies when sourceIsMagical is true (spell save)', () => {
+    const mantle = makeMantle();
+    const wearer = buildWearer(mantle.id);
+    const r = computeSavingThrow({
+      character: wearer,
+      itemInstances: { [mantle.id]: mantle },
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      sourceIsMagical: true,
+    });
+    expect(r.hasAdvantage).toBe(true);
+  });
+
+  it('advantage does NOT apply when sourceIsMagical is false (non-spell save)', () => {
+    const mantle = makeMantle();
+    const wearer = buildWearer(mantle.id);
+    const r = computeSavingThrow({
+      character: wearer,
+      itemInstances: { [mantle.id]: mantle },
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      sourceIsMagical: false,
+    });
+    expect(r.hasAdvantage).toBe(false);
+  });
+
+  it('advantage applies on every ability (Mantle ships 6 entries, one per ability)', () => {
+    const mantle = makeMantle();
+    const wearer = buildWearer(mantle.id);
+    for (const ability of ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as const) {
+      const r = computeSavingThrow({
+        character: wearer,
+        itemInstances: { [mantle.id]: mantle },
+        content: STARTER_CONTENT,
+        ability,
+        sourceIsMagical: true,
+      });
+      expect(r.hasAdvantage, `Mantle should grant advantage on ${ability}`).toBe(true);
+    }
+  });
+
+  it('un-attuned Mantle does NOT project (RAW requires attunement)', () => {
+    // Same wearer but Mantle isn't in equipped.attuned. Magic-item
+    // projection (slice 132) skips attunement-required items that
+    // aren't attuned.
+    const mantle = ItemInstanceSchema.parse({
+      id: newItemInstanceId(),
+      definitionId: 'mantle-of-spell-resistance',
+      attuned: false,
+    });
+    const wearer: Character = CharacterSchema.parse({
+      id: newCharacterId(),
+      name: 'Mantle Carrier',
+      speciesId: 'human',
+      backgroundId: 'soldier',
+      classes: [{ classId: 'fighter', level: 5, hitDiceRemaining: 5 }],
+      abilityScores: { STR: 14, DEX: 12, CON: 14, INT: 10, WIS: 10, CHA: 10 },
+      hp: { current: 40, max: 40, temp: 0 },
+      inventory: [mantle.id],
+      equipped: { attuned: [] },
+    });
+    const r = computeSavingThrow({
+      character: wearer,
+      itemInstances: { [mantle.id]: mantle },
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      sourceIsMagical: true,
+    });
+    expect(r.hasAdvantage).toBe(false);
   });
 });

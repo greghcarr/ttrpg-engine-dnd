@@ -35,6 +35,17 @@ export interface BuildFighterOptions {
   readonly hitDiceRemaining?: number;
   readonly resources?: ReadonlyArray<{ resourceId: string; current: number; max: number }>;
   readonly name?: string;
+  // Slice 259: item instance ids to seed the character's `inventory`
+  // and (optionally) the `equipped.attuned` list. Previously tests
+  // using planUseItem / planConsumeItem with a fixture-built
+  // character had to spread + add inventory manually (`const hero =
+  // { ...buildFighter(), inventory: [item.id] }`); slice 256's
+  // ItemDestroyed reducer test hit this. `attunedInstanceIds`
+  // defaults to empty; pass instance ids here for items that
+  // require attunement (slice 132 magic-item projection skips
+  // attunement-required items not in `equipped.attuned`).
+  readonly inventory?: ReadonlyArray<string>;
+  readonly attunedInstanceIds?: ReadonlyArray<string>;
 }
 
 const FIGHTER_DEFAULT_HP_BY_LEVEL: Readonly<Record<number, number>> = {
@@ -76,10 +87,11 @@ export const buildFighter = (opts: BuildFighterOptions = {}): Character => {
     },
     exhaustion: opts.exhaustion ?? 0,
     featsTaken: ['savage-attacker'],
+    inventory: [...(opts.inventory ?? [])],
     equipped: {
       ...(opts.armorInstanceId !== undefined ? { armor: opts.armorInstanceId } : {}),
       ...(opts.shieldInstanceId !== undefined ? { shield: opts.shieldInstanceId } : {}),
-      attuned: [],
+      attuned: [...(opts.attunedInstanceIds ?? [])],
     },
   });
   return character;
@@ -101,6 +113,11 @@ export interface BuildOgreOptions {
   readonly STR?: number;
   readonly mainWeaponInstanceId?: string;
   readonly multiattackCount?: number;
+  // Slice 259: same shape as BuildFighterOptions.inventory /
+  // attunedInstanceIds; lets creature-side tests seed magic items
+  // without manual spread.
+  readonly inventory?: ReadonlyArray<string>;
+  readonly attunedInstanceIds?: ReadonlyArray<string>;
 }
 
 export const buildOgre = (opts: BuildOgreOptions = {}) => {
@@ -117,6 +134,8 @@ export const buildOgre = (opts: BuildOgreOptions = {}) => {
     hp: { current: hp, max: hp, temp: 0 },
     featsTaken: ['savage-attacker'],
     speedFeet: 40,
+    inventory: [...(opts.inventory ?? [])],
+    equipped: { attuned: [...(opts.attunedInstanceIds ?? [])] },
     multiattack:
       opts.mainWeaponInstanceId !== undefined
         ? {

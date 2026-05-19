@@ -83,6 +83,20 @@ The audit is **mandatory** for engine slices. Pure content sweeps (JSON wires on
 
 The audit is a discipline tool, not paperwork: writing it forces you to notice the issues you would otherwise ship. If you cannot defend a decision in one line, reconsider it before committing.
 
+### Pattern-check on bugs
+
+When you find a bug, audit gap, or inconsistency in this codebase, do not fix only the surfaced instance. Check the codebase for the same pattern elsewhere; fix all instances; and if you can't fix them all in one slice, track the remaining ones explicitly (a new row in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) and an `Open follow-ups` block in the slice's CHANGELOG entry).
+
+Claude wrote most of this code across hundreds of slices. A mistake made once is very likely repeated in many places. Concrete examples that established the norm:
+
+- Slice 258 surfaced one effect kind (`SetAdvantage`) dropping its `condition` field; auditing siblings found three more (`GrantResistance`, `ModifyActionEconomy`, `GrantAdvantageToAttackers`) with the same shape. Slice 258 fixed the canonical one + tracked the others.
+- Slice 254 surfaced one coverage-matrix filter missing `onUse` wires; sweeping the other category matrices confirmed they were sound but established the pattern-check as the right move.
+- Slice 252 surfaced one broken link in a newly-written archive file; the audit found 207 broken root-relative paths across 14 archive files (slice 248 had silently propagated the same bug 11 archives wide). Fixing only the new file would have widened the inconsistency.
+
+Reading "found a bug" or "noticed an inconsistency" in your own thinking is the trigger. Before fixing, ask: "Same shape, elsewhere?" — grep for the pattern, check sibling files, look at recent CHANGELOG entries for similar-shape work. Then fix all of it in one slice if scoped right, or fix the canonical case + add concrete tracking for the others.
+
+When a later slice closes a tracked follow-up, mark the original line in the prior slice's CHANGELOG entry with `~~strikethrough~~` + `**Closed by slice N.**` (slice 260's convention). Items that stay open get an explicit `**Still open.**` so a reader can tell "open" from "stale, not yet annotated."
+
 ### Doc updates per slice
 
 At the close of every slice, update the docs the slice touched:
