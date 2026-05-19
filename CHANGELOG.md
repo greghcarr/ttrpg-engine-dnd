@@ -4,6 +4,23 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: README map of top-level dirs (slice 250)**
+
+Closes the friction surfaced by the slice 247 fresh-agent test: a cold agent landing on the repo sees `dndbnb/`, `supabase/`, `web/`, `references/`, plus the agent-pointer files at the root, and has no signpost in `README.md` for what each one is. The `dndbnb/` consumer app and its `supabase/` backend are invisible from the front-door doc until the agent opens them. Pure documentation; no engine, schema, or content surface touched.
+
+What changed:
+
+- **README.md gains a "What lives in this repo" section** between Quick start and Documentation. Nine-row table covering `src/`, `tests/`, `docs/`, `examples/`, `references/srd-markdown/`, `web/`, `dndbnb/`, `supabase/`, and the agent-manual cluster (CLAUDE.md / AGENTS.md / .cursorrules). Each row says what the path is and, for co-located consumers, why it lives in the engine repo at all.
+- Generated dirs (`dist/`, `dist-dndbnb/`, `dist-web/`, `coverage/`, `node_modules/`) and root config files skipped: either inferable or noise.
+- README went 16,495 → 17,900 bytes. Comfortably under the single-Read ceiling.
+
+Pre-commit short audit (doc slice):
+
+- **Names**: section header is "What lives in this repo", matches the existing Documentation section's voice.
+- **DRY**: no overlap with the Documentation table below; that one answers "which doc for which task," this one answers "what is each top-level path."
+- **Placement**: between Quick start and Documentation because a reader has just run `npm test` and the next natural question is "what are these dirs?" before "which doc next?"
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1643 tests across 244 files) green; README still fits in a single Read.
+
 **Docs + infra: starter-pack-gaps split into per-category catalogs (slice 249)**
 
 Closes the deferral slice 248 explicitly flagged: `docs/starter-pack-gaps.md` was 410 KB / over the Claude Code Read tool's 256 KB hard ceiling, breaking step 4 of the fresh-agent quickstart. The doc is the canonical priority queue for next slices, so a fresh agent couldn't actually load it cold. This slice splits it into a slim top-level priority queue (57 KB, fits in a single Read) plus 12 per-category catalogs (each fits independently).
