@@ -10,7 +10,7 @@ Order: most-recent first. For more recent slices, see [archive-slices-196-200.md
 
 **Engine: SRD 5.2.1 drift audit harness (slice 195)**
 
-Adds [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts), a checked-in vitest suite that parses the SRD 5.2.1 markdown clone at `references/srd-markdown/` and asserts every pack spell, monster, and magic item matches SRD on script-detectable fields. Slices 177-194 used the same logic ad-hoc to ship ~310 drift fixes; the harness now catches regressions automatically.
+Adds [tests/audit/srd-drift.test.ts](../../tests/audit/srd-drift.test.ts), a checked-in vitest suite that parses the SRD 5.2.1 markdown clone at `references/srd-markdown/` and asserts every pack spell, monster, and magic item matches SRD on script-detectable fields. Slices 177-194 used the same logic ad-hoc to ship ~310 drift fixes; the harness now catches regressions automatically.
 
 The suite is organized as three nested describes (spells, monsters, magic items) with 15 `it()` blocks covering:
 

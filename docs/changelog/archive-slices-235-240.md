@@ -14,12 +14,12 @@ Adds the magic-item activate-as-action sibling of slice 235's `ConsumeItem`. Whe
 
 **Plumbing**:
 
-- New `UseAction` discriminated union in [src/schemas/content/item.ts](src/schemas/content/item.ts) — `ApplyCondition { conditionId }` for slice 240; future slices add `CastSpell` (for Hat of Disguise / Helm of Telepathy / Decanter of Endless Water) and `Toggle` (for Boots of Speed's click-on / click-off shape).
+- New `UseAction` discriminated union in [src/schemas/content/item.ts](../../src/schemas/content/item.ts) — `ApplyCondition { conditionId }` for slice 240; future slices add `CastSpell` (for Hat of Disguise / Helm of Telepathy / Decanter of Endless Water) and `Toggle` (for Boots of Speed's click-on / click-off shape).
 - New `onUse: UseAction[]` field on `MagicItemSchema`, parallel to `onConsume` on `ConsumableSchema`.
-- New `ItemUsed` event in [src/schemas/events/inventory.ts](src/schemas/events/inventory.ts): `{ characterId, instanceId, definitionId, targetId }`. Mirrors `ItemConsumed`'s shape; reducer just sanity-checks (the actual state changes — charge decrement, condition application — are emitted by separate events ahead of this one).
-- `applyItemUsed` reducer in [src/engine/reducers/inventory.ts](src/engine/reducers/inventory.ts). Wired into [src/engine/apply.ts](src/engine/apply.ts).
-- New [src/engine/plan/use-item.ts](src/engine/plan/use-item.ts) with `planUseItem`. Validates the instance + inventory + magic-item kind, emits `ItemChargeConsumed` if the definition has charges (gating on `chargesRemaining >= 1`), walks the `onUse` action list emitting the corresponding effects (`ConditionApplied` for `ApplyCondition` variants), then emits `ItemUsed`.
-- `engine.plan.useItem(state, intent)` on the [Engine](src/engine/index.ts) interface, parallel to `engine.plan.consumeItem`.
+- New `ItemUsed` event in [src/schemas/events/inventory.ts](../../src/schemas/events/inventory.ts): `{ characterId, instanceId, definitionId, targetId }`. Mirrors `ItemConsumed`'s shape; reducer just sanity-checks (the actual state changes — charge decrement, condition application — are emitted by separate events ahead of this one).
+- `applyItemUsed` reducer in [src/engine/reducers/inventory.ts](../../src/engine/reducers/inventory.ts). Wired into [src/engine/apply.ts](../../src/engine/apply.ts).
+- New [src/engine/plan/use-item.ts](../../src/engine/plan/use-item.ts) with `planUseItem`. Validates the instance + inventory + magic-item kind, emits `ItemChargeConsumed` if the definition has charges (gating on `chargesRemaining >= 1`), walks the `onUse` action list emitting the corresponding effects (`ConditionApplied` for `ApplyCondition` variants), then emits `ItemUsed`.
+- `engine.plan.useItem(state, intent)` on the [Engine](../../src/engine/index.ts) interface, parallel to `engine.plan.consumeItem`.
 
 **Content wired (1 magic item)**:
 
@@ -51,7 +51,7 @@ Pre-commit Uncle Bob audit:
 
 **Content: consumable-pack wiring sweep on existing ConsumeAction variants (slice 239)**
 
-Pure content sweep with no engine changes. Walks the 33 still-empty `onConsume` arrays on consumables in [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) and wires the 14 that map cleanly onto the existing three `ConsumeAction` variants (`Heal` from slice 235, `ApplyCondition` from slice 236, `CastSpell` from slice 237). 6 new content-side conditions added (Giant Strength potion family) — each wraps the slice-229 `OverrideAbilityScore` floor-semantic primitive in a temporary condition for use via `ApplyCondition`.
+Pure content sweep with no engine changes. Walks the 33 still-empty `onConsume` arrays on consumables in [src/content/packs/starter-pack.json](../../src/content/packs/starter-pack.json) and wires the 14 that map cleanly onto the existing three `ConsumeAction` variants (`Heal` from slice 235, `ApplyCondition` from slice 236, `CastSpell` from slice 237). 6 new content-side conditions added (Giant Strength potion family) — each wraps the slice-229 `OverrideAbilityScore` floor-semantic primitive in a temporary condition for use via `ApplyCondition`.
 
 **Content wired (14 consumables)**:
 
@@ -112,7 +112,7 @@ Pre-commit Uncle Bob audit:
 - Magic numbers: STR values (21 / 23 / 23 / 25 / 27 / 29) are SRD-derived (the matching Giant CR ladder).
 - Mechanical outcomes asserted: condition lands on the consumer, OverrideAbilityScore floor folds through `buildEffectStack`, RAW "no effect if already higher" preserved via the floor semantics.
 
-Tests: 4 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) — Potion of Hill Giant Strength applies the STR floor through `buildEffectStack`; a consumer with STR 22 sees no functional change; Potion of Invisibility lands the `invisible` condition; Potion of Mind Reading emits SpellCastDeclared for the schema-only Detect Thoughts spell. 14 total cases in the file.
+Tests: 4 new cases in [tests/unit/engine/plan-consume-item.test.ts](../../tests/unit/engine/plan-consume-item.test.ts) — Potion of Hill Giant Strength applies the STR floor through `buildEffectStack`; a consumer with STR 22 sees no functional change; Potion of Invisibility lands the `invisible` condition; Potion of Mind Reading emits SpellCastDeclared for the schema-only Detect Thoughts spell. 14 total cases in the file.
 
 **Content: `CastSpell` consume-action + spell-scroll wires (slice 237)**
 
@@ -149,7 +149,7 @@ Pre-commit Uncle Bob audit:
 - `castingClassId` field added when the test exposed the non-caster gap; documented in schema. Not added speculatively.
 - Mechanical outcomes asserted: `SpellCastDeclared` fires, no `SpellSlotConsumed`, Barbarian (non-caster) doesn't throw.
 
-Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) covering Magic Missile scroll happy path + Fireball scroll usable by a non-caster Barbarian. 1622 pass, 208 skipped. tsc clean.
+Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](../../tests/unit/engine/plan-consume-item.test.ts) covering Magic Missile scroll happy path + Fireball scroll usable by a non-caster Barbarian. 1622 pass, 208 skipped. tsc clean.
 
 **Content: `ApplyCondition` consume-action + buff-potion wires (slice 236)**
 
@@ -157,7 +157,7 @@ Extends slice 235's `ConsumeAction` union with `ApplyCondition { conditionId }`.
 
 **Plumbing**:
 
-- New `ApplyCondition` variant on `ConsumeActionSchema` in [src/schemas/content/item.ts](src/schemas/content/item.ts).
+- New `ApplyCondition` variant on `ConsumeActionSchema` in [src/schemas/content/item.ts](../../src/schemas/content/item.ts).
 - `planConsumeItem` extended with the `ApplyCondition` branch — emits ConditionApplied per action, ends with ItemConsumed.
 
 **Content wired**:
@@ -176,7 +176,7 @@ Pre-commit Uncle Bob audit:
 - SRP: planner branch is one if-else case in the same per-action loop.
 - Magic numbers: none added.
 
-Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) — Potion of Climbing applies `spider-climbing-active` with consumer as source; Potion of Water Breathing applies `water-breathing-active` after commit. Updated spell-coverage expectations for Water Breathing from `'skip'` to `'buff'`. 1620 pass, 208 skipped. tsc clean.
+Tests: 2 new cases in [tests/unit/engine/plan-consume-item.test.ts](../../tests/unit/engine/plan-consume-item.test.ts) — Potion of Climbing applies `spider-climbing-active` with consumer as source; Potion of Water Breathing applies `water-breathing-active` after commit. Updated spell-coverage expectations for Water Breathing from `'skip'` to `'buff'`. 1620 pass, 208 skipped. tsc clean.
 
 **Engine: `ConsumeItem` planner + Potions of Healing wired (slice 235)**
 
@@ -184,11 +184,11 @@ The single biggest single-slice leverage move for SRD mechanical depth: consumab
 
 **Plumbing**:
 
-- New `ConsumeAction` discriminated union in [src/schemas/content/item.ts](src/schemas/content/item.ts). Distinct from `Effect` (passive grants) and `TriggerAction` (event-fired): consumption is a deliberate consumer-initiated act with its own semantic. Starts with one action kind, `Heal { dice?, flatAmount? }`. Future entries will add `ApplyCondition` (buff potions: Climbing, Resistance, Heroism) and `CastSpell` (spell scrolls, spell-storing potions).
+- New `ConsumeAction` discriminated union in [src/schemas/content/item.ts](../../src/schemas/content/item.ts). Distinct from `Effect` (passive grants) and `TriggerAction` (event-fired): consumption is a deliberate consumer-initiated act with its own semantic. Starts with one action kind, `Heal { dice?, flatAmount? }`. Future entries will add `ApplyCondition` (buff potions: Climbing, Resistance, Heroism) and `CastSpell` (spell scrolls, spell-storing potions).
 - `ConsumableSchema.onConsume` retyped from `EffectSchema[]` to `ConsumeActionSchema[]`. No existing pack entries had non-empty arrays so no migration needed.
-- New `ItemConsumed` event in [src/schemas/events/inventory.ts](src/schemas/events/inventory.ts) carrying `characterId / instanceId / definitionId / targetId`.
-- New `applyItemConsumed` reducer: removes the instance from the consumer's inventory and from `state.itemInstances`. Wired into [src/engine/apply.ts](src/engine/apply.ts).
-- New `planConsumeItem` planner in [src/engine/plan/consume-item.ts](src/engine/plan/consume-item.ts). Validates the instance is in inventory + the definition is `itemKind: 'consumable'`, walks `onConsume` actions emitting one event per action (Healed for Heal), ends with the ItemConsumed event. Exposed via `engine.plan.consumeItem({ characterId, instanceId, targetId? })`.
+- New `ItemConsumed` event in [src/schemas/events/inventory.ts](../../src/schemas/events/inventory.ts) carrying `characterId / instanceId / definitionId / targetId`.
+- New `applyItemConsumed` reducer: removes the instance from the consumer's inventory and from `state.itemInstances`. Wired into [src/engine/apply.ts](../../src/engine/apply.ts).
+- New `planConsumeItem` planner in [src/engine/plan/consume-item.ts](../../src/engine/plan/consume-item.ts). Validates the instance is in inventory + the definition is `itemKind: 'consumable'`, walks `onConsume` actions emitting one event per action (Healed for Heal), ends with the ItemConsumed event. Exposed via `engine.plan.consumeItem({ characterId, instanceId, targetId? })`.
 - Transcript formatter extended with an `ItemConsumed` case.
 
 **Content wired (4 canonical users — Potions of Healing table)**:
@@ -224,5 +224,5 @@ Pre-commit Uncle Bob audit:
 - Magic numbers: heal dice all SRD-derived (Potions of Healing table).
 - Tests assert mechanical outcomes (heal amount in expected range, instance retirement, throw conditions).
 
-Tests: 6-case planner test in [tests/unit/engine/plan-consume-item.test.ts](tests/unit/engine/plan-consume-item.test.ts) covering Healing potion happy path, Supreme variant range, instance retirement post-commit, feed-to-ally targeting, inventory-validation throw, wrong-kind-rejection throw. 1617 pass, 209 skipped. tsc clean.
+Tests: 6-case planner test in [tests/unit/engine/plan-consume-item.test.ts](../../tests/unit/engine/plan-consume-item.test.ts) covering Healing potion happy path, Supreme variant range, instance retirement post-commit, feed-to-ally targeting, inventory-validation throw, wrong-kind-rejection throw. 1617 pass, 209 skipped. tsc clean.
 
