@@ -4,6 +4,22 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Cloak of the Bat dim-light Stealth gate (slice 279)**
+
+Closes the slice-263 deferred Cloak of the Bat Stealth row. RAW: "Advantage on Dexterity (Stealth) checks while wearing this cloak in an area of dim light or darkness." Pre-279 the SetAdvantage applied unconditionally (broader than RAW).
+
+Same opt-in semantic as slice 263 (Eyes of the Eagle, `sense?`) and slice 274 (Gloves of Swimming, `athleticsSubAction?`): the consumer reports the value, undefined produces no advantage. Different from slice 276/278's default-apply: this is a positive benefit consumers opt INTO, not a negative penalty consumers opt OUT of.
+
+**Plumbing**: new `lightLevel?: 'bright' | 'dim' | 'darkness'` on [`ComputeAbilityCheckInput`](src/derive/ability-check.ts). `computeAbilityCheck` populates `bearer.lightLevel` fact alongside the existing slice 263/274/276 facts.
+
+**Content wired**: Cloak of the Bat's SetAdvantage on Stealth gains `condition: any(eq path:'bearer.lightLevel' value:'dim', eq path:'bearer.lightLevel' value:'darkness')`. Description rewritten to cite the RAW spec.
+
+**Pattern-check sweep**: searched the pack for sibling Stealth-on-light items — none. Cloak of Elvenkind uses a different shape (target's WIS perception to spot bearer has disadvantage, not bearer's own Stealth advantage). Cloak of the Bat is the unique user.
+
+**Related deferred rows updated**: the Cloak of the Bat fly-speed and Polymorph-to-Bat arms (slice-227 deferred rows) have half (b) — the `bearer.lightLevel` fact — closed by this slice. Half (a) still needs the slice-242 Toggle UseAction wire (fly speed) and a Polymorph cross-reference primitive (Polymorph arm).
+
+Audit: name matches slice 263/274 sibling fields in `ComputeAbilityCheckInput`. Derive-only; plan/commit split preserved. tsc clean; full vitest suite (1728 tests across 253 files, was 1722) green. 6 cases: dim/darkness → advantage; bright → no advantage; undefined → no advantage; non-Stealth skill in dim → no advantage; unattuned in dim → no advantage. Pack drift: `cloak-of-the-bat.effects[0]` gains a `condition` field.
+
 **Engine+content: Dodge LoS gate (consumer-supplied per-attacker) (slice 278)**
 
 Closes the slice-267 deferred row for Dodge's missing LoS gate. RAW (SRD 5.2.1 Dodge): "any attack roll made against you has Disadvantage if you can see the attacker." Slice 272 added the Incap/Speed-0 self-disable; this slice adds the per-attacker LoS gate on the attack-disadvantage arm only (RAW: the LoS clause applies to the attack benefit; the DEX-save advantage has no LoS clause).

@@ -64,6 +64,17 @@ export interface ComputeAbilityCheckInput {
   //                true). Mirror of AttackIntent.bearerCanSeeFearSource
   //                on the attack-roll arm.
   readonly bearerCanSeeFearSource?: boolean;
+  // Slice 279: consumer-supplied ambient-light fact for items / spells
+  // that gate effects on light level (Cloak of the Bat: "Advantage on
+  // Dexterity (Stealth) checks while in dim light or darkness").
+  // Same opt-in semantic as slice 263 `sense?` and slice 274
+  // `athleticsSubAction?`: the engine doesn't model scene lighting,
+  // the consumer reports the value. Predicates that require a
+  // specific light level evaluate false when this is undefined, so
+  // the bearer must explicitly receive the consumer-supplied value
+  // to get the gated benefit. The three-value enum matches the
+  // 2024 PHB / DMG light-tier vocabulary.
+  readonly lightLevel?: 'bright' | 'dim' | 'darkness';
 }
 
 const exhaustionPenalty = (level: number): number =>
@@ -137,6 +148,8 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
     ['event.sense', input.sense],
     ['event.athleticsSubAction', input.athleticsSubAction],
     ['bearer.canSeeFearSource', input.bearerCanSeeFearSource],
+    // Slice 279: ambient-light fact (Cloak of the Bat dim-light gate).
+    ['bearer.lightLevel', input.lightLevel],
   ]);
   // Slice 265: a skill check IS an ability check (RAW: skill check =
   // ability mod + skill bonus + d20). Pre-slice, `advantageFor` was
