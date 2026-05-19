@@ -4,6 +4,24 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Tests: `inventory` + `attunedInstanceIds` on `buildFighter` / `buildOgre` fixtures (slice 259)**
+
+Closes the second of the three audit-gap findings: the test fixtures populated `state.itemInstances` (via `ItemAcquired` events) but didn't expose a way to seed the character's `inventory` array. Tests using `planUseItem` / `planConsumeItem` / inventory reducers had to spread + reassign manually (`const hero = { ...buildFighter(), inventory: [item.id] }`). Slice 256's `ItemDestroyed` reducer test hit this footgun.
+
+What changed:
+
+- `BuildFighterOptions` gains two optional fields: `inventory?: string[]` (item instance ids to seed the character's `inventory` array) and `attunedInstanceIds?: string[]` (ids to seed `equipped.attuned`, since slice-132 magic-item projection skips attunement-required items not in that list).
+- Same shape added to `BuildOgreOptions` so creature-side tests have parity.
+- Defaults preserve prior behavior (empty arrays match what every existing caller passed implicitly).
+- The slice-256 `ItemDestroyed` reducer test refactored from `{ ...buildFighter(), inventory: [wand.id] }` to `buildFighter({ inventory: [wand.id] })` as the demonstration + regression check.
+
+Pre-commit short audit (DX slice):
+
+- **Names**: `inventory` matches the `Character.inventory` field name (no surprise translation). `attunedInstanceIds` is more verbose than `attuned` to avoid confusion with the per-instance `ItemInstance.attuned` boolean.
+- **DRY**: same shape added to both fixtures; could have been factored into a shared helper but two siblings is below the abstraction threshold and the two fixtures are otherwise distinct (Fighter takes ability scores, Ogre takes multiattack config).
+- **SRP**: pure additive change to fixture construction; no engine surface touched.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1664 tests across 244 files) green. The refactored slice-256 test exercises the new option end-to-end; all other tests unaffected (defaults match prior behavior).
+
 **Engine: SetAdvantage.condition honored + event.isSpellSave + Mantle of Spell Resistance (slice 258)**
 
 Closes the first of the three audit-gap findings surfaced after slice 257. The `SetAdvantage` effect kind declares a `condition?: Predicate` field in its schema but the effect-stack builder silently dropped it (line 692-694 pre-slice). 0 pack entries currently set the condition, so no behavior was broken in production — but the schema documented a capability the runtime didn't support, blocking multiple deferred-primitives rows (Mantle of Spell Resistance, Eyes of the Eagle, Boots of Speed's opportunity-attack gate).

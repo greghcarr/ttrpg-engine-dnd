@@ -146,13 +146,10 @@ describe('Item attunement', () => {
 describe('Item destruction (slice 256)', () => {
   it('ItemDestroyed retires the instance: removed from inventory + itemInstances', () => {
     // Construct a state where the wand is both in state.itemInstances
-    // AND in the character's inventory (the planUseItem precondition
-    // path). seedFighter's ItemAcquired events populate
-    // state.itemInstances but not character.inventory, so this test
-    // builds the state directly.
+    // AND in the character's inventory. Slice 259 added `inventory`
+    // to BuildFighterOptions so this no longer needs a manual spread.
     const wand = makeItemInstance('wand-of-magic-missiles');
-    const baseFighter = buildFighter();
-    const fighter = { ...baseFighter, inventory: [wand.id] };
+    const fighter = buildFighter({ inventory: [wand.id] });
     const state = applyAll(emptyCampaignState(), [
       { id: eventId(), at: isoTimestamp(), type: 'ItemAcquired', instance: wand } satisfies ItemAcquiredEvent,
       { id: eventId(), at: isoTimestamp(), type: 'CharacterCreated', snapshot: fighter } satisfies CharacterCreatedEvent,
