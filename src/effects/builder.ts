@@ -20,12 +20,29 @@ const rollKey = (target: RollTarget): string => {
   if (typeof target === 'string') return target;
   switch (target.kind) {
     case 'save':
-      return `save:${target.ability}`;
+      // Slice 266: `save:*` is the wildcard key (no ability specified).
+      // Stored under that key; queried as part of any specific-ability
+      // save lookup via `wildcardKeyFor`.
+      return `save:${target.ability ?? '*'}`;
     case 'check':
-      return `check:${target.ability}`;
+      return `check:${target.ability ?? '*'}`;
     case 'skill':
       return `skill:${target.skill}`;
   }
+};
+
+// Slice 266: when querying advantage for a specific-ability save or
+// check, ALSO look up the wildcard `save:*` / `check:*` entries so a
+// no-ability SetAdvantage (poisoned: disadvantage on any check;
+// Mantle of Spell Resistance: advantage on any save vs spells)
+// applies to every per-ability query. Returns undefined for queries
+// that don't have a wildcard form (attack, damage, initiative,
+// skill, or queries already at the wildcard level).
+const wildcardKeyFor = (target: RollTarget): string | undefined => {
+  if (typeof target === 'string') return undefined;
+  if (target.kind === 'save' && target.ability !== undefined) return 'save:*';
+  if (target.kind === 'check' && target.ability !== undefined) return 'check:*';
+  return undefined;
 };
 
 export interface ModifierContribution {
@@ -108,7 +125,13 @@ export class EffectAccumulator {
   // source IS magical. Resistance from multiple entries stacks via
   // any-match semantics: if any matching entry fires, the damage is
   // halved (resistance doesn't compound).
-  private readonly resistances = new Map<DamageType | 'all', Array<{ qualifier?: 'nonmagical' | 'magical' }>>();
+  //
+  // Slice 262: optional `predicate` on each entry, evaluated against
+  // caller-supplied facts at hasResistance() time. Same plumbing
+  // shape as slice 258's SetAdvantage predicates. 0 pack entries set
+  // `condition` on GrantResistance today; this closes the audit gap
+  // categorically (pattern-check applied per the slice-261 norm).
+  private readonly resistances = new Map<DamageType | 'all', Array<{ qualifier?: 'nonmagical' | 'magical'; predicate?: Predicate }>>();
   private readonly immunities = new Set<DamageType | 'all'>();
   private readonly vulnerabilities = new Set<DamageType>();
   // Per-condition lists of immunity entries. Entries with no predicate
@@ -133,6 +156,14 @@ export class EffectAccumulator {
   private readonly senseGrants = new Map<Sense, number>();
   private readonly proficiencies = new Map<string, 'half' | 'proficient' | 'expertise'>();
   private readonly actionEconomyMods = new Map<'extraAttack' | 'extraAction' | 'extraBonusAction', number>();
+  // Slice 262: predicated ModifyActionEconomy entries, evaluated at
+  // actionEconomyTotal() time. Kept distinct from the unconditional
+  // map so the existing fast path pays no evaluation cost. Mirror of
+  // slice 258's `predicatedAdvantages` shape.
+  private readonly predicatedActionEconomy = new Map<
+    'extraAttack' | 'extraAction' | 'extraBonusAction',
+    Array<{ count: number; predicate: Predicate }>
+  >();
   private readonly flatDamageReductions = new Map<DamageType, number>();
   private critThresholdValue: number = 20;
   private halfProficiencyBonusFloorFlag: boolean = false;
@@ -242,13 +273,17 @@ export class EffectAccumulator {
     this.advantagesVsBearersOfMyCondition.set(key, entries);
   }
 
-  addResistance(type: DamageType | 'all', qualifier?: 'nonmagical' | 'magical'): void {
+  addResistance(
+    type: DamageType | 'all',
+    qualifier?: 'nonmagical' | 'magical',
+    predicate?: Predicate,
+  ): void {
     let list = this.resistances.get(type);
     if (list === undefined) {
       list = [];
       this.resistances.set(type, list);
     }
-    list.push({ qualifier });
+    list.push(predicate !== undefined ? { qualifier, predicate } : { qualifier });
   }
   addImmunity(type: DamageType | 'all'): void {
     this.immunities.add(type);
@@ -324,20 +359,40 @@ export class EffectAccumulator {
 
   advantageFor(target: RollTarget, facts?: ReadonlyMap<string, unknown>): AdvantageState {
     const key = rollKey(target);
-    const unconditional = this.advantages.get(key) ?? emptyAdvantage();
+    const wildcard = wildcardKeyFor(target);
+    // Slice 266: merge unconditional entries at both the specific key
+    // and the wildcard key (`save:*` / `check:*`). The wildcard set
+    // only fires for save/check targets with a specific ability; for
+    // other roll kinds it's undefined and the merge is a no-op.
+    const merged: AdvantageState = { ...(this.advantages.get(key) ?? emptyAdvantage()) };
+    if (wildcard !== undefined) {
+      const wild = this.advantages.get(wildcard);
+      if (wild !== undefined) {
+        merged.advantage = merged.advantage || wild.advantage;
+        merged.disadvantage = merged.disadvantage || wild.disadvantage;
+        merged.autoCrit = merged.autoCrit || wild.autoCrit;
+        merged.autoFail = merged.autoFail || wild.autoFail;
+      }
+    }
     const predicated = this.predicatedAdvantages.get(key);
-    if (predicated === undefined || predicated.length === 0) return unconditional;
+    const wildPredicated = wildcard !== undefined ? this.predicatedAdvantages.get(wildcard) : undefined;
+    if ((predicated === undefined || predicated.length === 0) && (wildPredicated === undefined || wildPredicated.length === 0)) {
+      return merged;
+    }
     // Slice 258: fold filtered predicated entries on top of the
     // unconditional state. An entry whose predicate doesn't evaluate
     // true with the caller-supplied facts contributes nothing.
-    const merged: AdvantageState = { ...unconditional };
-    for (const entry of predicated) {
-      if (!evaluatePredicate(entry.predicate, { facts })) continue;
-      if (entry.mode === 'advantage') merged.advantage = true;
-      else if (entry.mode === 'disadvantage') merged.disadvantage = true;
-      else if (entry.mode === 'auto-crit') merged.autoCrit = true;
-      else merged.autoFail = true;
-    }
+    const foldPredicated = (entries: Array<{ mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'; predicate: Predicate }>): void => {
+      for (const entry of entries) {
+        if (!evaluatePredicate(entry.predicate, { facts })) continue;
+        if (entry.mode === 'advantage') merged.advantage = true;
+        else if (entry.mode === 'disadvantage') merged.disadvantage = true;
+        else if (entry.mode === 'auto-crit') merged.autoCrit = true;
+        else merged.autoFail = true;
+      }
+    };
+    if (predicated !== undefined) foldPredicated(predicated);
+    if (wildPredicated !== undefined) foldPredicated(wildPredicated);
     return merged;
   }
 
@@ -348,7 +403,21 @@ export class EffectAccumulator {
   // target) and folds the result into the regular advantage resolution.
   advantageVsSource(target: RollTarget, sourceCharacterId: string): AdvantageState {
     const key = `${rollKey(target)}::${sourceCharacterId}`;
-    return this.advantagesVsSource.get(key) ?? emptyAdvantage();
+    const specific = this.advantagesVsSource.get(key) ?? emptyAdvantage();
+    // Slice 266: merge wildcard `save:*::SOURCE` / `check:*::SOURCE`
+    // for consistency with `advantageFor`. No current canonical user
+    // sets a wildcard SetAdvantageVsSource — pure plumbing parity
+    // with `advantageFor` per the slice 261 pattern-check norm.
+    const wildcard = wildcardKeyFor(target);
+    if (wildcard === undefined) return specific;
+    const wild = this.advantagesVsSource.get(`${wildcard}::${sourceCharacterId}`);
+    if (wild === undefined) return specific;
+    return {
+      advantage: specific.advantage || wild.advantage,
+      disadvantage: specific.disadvantage || wild.disadvantage,
+      autoCrit: specific.autoCrit || wild.autoCrit,
+      autoFail: specific.autoFail || wild.autoFail,
+    };
   }
 
   // Slice 231: returns the AdvantageState that applies when this
@@ -363,19 +432,28 @@ export class EffectAccumulator {
     counterpartyConditions: ReadonlyArray<{ conditionId: string; sourceCharacterId?: string }>,
     bearerId: string,
   ): AdvantageState {
-    const entries = this.advantagesVsBearersOfMyCondition.get(rollKey(target));
-    if (entries === undefined || entries.length === 0) return emptyAdvantage();
     const result = emptyAdvantage();
-    for (const entry of entries) {
-      const match = counterpartyConditions.some(
-        (c) => c.conditionId === entry.conditionId && c.sourceCharacterId === bearerId,
-      );
-      if (!match) continue;
-      if (entry.mode.advantage) result.advantage = true;
-      if (entry.mode.disadvantage) result.disadvantage = true;
-      if (entry.mode.autoCrit) result.autoCrit = true;
-      if (entry.mode.autoFail) result.autoFail = true;
-    }
+    // Slice 266: merge entries at both the specific key and the
+    // wildcard. No current canonical user sets a wildcard
+    // GrantAdvantageVsBearersOfMyCondition — pure plumbing parity
+    // with `advantageFor` per the slice 261 pattern-check norm.
+    const wildcard = wildcardKeyFor(target);
+    const collect = (key: string): void => {
+      const entries = this.advantagesVsBearersOfMyCondition.get(key);
+      if (entries === undefined || entries.length === 0) return;
+      for (const entry of entries) {
+        const match = counterpartyConditions.some(
+          (c) => c.conditionId === entry.conditionId && c.sourceCharacterId === bearerId,
+        );
+        if (!match) continue;
+        if (entry.mode.advantage) result.advantage = true;
+        if (entry.mode.disadvantage) result.disadvantage = true;
+        if (entry.mode.autoCrit) result.autoCrit = true;
+        if (entry.mode.autoFail) result.autoFail = true;
+      }
+    };
+    collect(rollKey(target));
+    if (wildcard !== undefined) collect(wildcard);
     return result;
   }
 
@@ -383,15 +461,29 @@ export class EffectAccumulator {
   // advantage against them (Faerie Fire, Restrained, paralyzed-while-
   // attacker-within-5-feet, etc.). Called on the *target's* effect
   // stack by the attack planner.
-  grantsAdvantageToAttackers(): boolean {
-    return this.advantageToAttackersFlag;
+  grantsAdvantageToAttackers(facts?: ReadonlyMap<string, unknown>): boolean {
+    if (this.advantageToAttackersFlag) return true;
+    // Slice 262: predicated entries fire when facts say so. No
+    // predicated entries (the typical case) → fast path returns the
+    // existing flag value above.
+    return this.predicatedAdvantageToAttackers.some((entry) =>
+      evaluatePredicate(entry.predicate, { facts }),
+    );
   }
 
-  markGrantsAdvantageToAttackers(): void {
+  markGrantsAdvantageToAttackers(predicate?: Predicate): void {
+    if (predicate !== undefined) {
+      this.predicatedAdvantageToAttackers.push({ predicate });
+      return;
+    }
     this.advantageToAttackersFlag = true;
   }
 
   private advantageToAttackersFlag = false;
+  // Slice 262: predicated entries for GrantAdvantageToAttackers,
+  // mirroring slice 258's predicatedAdvantages pattern. Unconditional
+  // grants (the existing flag) stay on the fast path.
+  private readonly predicatedAdvantageToAttackers: Array<{ predicate: Predicate }> = [];
 
   // Mirror of `grantsAdvantageToAttackers`: true when this character
   // has any effect that imposes disadvantage on incoming attacks
@@ -482,9 +574,20 @@ export class EffectAccumulator {
     return this.senseGrants.get(sense) ?? 0;
   }
 
-  hasResistance(type: DamageType, sourceIsMagical?: boolean): boolean {
-    const matches = (entries: Array<{ qualifier?: 'nonmagical' | 'magical' }>): boolean =>
+  hasResistance(
+    type: DamageType,
+    sourceIsMagical?: boolean,
+    facts?: ReadonlyMap<string, unknown>,
+  ): boolean {
+    const matches = (
+      entries: Array<{ qualifier?: 'nonmagical' | 'magical'; predicate?: Predicate }>,
+    ): boolean =>
       entries.some((entry) => {
+        // Slice 262: entry-level predicate gates resistance on facts.
+        // Unpredicated entries (the slice-112 norm) skip this check.
+        if (entry.predicate !== undefined && !evaluatePredicate(entry.predicate, { facts })) {
+          return false;
+        }
         if (entry.qualifier === undefined) return true;
         if (entry.qualifier === 'nonmagical') return sourceIsMagical !== true;
         return sourceIsMagical === true;
@@ -551,12 +654,35 @@ export class EffectAccumulator {
     return rows;
   }
 
-  addActionEconomy(op: 'extraAttack' | 'extraAction' | 'extraBonusAction', count: number): void {
+  addActionEconomy(
+    op: 'extraAttack' | 'extraAction' | 'extraBonusAction',
+    count: number,
+    predicate?: Predicate,
+  ): void {
+    if (predicate !== undefined) {
+      let list = this.predicatedActionEconomy.get(op);
+      if (list === undefined) {
+        list = [];
+        this.predicatedActionEconomy.set(op, list);
+      }
+      list.push({ count, predicate });
+      return;
+    }
     const prior = this.actionEconomyMods.get(op) ?? 0;
     this.actionEconomyMods.set(op, prior + count);
   }
-  actionEconomyTotal(op: 'extraAttack' | 'extraAction' | 'extraBonusAction'): number {
-    return this.actionEconomyMods.get(op) ?? 0;
+  actionEconomyTotal(
+    op: 'extraAttack' | 'extraAction' | 'extraBonusAction',
+    facts?: ReadonlyMap<string, unknown>,
+  ): number {
+    const unconditional = this.actionEconomyMods.get(op) ?? 0;
+    const predicated = this.predicatedActionEconomy.get(op);
+    if (predicated === undefined || predicated.length === 0) return unconditional;
+    return predicated.reduce(
+      (acc, entry) =>
+        evaluatePredicate(entry.predicate, { facts }) ? acc + entry.count : acc,
+      unconditional,
+    );
   }
   addFlatDamageReduction(damageType: DamageType, amount: number): void {
     const prior = this.flatDamageReductions.get(damageType) ?? 0;
@@ -749,7 +875,8 @@ export const applyEffectToBuilder = (
       acc.markHealingBlocked();
       return;
     case 'GrantResistance':
-      acc.addResistance(effect.damageType, effect.qualifier);
+      // Slice 262: thread effect.condition (previously dropped).
+      acc.addResistance(effect.damageType, effect.qualifier, effect.condition);
       return;
     case 'GrantImmunity':
       acc.addImmunity(effect.damageType);
@@ -802,7 +929,8 @@ export const applyEffectToBuilder = (
       acc.addProficiency(effect.target, effect.id, effect.level === 'none' ? 'proficient' : effect.level);
       return;
     case 'ModifyActionEconomy':
-      acc.addActionEconomy(effect.op, effect.count);
+      // Slice 262: thread effect.condition (previously dropped).
+      acc.addActionEconomy(effect.op, effect.count, effect.condition);
       return;
     case 'FlatDamageReduction':
       for (const damageType of effect.damageTypes) {
@@ -852,7 +980,8 @@ export const applyEffectToBuilder = (
       acc.markGreatWeaponFighting();
       return;
     case 'GrantAdvantageToAttackers':
-      acc.markGrantsAdvantageToAttackers();
+      // Slice 262: thread effect.condition (previously dropped).
+      acc.markGrantsAdvantageToAttackers(effect.condition);
       return;
     case 'ImposeDisadvantageOnAttackers':
       acc.markImposesDisadvantageOnAttackers(effect.condition);

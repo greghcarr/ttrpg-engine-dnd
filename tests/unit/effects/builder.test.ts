@@ -143,6 +143,78 @@ describe('EffectAccumulator', () => {
     ).toBe(true);
   });
 
+  // Slice 266: no-ability RollTarget wildcards. SetAdvantage with
+  // `on: { kind: 'save' }` (no ability) applies to every per-ability
+  // save query; same for check. Canonical users: Mantle of Spell
+  // Resistance (1 entry instead of 6); poisoned (1 entry instead
+  // of 6).
+
+  it('SetAdvantage wildcard on:{kind:save} applies to every per-ability save query', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'save' }, mode: 'advantage' },
+      acc,
+      { source: 'wildcard-save' },
+    );
+    for (const ability of ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }).advantage).toBe(true);
+    }
+    // The wildcard does NOT bleed into check.
+    expect(acc.advantageFor({ kind: 'check', ability: 'STR' }).advantage).toBe(false);
+    // The wildcard does NOT bleed into other roll kinds.
+    expect(acc.advantageFor('attack').advantage).toBe(false);
+  });
+
+  it('SetAdvantage wildcard on:{kind:check} merges with per-ability check entries', () => {
+    const acc = new EffectAccumulator();
+    // Wildcard disadvantage on any check.
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'check' }, mode: 'disadvantage' },
+      acc,
+      { source: 'poisoned' },
+    );
+    // Specific advantage on STR check.
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'check', ability: 'STR' }, mode: 'advantage' },
+      acc,
+      { source: 'bulls-strength' },
+    );
+    // STR check picks up both: advantage AND disadvantage (RAW
+    // cancellation is the caller's job).
+    const strCheck = acc.advantageFor({ kind: 'check', ability: 'STR' });
+    expect(strCheck.advantage).toBe(true);
+    expect(strCheck.disadvantage).toBe(true);
+    // CON check picks up only the wildcard disadvantage.
+    const conCheck = acc.advantageFor({ kind: 'check', ability: 'CON' });
+    expect(conCheck.advantage).toBe(false);
+    expect(conCheck.disadvantage).toBe(true);
+  });
+
+  it('Predicated wildcard SetAdvantage merges correctly with facts', () => {
+    const acc = new EffectAccumulator();
+    // Wildcard advantage on saves vs spells (Mantle of Spell
+    // Resistance shape).
+    applyEffectToBuilder(
+      {
+        kind: 'SetAdvantage',
+        on: { kind: 'save' },
+        mode: 'advantage',
+        condition: { kind: 'eq', path: 'event.isSpellSave', value: true },
+      },
+      acc,
+      { source: 'mantle' },
+    );
+    // No facts: predicate false → no advantage on any save.
+    for (const ability of ['STR', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }).advantage).toBe(false);
+    }
+    // Facts say spell save: advantage on every per-ability query.
+    const spellFacts = new Map<string, unknown>([['event.isSpellSave', true]]);
+    for (const ability of ['STR', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }, spellFacts).advantage).toBe(true);
+    }
+  });
+
   it('Predicated + unpredicated SetAdvantage merge correctly', () => {
     const acc = new EffectAccumulator();
     // One unpredicated advantage on WIS save.
@@ -188,6 +260,42 @@ describe('EffectAccumulator', () => {
     expect(acc.hasImmunity('poison')).toBe(true);
     applyEffectToBuilder({ kind: 'GrantVulnerability', damageType: 'fire' }, acc, { source: 'q' });
     expect(acc.hasVulnerability('fire')).toBe(true);
+  });
+
+  // Slice 262: predicated GrantResistance. Schema accepted `condition`
+  // but the builder dropped it pre-slice. Pattern-check companion to
+  // slice 258's SetAdvantage fix.
+  it('GrantResistance with a predicate is gated on caller-supplied facts', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'GrantResistance',
+        damageType: 'fire',
+        condition: { kind: 'eq', path: 'bearer.transformed', value: true },
+      },
+      acc,
+      { source: 'fire-form' },
+    );
+    // No facts: predicate false → no resistance.
+    expect(acc.hasResistance('fire')).toBe(false);
+    // Facts say not-transformed: still no resistance.
+    expect(
+      acc.hasResistance('fire', false, new Map<string, unknown>([['bearer.transformed', false]])),
+    ).toBe(false);
+    // Facts say transformed: resistance applies.
+    expect(
+      acc.hasResistance('fire', false, new Map<string, unknown>([['bearer.transformed', true]])),
+    ).toBe(true);
+  });
+
+  it('Unpredicated GrantResistance entries still apply regardless of facts (fast path preserved)', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder({ kind: 'GrantResistance', damageType: 'cold' }, acc, { source: 'frost-cloak' });
+    expect(acc.hasResistance('cold')).toBe(true);
+    // Random facts: still applies.
+    expect(
+      acc.hasResistance('cold', false, new Map<string, unknown>([['random.fact', true]])),
+    ).toBe(true);
   });
 
   it('Condition immunity tracked', () => {
@@ -434,5 +542,119 @@ describe('EffectAccumulator', () => {
       { source: 'devils-sight' },
     );
     expect(acc.senseRange('darkvision')).toBe(120);
+  });
+
+  // Slice 262: predicated ModifyActionEconomy + GrantAdvantageToAttackers,
+  // closing the audit-gap pattern from slice 258 categorically (the
+  // SetAdvantage / GrantResistance / ModifyActionEconomy /
+  // GrantAdvantageToAttackers four-way inert-condition cohort).
+
+  it('ModifyActionEconomy unpredicated sums normally (fast path preserved)', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'ModifyActionEconomy', op: 'extraAttack', count: 1 },
+      acc,
+      { source: 'fighter-extra-attack' },
+    );
+    expect(acc.actionEconomyTotal('extraAttack')).toBe(1);
+    // Facts irrelevant for unpredicated entries.
+    expect(
+      acc.actionEconomyTotal('extraAttack', new Map<string, unknown>([['noisy.fact', true]])),
+    ).toBe(1);
+  });
+
+  it('ModifyActionEconomy with a predicate adds only when facts evaluate true', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'ModifyActionEconomy',
+        op: 'extraBonusAction',
+        count: 1,
+        condition: { kind: 'eq', path: 'bearer.raging', value: true },
+      },
+      acc,
+      { source: 'frenzy' },
+    );
+    // No facts: predicate false → no extra bonus action.
+    expect(acc.actionEconomyTotal('extraBonusAction')).toBe(0);
+    // Facts say not-raging: still 0.
+    expect(
+      acc.actionEconomyTotal(
+        'extraBonusAction',
+        new Map<string, unknown>([['bearer.raging', false]]),
+      ),
+    ).toBe(0);
+    // Facts say raging: extra bonus action applies.
+    expect(
+      acc.actionEconomyTotal(
+        'extraBonusAction',
+        new Map<string, unknown>([['bearer.raging', true]]),
+      ),
+    ).toBe(1);
+  });
+
+  it('ModifyActionEconomy predicated + unpredicated sum correctly', () => {
+    const acc = new EffectAccumulator();
+    // Always-on extra attack from a class feature.
+    applyEffectToBuilder(
+      { kind: 'ModifyActionEconomy', op: 'extraAttack', count: 1 },
+      acc,
+      { source: 'class' },
+    );
+    // Conditional extra attack from a rider.
+    applyEffectToBuilder(
+      {
+        kind: 'ModifyActionEconomy',
+        op: 'extraAttack',
+        count: 1,
+        condition: { kind: 'eq', path: 'bearer.raging', value: true },
+      },
+      acc,
+      { source: 'rage' },
+    );
+    expect(acc.actionEconomyTotal('extraAttack')).toBe(1);
+    expect(
+      acc.actionEconomyTotal('extraAttack', new Map<string, unknown>([['bearer.raging', true]])),
+    ).toBe(2);
+  });
+
+  it('GrantAdvantageToAttackers unpredicated returns true unconditionally (fast path preserved)', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'GrantAdvantageToAttackers' },
+      acc,
+      { source: 'faerie-fire' },
+    );
+    expect(acc.grantsAdvantageToAttackers()).toBe(true);
+    // Facts irrelevant.
+    expect(
+      acc.grantsAdvantageToAttackers(new Map<string, unknown>([['random', false]])),
+    ).toBe(true);
+  });
+
+  it('GrantAdvantageToAttackers with a predicate is gated on facts', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      {
+        kind: 'GrantAdvantageToAttackers',
+        condition: { kind: 'eq', path: 'event.attackerCreatureType', value: 'undead' },
+      },
+      acc,
+      { source: 'undead-bane' },
+    );
+    // No facts: predicate false.
+    expect(acc.grantsAdvantageToAttackers()).toBe(false);
+    // Facts say attacker is a fiend: still false.
+    expect(
+      acc.grantsAdvantageToAttackers(
+        new Map<string, unknown>([['event.attackerCreatureType', 'fiend']]),
+      ),
+    ).toBe(false);
+    // Facts say attacker is undead: true.
+    expect(
+      acc.grantsAdvantageToAttackers(
+        new Map<string, unknown>([['event.attackerCreatureType', 'undead']]),
+      ),
+    ).toBe(true);
   });
 });

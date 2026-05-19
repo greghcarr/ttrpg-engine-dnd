@@ -6,6 +6,7 @@ import { abilityModifier, effectiveAbilityScore, proficiencyBonus } from './abil
 import { buildEffectStack } from './effect-stack.js';
 import { computeTotalLevel } from '../schemas/runtime/character.js';
 import { EXHAUSTION_SAVE_PENALTY_PER_LEVEL } from '../internal/constants.js';
+import { findActorBlockingCondition, getEffectiveSpeed } from '../engine/plan/_actor-state.js';
 
 export interface SaveBreakdownEntry {
   readonly source: string;
@@ -104,8 +105,24 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
   // non-spell magical effects today, so this conservatively extends
   // advantage to all magical saves (more saves benefit, never fewer;
   // matches how Magic Resistance already operates).
+  //
+  // Slice 272: bearer-state facts for the Dodge self-disable
+  // ("you lose these benefits if you have the Incapacitated
+  // condition or if your Speed is 0"). The dodged condition's
+  // DEX-save advantage entry gates on these facts being false; same
+  // facts populated in the attack planner for the
+  // ImposeDisadvantageOnAttackers arm.
+  const bearerHasIncapacitated = findActorBlockingCondition(input.character) !== undefined;
+  const bearerSpeedZero = getEffectiveSpeed({
+    character: input.character,
+    content: input.content,
+    itemInstances: input.itemInstances,
+    pendingChoices: input.pendingChoices,
+  }) === 0;
   const facts = new Map<string, unknown>([
     ['event.isSpellSave', input.sourceIsMagical === true],
+    ['bearer.hasIncapacitated', bearerHasIncapacitated],
+    ['bearer.speedZero', bearerSpeedZero],
   ]);
   const adv = effects.advantageFor(target, facts);
   // Slice 131: Magic Resistance contributes advantage to the save

@@ -2318,7 +2318,7 @@
     { "id": "brooch-of-shielding", "itemKind": "magic", "name": "Brooch of Shielding", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "GrantResistance", "damageType": "force" }] },
     { "id": "periapt-of-wound-closure", "itemKind": "magic", "name": "Periapt of Wound Closure", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "ring-of-swimming", "itemKind": "magic", "name": "Ring of Swimming", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 40 }] },
-    { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage" }] },
+    { "id": "eyes-of-the-eagle", "itemKind": "magic", "name": "Eyes of the Eagle", "rarity": "uncommon", "requiresAttunement": false, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "perception" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.sense", "value": "sight" } }] },
     {
       "id": "hat-of-disguise",
       "itemKind": "magic",
@@ -2332,7 +2332,7 @@
     },
     { "id": "headband-of-intellect", "itemKind": "magic", "name": "Headband of Intellect", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "boots-of-striding-and-springing", "itemKind": "magic", "name": "Boots of Striding and Springing", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
-    { "id": "cloak-of-the-bat", "itemKind": "magic", "name": "Cloak of the Bat", "rarity": "rare", "requiresAttunement": true, "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "stealth" }, "mode": "advantage" }] },
+    { "id": "cloak-of-the-bat", "itemKind": "magic", "name": "Cloak of the Bat", "rarity": "rare", "requiresAttunement": true, "description": "RAW: 'You have Advantage on Dexterity (Stealth) checks while wearing this cloak in an area of dim light or darkness.' (Plus a Magic-action fly speed + Polymorph-to-Bat in dim light or darkness, both still deferred — they need the slice-242 Toggle UseAction shape for the activate-as-action arms plus the dim-light gate.) Slice 279 wired the Stealth arm via the new `bearer.lightLevel` consumer-supplied predicate fact on `ComputeAbilityCheckInput`. The SetAdvantage gates on `any(eq path:'bearer.lightLevel' value:'dim', eq path:'bearer.lightLevel' value:'darkness')`. Same opt-in semantic as slice 263's Eyes of the Eagle sight-only Perception advantage: undefined lightLevel produces no advantage (consumer didn't tell us the scene state); the consumer (UI, encounter manager, future VTT) reports the value.", "effects": [{ "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "stealth" }, "mode": "advantage", "condition": { "kind": "any", "terms": [{ "kind": "eq", "path": "bearer.lightLevel", "value": "dim" }, { "kind": "eq", "path": "bearer.lightLevel", "value": "darkness" }] } }] },
     { "id": "helm-of-telepathy", "itemKind": "magic", "name": "Helm of Telepathy", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "necklace-of-adaptation", "itemKind": "magic", "name": "Necklace of Adaptation", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "decanter-of-endless-water", "itemKind": "magic", "name": "Decanter of Endless Water", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
@@ -2371,9 +2371,9 @@
     { "id": "gloves-of-missile-snaring", "itemKind": "magic", "name": "Gloves of Missile Snaring", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
     { "id": "lantern-of-revealing", "itemKind": "magic", "name": "Lantern of Revealing", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "robe-of-useful-items", "itemKind": "magic", "name": "Robe of Useful Items", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
-    { "id": "bracers-of-archery", "itemKind": "magic", "name": "Bracers of Archery", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
+    { "id": "bracers-of-archery", "itemKind": "magic", "name": "Bracers of Archery", "rarity": "uncommon", "requiresAttunement": true, "description": "RAW: 'Proficiency with the longbow and the shortbow, and gain a +2 bonus to damage rolls on ranged attacks made with such weapons.' Slice 275 wired the +2 damage arm via a new `event.weaponId` predicate fact on the attack planner's `damageFacts` map; the AddModifier entry gates on `any(eq path:event.weaponId value:longbow, eq path:event.weaponId value:shortbow)`. The proficiency arm (RAW: grants proficiency with longbow/shortbow regardless of class) stays deferred until conditional GrantProficiency lands — most archery-focused builds already carry these proficiencies via class, so the damage arm is the higher-payoff mechanical wire.", "effects": [{ "kind": "AddModifier", "target": "damage", "value": 2, "condition": { "kind": "any", "terms": [{ "kind": "eq", "path": "event.weaponId", "value": "longbow" }, { "kind": "eq", "path": "event.weaponId", "value": "shortbow" }] } }] },
     { "id": "winged-boots", "itemKind": "magic", "name": "Winged Boots", "rarity": "uncommon", "requiresAttunement": true, "effects": [] },
-    { "id": "gloves-of-swimming-and-climbing", "itemKind": "magic", "name": "Gloves of Swimming and Climbing", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }, { "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 30 }, { "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "athletics" }, "mode": "advantage" }] },
+    { "id": "gloves-of-swimming-and-climbing", "itemKind": "magic", "name": "Gloves of Swimming and Climbing", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "ModifySpeed", "mode": "climb", "op": "set", "value": 30 }, { "kind": "ModifySpeed", "mode": "swim", "op": "set", "value": 30 }, { "kind": "SetAdvantage", "on": { "kind": "skill", "skill": "athletics" }, "mode": "advantage", "condition": { "kind": "any", "terms": [{ "kind": "eq", "path": "event.athleticsSubAction", "value": "climb" }, { "kind": "eq", "path": "event.athleticsSubAction", "value": "swim" }] } }] },
     { "id": "stone-of-good-luck", "itemKind": "magic", "name": "Stone of Good Luck", "rarity": "uncommon", "requiresAttunement": true, "effects": [{ "kind": "AddModifier", "target": { "kind": "save", "ability": "STR" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "DEX" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "CON" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "INT" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "WIS" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "save", "ability": "CHA" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "STR" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "DEX" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "CON" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "INT" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "WIS" }, "value": 1 }, { "kind": "AddModifier", "target": { "kind": "check", "ability": "CHA" }, "value": 1 }] },
     { "id": "weapon-plus-1", "itemKind": "magic", "name": "Weapon, +1", "rarity": "uncommon", "requiresAttunement": false, "effects": [] },
     { "id": "weapon-plus-2", "itemKind": "magic", "name": "Weapon, +2", "rarity": "rare", "requiresAttunement": false, "effects": [] },
@@ -2811,12 +2811,7 @@
     {"id": "mace-of-smiting", "itemKind": "magic", "name": "Mace of Smiting", "rarity": "rare", "requiresAttunement": false, "effects": []},
     {"id": "mace-of-terror", "itemKind": "magic", "name": "Mace of Terror", "rarity": "rare", "requiresAttunement": true, "effects": []},
     {"id": "mantle-of-spell-resistance", "itemKind": "magic", "name": "Mantle of Spell Resistance", "rarity": "rare", "requiresAttunement": true, "effects": [
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CON" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "INT" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "WIS" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
-      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CHA" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } }
+      { "kind": "SetAdvantage", "on": { "kind": "save" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } }
     ]},
     {"id": "manual-of-bodily-health", "itemKind": "magic", "name": "Manual of Bodily Health", "rarity": "very-rare", "requiresAttunement": false, "effects": []},
     {"id": "manual-of-gainful-exercise", "itemKind": "magic", "name": "Manual of Gainful Exercise", "rarity": "very-rare", "requiresAttunement": false, "effects": []},
@@ -7899,12 +7894,12 @@
     {
       "id": "dodged",
       "name": "Dodging",
-      "description": "Until the start of your next turn, attacks against you have disadvantage and you have advantage on Dexterity saving throws (Dodge action).",
+      "description": "RAW (SRD 5.2.1 Dodge action): 'Until the start of your next turn, any attack roll made against you has Disadvantage if you can see the attacker, and you make Dexterity saving throws with Advantage. You lose these benefits if you have the Incapacitated condition or if your Speed is 0.' Slice 272 added the Incap/Speed-0 self-disable on both arms. Slice 278 added the per-attacker LoS gate on the attack-disadvantage arm only (RAW: the LoS clause applies to the attack-disadvantage benefit; the DEX-save advantage has no LoS clause). The attack-disadvantage arm now gates on `all(bearer.hasIncapacitated=false, bearer.speedZero=false, not eq bearer.canSeeAttacker false)`. The consumer (UI, encounter manager, future VTT) supplies `targetCanSeeAttacker` on the AttackIntent when it models line of sight; undefined preserves current behavior (default-apply). The DEX-save advantage arm stays gated only on Incap/Speed-0 per RAW.",
       "stackable": false,
       "endsOn": [{ "kind": "turnEnd", "ownerId": "self" }],
       "effects": [
-        { "kind": "ImposeDisadvantageOnAttackers" },
-        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage" }
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.hasIncapacitated", "value": false }, { "kind": "eq", "path": "bearer.speedZero", "value": false }, { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeAttacker", "value": false } }] } },
+        { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage", "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.hasIncapacitated", "value": false }, { "kind": "eq", "path": "bearer.speedZero", "value": false }] } }
       ]
     },
     {
@@ -7933,11 +7928,12 @@
     {
       "id": "frightened",
       "name": "Frightened",
+      "description": "RAW (SRD 5.2.1 Frightened): 'Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.' Slice 276 fixed two simultaneous bugs in the prior wire: (a) narrow breadth (only STR check disadvantage) replaced with the slice-266 check wildcard so all six abilities are penalized; (b) missing LoS gate added via the new `bearer.canSeeFearSource` consumer-supplied predicate fact. Both arms (attack disadvantage + check wildcard disadvantage) gate on `not eq path:'bearer.canSeeFearSource' value:false` — default-apply semantics: undefined or true fires the disadvantage; only an explicit false bypass (consumer-supplied) suppresses it. Consumers that model line of sight (dndbnb's encounter manager, a VTT) pass the value; consumers without scene state get the strict-RAW default (apply unless explicitly bypassed). The fact is per-bearer (any source of fear in LoS produces true); per-source granularity would need additional engine state and stays deferred.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" }
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage", "condition": { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeFearSource", "value": false } } },
+        { "kind": "SetAdvantage", "on": { "kind": "check" }, "mode": "disadvantage", "condition": { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeFearSource", "value": false } } }
       ]
     },
     {
@@ -7959,10 +7955,12 @@
     {
       "id": "invisible",
       "name": "Invisible",
+      "description": "RAW (SRD 5.2.1 Invisible): 'Attack rolls against you have Disadvantage, and your attack rolls have Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.' Slice 273 wired both arms: the bearer's-own-advantage gates on `target.canLocateInvisible=false`, and the new ImposeDisadvantageOnAttackers gates on `attacker.canLocateInvisible=false`. The attack planner populates both facts symmetrically (blindsight / tremorsense / truesight all let the counter-party locate an invisible creature; the Blinded condition does NOT bypass invisibility because a blinded creature can't see anything to begin with). Pre-273 the bearer's advantage applied unconditionally and the disadvantage-on-attackers arm was missing entirely.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage" }
+        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage", "condition": { "kind": "eq", "path": "target.canLocateInvisible", "value": false } },
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "attacker.canLocateInvisible", "value": false } }
       ]
     },
     {
@@ -7994,8 +7992,7 @@
       "endsOn": [],
       "effects": [
         { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "DEX" }, "mode": "disadvantage" }
+        { "kind": "SetAdvantage", "on": { "kind": "check" }, "mode": "disadvantage" }
       ]
     },
     {
@@ -8520,21 +8517,22 @@
     {
       "id": "boots-of-speed-active",
       "name": "Boots of Speed (active)",
-      "description": "Slice 242. Walking speed doubled while the wearer's heels are clicked together. RAW also gives Disadvantage on opportunity attacks against the wearer; that arm needs an `event.isOpportunityAttack` predicate fact that the engine doesn't yet carry on AttackRolled (only the `event.attackKind` melee/ranged distinction landed in slice 123), so the opportunity-attack-disadvantage arm stays narrative for now. Cumulative 10-minute-per-long-rest budget is also consumer-managed (the engine's auto-expiry is round-based + source-keyed, not minute-budgeted). Toggled on / off via the slice-240 / 242 UseItem planner; the planner emits ConditionApplied on the first use and ConditionRemoved on the second.",
+      "description": "Walking speed doubled while the wearer's heels are clicked together, plus Disadvantage on opportunity attacks against the wearer (slice 269 closed the OA-disadvantage arm by gating ImposeDisadvantageOnAttackers on `event.isOpportunityAttack === true`, the predicate fact slice 206 added for Hunter L7 Escape the Horde). Cumulative 10-minute-per-long-rest budget is still consumer-managed (the engine's auto-expiry is round-based + source-keyed, not minute-budgeted). Toggled on / off via the slice-240 / 242 UseItem planner; the planner emits ConditionApplied on the first use and ConditionRemoved on the second.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "ModifySpeed", "mode": "walk", "op": "multiply", "value": 2 }
+        { "kind": "ModifySpeed", "mode": "walk", "op": "multiply", "value": 2 },
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "event.isOpportunityAttack", "value": true } }
       ]
     },
     {
       "id": "blurred-active",
       "name": "Blurred",
-      "description": "Attackers have disadvantage on attack rolls against the blurred creature (the spell's RAW exemption for blindsight / truesight / blindness isn't modeled).",
+      "description": "Attackers have disadvantage on attack rolls against the blurred creature, UNLESS the attacker can perceive the bearer via a sense other than sight (Blur spell RAW). Slice 271 added the bypass by gating the ImposeDisadvantageOnAttackers entry on `attacker.bypassesSightIllusion === false`; the attack planner populates the fact by mirroring the slice-127 Mirror Image bypass (true when the attacker has blindsight, tremorsense, or truesight, or carries the Blinded condition).",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "ImposeDisadvantageOnAttackers" }
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "attacker.bypassesSightIllusion", "value": false } }
       ]
     },
     {

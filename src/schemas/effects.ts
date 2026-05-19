@@ -53,20 +53,28 @@ export const ModifierTargetSchema: z.ZodType<ModifierTarget> = z.union([
   z.object({ kind: z.literal('skill'), skill: SkillSchema }),
 ]);
 
+// Slice 266: `ability` made optional on `save` and `check` so a
+// single entry can target "any save" or "any check" (the wildcard).
+// Canonical users: poisoned (disadvantage on any check); Mantle of
+// Spell Resistance (advantage on any save vs spells). Without the
+// wildcard, both needed 6 per-ability entries. The accumulator's
+// `advantageFor(target, facts?)` merges wildcard entries with any
+// specific-ability query: `advantageFor({kind:'save', ability:'WIS'})`
+// picks up both `save:WIS` AND `save:*` entries.
 export type RollTarget =
   | 'attack'
   | 'damage'
   | 'initiative'
-  | { kind: 'save'; ability: AbilityScore }
-  | { kind: 'check'; ability: AbilityScore }
+  | { kind: 'save'; ability?: AbilityScore }
+  | { kind: 'check'; ability?: AbilityScore }
   | { kind: 'skill'; skill: Skill };
 
 export const RollTargetSchema: z.ZodType<RollTarget> = z.union([
   z.literal('attack'),
   z.literal('damage'),
   z.literal('initiative'),
-  z.object({ kind: z.literal('save'), ability: AbilityScoreSchema }),
-  z.object({ kind: z.literal('check'), ability: AbilityScoreSchema }),
+  z.object({ kind: z.literal('save'), ability: AbilityScoreSchema.optional() }),
+  z.object({ kind: z.literal('check'), ability: AbilityScoreSchema.optional() }),
   z.object({ kind: z.literal('skill'), skill: SkillSchema }),
 ]);
 

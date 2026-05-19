@@ -34,6 +34,47 @@ export interface ComputeAbilityCheckInput {
   // slice 64; slice 105 closes the same RAW gap for ability checks
   // so the Paladin's L6 Aura of Protection applies to both rolls.
   readonly characters?: Readonly<Record<string, Character>>;
+  // Slice 263: the in-fiction sense the check relies on (sight /
+  // hearing / smell / touch / taste). RAW magic items can gate their
+  // advantage on a specific sense (Eyes of the Eagle: "Advantage on
+  // WIS (Perception) checks that rely on sight"). Populated by the
+  // consumer who knows the narrative context; defaults to undefined
+  // (advantage gated on a specific sense will NOT apply when the
+  // consumer didn't specify).
+  readonly sense?: 'sight' | 'hearing' | 'smell' | 'touch' | 'taste';
+  // Slice 274: the specific Strength (Athletics) sub-action the check
+  // resolves. Mirror of `sense` but on a different axis: RAW magic
+  // items can gate Athletics advantage on a specific sub-action
+  // (Gloves of Swimming and Climbing: "Advantage on any Strength
+  // (Athletics) check you make to climb or swim"). The five-value
+  // enum covers the 2024 PHB-named Athletics applications. Populated
+  // by the consumer; defaults to undefined (advantage gated on a
+  // specific sub-action will NOT apply when the consumer didn't
+  // specify).
+  readonly athleticsSubAction?: 'climb' | 'swim' | 'jump' | 'grapple' | 'shove';
+  // Slice 276: consumer-supplied LoS fact for the Frightened
+  // condition's ability-check disadvantage arm. RAW: "Disadvantage
+  // on ability checks ... while the source of fear is within line
+  // of sight." The engine doesn't model line of sight; the consumer
+  // supplies the value. Semantics:
+  //   true  -> source visible (disadvantage applies; default RAW
+  //            reading when no information is available).
+  //   false -> source NOT visible (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). Mirror of AttackIntent.bearerCanSeeFearSource
+  //                on the attack-roll arm.
+  readonly bearerCanSeeFearSource?: boolean;
+  // Slice 279: consumer-supplied ambient-light fact for items / spells
+  // that gate effects on light level (Cloak of the Bat: "Advantage on
+  // Dexterity (Stealth) checks while in dim light or darkness").
+  // Same opt-in semantic as slice 263 `sense?` and slice 274
+  // `athleticsSubAction?`: the engine doesn't model scene lighting,
+  // the consumer reports the value. Predicates that require a
+  // specific light level evaluate false when this is undefined, so
+  // the bearer must explicitly receive the consumer-supplied value
+  // to get the gated benefit. The three-value enum matches the
+  // 2024 PHB / DMG light-tier vocabulary.
+  readonly lightLevel?: 'bright' | 'dim' | 'darkness';
 }
 
 const exhaustionPenalty = (level: number): number =>
@@ -90,10 +131,46 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
     breakdown.push({ source: 'exhaustion', value: exhaustionPenalty(input.character.exhaustion) });
   }
 
-  const advantageTarget = input.skill !== undefined
-    ? { kind: 'skill' as const, skill: input.skill }
-    : { kind: 'check' as const, ability: input.ability };
-  const adv = effects.advantageFor(advantageTarget);
+  // Slice 263: thread `event.sense` so predicated SetAdvantage entries
+  // (Eyes of the Eagle's sight-only Perception advantage) can gate on
+  // the in-fiction sense. Undefined sense means "consumer didn't
+  // specify" — predicated entries that require a specific sense
+  // evaluate false.
+  // Slice 274: `event.athleticsSubAction` is the sibling axis for
+  // Athletics-only advantage gates (Gloves of Swimming and Climbing).
+  // Same undefined-means-no-match semantics.
+  // Slice 276: `bearer.canSeeFearSource` carries the consumer-supplied
+  // LoS fact for the Frightened gate. Default-apply semantics: the
+  // predicate is `not eq value:false`, so undefined and true both
+  // fire the disadvantage. Consumers that model line of sight pass
+  // `false` to bypass.
+  const facts = new Map<string, unknown>([
+    ['event.sense', input.sense],
+    ['event.athleticsSubAction', input.athleticsSubAction],
+    ['bearer.canSeeFearSource', input.bearerCanSeeFearSource],
+    // Slice 279: ambient-light fact (Cloak of the Bat dim-light gate).
+    ['bearer.lightLevel', input.lightLevel],
+  ]);
+  // Slice 265: a skill check IS an ability check (RAW: skill check =
+  // ability mod + skill bonus + d20). Pre-slice, `advantageFor` was
+  // queried only on the skill target when skill was set, missing
+  // advantage / disadvantage applied at the underlying ability-check
+  // level. Result: poisoned (slice 264 disadvantage on all 6 checks)
+  // didn't apply to Athletics; Bull's Strength advantage on STR
+  // checks didn't apply to Athletics either. Fix: query BOTH the
+  // skill target AND the underlying ability's check target, merge
+  // results. (This mirrors how `modifierSum` already adds both skill
+  // and check modifiers above.)
+  const skillAdv = input.skill !== undefined
+    ? effects.advantageFor({ kind: 'skill', skill: input.skill }, facts)
+    : { advantage: false, disadvantage: false, autoCrit: false, autoFail: false };
+  const checkAdv = effects.advantageFor({ kind: 'check', ability: input.ability }, facts);
+  const adv = {
+    advantage: skillAdv.advantage || checkAdv.advantage,
+    disadvantage: skillAdv.disadvantage || checkAdv.disadvantage,
+    autoCrit: skillAdv.autoCrit || checkAdv.autoCrit,
+    autoFail: skillAdv.autoFail || checkAdv.autoFail,
+  };
   const total = breakdown.reduce((sum, e) => sum + e.value, 0);
   return {
     total,

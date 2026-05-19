@@ -82,6 +82,16 @@ Several helpers are intentionally engine-internal (used by planners, not on the 
 
 Predicate DSL kinds (slice 122 additions): `eq` / `gt` / `gte` for value comparisons, `hasProperty` / `hasCondition` / `damageType` for context queries, `self` / `always` / `never` for trivial cases, and `all` / `any` / `not` for composition. Numeric kinds (`gt`, `gte`) return false on missing or non-numeric values. Facts populated by the trigger dispatcher include `event.attackerIsSelf`, `event.targetIsSelf`, `event.hit`, `event.critical`, `event.attackKind` (slice 123: `'melee'` / `'ranged'`, read from the new required `AttackRolledEvent.attackKind` field), `event.weaponInstanceId`, `event.attackerIsSource`, `event.targetIsSource`, `event.attackerCreatureType`, `event.targetCreatureType`, and `bearer.tempHp` (slice 122).
 
+**Consumer-supplied scene-state facts** (slices 263, 274, 276, 278, 279): several RAW gates depend on narrative context the engine doesn't model (line of sight, ambient light, skill sub-action, in-fiction sense). The consumer (UI, encounter manager, future VTT) supplies these via optional input fields on `AttackIntent` and `ComputeAbilityCheckInput`:
+
+- `bearerCanSeeFearSource?: boolean` (slice 276, `AttackIntent` + `ComputeAbilityCheckInput`) — Frightened LoS gate. Default-apply (predicate is `not eq false`): undefined or true fires the disadvantage; explicit `false` bypasses.
+- `targetCanSeeAttacker?: boolean` (slice 278, `AttackIntent`) — Dodge LoS gate, per-attacker. Default-apply.
+- `lightLevel?: 'bright' | 'dim' | 'darkness'` (slice 279, `ComputeAbilityCheckInput`) — ambient-light gate (Cloak of the Bat Stealth). Opt-in: predicates require a specific value, undefined produces no match.
+- `sense?: 'sight' | 'hearing' | 'smell' | 'touch' | 'taste'` (slice 263, `ComputeAbilityCheckInput`) — in-fiction sense gate (Eyes of the Eagle sight-only Perception). Opt-in.
+- `athleticsSubAction?: 'climb' | 'swim' | 'jump' | 'grapple' | 'shove'` (slice 274, `ComputeAbilityCheckInput`) — Athletics sub-action gate (Gloves of Swimming and Climbing). Opt-in.
+
+Two semantic flavors: **default-apply** for negative penalties (engine ships strict-RAW-broad behavior; consumer bypasses with explicit `false`) and **opt-in** for positive benefits (engine ships strict-RAW-narrow behavior; consumer specifies the right scene state to receive the benefit). Engine-side fact slots can land independently of consumer wiring; until the consumer populates a slot, the engine behaves per the documented default semantic.
+
 ## Events
 
 Every state transition is an event. The discriminated union `Event` lives at `EventSchema` (Zod) and `Event` (TypeScript). The full list (~130 event types) is at [src/schemas/events/index.ts](../src/schemas/events/index.ts) in the `EVENT_TYPES` constant.

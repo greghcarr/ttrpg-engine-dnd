@@ -34,7 +34,7 @@ import { D20_SIDES, NAT_20, NAT_1 } from '../../internal/constants.js';
 import { nowIso } from '../../internal/clock.js';
 import type { ULID } from '../ids-utils.js';
 import type { ActionEconomyConsumedEvent } from '../../schemas/events/action-economy.js';
-import { assertActorCanAct, findActorBlockingCondition } from './_actor-state.js';
+import { assertActorCanAct, findActorBlockingCondition, getEffectiveSpeed } from './_actor-state.js';
 import { chebyshevDistance } from './movement.js';
 
 const DEFAULT_MELEE_REACH_FEET = 5;
@@ -204,6 +204,37 @@ export interface AttackIntent {
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
   readonly cover?: CoverKind;
   readonly at?: string;
+  // Slice 276: consumer-supplied bearer-side perception fact for the
+  // Frightened LoS gate. RAW (SRD 5.2.1 Frightened): "Disadvantage on
+  // ability checks and attack rolls while the source of fear is
+  // within line of sight." When the attacker carries a Frightened
+  // condition, the predicate-gated SetAdvantage on attack only fires
+  // if the bearer can see their fear source. The engine doesn't
+  // model line of sight; the consumer supplies the value. Semantics:
+  //   true  -> source is visible (disadvantage applies; default RAW
+  //            reading when no information is available).
+  //   false -> source is NOT visible (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). The predicate is `not eq value:false` so
+  //                undefined and true both fire.
+  // Symmetric `bearerCanSeeFearSource?` field on ComputeAbilityCheckInput
+  // gates the ability-check disadvantage arm.
+  readonly bearerCanSeeFearSource?: boolean;
+  // Slice 278: consumer-supplied per-attacker LoS fact for the Dodge
+  // condition's ImposeDisadvantageOnAttackers arm. RAW (SRD 5.2.1
+  // Dodge): "any attack roll made against you has Disadvantage if
+  // you can see the attacker." When the TARGET carries the dodged
+  // condition, the disadvantage applies only when the target can see
+  // this specific attacker. Per-attacker rather than per-bearer
+  // (slice 276's pattern): the same dodging creature might see
+  // attacker A but not attacker B. The engine doesn't model line of
+  // sight; the consumer supplies the value. Semantics:
+  //   true  -> target can see attacker (disadvantage applies; default
+  //            RAW reading when no information is available).
+  //   false -> target CANNOT see attacker (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). Predicate is `not eq value:false`.
+  readonly targetCanSeeAttacker?: boolean;
 }
 
 const chooseDamageAbility = (
@@ -267,6 +298,12 @@ export interface ResolveAttackInput {
   // attackerFacts map so predicates (Hunter Escape the Horde, future
   // OA-specific riders) can scope to OAs without sniffing the planner.
   readonly isOpportunityAttack?: boolean;
+  // Slice 276: consumer-supplied LoS fact for Frightened. See doc
+  // comment on AttackIntent.bearerCanSeeFearSource above.
+  readonly bearerCanSeeFearSource?: boolean;
+  // Slice 278: consumer-supplied LoS fact for Dodge. See doc comment
+  // on AttackIntent.targetCanSeeAttacker above.
+  readonly targetCanSeeAttacker?: boolean;
 }
 
 export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> => {
@@ -404,20 +441,89 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     target.appliedConditions,
     input.attackerId,
   );
+  // Slice 273: `target.canLocateInvisible` is symmetric to slice-271's
+  // `attacker.bypassesSightIllusion` but for the Invisible RAW shape:
+  // "If a creature can somehow see you, you don't gain this benefit
+  // against that creature." Blindsight / tremorsense / truesight all
+  // let the counter-party locate an invisible creature; Blinded does
+  // NOT bypass invisibility (a blinded creature can't see anything,
+  // so the invisibility benefit still applies). Same logic populated
+  // for both attacker-side and target-side perception so Invisible's
+  // SetAdvantage (bearer's own attacks) and ImposeDisadvantageOnAttackers
+  // (attacks against bearer) arms can each gate on the counter-party's
+  // ability to perceive.
+  const canLocateInvisible = (effects: typeof targetEffects): boolean =>
+    effects.hasSense('blindsight')
+    || effects.hasSense('tremorsense')
+    || effects.hasSense('truesight');
+  const targetCanLocateInvisible = canLocateInvisible(targetEffects);
+  const attackerCanLocateInvisible = canLocateInvisible(attackerEffects);
   // Generic attacker-side advantage on attacks (e.g. Invisible) and
   // disadvantage on attacks (e.g. Blinded, Frightened, Poisoned,
   // Prone, Restrained). Folded alongside target-side contributions
   // so 2024 RAW advantage-cancellation applies symmetrically.
-  const attackerSelfAdvantage = attackerEffects.advantageFor('attack');
+  // Slice 276: `bearer.canSeeFearSource` is consumer-supplied (see
+  // ResolveAttackInput doc). Undefined defaults to "default-apply"
+  // (the predicate is `not eq value:false`, so undefined evaluates
+  // true and the Frightened disadvantage fires). Consumers that
+  // model line of sight pass `false` to bypass when the source is
+  // out of sight.
+  const attackerSelfAdvantageFacts = new Map<string, unknown>([
+    ['target.canLocateInvisible', targetCanLocateInvisible],
+    ['bearer.canSeeFearSource', input.bearerCanSeeFearSource],
+  ]);
+  const attackerSelfAdvantage = attackerEffects.advantageFor('attack', attackerSelfAdvantageFacts);
   // Build a small facts map for type-conditional ImposeDisadvantage
   // entries (Protection from Evil and Good gates the disadvantage on
   // the attacker being aberration / celestial / elemental / fey /
   // fiend / undead). Entries with no predicate apply unconditionally.
+  // Slice 271: `attacker.bypassesSightIllusion` mirrors the slice-127
+  // Mirror Image bypass logic for any sight-illusion effect (Blur, and
+  // future spells with the same RAW shape). True when the attacker
+  // has a non-sight sense that defeats visual obfuscation (blindsight,
+  // tremorsense, truesight) or carries the Blinded condition (relying
+  // on hearing / smell instead of sight). Darkvision is sight-based
+  // and is intentionally excluded.
+  const attackerBypassesSightIllusion =
+    attackerEffects.hasSense('blindsight')
+    || attackerEffects.hasSense('tremorsense')
+    || attackerEffects.hasSense('truesight')
+    || attacker.appliedConditions.some((c) => c.conditionId === 'blinded');
+  // Slice 272: bearer-state facts for the Dodge self-disable
+  // ("you lose these benefits if you have the Incapacitated
+  // condition or if your Speed is 0"). The dodged condition's
+  // ImposeDisadvantageOnAttackers entry gates on these facts being
+  // false; same facts populated in `computeSavingThrow` for the
+  // DEX-save advantage arm. `findActorBlockingCondition` returns the
+  // first incapacitating condition the target carries (incapacitated,
+  // stunned, paralyzed, petrified, unconscious — the last four all
+  // include Incapacitated by RAW); HP <= 0 returns 'unconscious'.
+  const targetBearerHasIncapacitated = findActorBlockingCondition(target) !== undefined;
+  const targetSpeedZero = getEffectiveSpeed({
+    character: target,
+    content,
+    itemInstances: state.itemInstances,
+    pendingChoices: state.pendingChoices,
+  }) === 0;
   const attackerFacts = new Map<string, unknown>([
     ['attackerCreatureType', getCreatureType(attacker, content)],
     // Slice 206: surfaces opportunity-attack-ness to predicate-gated
     // ImposeDisadvantageOnAttackers entries (Hunter Escape the Horde).
     ['event.isOpportunityAttack', input.isOpportunityAttack === true],
+    ['attacker.bypassesSightIllusion', attackerBypassesSightIllusion],
+    // Slice 273: surfaces attacker-side perception for Invisible's
+    // ImposeDisadvantageOnAttackers arm (RAW: "If a creature can
+    // somehow see you, you don't gain this benefit against that
+    // creature.").
+    ['attacker.canLocateInvisible', attackerCanLocateInvisible],
+    ['bearer.hasIncapacitated', targetBearerHasIncapacitated],
+    ['bearer.speedZero', targetSpeedZero],
+    // Slice 278: consumer-supplied LoS fact for Dodge. The bearer
+    // here is the TARGET of this attack; the fact is "does the
+    // target see this specific attacker." See doc comment on
+    // ResolveAttackInput.targetCanSeeAttacker above. Undefined
+    // defaults to default-apply (predicate is `not eq value:false`).
+    ['bearer.canSeeAttacker', input.targetCanSeeAttacker],
   ]);
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers(attackerFacts)
@@ -642,6 +748,12 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     // Lets predicate-gated AddModifier effects scope to weapon-attack
     // damage types (no canonical user today; future content can use it).
     ['event.damageType', weaponDef.damageType],
+    // Slice 275: weapon-id fact for predicate-gated AddModifier
+    // effects scoped to specific weapons (Bracers of Archery's RAW
+    // "+2 damage on ranged attacks made with a longbow or shortbow"
+    // is the canonical user; future weapon-specific item buffs plug
+    // in by gating on the same fact).
+    ['event.weaponId', weaponInstance.definitionId],
   ]);
   const damageModifierBonus = attackerEffects.modifierSum('damage', damageFacts);
   const damageRollPayload: DamageRoll = {
@@ -854,6 +966,12 @@ export const planAttack = (
     weaponInstanceId: intent.weaponInstanceId,
     ...(intent.cover !== undefined ? { cover: intent.cover } : {}),
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
+    ...(intent.bearerCanSeeFearSource !== undefined
+      ? { bearerCanSeeFearSource: intent.bearerCanSeeFearSource }
+      : {}),
+    ...(intent.targetCanSeeAttacker !== undefined
+      ? { targetCanSeeAttacker: intent.targetCanSeeAttacker }
+      : {}),
     at,
   });
   // If we fired a Loading weapon, append a WeaponLoaded event so the
