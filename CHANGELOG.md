@@ -4,6 +4,24 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Docs: pattern-check-on-bugs working norm codified in CLAUDE.md (slice 261)**
+
+Codifies the working norm that surfaced through slices 252, 254, and 258: when finding a bug, audit gap, or inconsistency in this codebase, check it against a pattern across the codebase before fixing only the surfaced instance. Each of those slices started as a single observation that turned out to be a pattern (slice 252: one broken link → 207 broken links across 14 archive files; slice 258: one effect kind dropping `condition` → four with the same shape; slice 254: one coverage-matrix filter missing `onUse`). Fixing only the surfaced instance leaves the latent bug elsewhere.
+
+What changed:
+
+- New **"Pattern-check on bugs"** subsection in [CLAUDE.md](CLAUDE.md), placed under "Working norms" between the Uncle Bob audit and "Doc updates per slice." Naming the norm makes it discoverable to fresh agents; positioning it next to the Uncle Bob audit ties it to the same "audit before commit" discipline.
+- The subsection cites the three concrete examples (slices 252, 254, 258) so a reader sees the pattern shape rather than an abstract rule.
+- The companion CHANGELOG closure-annotation convention (slice 260) gets a one-line note in the same subsection — when a later slice closes a tracked follow-up, the original entry gets struck through with a "Closed by slice N" tag.
+- CLAUDE.md size: 31.7 KB → 33.7 KB. Comfortably under the 60 KB single-Read ceiling.
+
+Pre-commit short audit (docs slice):
+
+- **Names**: "Pattern-check on bugs" reads as imperative for the agent (the entity reading the doc); avoids "engineering" / "team" framing because Claude is the primary author of this codebase. The norm explicitly says so in its rationale.
+- **DRY**: the norm appears once, in CLAUDE.md. The auto-memory entries at `~/.claude/projects/.../memory/pattern-check-on-bugs.md` and `changelog-closure-annotation-convention.md` mirror the same content for session persistence; the CLAUDE.md version is the authoritative source. Linked memory entries cite the CLAUDE.md section, not vice versa.
+- **SRP**: pure docs slice. No code or test surface touched. The norm prescribes how to approach future bugs; it doesn't itself fix any.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1664 tests across 244 files) green; CLAUDE.md still fits in a single Read.
+
 **Docs: closure annotations on past CHANGELOG `Open follow-ups` blocks (slice 260)**
 
 Closes the third of the three audit-gap findings: past CHANGELOG entries kept their `Open follow-ups` text frozen, so when a subsequent slice closed one of those follow-ups, the original entry didn't reflect it. A reader landing on slice 253's entry saw an open follow-up that had actually been closed two slices later (slice 254); slice 256's content-sweep follow-up was closed by slice 257 with no back-link in slice 256.
