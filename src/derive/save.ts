@@ -96,7 +96,18 @@ export const computeSavingThrow = (input: ComputeSaveInput): SaveResult => {
     breakdown.push({ source: 'exhaustion', value: penalty });
   }
 
-  const adv = effects.advantageFor(target);
+  // Slice 258: thread `event.isSpellSave` to advantageFor so predicated
+  // SetAdvantage entries (Mantle of Spell Resistance's "advantage on
+  // saves vs spells") can gate on it. The fact reflects `sourceIsMagical`
+  // (slice 131): a spell-or-magical-source save. Strict-RAW Mantle is
+  // "vs spells" only, but the engine doesn't distinguish spell from
+  // non-spell magical effects today, so this conservatively extends
+  // advantage to all magical saves (more saves benefit, never fewer;
+  // matches how Magic Resistance already operates).
+  const facts = new Map<string, unknown>([
+    ['event.isSpellSave', input.sourceIsMagical === true],
+  ]);
+  const adv = effects.advantageFor(target, facts);
   // Slice 131: Magic Resistance contributes advantage to the save
   // when the source is magical. RAW advantage / disadvantage
   // cancellation still applies (a creature with both Magic Resistance

@@ -4,6 +4,42 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: SetAdvantage.condition honored + event.isSpellSave + Mantle of Spell Resistance (slice 258)**
+
+Closes the first of the three audit-gap findings surfaced after slice 257. The `SetAdvantage` effect kind declares a `condition?: Predicate` field in its schema but the effect-stack builder silently dropped it (line 692-694 pre-slice). 0 pack entries currently set the condition, so no behavior was broken in production — but the schema documented a capability the runtime didn't support, blocking multiple deferred-primitives rows (Mantle of Spell Resistance, Eyes of the Eagle, Boots of Speed's opportunity-attack gate).
+
+**Plumbing**:
+
+- New `predicatedAdvantages: Map<string, Array<{ mode, predicate }>>` storage in [src/effects/builder.ts](src/effects/builder.ts), mirroring the slice-66 `conditionImmunities` shape. Kept distinct from the unconditional `advantages` map so the existing fast path pays no evaluation cost.
+- `setAdvantage(target, mode, predicate?)` now accepts an optional predicate; routes to the predicated map when set, the existing unconditional map otherwise.
+- `advantageFor(target, facts?)` accepts optional facts; merges unconditional state with predicated entries whose predicate evaluates true against the facts.
+- `applyEffectToBuilder`'s `SetAdvantage` case now passes `effect.condition` (previously dropped).
+- `computeSavingThrow` in [src/derive/save.ts](src/derive/save.ts) threads a facts map carrying `event.isSpellSave: input.sourceIsMagical === true` to `advantageFor`. The fact name uses "spell save" semantics; the value reflects "spell or magical source" (matching slice 131's Magic Resistance handling). The engine doesn't distinguish strict-spell from non-spell magical sources today; conservative extension grants advantage on a broader set of saves than strict RAW (more saves benefit, never fewer).
+
+**Content wired (1 magic item)**:
+
+- **Mantle of Spell Resistance** (rare wondrous, requires attunement): 6 `SetAdvantage` entries, one per ability score (STR / DEX / CON / INT / WIS / CHA), each with `condition: { kind: 'eq', path: 'event.isSpellSave', value: true }`. Matches the slice-105 Aura of Protection precedent (6 per-ability AddModifier entries for "saves with CHA mod added"). RAW: "Advantage on saving throws against spells."
+
+**Other inert `condition` fields surfaced but deferred**:
+
+- `GrantResistance.condition` (builder.ts:707), `ModifyActionEconomy.condition` (line 759), `GrantAdvantageToAttackers.condition` (line 809) all have the same audit-gap shape but no current canonical user. Tracked in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md) as a single deferred row pointing at slice 258 for the pattern. Each closes as a canonical user emerges (mirror of how SetAdvantage waited for Mantle).
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `predicatedAdvantages` mirrors the slice-66 / slice-91 pattern naming (predicated vs unconditional). `event.isSpellSave` matches the deferred-row wording in the gaps doc; the underlying value is `sourceIsMagical` but the fact name documents the consumer-facing semantic.
+- **DRY**: storage split (predicated vs unconditional) chosen specifically to avoid paying predicate-evaluation cost on the existing unpredicated entries (55 SetAdvantage entries in the pack, 0 of which set `condition`). The slow path runs only when a predicated entry is actually present.
+- **SRP**: setter routes by presence of predicate; reader merges by filtering predicates against facts. No mixed concerns. The fact-population lives in the save derive (the only consumer that currently passes facts); other `advantageFor` callers (ability-check, encounter / initiative) continue passing no facts — their canonical users are deferred rows that will plumb facts themselves when they ship.
+- **Magic numbers**: none. Mantle's 6 entries match the 6 ability scores (RAW); not extracted to a helper because identical inline JSON is more grep-able than abstracted iteration.
+- **`at`-threading**: N/A (no events emitted by this slice).
+- **Plan/commit split preserved**: derive-only change. No RNG, no event emission.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1664 tests across 244 files, was 1657) green. 3 new builder unit cases (predicated entry gated on facts, unpredicated fast path preserved, merged predicated+unpredicated behavior). 4 new save-derive cases (Mantle advantage on spell save, no advantage on non-spell save, advantage applies on all 6 abilities, un-attuned Mantle doesn't project). Coverage snapshot updated: `mantle-of-spell-resistance` joins `wiredIds` (no longer `effects: []`).
+
+**Open follow-ups (none critical)**:
+
+- 3 sibling inert `condition` fields tracked in the gaps doc. Each is a content-driven follow-up.
+- The `event.isSpellSave` fact ties to `sourceIsMagical` (which covers spell and non-spell magical sources). A future stricter "is this specifically a spell save vs a non-spell magical save" predicate would require distinguishing those at the save-call sites; today the engine uses the broader semantic everywhere.
+- Other `advantageFor` callers (ability-check, encounter / initiative) accept the new optional `facts` parameter but don't populate it. Eyes of the Eagle (sight-only Perception), Bracers of Archery (weapon-type gates) etc. would populate facts at those sites when their canonical users ship.
+
 **Content: degradation-roll sweep for the remaining wands + Staff of Healing (slice 257)**
 
 Closes the slice-256 follow-up: wires the three remaining RAW canonical users of the slice-256 `destructionRoll` primitive. Pure JSON, no engine surface touched.

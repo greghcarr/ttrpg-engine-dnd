@@ -2810,7 +2810,14 @@
     {"id": "mace-of-disruption", "itemKind": "magic", "name": "Mace of Disruption", "rarity": "rare", "requiresAttunement": true, "effects": []},
     {"id": "mace-of-smiting", "itemKind": "magic", "name": "Mace of Smiting", "rarity": "rare", "requiresAttunement": false, "effects": []},
     {"id": "mace-of-terror", "itemKind": "magic", "name": "Mace of Terror", "rarity": "rare", "requiresAttunement": true, "effects": []},
-    {"id": "mantle-of-spell-resistance", "itemKind": "magic", "name": "Mantle of Spell Resistance", "rarity": "rare", "requiresAttunement": true, "effects": []},
+    {"id": "mantle-of-spell-resistance", "itemKind": "magic", "name": "Mantle of Spell Resistance", "rarity": "rare", "requiresAttunement": true, "effects": [
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "STR" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CON" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "INT" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "WIS" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } },
+      { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "CHA" }, "mode": "advantage", "condition": { "kind": "eq", "path": "event.isSpellSave", "value": true } }
+    ]},
     {"id": "manual-of-bodily-health", "itemKind": "magic", "name": "Manual of Bodily Health", "rarity": "very-rare", "requiresAttunement": false, "effects": []},
     {"id": "manual-of-gainful-exercise", "itemKind": "magic", "name": "Manual of Gainful Exercise", "rarity": "very-rare", "requiresAttunement": false, "effects": []},
     {"id": "manual-of-golems", "itemKind": "magic", "name": "Manual of Golems", "rarity": "very-rare", "requiresAttunement": false, "effects": []},
