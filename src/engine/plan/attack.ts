@@ -220,6 +220,21 @@ export interface AttackIntent {
   // Symmetric `bearerCanSeeFearSource?` field on ComputeAbilityCheckInput
   // gates the ability-check disadvantage arm.
   readonly bearerCanSeeFearSource?: boolean;
+  // Slice 278: consumer-supplied per-attacker LoS fact for the Dodge
+  // condition's ImposeDisadvantageOnAttackers arm. RAW (SRD 5.2.1
+  // Dodge): "any attack roll made against you has Disadvantage if
+  // you can see the attacker." When the TARGET carries the dodged
+  // condition, the disadvantage applies only when the target can see
+  // this specific attacker. Per-attacker rather than per-bearer
+  // (slice 276's pattern): the same dodging creature might see
+  // attacker A but not attacker B. The engine doesn't model line of
+  // sight; the consumer supplies the value. Semantics:
+  //   true  -> target can see attacker (disadvantage applies; default
+  //            RAW reading when no information is available).
+  //   false -> target CANNOT see attacker (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). Predicate is `not eq value:false`.
+  readonly targetCanSeeAttacker?: boolean;
 }
 
 const chooseDamageAbility = (
@@ -286,6 +301,9 @@ export interface ResolveAttackInput {
   // Slice 276: consumer-supplied LoS fact for Frightened. See doc
   // comment on AttackIntent.bearerCanSeeFearSource above.
   readonly bearerCanSeeFearSource?: boolean;
+  // Slice 278: consumer-supplied LoS fact for Dodge. See doc comment
+  // on AttackIntent.targetCanSeeAttacker above.
+  readonly targetCanSeeAttacker?: boolean;
 }
 
 export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> => {
@@ -500,6 +518,12 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     ['attacker.canLocateInvisible', attackerCanLocateInvisible],
     ['bearer.hasIncapacitated', targetBearerHasIncapacitated],
     ['bearer.speedZero', targetSpeedZero],
+    // Slice 278: consumer-supplied LoS fact for Dodge. The bearer
+    // here is the TARGET of this attack; the fact is "does the
+    // target see this specific attacker." See doc comment on
+    // ResolveAttackInput.targetCanSeeAttacker above. Undefined
+    // defaults to default-apply (predicate is `not eq value:false`).
+    ['bearer.canSeeAttacker', input.targetCanSeeAttacker],
   ]);
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers(attackerFacts)
@@ -944,6 +968,9 @@ export const planAttack = (
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
     ...(intent.bearerCanSeeFearSource !== undefined
       ? { bearerCanSeeFearSource: intent.bearerCanSeeFearSource }
+      : {}),
+    ...(intent.targetCanSeeAttacker !== undefined
+      ? { targetCanSeeAttacker: intent.targetCanSeeAttacker }
       : {}),
     at,
   });

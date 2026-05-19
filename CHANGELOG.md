@@ -4,6 +4,18 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Dodge LoS gate (consumer-supplied per-attacker) (slice 278)**
+
+Closes the slice-267 deferred row for Dodge's missing LoS gate. RAW (SRD 5.2.1 Dodge): "any attack roll made against you has Disadvantage if you can see the attacker." Slice 272 added the Incap/Speed-0 self-disable; this slice adds the per-attacker LoS gate on the attack-disadvantage arm only (RAW: the LoS clause applies to the attack benefit; the DEX-save advantage has no LoS clause).
+
+Same consumer-coordinated pattern as slice 276 (Frightened), but per-**attacker** rather than per-**bearer**: the same dodging creature might see attacker A but not attacker B, so the fact lives on `AttackIntent` (per-call) rather than on a per-character state field.
+
+**Plumbing**: new `targetCanSeeAttacker?: boolean` on [`AttackIntent`](src/engine/plan/attack.ts) and `ResolveAttackInput`, threaded into the `attackerFacts` map as `bearer.canSeeAttacker` (the bearer of `dodged` is the target of this attack). Default-apply: predicate is `not eq value:false`, undefined and true both fire the disadvantage.
+
+**Content wired**: `dodged.effects[0]` (the `ImposeDisadvantageOnAttackers` entry) combines the slice-272 Incap/Speed-0 gate with the new LoS gate via `all`. The DEX-save advantage arm stays unchanged (RAW: no LoS clause). Description rewritten to cite both gates.
+
+Audit: name parallels slice 276's `bearerCanSeeFearSource` but axis differs (per-attacker vs. per-bearer). Threading uses the slice-206 spread-on-defined idiom. Derive-only fact-population; plan/commit split preserved. tsc clean; full vitest suite (1722 tests across 252 files, was 1718) green. 4 cases in [tests/unit/engine/dodge-los-gate.test.ts](tests/unit/engine/dodge-los-gate.test.ts): undefined fires disadvantage; true fires; false bypasses; non-dodged target has no disadvantage. Default-apply preserved prior behavior (the 1718 pre-slice tests still pass without modification). Pack drift: `dodged.effects[0].condition.terms` gains a third (LoS) term.
+
 **Docs+infra: archive slices 261-268 to restore single-Read ceiling (slice 277)**
 
 Companion to slice 276. Slice 276's CHANGELOG entry pushed the live doc ~70 tokens over the single-Read ceiling. This slice archives the pattern-check chain (slices 261-268) to [docs/changelog/archive-slices-261-268.md](docs/changelog/archive-slices-261-268.md), mirroring slice 270's archive of 252-260. Live Unreleased now carries slices 269-276 (the bug-fix cohort that surfaced from the pattern-check chain).

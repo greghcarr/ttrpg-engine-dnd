@@ -7894,11 +7894,11 @@
     {
       "id": "dodged",
       "name": "Dodging",
-      "description": "Until the start of your next turn, attacks against you have disadvantage and you have advantage on Dexterity saving throws (Dodge action). RAW: 'You lose these benefits if you have the Incapacitated condition or if your Speed is 0.' Slice 272 gates both effect entries on `all(bearer.hasIncapacitated=false, bearer.speedZero=false)`; the attack planner and `computeSavingThrow` populate the bearer-state facts. The slice-103 / 258 predicate plumbing on `ImposeDisadvantageOnAttackers` and `SetAdvantage` carries the gate. The slice-267 LoS gate (RAW: 'if you can see the attacker') still needs a consumer-supplied `bearer.canSeeAttacker` fact and stays deferred.",
+      "description": "RAW (SRD 5.2.1 Dodge action): 'Until the start of your next turn, any attack roll made against you has Disadvantage if you can see the attacker, and you make Dexterity saving throws with Advantage. You lose these benefits if you have the Incapacitated condition or if your Speed is 0.' Slice 272 added the Incap/Speed-0 self-disable on both arms. Slice 278 added the per-attacker LoS gate on the attack-disadvantage arm only (RAW: the LoS clause applies to the attack-disadvantage benefit; the DEX-save advantage has no LoS clause). The attack-disadvantage arm now gates on `all(bearer.hasIncapacitated=false, bearer.speedZero=false, not eq bearer.canSeeAttacker false)`. The consumer (UI, encounter manager, future VTT) supplies `targetCanSeeAttacker` on the AttackIntent when it models line of sight; undefined preserves current behavior (default-apply). The DEX-save advantage arm stays gated only on Incap/Speed-0 per RAW.",
       "stackable": false,
       "endsOn": [{ "kind": "turnEnd", "ownerId": "self" }],
       "effects": [
-        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.hasIncapacitated", "value": false }, { "kind": "eq", "path": "bearer.speedZero", "value": false }] } },
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.hasIncapacitated", "value": false }, { "kind": "eq", "path": "bearer.speedZero", "value": false }, { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeAttacker", "value": false } }] } },
         { "kind": "SetAdvantage", "on": { "kind": "save", "ability": "DEX" }, "mode": "advantage", "condition": { "kind": "all", "terms": [{ "kind": "eq", "path": "bearer.hasIncapacitated", "value": false }, { "kind": "eq", "path": "bearer.speedZero", "value": false }] } }
       ]
     },
