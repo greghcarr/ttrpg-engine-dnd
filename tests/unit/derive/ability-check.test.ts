@@ -197,3 +197,89 @@ describe('Poisoned condition disadvantage on all ability checks (slice 264)', ()
     }
   });
 });
+
+// Slice 265: a skill check IS an ability check (RAW: skill check =
+// ability mod + skill bonus + d20). Pre-slice, advantageFor was
+// queried only on the skill target when skill was set, missing
+// advantage / disadvantage applied at the underlying ability-check
+// level. This block tests the inheritance: ability-check entries
+// flow through to skill checks of the matching ability.
+const buildBullsStrengthFighter = () => {
+  const base = buildFighter({ STR: 14 });
+  return {
+    ...base,
+    appliedConditions: [{ id: newAppliedConditionId(), conditionId: 'bulls-strength-active' }],
+  };
+};
+
+describe('Skill check inherits underlying ability-check advantage (slice 265)', () => {
+  it('Poisoned character rolling Athletics (STR skill) has disadvantage', () => {
+    const fighter = buildPoisonedFighter();
+    const r = computeAbilityCheck({
+      character: fighter,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'STR',
+      skill: 'athletics',
+    });
+    expect(r.hasDisadvantage).toBe(true);
+  });
+
+  it('Poisoned character rolling Perception (WIS skill) has disadvantage', () => {
+    const fighter = buildPoisonedFighter();
+    const r = computeAbilityCheck({
+      character: fighter,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      skill: 'perception',
+    });
+    expect(r.hasDisadvantage).toBe(true);
+  });
+
+  it("Bull's Strength wearer rolling Athletics (STR skill) has advantage", () => {
+    const fighter = buildBullsStrengthFighter();
+    const r = computeAbilityCheck({
+      character: fighter,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'STR',
+      skill: 'athletics',
+    });
+    expect(r.hasAdvantage).toBe(true);
+  });
+
+  it("Bull's Strength wearer rolling Perception (WIS skill) has no advantage (cross-ability)", () => {
+    const fighter = buildBullsStrengthFighter();
+    const r = computeAbilityCheck({
+      character: fighter,
+      itemInstances: {},
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      skill: 'perception',
+    });
+    expect(r.hasAdvantage).toBe(false);
+  });
+
+  it('Eyes of the Eagle still gates on sense=sight when querying skill target (regression for slice 263)', () => {
+    const eyes = makeEyes();
+    const wearer = buildFighter({ WIS: 14, inventory: [eyes.id] });
+    const withSight = computeAbilityCheck({
+      character: wearer,
+      itemInstances: { [eyes.id]: eyes },
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      skill: 'perception',
+      sense: 'sight',
+    });
+    expect(withSight.hasAdvantage).toBe(true);
+    const withoutSight = computeAbilityCheck({
+      character: wearer,
+      itemInstances: { [eyes.id]: eyes },
+      content: STARTER_CONTENT,
+      ability: 'WIS',
+      skill: 'perception',
+    });
+    expect(withoutSight.hasAdvantage).toBe(false);
+  });
+});

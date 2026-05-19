@@ -4,6 +4,34 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: skill checks inherit underlying ability-check advantage (slice 265)**
+
+Pattern-check follow-on from slice 264. After fixing poisoned to apply disadvantage on all 6 ability checks, a code-inspection of `computeAbilityCheck` surfaced that the inheritance is one-sided: **modifiers** correctly inherit from ability-check entries to skill checks (verified in the existing code — `modifierSum({ kind: 'check', ability })` is always added to the breakdown), but **advantage** does not. A poisoned character rolling Athletics had no disadvantage, even though RAW says a skill check IS an ability check + skill bonus + d20.
+
+Real impact: 8 conditions in the pack have `SetAdvantage on:{kind:'check', ability:X}` entries that affect ability checks but NOT skill checks today (poisoned + frightened + bulls-strength-active / cats-grace-active / eagles-splendor-active / foxs-cunning-active / owls-wisdom-active / enlarged-active / reduced-active). All of these silently fail to apply to skill checks of their target ability. The fix is one site in the derive.
+
+What changed:
+
+- **`computeAbilityCheck` now queries `advantageFor` at both targets when a skill is specified**: the skill target (for skill-specific wires like Eyes of the Eagle's gated Perception advantage) AND the underlying ability's check target (for ability-check wires like poisoned's disadvantage or Bull's Strength's advantage). The two `AdvantageState` results merge with OR semantics, mirroring how `modifierSum` already adds both modifier sums.
+- No schema changes. No `RollTarget` extension. Pure derive-level fix.
+
+Pattern-check sweep (per slice 261 norm):
+
+- **Saves**: no analogous inheritance needed (no "skill saves" in 5e).
+- **Attacks / initiative**: no skill component, no inheritance needed.
+- **`advantageVsSource` / `advantageVsBearersOfMyCondition`**: RAW canonical users (Bestow Curse, Precise Hunter) target `attack` only, not check/skill. No inheritance needed today; if a future user wants skill+source semantics, the same pattern applies.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: variables `skillAdv` + `checkAdv` + `adv` (the merged result) are intention-revealing. Merge is inline OR-of-fields rather than a helper because (a) one call site and (b) the field names need to read in context to confirm the merge is correct.
+- **DRY**: the inline merge is 4 lines of identical-shape OR. Considered extracting a `mergeAdvantageState(a, b)` helper but it would be one-call-site-shallow and the inline form makes the merge semantic visible.
+- **SRP**: derive owns the query semantics ("a skill check is an ability check + skill bonus"). The accumulator's `advantageFor` doesn't know about skill→ability inheritance — caller's responsibility, mirroring `modifierSum`.
+- **Magic numbers**: none.
+- **`at`-threading**: N/A (derive-only).
+- **Plan/commit split preserved**: derive-only change.
+- **Pattern-check applied**: confirmed no analogous inheritance needed for saves / attack / initiative / source-keyed advantage. Single-site fix.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1683 tests across 244 files, was 1678) green. 5 new ability-check unit cases (poisoned-on-Athletics, poisoned-on-Perception, Bull's-Strength-on-Athletics, Bull's-Strength-no-effect-on-Perception cross-ability, Eyes-of-the-Eagle regression). No regressions across the existing 1678 tests — including the slice 263 Eyes-of-the-Eagle tests (which use skill-only wires that don't trip the inheritance path).
+
 **Content: poisoned condition disadvantage extended to all 6 ability checks (slice 264)**
 
 Pattern-check continuation from slice 263. After fixing Eyes of the Eagle (broader-than-RAW SetAdvantage in items), the same shape sweep was extended to non-item content (class features / conditions / feats / species). The sweep surfaced **3 narrow-ability-check disadvantage entries** in conditions; cross-checked against SRD 5.2.1 narrowed it to:

@@ -98,16 +98,32 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
     breakdown.push({ source: 'exhaustion', value: exhaustionPenalty(input.character.exhaustion) });
   }
 
-  const advantageTarget = input.skill !== undefined
-    ? { kind: 'skill' as const, skill: input.skill }
-    : { kind: 'check' as const, ability: input.ability };
   // Slice 263: thread `event.sense` so predicated SetAdvantage entries
   // (Eyes of the Eagle's sight-only Perception advantage) can gate on
   // the in-fiction sense. Undefined sense means "consumer didn't
   // specify" — predicated entries that require a specific sense
   // evaluate false.
   const facts = new Map<string, unknown>([['event.sense', input.sense]]);
-  const adv = effects.advantageFor(advantageTarget, facts);
+  // Slice 265: a skill check IS an ability check (RAW: skill check =
+  // ability mod + skill bonus + d20). Pre-slice, `advantageFor` was
+  // queried only on the skill target when skill was set, missing
+  // advantage / disadvantage applied at the underlying ability-check
+  // level. Result: poisoned (slice 264 disadvantage on all 6 checks)
+  // didn't apply to Athletics; Bull's Strength advantage on STR
+  // checks didn't apply to Athletics either. Fix: query BOTH the
+  // skill target AND the underlying ability's check target, merge
+  // results. (This mirrors how `modifierSum` already adds both skill
+  // and check modifiers above.)
+  const skillAdv = input.skill !== undefined
+    ? effects.advantageFor({ kind: 'skill', skill: input.skill }, facts)
+    : { advantage: false, disadvantage: false, autoCrit: false, autoFail: false };
+  const checkAdv = effects.advantageFor({ kind: 'check', ability: input.ability }, facts);
+  const adv = {
+    advantage: skillAdv.advantage || checkAdv.advantage,
+    disadvantage: skillAdv.disadvantage || checkAdv.disadvantage,
+    autoCrit: skillAdv.autoCrit || checkAdv.autoCrit,
+    autoFail: skillAdv.autoFail || checkAdv.autoFail,
+  };
   const total = breakdown.reduce((sum, e) => sum + e.value, 0);
   return {
     total,
