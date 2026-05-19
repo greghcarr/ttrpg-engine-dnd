@@ -8525,11 +8525,11 @@
     {
       "id": "blurred-active",
       "name": "Blurred",
-      "description": "Attackers have disadvantage on attack rolls against the blurred creature (the spell's RAW exemption for blindsight / truesight / blindness isn't modeled).",
+      "description": "Attackers have disadvantage on attack rolls against the blurred creature, UNLESS the attacker can perceive the bearer via a sense other than sight (Blur spell RAW). Slice 271 added the bypass by gating the ImposeDisadvantageOnAttackers entry on `attacker.bypassesSightIllusion === false`; the attack planner populates the fact by mirroring the slice-127 Mirror Image bypass (true when the attacker has blindsight, tremorsense, or truesight, or carries the Blinded condition).",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "ImposeDisadvantageOnAttackers" }
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "attacker.bypassesSightIllusion", "value": false } }
       ]
     },
     {

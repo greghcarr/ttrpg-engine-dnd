@@ -413,11 +413,24 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // entries (Protection from Evil and Good gates the disadvantage on
   // the attacker being aberration / celestial / elemental / fey /
   // fiend / undead). Entries with no predicate apply unconditionally.
+  // Slice 271: `attacker.bypassesSightIllusion` mirrors the slice-127
+  // Mirror Image bypass logic for any sight-illusion effect (Blur, and
+  // future spells with the same RAW shape). True when the attacker
+  // has a non-sight sense that defeats visual obfuscation (blindsight,
+  // tremorsense, truesight) or carries the Blinded condition (relying
+  // on hearing / smell instead of sight). Darkvision is sight-based
+  // and is intentionally excluded.
+  const attackerBypassesSightIllusion =
+    attackerEffects.hasSense('blindsight')
+    || attackerEffects.hasSense('tremorsense')
+    || attackerEffects.hasSense('truesight')
+    || attacker.appliedConditions.some((c) => c.conditionId === 'blinded');
   const attackerFacts = new Map<string, unknown>([
     ['attackerCreatureType', getCreatureType(attacker, content)],
     // Slice 206: surfaces opportunity-attack-ness to predicate-gated
     // ImposeDisadvantageOnAttackers entries (Hunter Escape the Horde).
     ['event.isOpportunityAttack', input.isOpportunityAttack === true],
+    ['attacker.bypassesSightIllusion', attackerBypassesSightIllusion],
   ]);
   const targetImposesDisadvantage =
     targetEffects.imposesDisadvantageOnAttackers(attackerFacts)

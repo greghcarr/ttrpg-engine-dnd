@@ -4,6 +4,48 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Blurred attacker-sense bypass closes the slice-267 outstanding bug (slice 271)**
+
+Closes the third of the slice-267 outstanding bugs: the `blurred-active` condition imposed disadvantage on attackers unconditionally, but Blur RAW says "An attacker is immune to this effect if it doesn't rely on sight, as with Blindsight, or can see through illusions, as with Truesight." The bypass shape is mirror of slice 127's Mirror Image vision-gate (already shipped for that one spell's dedicated deflection branch).
+
+**Plumbing**:
+
+- New `attacker.bypassesSightIllusion` boolean fact populated in [src/engine/plan/attack.ts](src/engine/plan/attack.ts)'s `attackerFacts` map. True when the attacker has blindsight, tremorsense, or truesight, OR carries the Blinded condition. Mirrors the slice-127 Mirror Image bypass logic verbatim. Darkvision is sight-based and intentionally excluded.
+
+**Content wired (1 condition)**:
+
+- **`blurred-active`**: the existing `ImposeDisadvantageOnAttackers` entry gains `condition: { kind: 'eq', path: 'attacker.bypassesSightIllusion', value: false }`. Description rewritten to drop the "blindsight / truesight / blindness isn't modeled" caveat.
+
+**Pattern-check sweep** (per slice 261 / 268 norms): walked all 8 `ImposeDisadvantageOnAttackers` wires in the pack against RAW. Blur was the only same-shape bug:
+
+- `escape-the-horde` (slice 206): gated on `event.isOpportunityAttack` — correct.
+- `dodged` (Dodge action): two separately-tracked deferred rows (LoS gate + Incap/Speed-0 disabler) blocked on consumer-supplied scene state and bearer-state predicate facts respectively.
+- `boots-of-speed-active` (slice 269): gated on `event.isOpportunityAttack` — correct.
+- `foresight-active` (Foresight spell): unconditional — RAW-correct (precognitive sense, not a sight-illusion).
+- `protection-from-evil-and-good-active` (slice 103): gated on `attackerCreatureType` — correct.
+- `magic-circle-active` (slice 103): gated on `attackerCreatureType` — correct.
+- `holy-aura-active` (slice 103): unconditional — RAW-correct (universal).
+
+**Pattern-check secondary finding** (different shape, new tracking row): the `invisible` condition's wire is broken on a different axis. It carries `SetAdvantage on:'attack' mode:'advantage'` (bearer's own attack advantage) but is missing both:
+1. The disadvantage-on-attackers arm entirely.
+2. The bypass clause on the existing advantage arm ("if a creature can somehow see you, you don't gain this benefit against that creature").
+
+Tracked as a new deferred row in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md). Closing (b) for Invisible is a one-line content edit (parallel to this slice); closing (a) needs a target-side perception fact symmetric to this slice's attacker-side fact (the engine doesn't track per-target see-invisibility today).
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `attacker.bypassesSightIllusion` is intention-revealing about both the bypass condition and the use case (sight-illusion effects, not all sight-related). The path namespace (`attacker.*`) matches the existing `attacker` family (`attackerCreatureType` already in the same map).
+- **DRY**: bypass logic mirrors slice 127 byte-for-byte (`hasSense('blindsight') || hasSense('tremorsense') || hasSense('truesight') || appliedConditions.includes('blinded')`). Extracted as a local boolean named `attackerBypassesSightIllusion` for readability; not factored to a shared helper because slice 127's Mirror Image branch reads its own logic inline (the inline form lets each call site document its bypass clauses against its own RAW source).
+- **SRP**: the fact-population sits next to the existing `attackerCreatureType` and `event.isOpportunityAttack` facts (one map, one purpose: predicate gates for `ImposeDisadvantageOnAttackers`). The condition entry gates via the existing slice-103 predicate plumbing; no engine API change.
+- **Magic numbers**: none added. The four sense / condition checks are RAW vocabulary.
+- **at-threading**: N/A (no events emitted by the new code path).
+- **Plan/commit split preserved**: derive-only fact-population; no RNG, no event emission.
+- **Pattern-check applied**: 8 wires audited, 1 closed (Blur), 0 false-positives (RAW-correct universal wires kept as-is), 1 new tracking row (Invisible — different shape).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1692 tests across 246 files, was 1689) green. 3 new integration cases: baseline sight-only attacker rolls with disadvantage (2 d20); truesight attacker bypasses (1 d20, used='none'); no-condition baseline doesn't impose disadvantage (1 d20). The Blinded-attacker case is observationally muddied by Blinded's own attacker-side disadvantage (slice 97) and isn't pinned at the integration level; the slice-127 Mirror Image tests pin the same Blinded-bypass code path in a different scenario.
+- **Tests**: 3 cases in new [tests/unit/engine/blur-attacker-sense-bypass.test.ts](tests/unit/engine/blur-attacker-sense-bypass.test.ts).
+
+Pack snapshot drift: 1 entry on `blurred-active.effects[0]` gains a `condition` field. Coverage matrix counts unchanged.
+
 **Docs+infra: front-door docs split back under single-Read ceiling (slice 270)**
 
 Two same-shape splits to restore single-Read fitness on the two front-door docs that drifted over the ceiling during the recent slice cluster:
