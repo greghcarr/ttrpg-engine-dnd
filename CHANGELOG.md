@@ -4,6 +4,34 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: `condition` field honored on `GrantResistance` / `ModifyActionEconomy` / `GrantAdvantageToAttackers` (slice 262)**
+
+First production application of the slice-261 pattern-check norm. Slice 258 fixed one effect kind (`SetAdvantage`) dropping its `condition` field and surfaced three siblings with the same shape; slice 258's open follow-up tracked them but deferred for lack of canonical users. The norm explicitly says "fix all instances of a pattern in one slice if scoped right" — this slice closes the audit gap categorically with pure plumbing + builder tests. 0 pack entries currently set `condition` on any of these kinds; future canonical users wire as one-line content edits.
+
+**Plumbing** (all three mirror slice 258's two-storage pattern: keep the unconditional fast path, add a parallel predicated structure):
+
+- **`GrantResistance`**: existing `resistances` map entries gain an optional `predicate` field (slice-112's `qualifier` shape extended). `addResistance(type, qualifier?, predicate?)`. `hasResistance(type, sourceIsMagical?, facts?)` filters entries by predicate before the qualifier check.
+- **`ModifyActionEconomy`**: new `predicatedActionEconomy: Map<op, Array<{ count, predicate }>>` alongside the existing unconditional `actionEconomyMods: Map<op, number>`. `addActionEconomy(op, count, predicate?)` routes by presence. `actionEconomyTotal(op, facts?)` sums unconditional + filtered predicated.
+- **`GrantAdvantageToAttackers`**: new `predicatedAdvantageToAttackers: Array<{ predicate }>` alongside the existing `advantageToAttackersFlag: boolean`. `markGrantsAdvantageToAttackers(predicate?)` routes by presence. `grantsAdvantageToAttackers(facts?)` returns flag OR any-predicate-match.
+- `applyEffectToBuilder` now passes `effect.condition` for all three cases (previously dropped).
+
+**No canonical users wired**. The slice-241/245/248/252 precedent permits primitive-only slices when the unblock has no near-term content driver. Future content slices wiring one of these kinds with a predicate will exercise the path end-to-end; today the builder unit tests pin the behavior.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `predicatedActionEconomy` / `predicatedAdvantageToAttackers` mirror slice 258's `predicatedAdvantages`. The pattern is now a recognized convention — three predicated-storage maps in the builder, all named with the same prefix.
+- **DRY**: the three changes share the same shape (unconditional fast path + predicated parallel structure), but each effect kind's storage is genuinely different (a per-type entries list for resistance; a per-op count map for action economy; a flag for the attackers debuff). Extracting a shared `predicatedStorage<T>` helper would be premature: 3 call sites, each with slightly different read semantics (qualifier check on resistance, count sum on action economy, any-match for attackers). The DRY-ness lives in the naming convention and the pattern.
+- **SRP**: each setter / reader pair owns one effect kind's storage. Existing callers of the readers pass no facts and get the existing fast-path behavior; new predicated entries only apply when facts are supplied (mirroring slice 258's contract).
+- **Magic numbers**: none introduced.
+- **`at`-threading**: N/A (no events emitted).
+- **Plan/commit split preserved**: derive-only change.
+- **Pattern-check applied**: this slice IS the pattern-check on slice 258. Three sibling effect kinds had the same audit-gap shape; closed categorically rather than as canonical users emerge. The slice 261 norm called for exactly this approach.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1671 tests across 244 files, was 1664) green. 7 new builder unit cases (2 each for the three effect kinds: predicated entry gated on facts + unpredicated fast path preserved; plus 1 merged predicated+unpredicated test for ModifyActionEconomy). All 26 prior builder tests + 1664 prior suite tests unaffected.
+
+**Open follow-ups**:
+
+- None for this slice. The audit-gap pattern (inert `condition` on effect kinds) is now fully closed. Future canonical users wire as content edits.
+
 **Docs: pattern-check-on-bugs working norm codified in CLAUDE.md (slice 261)**
 
 Codifies the working norm that surfaced through slices 252, 254, and 258: when finding a bug, audit gap, or inconsistency in this codebase, check it against a pattern across the codebase before fixing only the surfaced instance. Each of those slices started as a single observation that turned out to be a pattern (slice 252: one broken link → 207 broken links across 14 archive files; slice 258: one effect kind dropping `condition` → four with the same shape; slice 254: one coverage-matrix filter missing `onUse`). Fixing only the surfaced instance leaves the latent bug elsewhere.
@@ -94,7 +122,7 @@ Pre-commit Uncle Bob audit:
 
 **Open follow-ups (none critical)**:
 
-- 3 sibling inert `condition` fields tracked in the gaps doc. Each is a content-driven follow-up.
+- ~~3 sibling inert `condition` fields tracked in the gaps doc. Each is a content-driven follow-up.~~ **Closed by slice 262** (pattern-check applied per slice 261 norm — all three threaded through the builder + builder tests added; no canonical users wired this slice).
 - The `event.isSpellSave` fact ties to `sourceIsMagical` (which covers spell and non-spell magical sources). A future stricter "is this specifically a spell save vs a non-spell magical save" predicate would require distinguishing those at the save-call sites; today the engine uses the broader semantic everywhere.
 - Other `advantageFor` callers (ability-check, encounter / initiative) accept the new optional `facts` parameter but don't populate it. Eyes of the Eagle (sight-only Perception), Bracers of Archery (weapon-type gates) etc. would populate facts at those sites when their canonical users ship.
 
