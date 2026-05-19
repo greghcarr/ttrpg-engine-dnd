@@ -4,6 +4,40 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Invisible condition perception-bypass on both arms (slice 273)**
+
+Closes the gap tracked in slice 271's pattern-check secondary finding. The `invisible` condition had a known two-bug shape:
+
+1. The bearer-side `SetAdvantage on:'attack' mode:'advantage'` (bearer's own attacks) applied unconditionally; RAW: "If a creature can somehow see you, you don't gain this benefit against that creature."
+2. The disadvantage-on-attackers arm was missing entirely; RAW: "Attack rolls against you have Disadvantage."
+
+This slice ships both. The shape is symmetric to slice 271's Blur bypass but uses a different bypass clause (Blinded creatures do NOT bypass invisibility — they can't see anything to begin with — so they're excluded from this fact).
+
+**Plumbing**:
+
+- New `attacker.canLocateInvisible` + `target.canLocateInvisible` boolean facts populated in [src/engine/plan/attack.ts](src/engine/plan/attack.ts). True when the counter-party has blindsight, tremorsense, or truesight. Computed via a shared helper closure (`canLocateInvisible(effectStack)`) applied to both attacker and target.
+- `attackerEffects.advantageFor('attack')` now receives a facts map containing `target.canLocateInvisible` (previously called with no facts). The existing `attackerFacts` map (passed to `imposesDisadvantageOnAttackers`) gains `attacker.canLocateInvisible`.
+
+**Content wired (1 condition)**:
+
+- **`invisible`**: existing `SetAdvantage on:'attack' mode:'advantage'` gains `condition: { kind: 'eq', path: 'target.canLocateInvisible', value: false }`. New `ImposeDisadvantageOnAttackers` entry with `condition: { kind: 'eq', path: 'attacker.canLocateInvisible', value: false }`. Description rewrites the RAW spec and notes the Blinded distinction.
+
+**Pattern-check sweep**: Invisible is the only 2024 RAW condition with `SetAdvantage on:'attack' mode:'advantage'` (slice 113 archived: "invisible — gains advantage on its own attacks"). All other conditions with `SetAdvantage on:'attack'` use `mode:'disadvantage'` (blinded, frightened, poisoned, prone, restrained — none need a bypass clause; they impose on the bearer's own attacks unconditionally per RAW). No sibling bugs surfaced.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `canLocateInvisible` reads as a boolean question targeted at the Invisible RAW shape ("can a creature somehow see you"). Mirror naming on both attacker and target sides. The slice-271 `bypassesSightIllusion` fact is kept separate because its bypass clause includes Blinded (Blur's "doesn't rely on sight" applies to blinded creatures; Invisible's "can somehow see you" does not).
+- **DRY**: shared `canLocateInvisible(effects)` closure used at both attacker and target call sites — three-line helper, two call sites, the symmetry made the abstraction worth the named function.
+- **SRP**: facts live in the existing maps already passed to `advantageFor` / `imposesDisadvantageOnAttackers`. No new helper or API change. The condition uses existing `eq` predicate; no new predicate kinds.
+- **Magic numbers**: none added. The three senses (blindsight, tremorsense, truesight) are RAW vocabulary.
+- **at-threading**: N/A (derive-only fact population).
+- **Plan/commit split preserved**: derive-only change. No RNG, no event emission.
+- **Pattern-check applied**: confirmed Invisible is the unique 2024 condition with `SetAdvantage on:'attack' mode:'advantage'`. Five other `SetAdvantage on:'attack'` wires all use disadvantage; none need a bypass.
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1700 tests across 248 files, was 1695) green. 5 integration cases organized in two describes: bearer-attacks-someone (advantage with sight-only target; no advantage with truesight target) + attacker-targets-bearer (disadvantage with sight-only attacker; no disadvantage with truesight attacker) + a no-Invisible baseline.
+- **Tests**: 5 cases in new [tests/unit/engine/invisible-perception-bypass.test.ts](tests/unit/engine/invisible-perception-bypass.test.ts).
+
+Pack snapshot drift: `invisible.effects[0]` gains a `condition` field; new `effects[1]` is the ImposeDisadvantageOnAttackers entry. Coverage matrix counts unchanged.
+
 **Engine+content: Dodge benefits disabled by Incapacitated / Speed 0 (slice 272)**
 
 Closes the second of the slice-267 outstanding bugs. RAW (2024 PHB Dodge action): "You lose these benefits if you have the Incapacitated condition or if your Speed is 0." Pre-272 the `dodged` condition imposed both benefits (disadvantage on attackers + advantage on DEX saves) unconditionally. The gaps row sketched two paths; this slice ships path (a) — per-effect `condition` predicate — because it reuses the slice-103 + slice-258 plumbing already in place without new schema surface. Path (b) (a condition-level `disabledWhile?` field) is deferred unless a second canonical user emerges.

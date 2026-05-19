@@ -404,11 +404,31 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     target.appliedConditions,
     input.attackerId,
   );
+  // Slice 273: `target.canLocateInvisible` is symmetric to slice-271's
+  // `attacker.bypassesSightIllusion` but for the Invisible RAW shape:
+  // "If a creature can somehow see you, you don't gain this benefit
+  // against that creature." Blindsight / tremorsense / truesight all
+  // let the counter-party locate an invisible creature; Blinded does
+  // NOT bypass invisibility (a blinded creature can't see anything,
+  // so the invisibility benefit still applies). Same logic populated
+  // for both attacker-side and target-side perception so Invisible's
+  // SetAdvantage (bearer's own attacks) and ImposeDisadvantageOnAttackers
+  // (attacks against bearer) arms can each gate on the counter-party's
+  // ability to perceive.
+  const canLocateInvisible = (effects: typeof targetEffects): boolean =>
+    effects.hasSense('blindsight')
+    || effects.hasSense('tremorsense')
+    || effects.hasSense('truesight');
+  const targetCanLocateInvisible = canLocateInvisible(targetEffects);
+  const attackerCanLocateInvisible = canLocateInvisible(attackerEffects);
   // Generic attacker-side advantage on attacks (e.g. Invisible) and
   // disadvantage on attacks (e.g. Blinded, Frightened, Poisoned,
   // Prone, Restrained). Folded alongside target-side contributions
   // so 2024 RAW advantage-cancellation applies symmetrically.
-  const attackerSelfAdvantage = attackerEffects.advantageFor('attack');
+  const attackerSelfAdvantageFacts = new Map<string, unknown>([
+    ['target.canLocateInvisible', targetCanLocateInvisible],
+  ]);
+  const attackerSelfAdvantage = attackerEffects.advantageFor('attack', attackerSelfAdvantageFacts);
   // Build a small facts map for type-conditional ImposeDisadvantage
   // entries (Protection from Evil and Good gates the disadvantage on
   // the attacker being aberration / celestial / elemental / fey /
@@ -447,6 +467,11 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
     // ImposeDisadvantageOnAttackers entries (Hunter Escape the Horde).
     ['event.isOpportunityAttack', input.isOpportunityAttack === true],
     ['attacker.bypassesSightIllusion', attackerBypassesSightIllusion],
+    // Slice 273: surfaces attacker-side perception for Invisible's
+    // ImposeDisadvantageOnAttackers arm (RAW: "If a creature can
+    // somehow see you, you don't gain this benefit against that
+    // creature.").
+    ['attacker.canLocateInvisible', attackerCanLocateInvisible],
     ['bearer.hasIncapacitated', targetBearerHasIncapacitated],
     ['bearer.speedZero', targetSpeedZero],
   ]);

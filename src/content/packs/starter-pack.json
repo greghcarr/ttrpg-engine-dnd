@@ -7954,10 +7954,12 @@
     {
       "id": "invisible",
       "name": "Invisible",
+      "description": "RAW (SRD 5.2.1 Invisible): 'Attack rolls against you have Disadvantage, and your attack rolls have Advantage. If a creature can somehow see you, you don't gain this benefit against that creature.' Slice 273 wired both arms: the bearer's-own-advantage gates on `target.canLocateInvisible=false`, and the new ImposeDisadvantageOnAttackers gates on `attacker.canLocateInvisible=false`. The attack planner populates both facts symmetrically (blindsight / tremorsense / truesight all let the counter-party locate an invisible creature; the Blinded condition does NOT bypass invisibility because a blinded creature can't see anything to begin with). Pre-273 the bearer's advantage applied unconditionally and the disadvantage-on-attackers arm was missing entirely.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage" }
+        { "kind": "SetAdvantage", "on": "attack", "mode": "advantage", "condition": { "kind": "eq", "path": "target.canLocateInvisible", "value": false } },
+        { "kind": "ImposeDisadvantageOnAttackers", "condition": { "kind": "eq", "path": "attacker.canLocateInvisible", "value": false } }
       ]
     },
     {
