@@ -4,6 +4,41 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine: no-ability `RollTarget` wildcards for save / check (slice 266)**
+
+Closes the simplification opportunity surfaced by slices 263 + 264: Mantle of Spell Resistance and poisoned both needed 6 per-ability `SetAdvantage` entries (one each for STR / DEX / CON / INT / WIS / CHA) because `RollTarget` required a specific ability on every save/check entry. This slice extends `RollTarget` to allow `{ kind: 'save' }` and `{ kind: 'check' }` without an ability, which serves as a wildcard matching every per-ability query.
+
+**Plumbing**:
+
+- **Schema** ([src/schemas/effects.ts](src/schemas/effects.ts)): `ability` is now optional on the `save` and `check` variants of `RollTarget`. `skill` stays mandatory (no analogous wildcard need yet).
+- **`rollKey`** ([src/effects/builder.ts](src/effects/builder.ts)): no-ability case keys as `save:*` and `check:*`. The `*` sentinel can't collide with any ability score name.
+- **`wildcardKeyFor`** (new helper): returns the wildcard key for a specific-ability target (or undefined for attack / damage / initiative / skill / wildcard-already queries).
+- **`advantageFor(target, facts?)`**: merges unconditional entries at both the specific key and the wildcard, plus folds predicated entries from both. Existing unpredicated fast path preserved when wildcard is empty.
+- **`advantageVsSource(target, sourceCharacterId)`**: same merge logic (specific + wildcard) for source-keyed advantage. No current canonical user uses wildcard-vs-source — pure plumbing parity per the slice 261 pattern-check norm.
+- **`advantageVsBearersOfMyCondition(...)`**: same merge logic. Same parity rationale.
+
+**Content rewrites** (1 magic item, 1 condition):
+
+- **Mantle of Spell Resistance**: 6 per-ability `SetAdvantage on:{kind:'save',ability:X}` entries collapsed to 1 wildcard `SetAdvantage on:{kind:'save'}` entry, predicate unchanged. Same observable behavior (verified by the slice 258 Mantle tests still passing).
+- **Poisoned**: 6 per-ability `SetAdvantage on:{kind:'check',ability:X}` entries collapsed to 1 wildcard. The attack-disadvantage entry stays as-is.
+
+Net pack diff: **-11 effect entries** (12 collapsed to 1 + 7 collapsed to 2). No behavior change at any query site.
+
+Pre-commit Uncle Bob audit:
+
+- **Names**: `save:*` / `check:*` mirror the `*` glob convention; `wildcardKeyFor` is intention-revealing about its return semantics. The schema change exposes the wildcard via the type system (`ability?` rather than via a sentinel value), so future content authors get autocomplete support.
+- **DRY**: the three readers (`advantageFor`, `advantageVsSource`, `advantageVsBearersOfMyCondition`) each have their own merge logic. Considered a shared `mergeAdvantageState` helper but the merge shapes diverge (advantageVsBearersOfMyCondition mutates a single result via the existing collect closure; the other two fold into a single AdvantageState). Inline merges keep each reader's intent visible.
+- **SRP**: `wildcardKeyFor` does one thing (compute the wildcard key for a target). `rollKey` extended minimally — no-ability case picks the `*` sentinel; everything else unchanged.
+- **Magic numbers**: `'*'` sentinel is documented as the wildcard convention in the `wildcardKeyFor` doc comment.
+- **`at`-threading**: N/A (derive-only).
+- **Plan/commit split preserved**: derive-only change.
+- **Pattern-check applied**: extension done for all three advantage readers categorically (per slice 262 precedent — fix the audit-gap pattern across all instances, even when only one has a canonical user driving it).
+- **Mechanical outcomes asserted**: tsc clean; full vitest suite (1686 tests across 244 files, was 1683) green. 3 new builder unit cases (wildcard save applies to every per-ability query, wildcard check merges with specific check entries, predicated wildcard merges with facts). No regressions: the 17 slice-258 Mantle tests + the 12 slice-264 poisoned tests + the 5 slice-265 skill-check inheritance tests all still pass — same observable behavior with the simplified wires.
+
+**Open follow-ups (none critical)**:
+
+- **`ModifierTarget` analog**: same pattern (per-ability `AddModifier` entries) appears in Aura of Protection (6 per-ability entries adding CHA mod to saves). A `{ kind: 'save' }` wildcard on `ModifierTarget` would collapse Aura of Protection 6→1 the same way. Not done here — RollTarget wildcards close the SetAdvantage cohort cleanly; ModifierTarget is its own cohort with its own canonical user (Aura of Protection) and deserves a focused slice.
+
 **Engine: skill checks inherit underlying ability-check advantage (slice 265)**
 
 Pattern-check follow-on from slice 264. After fixing poisoned to apply disadvantage on all 6 ability checks, a code-inspection of `computeAbilityCheck` surfaced that the inheritance is one-sided: **modifiers** correctly inherit from ability-check entries to skill checks (verified in the existing code — `modifierSum({ kind: 'check', ability })` is always added to the breakdown), but **advantage** does not. A poisoned character rolling Athletics had no disadvantage, even though RAW says a skill check IS an ability check + skill bonus + d20.

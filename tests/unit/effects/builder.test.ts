@@ -143,6 +143,78 @@ describe('EffectAccumulator', () => {
     ).toBe(true);
   });
 
+  // Slice 266: no-ability RollTarget wildcards. SetAdvantage with
+  // `on: { kind: 'save' }` (no ability) applies to every per-ability
+  // save query; same for check. Canonical users: Mantle of Spell
+  // Resistance (1 entry instead of 6); poisoned (1 entry instead
+  // of 6).
+
+  it('SetAdvantage wildcard on:{kind:save} applies to every per-ability save query', () => {
+    const acc = new EffectAccumulator();
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'save' }, mode: 'advantage' },
+      acc,
+      { source: 'wildcard-save' },
+    );
+    for (const ability of ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }).advantage).toBe(true);
+    }
+    // The wildcard does NOT bleed into check.
+    expect(acc.advantageFor({ kind: 'check', ability: 'STR' }).advantage).toBe(false);
+    // The wildcard does NOT bleed into other roll kinds.
+    expect(acc.advantageFor('attack').advantage).toBe(false);
+  });
+
+  it('SetAdvantage wildcard on:{kind:check} merges with per-ability check entries', () => {
+    const acc = new EffectAccumulator();
+    // Wildcard disadvantage on any check.
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'check' }, mode: 'disadvantage' },
+      acc,
+      { source: 'poisoned' },
+    );
+    // Specific advantage on STR check.
+    applyEffectToBuilder(
+      { kind: 'SetAdvantage', on: { kind: 'check', ability: 'STR' }, mode: 'advantage' },
+      acc,
+      { source: 'bulls-strength' },
+    );
+    // STR check picks up both: advantage AND disadvantage (RAW
+    // cancellation is the caller's job).
+    const strCheck = acc.advantageFor({ kind: 'check', ability: 'STR' });
+    expect(strCheck.advantage).toBe(true);
+    expect(strCheck.disadvantage).toBe(true);
+    // CON check picks up only the wildcard disadvantage.
+    const conCheck = acc.advantageFor({ kind: 'check', ability: 'CON' });
+    expect(conCheck.advantage).toBe(false);
+    expect(conCheck.disadvantage).toBe(true);
+  });
+
+  it('Predicated wildcard SetAdvantage merges correctly with facts', () => {
+    const acc = new EffectAccumulator();
+    // Wildcard advantage on saves vs spells (Mantle of Spell
+    // Resistance shape).
+    applyEffectToBuilder(
+      {
+        kind: 'SetAdvantage',
+        on: { kind: 'save' },
+        mode: 'advantage',
+        condition: { kind: 'eq', path: 'event.isSpellSave', value: true },
+      },
+      acc,
+      { source: 'mantle' },
+    );
+    // No facts: predicate false → no advantage on any save.
+    for (const ability of ['STR', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }).advantage).toBe(false);
+    }
+    // Facts say spell save: advantage on every per-ability query.
+    const spellFacts = new Map<string, unknown>([['event.isSpellSave', true]]);
+    for (const ability of ['STR', 'WIS', 'CHA'] as const) {
+      expect(acc.advantageFor({ kind: 'save', ability }, spellFacts).advantage).toBe(true);
+    }
+  });
+
   it('Predicated + unpredicated SetAdvantage merge correctly', () => {
     const acc = new EffectAccumulator();
     // One unpredicated advantage on WIS save.

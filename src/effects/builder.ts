@@ -20,12 +20,29 @@ const rollKey = (target: RollTarget): string => {
   if (typeof target === 'string') return target;
   switch (target.kind) {
     case 'save':
-      return `save:${target.ability}`;
+      // Slice 266: `save:*` is the wildcard key (no ability specified).
+      // Stored under that key; queried as part of any specific-ability
+      // save lookup via `wildcardKeyFor`.
+      return `save:${target.ability ?? '*'}`;
     case 'check':
-      return `check:${target.ability}`;
+      return `check:${target.ability ?? '*'}`;
     case 'skill':
       return `skill:${target.skill}`;
   }
+};
+
+// Slice 266: when querying advantage for a specific-ability save or
+// check, ALSO look up the wildcard `save:*` / `check:*` entries so a
+// no-ability SetAdvantage (poisoned: disadvantage on any check;
+// Mantle of Spell Resistance: advantage on any save vs spells)
+// applies to every per-ability query. Returns undefined for queries
+// that don't have a wildcard form (attack, damage, initiative,
+// skill, or queries already at the wildcard level).
+const wildcardKeyFor = (target: RollTarget): string | undefined => {
+  if (typeof target === 'string') return undefined;
+  if (target.kind === 'save' && target.ability !== undefined) return 'save:*';
+  if (target.kind === 'check' && target.ability !== undefined) return 'check:*';
+  return undefined;
 };
 
 export interface ModifierContribution {
@@ -342,20 +359,40 @@ export class EffectAccumulator {
 
   advantageFor(target: RollTarget, facts?: ReadonlyMap<string, unknown>): AdvantageState {
     const key = rollKey(target);
-    const unconditional = this.advantages.get(key) ?? emptyAdvantage();
+    const wildcard = wildcardKeyFor(target);
+    // Slice 266: merge unconditional entries at both the specific key
+    // and the wildcard key (`save:*` / `check:*`). The wildcard set
+    // only fires for save/check targets with a specific ability; for
+    // other roll kinds it's undefined and the merge is a no-op.
+    const merged: AdvantageState = { ...(this.advantages.get(key) ?? emptyAdvantage()) };
+    if (wildcard !== undefined) {
+      const wild = this.advantages.get(wildcard);
+      if (wild !== undefined) {
+        merged.advantage = merged.advantage || wild.advantage;
+        merged.disadvantage = merged.disadvantage || wild.disadvantage;
+        merged.autoCrit = merged.autoCrit || wild.autoCrit;
+        merged.autoFail = merged.autoFail || wild.autoFail;
+      }
+    }
     const predicated = this.predicatedAdvantages.get(key);
-    if (predicated === undefined || predicated.length === 0) return unconditional;
+    const wildPredicated = wildcard !== undefined ? this.predicatedAdvantages.get(wildcard) : undefined;
+    if ((predicated === undefined || predicated.length === 0) && (wildPredicated === undefined || wildPredicated.length === 0)) {
+      return merged;
+    }
     // Slice 258: fold filtered predicated entries on top of the
     // unconditional state. An entry whose predicate doesn't evaluate
     // true with the caller-supplied facts contributes nothing.
-    const merged: AdvantageState = { ...unconditional };
-    for (const entry of predicated) {
-      if (!evaluatePredicate(entry.predicate, { facts })) continue;
-      if (entry.mode === 'advantage') merged.advantage = true;
-      else if (entry.mode === 'disadvantage') merged.disadvantage = true;
-      else if (entry.mode === 'auto-crit') merged.autoCrit = true;
-      else merged.autoFail = true;
-    }
+    const foldPredicated = (entries: Array<{ mode: 'advantage' | 'disadvantage' | 'auto-crit' | 'auto-fail'; predicate: Predicate }>): void => {
+      for (const entry of entries) {
+        if (!evaluatePredicate(entry.predicate, { facts })) continue;
+        if (entry.mode === 'advantage') merged.advantage = true;
+        else if (entry.mode === 'disadvantage') merged.disadvantage = true;
+        else if (entry.mode === 'auto-crit') merged.autoCrit = true;
+        else merged.autoFail = true;
+      }
+    };
+    if (predicated !== undefined) foldPredicated(predicated);
+    if (wildPredicated !== undefined) foldPredicated(wildPredicated);
     return merged;
   }
 
@@ -366,7 +403,21 @@ export class EffectAccumulator {
   // target) and folds the result into the regular advantage resolution.
   advantageVsSource(target: RollTarget, sourceCharacterId: string): AdvantageState {
     const key = `${rollKey(target)}::${sourceCharacterId}`;
-    return this.advantagesVsSource.get(key) ?? emptyAdvantage();
+    const specific = this.advantagesVsSource.get(key) ?? emptyAdvantage();
+    // Slice 266: merge wildcard `save:*::SOURCE` / `check:*::SOURCE`
+    // for consistency with `advantageFor`. No current canonical user
+    // sets a wildcard SetAdvantageVsSource — pure plumbing parity
+    // with `advantageFor` per the slice 261 pattern-check norm.
+    const wildcard = wildcardKeyFor(target);
+    if (wildcard === undefined) return specific;
+    const wild = this.advantagesVsSource.get(`${wildcard}::${sourceCharacterId}`);
+    if (wild === undefined) return specific;
+    return {
+      advantage: specific.advantage || wild.advantage,
+      disadvantage: specific.disadvantage || wild.disadvantage,
+      autoCrit: specific.autoCrit || wild.autoCrit,
+      autoFail: specific.autoFail || wild.autoFail,
+    };
   }
 
   // Slice 231: returns the AdvantageState that applies when this
@@ -381,19 +432,28 @@ export class EffectAccumulator {
     counterpartyConditions: ReadonlyArray<{ conditionId: string; sourceCharacterId?: string }>,
     bearerId: string,
   ): AdvantageState {
-    const entries = this.advantagesVsBearersOfMyCondition.get(rollKey(target));
-    if (entries === undefined || entries.length === 0) return emptyAdvantage();
     const result = emptyAdvantage();
-    for (const entry of entries) {
-      const match = counterpartyConditions.some(
-        (c) => c.conditionId === entry.conditionId && c.sourceCharacterId === bearerId,
-      );
-      if (!match) continue;
-      if (entry.mode.advantage) result.advantage = true;
-      if (entry.mode.disadvantage) result.disadvantage = true;
-      if (entry.mode.autoCrit) result.autoCrit = true;
-      if (entry.mode.autoFail) result.autoFail = true;
-    }
+    // Slice 266: merge entries at both the specific key and the
+    // wildcard. No current canonical user sets a wildcard
+    // GrantAdvantageVsBearersOfMyCondition — pure plumbing parity
+    // with `advantageFor` per the slice 261 pattern-check norm.
+    const wildcard = wildcardKeyFor(target);
+    const collect = (key: string): void => {
+      const entries = this.advantagesVsBearersOfMyCondition.get(key);
+      if (entries === undefined || entries.length === 0) return;
+      for (const entry of entries) {
+        const match = counterpartyConditions.some(
+          (c) => c.conditionId === entry.conditionId && c.sourceCharacterId === bearerId,
+        );
+        if (!match) continue;
+        if (entry.mode.advantage) result.advantage = true;
+        if (entry.mode.disadvantage) result.disadvantage = true;
+        if (entry.mode.autoCrit) result.autoCrit = true;
+        if (entry.mode.autoFail) result.autoFail = true;
+      }
+    };
+    collect(rollKey(target));
+    if (wildcard !== undefined) collect(wildcard);
     return result;
   }
 
