@@ -12,8 +12,8 @@ Completes the Troll → Troll Limb arc started in slices 226 + 232. New TriggerA
 
 **Plumbing**:
 
-- New `SpawnCreature { statblockId, count? }` TriggerAction in [src/schemas/effects.ts](src/schemas/effects.ts) (alongside `AddDamage`, `ApplyCondition`, etc.).
-- New `fireSpawnCreature` helper in [src/engine/triggers/dispatch.ts](src/engine/triggers/dispatch.ts) that builds a Character snapshot from the named statblock (HP = statblock average; ability scores + speed + AC copied; minimal runtime state; no inventory / spells / equipment). The runtime monster-trait fold from slice 129 reads through `statblockId`, so spawned creatures automatically pick up their own traits (Troll Limb's Regeneration fires from slice 232 on subsequent turns).
+- New `SpawnCreature { statblockId, count? }` TriggerAction in [src/schemas/effects.ts](../../src/schemas/effects.ts) (alongside `AddDamage`, `ApplyCondition`, etc.).
+- New `fireSpawnCreature` helper in [src/engine/triggers/dispatch.ts](../../src/engine/triggers/dispatch.ts) that builds a Character snapshot from the named statblock (HP = statblock average; ability scores + speed + AC copied; minimal runtime state; no inventory / spells / equipment). The runtime monster-trait fold from slice 129 reads through `statblockId`, so spawned creatures automatically pick up their own traits (Troll Limb's Regeneration fires from slice 232 on subsequent turns).
 - New predicate facts for DamageApplied events: `event.damageOfType.<type>` carries the cumulative amount of each damage type in the event's components. Lets OnEvent filters express thresholds like `gte event.damageOfType.slashing 15`.
 - Attack planner now dispatches triggers on the DamageApplied event (after the existing AttackRolled dispatch). This is a new architectural capability — OnEvent riders can now watch damage events directly, not just attack rolls.
 
@@ -35,7 +35,7 @@ Pre-commit Uncle Bob audit:
 - The attack planner's new damage-dispatch call is a deliberate architectural surface widening, not a regression.
 - Tests assert mechanical outcomes (CharacterCreated with `statblockId === 'troll-limb'`), not just event presence.
 
-Tests: 3-case test in [tests/unit/engine/troll-loathsome-limbs.test.ts](tests/unit/engine/troll-loathsome-limbs.test.ts) covering (1) 15+ slashing spawns a Troll Limb, (2) low slashing damage does NOT spawn, (3) high acid damage does NOT spawn (slashing filter). 1611 pass, 209 skipped. tsc clean.
+Tests: 3-case test in [tests/unit/engine/troll-loathsome-limbs.test.ts](../../tests/unit/engine/troll-loathsome-limbs.test.ts) covering (1) 15+ slashing spawns a Troll Limb, (2) low slashing damage does NOT spawn, (3) high acid damage does NOT spawn (slashing filter). 1611 pass, 209 skipped. tsc clean.
 
 **Engine: `Regeneration` monster trait primitive (slice 232)**
 
@@ -45,9 +45,9 @@ New effect kind for the classic regenerating-monster trait: bearer regains `perT
 
 **Plumbing**:
 
-- New `Regeneration { perTurn, suppressedBy }` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 48 → 49 wired primitives.
+- New `Regeneration { perTurn, suppressedBy }` Effect kind in [src/schemas/effects.ts](../../src/schemas/effects.ts). 48 → 49 wired primitives.
 - New `damageTypesTakenThisTurn: DamageType[]` field on the Character schema. Populated by `applyDamageApplied`; cleared by `applyTurnStarted`. Initialized empty in the summons reducer.
-- New `planRegenerationAtTurnStart` helper in [src/engine/plan/regeneration.ts](src/engine/plan/regeneration.ts). Mirrors the shape of `planBreathWeaponRechargeAtTurnStart`. Threaded into all 3 emission sites in `planAdvanceTurn` and `planBeginFirstTurn`.
+- New `planRegenerationAtTurnStart` helper in [src/engine/plan/regeneration.ts](../../src/engine/plan/regeneration.ts). Mirrors the shape of `planBreathWeaponRechargeAtTurnStart`. Threaded into all 3 emission sites in `planAdvanceTurn` and `planBeginFirstTurn`.
 - `EffectAccumulator` gains `addRegeneration(perTurn, suppressedBy)` setter + `regenerations()` query. Builder dispatch routes the effect.
 
 **Content**: Troll and Troll Limb statblocks each gain a `traits` array with one Regeneration entry (per-turn 15 and 5, both suppressed by `["acid", "fire"]`).
@@ -62,7 +62,7 @@ Pre-commit Uncle Bob audit:
 - Magic numbers: 15 and 5 are SRD-derived (Troll and Troll Limb perTurn); `['acid', 'fire']` is RAW.
 - Tests assert mechanical outcomes: amount === 15, suppression-on / suppression-off, multi-turn re-enable.
 
-Tests: 4-case test in [tests/unit/engine/troll-regeneration.test.ts](tests/unit/engine/troll-regeneration.test.ts) covering (1) regen fires for 15 HP at turn-start, (2) acid damage suppresses next turn, (3) slashing damage does NOT suppress, (4) suppression lasts one turn only (regen re-enables on the turn after). 1608 pass, 209 skipped. tsc clean.
+Tests: 4-case test in [tests/unit/engine/troll-regeneration.test.ts](../../tests/unit/engine/troll-regeneration.test.ts) covering (1) regen fires for 15 HP at turn-start, (2) acid damage suppresses next turn, (3) slashing damage does NOT suppress, (4) suppression lasts one turn only (regen re-enables on the turn after). 1608 pass, 209 skipped. tsc clean.
 
 **Engine: `GrantAdvantageVsBearersOfMyCondition` primitive + Ranger L17 Precise Hunter (slice 231)**
 
@@ -74,7 +74,7 @@ The 3-way join — attacker bears the marker, target bears the named condition, 
 
 **Plumbing**:
 
-- New `GrantAdvantageVsBearersOfMyCondition` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 47 → 48 wired primitives.
+- New `GrantAdvantageVsBearersOfMyCondition` Effect kind in [src/schemas/effects.ts](../../src/schemas/effects.ts). 47 → 48 wired primitives.
 - `EffectAccumulator` gains `addAdvantageVsBearersOfMyCondition(target, conditionId, mode)` + `advantageVsBearersOfMyCondition(target, counterpartyConditions, bearerId)` query. The query walks the entries and folds in advantage only when the 3-way join matches.
 - Builder dispatch routes the effect to the accumulator.
 - `planAttack` adds one new query call alongside the existing advantage resolution; folds the result into the same disadvantage-cancellation logic as the other contributions.
@@ -88,11 +88,11 @@ Pre-commit Uncle Bob audit:
 - No magic numbers / strings: `hunters-mark-active` is the existing slice-222 condition id.
 - Tests assert mechanical outcomes: `attackRolled.used === 'advantage'` (and `!== 'advantage'` for the negative cases), not just event presence.
 
-Tests: 4-case planner test in [tests/unit/engine/ranger-precise-hunter.test.ts](tests/unit/engine/ranger-precise-hunter.test.ts) covering (1) L17 ranger against own marked target gets advantage, (2) L16 ranger (no feature yet) gets no advantage even with mark active, (3) L17 ranger against creature marked by a different ranger gets no advantage (source-match check), (4) L17 ranger against unmarked target gets no advantage. 1604 pass, 209 skipped. tsc clean.
+Tests: 4-case planner test in [tests/unit/engine/ranger-precise-hunter.test.ts](../../tests/unit/engine/ranger-precise-hunter.test.ts) covering (1) L17 ranger against own marked target gets advantage, (2) L16 ranger (no feature yet) gets no advantage even with mark active, (3) L17 ranger against creature marked by a different ranger gets no advantage (source-match check), (4) L17 ranger against unmarked target gets no advantage. 1604 pass, 209 skipped. tsc clean.
 
 **Engine: `bearer.wieldingShield` predicate fact + Bracers of Defense wire (slice 230)**
 
-Tiny primitive: a new predicate fact `bearer.wieldingShield` (mirror of `bearer.wearingArmor` from slice 116), populated in [src/derive/ac.ts](src/derive/ac.ts) alongside the existing armor fact. True iff the bearer has an item equipped in their shield slot.
+Tiny primitive: a new predicate fact `bearer.wieldingShield` (mirror of `bearer.wearingArmor` from slice 116), populated in [src/derive/ac.ts](../../src/derive/ac.ts) alongside the existing armor fact. True iff the bearer has an item equipped in their shield slot.
 
 **Canonical user**: Bracers of Defense (RAW: "+2 bonus to AC if you are wearing no armor and using no Shield"). Now wires the full RAW gate via an `AddModifier { target: 'ac', value: 2 }` whose condition is `all([eq bearer.wearingArmor false, eq bearer.wieldingShield false])`. Previously it was `effects: []` and one of the deferred backlog rows from slice 227's audit.
 
@@ -105,7 +105,7 @@ Tiny primitive: a new predicate fact `bearer.wieldingShield` (mirror of `bearer.
 
 Pack wired-items count: **26 → 27**. Closes the "Bracers of Defense bearer.wieldingShield predicate" backlog row.
 
-Tests: 3-case test in [tests/unit/engine/bracers-of-defense.test.ts](tests/unit/engine/bracers-of-defense.test.ts) covering (1) unarmored + no-shield gets the +2, (2) shield-wielding gets nothing, (3) armored gets nothing. Uses total-AC comparison against a baseline-no-bracers character to avoid coupling to breakdown labels.
+Tests: 3-case test in [tests/unit/engine/bracers-of-defense.test.ts](../../tests/unit/engine/bracers-of-defense.test.ts) covering (1) unarmored + no-shield gets the +2, (2) shield-wielding gets nothing, (3) armored gets nothing. Uses total-AC comparison against a baseline-no-bracers character to avoid coupling to breakdown labels.
 
 1600 pass, 209 skipped. tsc clean.
 
@@ -115,9 +115,9 @@ New effect kind that floors an ability score at a specific value: if the bearer'
 
 **Plumbing**:
 
-- New `OverrideAbilityScore { ability, value }` Effect kind in [src/schemas/effects.ts](src/schemas/effects.ts). 46 → 47 wired primitives.
+- New `OverrideAbilityScore { ability, value }` Effect kind in [src/schemas/effects.ts](../../src/schemas/effects.ts). 46 → 47 wired primitives.
 - `EffectAccumulator` gains `addAbilityScoreFloor(ability, value, source)` and `effectiveAbilityScoreFloor(ability): { value, source } | undefined`. Builder dispatch routes the effect to the accumulator.
-- New pure helper `effectiveAbilityScore(baseScore, floor?): number` in [src/derive/ability.ts](src/derive/ability.ts).
+- New pure helper `effectiveAbilityScore(baseScore, floor?): number` in [src/derive/ability.ts](../../src/derive/ability.ts).
 - Threaded the helper into 5 derive surfaces (save, ability-check, attack-bonus, spell-DC, AC) plus plan/attack's damage path and the cleave action's mod-strip math. Every consumer that reads `character.abilityScores[X]` for a roll bonus now honors the floor.
 
 **Content wirings (8 items)**:
@@ -144,7 +144,7 @@ Pre-commit Uncle Bob audit:
 - No magic numbers: 19/21/23/25/27/29 are SRD-derived.
 - The pre-existing belt-rarity drift was surfaced during audit and added to the backlog rather than silently fixed in-slice (separate concern).
 
-Tests: 10-case test in [tests/unit/engine/override-ability-score.test.ts](tests/unit/engine/override-ability-score.test.ts) covering the helper math, accumulator collection, multi-source fold-to-highest, save / ability-check / attack-bonus / damage-roll derivation paths. 1597 pass, 209 skipped. tsc clean. Wired-items snapshot updated additively.
+Tests: 10-case test in [tests/unit/engine/override-ability-score.test.ts](../../tests/unit/engine/override-ability-score.test.ts) covering the helper math, accumulator collection, multi-source fold-to-highest, save / ability-check / attack-bonus / damage-roll derivation paths. 1597 pass, 209 skipped. tsc clean. Wired-items snapshot updated additively.
 
 **Content: magic-item mechanical wiring (slice 227)**
 
@@ -218,7 +218,7 @@ Pure-content bulk addition: 149 SRD 5.2.1 magic-item entries that were SRD-liste
 
 The 4 variant-bearing parents (Figurine, Giant Strength Potion, Healing Potion, Spell Scroll) need each variant explicitly added; that's a content-only follow-up slice once the audit harness for variant naming is settled. The 2 statblock entries (Giant Fly, Avatar of Death) belong in `monsters` if anywhere.
 
-Net effect: the SRD 5.2.1 magic-item catalog is **substantially complete** at the pack-presence level. Mechanical wiring of the 149 new entries is a separate, much larger track (most need primitives like UseItem / ConsumeItem planners, OverrideAbilityScore, variant-instance pattern, WeaponCritRider, ItemSpellGrant; tracked in [docs/starter-pack-gaps.md](docs/starter-pack-gaps.md)).
+Net effect: the SRD 5.2.1 magic-item catalog is **substantially complete** at the pack-presence level. Mechanical wiring of the 149 new entries is a separate, much larger track (most need primitives like UseItem / ConsumeItem planners, OverrideAbilityScore, variant-instance pattern, WeaponCritRider, ItemSpellGrant; tracked in [docs/starter-pack-gaps.md](../../docs/starter-pack-gaps.md)).
 
 Tests: drift audit + spell-coverage tests + full suite pass after the bulk insert; **1587 tests, 209 skipped, 0 failed**. No engine changes; no schema changes.
 
@@ -228,7 +228,7 @@ Pure content addition focused on closing the SRD 5.2.1 catalog with entries that
 
 - **15 SRD spells added** (was 16, but Animate Objects was already present; the gaps doc was stale on the spelling):
   - **Wired** (single-save mechanic the engine already supports): Befuddlement (L8 INT, 10d12 psychic, half on success), Freezing Sphere (L6 CON, 10d6 cold, half), Mind Spike (L2 WIS, 3d8 psychic, half, +1d8/slot), Vitriolic Sphere (L4 DEX, 10d4 acid, half, +2d4/slot).
-  - **Schema-only** (deferred for engine wiring): Antilife Shell, Blink, Divine Smite, Elementalism, Floating Disk, Ice Knife, Illusory Script, Shining Smite, Sorcerous Burst, Summon Dragon, Transport via Plants. Each carries a documented blocker in [tests/unit/engine/spell-coverage.test.ts](tests/unit/engine/spell-coverage.test.ts).
+  - **Schema-only** (deferred for engine wiring): Antilife Shell, Blink, Divine Smite, Elementalism, Floating Disk, Ice Knife, Illusory Script, Shining Smite, Sorcerous Burst, Summon Dragon, Transport via Plants. Each carries a documented blocker in [tests/unit/engine/spell-coverage.test.ts](../../tests/unit/engine/spell-coverage.test.ts).
   - **SRD spell catalog coverage**: 324 → 339 / 340. Only the gaps-doc-stale "Animated Object" (already shipped as `animate-objects`) was a non-issue; the catalog is now SRD-complete to within one phantom entry.
 - **2 SRD species added**: Goliath (Medium Humanoid, walk 35), Orc (Medium Humanoid, walk 30). Both ship with the existing `traits: []` shape consistent with the other 7 species (mechanical traits are still consumer territory). **SRD species coverage**: 7/9 → 9/9.
 - **2 SRD feats added**: Grappler (general, prereq Level 4+ + STR/DEX 13+), Boon of Fate (epic boon, prereq Level 19+). Both ship `effects: []`; the Grappler bundle (Punch and Grab, Attack Advantage, Fast Wrestler) and Boon of Fate's 2d4 bonus/penalty mechanic both await targeted engine vocabulary. **SRD feat coverage**: 14/17 → 16/17 (Magic Initiate is split into 3 class variants per the existing pack convention; SRD treats it as one).
@@ -254,7 +254,7 @@ Deferred RAW arms (each is a separate slice's worth of work and not required for
 
 Slice 222 unblocks one of the audit's deferred-with-reason main-class features: Ranger L17 Precise Hunter, which needs exactly this `hunters-mark-active`-with-source-link condition before its Advantage-vs-bearer arm can be wired. Slice 223+ can ship the Precise Hunter primitive on top.
 
-Tests: 3-case planner test in [tests/unit/engine/plan-cast-spell-hunters-mark.test.ts](tests/unit/engine/plan-cast-spell-hunters-mark.test.ts) verifying (1) the condition installs on the target with the caster as source, (2) the marking ranger's hit fires +1d6 force, (3) a non-caster's hit on the marked target does NOT fire the rider. Updated wired-conditions snapshot.
+Tests: 3-case planner test in [tests/unit/engine/plan-cast-spell-hunters-mark.test.ts](../../tests/unit/engine/plan-cast-spell-hunters-mark.test.ts) verifying (1) the condition installs on the target with the caster as source, (2) the marking ranger's hit fires +1d6 force, (3) a non-caster's hit on the marked target does NOT fire the rider. Updated wired-conditions snapshot.
 
 No engine changes; no schema changes.
 
@@ -269,20 +269,20 @@ Pack: Cleric L20 `greater-divine-intervention` feature now ships `[{ kind: 'Gran
 
 Still deferred: the second arm of Greater Divine Intervention is the 2d4-long-rest cooldown when Wish is the chosen spell. This needs a `ResourceCooldownExtended` (or similar) primitive that the rest reducer can honor by skipping `divine-intervention` recharge until the cooldown count reaches zero. That's its own slice; the marker by itself is the right size for one slice.
 
-Tests: 4-case planner test in [tests/unit/engine/greater-divine-intervention.test.ts](tests/unit/engine/greater-divine-intervention.test.ts) covering the L20 Wish-cast happy path (no slot consumed), the L10 rejection (no marker → no Wish), the residual non-Wish above-L5 gate (Fire Bolt still rejected even at L20), and the L20 normal-DI path (a Cleric L1 cast still works). Updated wired-features snapshot.
+Tests: 4-case planner test in [tests/unit/engine/greater-divine-intervention.test.ts](../../tests/unit/engine/greater-divine-intervention.test.ts) covering the L20 Wish-cast happy path (no slot consumed), the L10 rejection (no marker → no Wish), the residual non-Wish above-L5 gate (Fire Bolt still rejected even at L20), and the L20 normal-DI path (a Cleric L1 cast still works). Updated wired-features snapshot.
 
 **Engine: Cleric L10 Divine Intervention planner + `ignorePreparation` flag (slice 220)**
 
 Closes one of the three deferred-with-reason main-class features from the slice-217 audit pass. Ships in two pieces:
 
 - **Primitive**: new `ignorePreparation?: boolean` flag on `CastSpellIntent`. When true, `planCastSpell` skips the "does the bearer know or prepare this spell?" gate; the calling planner is responsible for validating eligibility against the feature's rule. Used here for Divine Intervention's "any Cleric spell L5 or lower" rule, and available for any future magic-item or feature that lets the bearer cast from a fixed catalog.
-- **Canonical user**: new `planDivineIntervention` planner in [src/engine/plan/divine-intervention.ts](src/engine/plan/divine-intervention.ts). RAW: "As a Magic action, choose any Cleric spell of level 5 or lower that doesn't require a Reaction to cast. As part of the same action, you cast that spell without expending a spell slot or needing Material components. You can't use this feature again until you finish a Long Rest." Implementation validates the spell is on the Cleric list, level ≤ 5, and not Reaction casting time; consumes one `divine-intervention` resource use; then delegates to `planCastSpell` with both `noSlotCost: true` (slice 219) and `ignorePreparation: true`. The delegated cast emits its own action-economy event matching the underlying spell's casting time, which models "as part of the same action" (Divine Intervention IS the Magic action; the cast inherits it).
+- **Canonical user**: new `planDivineIntervention` planner in [src/engine/plan/divine-intervention.ts](../../src/engine/plan/divine-intervention.ts). RAW: "As a Magic action, choose any Cleric spell of level 5 or lower that doesn't require a Reaction to cast. As part of the same action, you cast that spell without expending a spell slot or needing Material components. You can't use this feature again until you finish a Long Rest." Implementation validates the spell is on the Cleric list, level ≤ 5, and not Reaction casting time; consumes one `divine-intervention` resource use; then delegates to `planCastSpell` with both `noSlotCost: true` (slice 219) and `ignorePreparation: true`. The delegated cast emits its own action-economy event matching the underlying spell's casting time, which models "as part of the same action" (Divine Intervention IS the Magic action; the cast inherits it).
 
 Pack changes: Cleric L10 feature `divine-intervention` now ships a `GrantResource { resourceId: 'divine-intervention', max: 1, recharge: 'longRest' }` effect (was previously `effects: []`).
 
 The L20 Greater Divine Intervention Wish variant is still a follow-up: it needs to add Wish to the selectable set and impose a 2d4 long-rest cooldown override when Wish is the chosen spell (the only RNG-bearing part of the feature).
 
-Tests: 6-case planner test in [tests/unit/engine/plan-divine-intervention.test.ts](tests/unit/engine/plan-divine-intervention.test.ts) covering the happy path (free cast, resource depletion), exhaustion rejection, non-Cleric spell rejection, above-L5 rejection, and the "no preparation needed" guarantee. Updated wired-features snapshot to include the L10 wire.
+Tests: 6-case planner test in [tests/unit/engine/plan-divine-intervention.test.ts](../../tests/unit/engine/plan-divine-intervention.test.ts) covering the happy path (free cast, resource depletion), exhaustion rejection, non-Cleric spell rejection, above-L5 rejection, and the "no preparation needed" guarantee. Updated wired-features snapshot to include the L10 wire.
 
 **Engine: `noSlotCost` flag on CastSpellIntent (slice 219)**
 
@@ -297,7 +297,7 @@ Unblocks several "free cast" features that previously had no engine-side mechani
 
 No new event types; no schema changes; no public-API additions beyond the intent flag.
 
-Tests: 4-case planner test in [tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts](tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts) verifying (1) no `SpellSlotConsumed` emission, (2) caster's slot pool unchanged after the cast, (3) the paid-cast path still emits `SpellSlotConsumed` (regression guard), (4) the flag bypasses the no-slots-available gate when the bearer is fully out of L1 slots.
+Tests: 4-case planner test in [tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts](../../tests/unit/engine/plan-cast-spell-no-slot-cost.test.ts) verifying (1) no `SpellSlotConsumed` emission, (2) caster's slot pool unchanged after the cast, (3) the paid-cast path still emits `SpellSlotConsumed` (regression guard), (4) the flag bypasses the no-slots-available gate when the bearer is fully out of L1 slots.
 
 **Content: subclass higher-tier spell-list sweep (slice 218)**
 
@@ -309,7 +309,7 @@ Cashes in slice 212's `GrantSpell` engine consumer by wiring the L5/L7/L9 spell-
 
 Each tier rides under a distinct feature id (e.g., `life-domain-spells-l5` / `-l7` / `-l9`) so the effect stack's dedup-by-feature-id semantics accumulate the tiers additively rather than overwriting the L3 set.
 
-12-case derive test in [tests/unit/engine/subclass-higher-tier-spells.test.ts](tests/unit/engine/subclass-higher-tier-spells.test.ts) verifying the accumulator's `grantedSpells()` returns the expected sorted spell-id list at each tier boundary (L4/L5/L7/L9 for all three subclasses). The L9 Fiend Patron case also asserts Contact Other Plane (slice 217 class L9) is part of the union, since `effectiveSpellList` unions class + subclass grants.
+12-case derive test in [tests/unit/engine/subclass-higher-tier-spells.test.ts](../../tests/unit/engine/subclass-higher-tier-spells.test.ts) verifying the accumulator's `grantedSpells()` returns the expected sorted spell-id list at each tier boundary (L4/L5/L7/L9 for all three subclasses). The L9 Fiend Patron case also asserts Contact Other Plane (slice 217 class L9) is part of the union, since `effectiveSpellList` unions class + subclass grants.
 
 Updated slice 212's regression test for the Life Domain L3 fix. Updated the wired-subclass-features snapshot to include the new tier rows.
 

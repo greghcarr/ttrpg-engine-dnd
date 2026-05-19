@@ -52,6 +52,20 @@ const sheet = engine.derive.character(campaign.state, alyx.id);
 console.log(`${alyx.name}: AC ${sheet.ac.total}, HP ${sheet.hp.current}/${sheet.hp.max}`);
 ```
 
+## What lives in this repo
+
+| Path | What it is |
+|---|---|
+| [src/](src/) | The engine: schemas, reducers, planners, derivations, starter content pack. Public surface in [src/index.ts](src/index.ts). |
+| [tests/](tests/) | Engine test suite (unit, golden scenarios + transcripts, property, audit, boundaries). |
+| [docs/](docs/) | Working docs: [status](docs/status.md), [roadmap](docs/roadmap.md), [slice template](docs/slice-template.md), [per-category gap catalogs](docs/starter-pack-gaps.md). |
+| [examples/](examples/) | Small runnable scripts showing API usage. |
+| [references/srd-markdown/](references/srd-markdown/) | The SRD 5.2.1 markdown clone (git submodule). Canonical source for rules text; never substitute web lookups. |
+| [web/](web/) | Browser demo for the engine (combat sandbox + event inspector). Deployed to GitHub Pages. |
+| [dndbnb/](dndbnb/) | A D&D Beyond-style consumer app built on the engine. Co-located so engine changes flow into it without a publish cycle. Has its own [README](dndbnb/README.md) and deploy workflow. |
+| [supabase/](supabase/) | dndbnb's database migrations (Postgres + Auth + RLS). Not used by the engine itself. |
+| [CLAUDE.md](CLAUDE.md) / [AGENTS.md](AGENTS.md) / [.cursorrules](.cursorrules) | Working manual (CLAUDE.md) plus cross-agent pointers for tools that don't auto-load it. Anyone doing non-trivial work reads CLAUDE.md end-to-end first. |
+
 ## Documentation
 
 Pick the doc that matches what you want:

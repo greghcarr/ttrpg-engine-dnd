@@ -128,7 +128,7 @@ Concrete next bumps:
 |---|---|---|
 | **0.1.0-alpha.0** | 2026-05-12 | First alpha. Phases A through E complete (Slices 1–46). Originally published to npm; later unpublished on IP-cleanup grounds. |
 | **0.1.0-alpha.5** | 2026-05-14 | Tier 3 content-stub sweep; class-feature matrix to 48 wired / 0 stub at L1–7; 48-probe RAW-compliance audit; 1009 tests. Originally published; later unpublished. |
-| **0.1.0-alpha.6** | when ready | Post-alpha.5 vocabulary expansion (slices 48–100). Spell catalog complete (399 spells, ~152 wired), class features filled out L1–L20 across all 12 classes, ~35 engine-primitive slices. Test count 1289. See [CHANGELOG.md](CHANGELOG.md). |
+| **0.1.0-alpha.6** | 2026-05-18 | Cumulative post-alpha.5 release. 204 vocabulary-expansion slices (47–250). Package renamed from `ttrpg-engine-dnd` to `dnd-srd-engine` (slice 247); SRD 5.2.1 pack-presence complete in every category; 49 wired effect primitives + `Custom`; SRD markdown shipped as git submodule (slice 245); fresh-agent discovery surface polished (slices 246–250). Test count 1643 across 244 files. See [CHANGELOG.md](CHANGELOG.md). |
 | **0.1.0-alpha.7+** | as needed | Continued primitive + canonical-user vocabulary expansion. Nothing API-breaking. |
 | **0.2.0-alpha.0** | only if needed | Breaking API change discovered during validation, OR substantial new features that warrant their own alpha cycle. Pre-1.0 escape hatch. |
 | **0.1.0-beta.0** | when an external consumer ships | First validated alpha promotes to beta. See [Promotion criteria](#promotion-criteria). |

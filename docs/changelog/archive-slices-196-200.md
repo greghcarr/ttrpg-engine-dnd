@@ -14,15 +14,15 @@ Adds a dedicated reaction planner for Uncanny Dodge plus a `GrantUncannyDodge` m
 
 Mechanism follows the existing Absorb Elements pattern, since the triggering DamageApplied has already committed by the time the consumer reacts: the planner emits a compensating `Healed` event for `floor(damageAmount / 2)`, an `ActionEconomyConsumed` (reaction) when inside an encounter, and a record-only `UncannyDodgeUsed` notification carrying the triggering DamageApplied id + the refunded amount for transcript readability. The planner gates on the bearer's effect stack carrying `GrantUncannyDodge` and on `assertReactionAvailable`; the RAW "you can see the attacker" preconditions stay consumer-side (the engine has no line-of-sight model).
 
-New event: `UncannyDodgeUsed` ([src/schemas/events/reactive-spells.ts](src/schemas/events/reactive-spells.ts)), pure-notification dispatcher case in [src/engine/apply.ts](src/engine/apply.ts). New planner: `engine.plan.uncannyDodge(state, intent)` ([src/engine/plan/reactive-spells.ts](src/engine/plan/reactive-spells.ts)). New transcript formatter for `UncannyDodgeUsed` ([tests/transcript.ts](tests/transcript.ts)).
+New event: `UncannyDodgeUsed` ([src/schemas/events/reactive-spells.ts](../../src/schemas/events/reactive-spells.ts)), pure-notification dispatcher case in [src/engine/apply.ts](../../src/engine/apply.ts). New planner: `engine.plan.uncannyDodge(state, intent)` ([src/engine/plan/reactive-spells.ts](../../src/engine/plan/reactive-spells.ts)). New transcript formatter for `UncannyDodgeUsed` ([tests/transcript.ts](../../tests/transcript.ts)).
 
-Canonical user: Rogue L5 Uncanny Dodge, added to [src/content/packs/starter-pack.json](src/content/packs/starter-pack.json) alongside Sneak Attack (3d6) and Cunning Strike. Closes another of the missing main-class features in the SRD 5.2.1 classes audit (~17 to ~16, with slice 199 already having closed Elusive).
+Canonical user: Rogue L5 Uncanny Dodge, added to [src/content/packs/starter-pack.json](../../src/content/packs/starter-pack.json) alongside Sneak Attack (3d6) and Cunning Strike. Closes another of the missing main-class features in the SRD 5.2.1 classes audit (~17 to ~16, with slice 199 already having closed Elusive).
 
-Tests: 8-case planner test in [tests/unit/engine/plan-uncanny-dodge.test.ts](tests/unit/engine/plan-uncanny-dodge.test.ts) (halve, floor, zero, no-feature throw, negative throw, in / out of encounter, reaction-already-used throw); accumulator marker test alongside slice 199's tests in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s200-uncanny-dodge.test.ts](tests/golden/s200-uncanny-dodge.test.ts) walks an attack-hit then reaction-halve flow. 1497 tests pass, tsc --noEmit clean.
+Tests: 8-case planner test in [tests/unit/engine/plan-uncanny-dodge.test.ts](../../tests/unit/engine/plan-uncanny-dodge.test.ts) (halve, floor, zero, no-feature throw, negative throw, in / out of encounter, reaction-already-used throw); accumulator marker test alongside slice 199's tests in [tests/unit/effects/builder.test.ts](../../tests/unit/effects/builder.test.ts); golden scenario with transcript at [tests/golden/s200-uncanny-dodge.test.ts](../../tests/golden/s200-uncanny-dodge.test.ts) walks an attack-hit then reaction-halve flow. 1497 tests pass, tsc --noEmit clean.
 
 **Engine: CancelAdvantageOnAttackers + Rogue L18 Elusive (slice 199)**
 
-Adds the `CancelAdvantageOnAttackers` effect primitive (39 to 40 EFFECT_KINDS): a predicate-gated marker that suppresses every advantage contribution against the bearer at attack-roll time. Wired in [src/engine/plan/attack.ts](src/engine/plan/attack.ts) just before the 2024 advantage / disadvantage resolution block; an explicit `input.advantage === 'advantage'` from the caller is also nullified when the bearer carries the marker. Disadvantage contributions are unaffected, matching RAW ("no attack roll can have Advantage against you").
+Adds the `CancelAdvantageOnAttackers` effect primitive (39 to 40 EFFECT_KINDS): a predicate-gated marker that suppresses every advantage contribution against the bearer at attack-roll time. Wired in [src/engine/plan/attack.ts](../../src/engine/plan/attack.ts) just before the 2024 advantage / disadvantage resolution block; an explicit `input.advantage === 'advantage'` from the caller is also nullified when the bearer carries the marker. Disadvantage contributions are unaffected, matching RAW ("no attack roll can have Advantage against you").
 
 Canonical user: Rogue L18 Elusive, wired via:
 
@@ -33,9 +33,9 @@ Canonical user: Rogue L18 Elusive, wired via:
 }
 ```
 
-The attack planner populates `bearerHasIncapacitated` from `findActorBlockingCondition` so the rule's "unless you have the Incapacitated condition" exemption picks up every action-blocking condition (incapacitated / stunned / paralyzed / petrified / unconscious, plus the HP-zero proxy) instead of just the literal `incapacitated` id. Closes one of the ~17 missing-main-class-feature entries from [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md).
+The attack planner populates `bearerHasIncapacitated` from `findActorBlockingCondition` so the rule's "unless you have the Incapacitated condition" exemption picks up every action-blocking condition (incapacitated / stunned / paralyzed / petrified / unconscious, plus the HP-zero proxy) instead of just the literal `incapacitated` id. Closes one of the ~17 missing-main-class-feature entries from [docs/srd-5.2.1-audit-classes.md](../../docs/srd-5.2.1-audit-classes.md).
 
-Tests: builder accumulator unit tests in [tests/unit/effects/builder.test.ts](tests/unit/effects/builder.test.ts); 8-case planner test in [tests/unit/engine/plan-attack-elusive.test.ts](tests/unit/engine/plan-attack-elusive.test.ts); golden scenario with transcript at [tests/golden/s199-elusive.test.ts](tests/golden/s199-elusive.test.ts) walks an Invisible attacker against an Elusive Rogue (advantage suppressed) and then re-runs with the bearer Stunned (advantage restored). 1488 tests pass.
+Tests: builder accumulator unit tests in [tests/unit/effects/builder.test.ts](../../tests/unit/effects/builder.test.ts); 8-case planner test in [tests/unit/engine/plan-attack-elusive.test.ts](../../tests/unit/engine/plan-attack-elusive.test.ts); golden scenario with transcript at [tests/golden/s199-elusive.test.ts](../../tests/golden/s199-elusive.test.ts) walks an Invisible attacker against an Elusive Rogue (advantage suppressed) and then re-runs with the bearer Stunned (advantage restored). 1488 tests pass.
 
 **Content authoring: monsters batch 5.11 (SRD 5.2.1 closure)**
 
@@ -187,7 +187,7 @@ No engine code changed; no test snapshots moved.
 
 **Content authoring: subclass batch 1.2**
 
-Extends the Path of the Berserker (Barbarian subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary. Documents the gaps in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md) so future engine slices know exactly what primitives unblock these.
+Extends the Path of the Berserker (Barbarian subclass) entry beyond its L3 row. All three remaining SRD 5.2.1 features land as deferred stubs because no honest wire path exists in the current engine vocabulary. Documents the gaps in [docs/srd-5.2.1-audit-classes.md](../../docs/srd-5.2.1-audit-classes.md) so future engine slices know exactly what primitives unblock these.
 
 - L6 Mindless Rage: `effects: []` (deferred). RAW gates Charmed / Frightened immunity on "while Rage is active." Rage is currently modeled as a resource counter only, with no rage-active condition or predicate path. Unconditional `GrantConditionImmunity` would be wrong.
 - L10 Retaliation: `effects: []` (deferred). RAW is a reaction to make a melee attack against a creature within 5 ft that damaged you. TriggerAction vocabulary has no "make an attack" action (kinds: AddDamage / AddDamageToAttacker / Heal / ApplyCondition / ApplyConditionToAttacker / SpendResource / ModifyDamageTaken / EmitEvent). No per-attacker range predicate either.
@@ -197,7 +197,7 @@ No engine code changed; no test snapshots moved (pure-stub additions don't trip 
 
 **Content authoring: subclass batch 1.1**
 
-Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four remaining SRD 5.2.1 features. Two ship wired and two ship as deferred stubs with audit-doc reasons. Closes 2 of the 41 Layer 4 entries in [docs/srd-5.2.1-audit-classes.md](docs/srd-5.2.1-audit-classes.md), 2 deferred-with-reason.
+Extends the Champion (Fighter subclass) entry beyond its L3 row, adding all four remaining SRD 5.2.1 features. Two ship wired and two ship as deferred stubs with audit-doc reasons. Closes 2 of the 41 Layer 4 entries in [docs/srd-5.2.1-audit-classes.md](../../docs/srd-5.2.1-audit-classes.md), 2 deferred-with-reason.
 
 - L7 Additional Fighting Style: wired via `OfferChoice` mirroring the L1 Fighter choice (six options: Archery, Defense, Dueling, Great Weapon Fighting, Protection, Two-Weapon Fighting), separate `choiceId` (`fighting-style-champion-l7`) so it doesn't collide with the L1 selection.
 - L10 Heroic Warrior: ships `effects: []` (deferred). Needs a `HeroicInspiration` tracker on character state plus a turn-start trigger that grants it if absent. Not in current engine vocabulary.
@@ -223,7 +223,7 @@ Tests: 1466 pass, tsc --noEmit clean, `npm run build` green.
 Updates README + SRD-audit docs + trustworthiness roadmap to reflect the slice 177-196 sweep and the lane-B/lane-C merges. No content or engine changes; documentation only.
 
 - README: test count 1471 to 1466, file count 203 to 205; monster row 111 to 181; weapons / armors / tools / gear row updated to current counts (39 weapons + 13 armors + 37 tools + 77 gear + 42 consumables); the SRD-compliance row references slices 177-196 and slice 195's harness; Layer 11 (SRD drift harness) added to the test infrastructure description.
-- All six SRD-audit docs now carry a "Status (as of slice 196)" header pointing at slice 195's [tests/audit/srd-drift.test.ts](tests/audit/srd-drift.test.ts) harness as the canonical re-runnable replacement for the hand-built audit scripts. The classes audit doc additionally records the slice 174-176 resource-pool fixes; the character-creation audit doc records the slice 187 Epic Boon prerequisite fixes.
+- All six SRD-audit docs now carry a "Status (as of slice 196)" header pointing at slice 195's [tests/audit/srd-drift.test.ts](../../tests/audit/srd-drift.test.ts) harness as the canonical re-runnable replacement for the hand-built audit scripts. The classes audit doc additionally records the slice 174-176 resource-pool fixes; the character-creation audit doc records the slice 187 Epic Boon prerequisite fixes.
 - Trustworthiness roadmap recalibrated from "post-slice-100" to "post-slice-196". Content-summary line updated with current counts (336 spells / 181 monsters / 330 items / 19 backgrounds / 33 feats / 97 conditions).
 
 Tests: 1466 pass, tsc --noEmit clean.
