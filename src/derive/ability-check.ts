@@ -52,6 +52,18 @@ export interface ComputeAbilityCheckInput {
   // specific sub-action will NOT apply when the consumer didn't
   // specify).
   readonly athleticsSubAction?: 'climb' | 'swim' | 'jump' | 'grapple' | 'shove';
+  // Slice 276: consumer-supplied LoS fact for the Frightened
+  // condition's ability-check disadvantage arm. RAW: "Disadvantage
+  // on ability checks ... while the source of fear is within line
+  // of sight." The engine doesn't model line of sight; the consumer
+  // supplies the value. Semantics:
+  //   true  -> source visible (disadvantage applies; default RAW
+  //            reading when no information is available).
+  //   false -> source NOT visible (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). Mirror of AttackIntent.bearerCanSeeFearSource
+  //                on the attack-roll arm.
+  readonly bearerCanSeeFearSource?: boolean;
 }
 
 const exhaustionPenalty = (level: number): number =>
@@ -116,9 +128,15 @@ export const computeAbilityCheck = (input: ComputeAbilityCheckInput): AbilityChe
   // Slice 274: `event.athleticsSubAction` is the sibling axis for
   // Athletics-only advantage gates (Gloves of Swimming and Climbing).
   // Same undefined-means-no-match semantics.
+  // Slice 276: `bearer.canSeeFearSource` carries the consumer-supplied
+  // LoS fact for the Frightened gate. Default-apply semantics: the
+  // predicate is `not eq value:false`, so undefined and true both
+  // fire the disadvantage. Consumers that model line of sight pass
+  // `false` to bypass.
   const facts = new Map<string, unknown>([
     ['event.sense', input.sense],
     ['event.athleticsSubAction', input.athleticsSubAction],
+    ['bearer.canSeeFearSource', input.bearerCanSeeFearSource],
   ]);
   // Slice 265: a skill check IS an ability check (RAW: skill check =
   // ability mod + skill bonus + d20). Pre-slice, `advantageFor` was

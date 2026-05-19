@@ -4,6 +4,20 @@ Notable changes to this project. The format follows [Keep a Changelog](https://k
 
 ## Unreleased
 
+**Engine+content: Frightened breadth + LoS gate (slice 276)**
+
+Closes the dual-bug slice-264 deferred row. Both axes fixed simultaneously: breadth (now all 6 ability checks via the slice-266 check wildcard; was STR-only) + LoS gate (consumer-supplied, default-apply). RAW (SRD 5.2.1): "Disadvantage on ability checks and attack rolls while the source of fear is within line of sight."
+
+First slice in this chain to ship the **engine half of a consumer-coordinated fix**: the engine exposes a `bearerCanSeeFearSource?: boolean` slot on `AttackIntent` + `ComputeAbilityCheckInput`, the consumer (UI, encounter manager, future VTT) supplies the value when it models line of sight, undefined preserves current behavior. The predicate is `not eq path:'bearer.canSeeFearSource' value:false` — default-apply semantics so consumers not yet wired don't regress. Future LoS-gated bugs (Dodge LoS gate, Cloak of the Bat dim-light family) will follow the same pattern.
+
+**Plumbing**: new `bearerCanSeeFearSource?: boolean` on [`AttackIntent`](src/engine/plan/attack.ts), [`ResolveAttackInput`](src/engine/plan/attack.ts), and [`ComputeAbilityCheckInput`](src/derive/ability-check.ts). Threaded from `planAttack` through `resolveAttack` into `attackerSelfAdvantageFacts` (attack arm); populated directly in `computeAbilityCheck`'s facts map (check arm). Mirrors slice-263 / 274 consumer-supplied scene-state pattern.
+
+**Content wired**: `frightened` condition's existing STR-only check entry replaced with the slice-266 wildcard; both arms gain `condition: { kind: 'not', term: { kind: 'eq', path: 'bearer.canSeeFearSource', value: false } }`.
+
+**Pattern-check sweep**: Frightened is the unique RAW source-in-LoS-gated condition. Charmed gates on a specific source-relative target (different shape); Hex tracks without LoS. Per-source `frightened-by-X` variants don't ship today.
+
+Audit: names match the `bearer.*` namespace and slice-263 / 274 sibling fields. Threading uses the slice-206 spread-on-defined idiom. Derive-only fact-population; plan/commit split preserved. tsc clean; full vitest suite (1718 tests across 251 files, was 1711) green. 7 cases in [tests/unit/engine/frightened-los-gate.test.ts](tests/unit/engine/frightened-los-gate.test.ts) — 4 ability-check + 3 attack-roll. Default-apply preserves prior behavior (the 1711 pre-slice tests still pass without modification). Pack drift: `frightened.effects[0]` + `effects[1]` each gain a `condition` field; the check arm switches from per-ability (STR) to wildcard.
+
 **Engine+content: Bracers of Archery +2 damage with longbow / shortbow (slice 275)**
 
 Closes the slice-224 deferred row that has been waiting on weapon-id specificity. RAW: "Proficiency with the longbow and the shortbow, and gain a +2 bonus to damage rolls on ranged attacks made with such weapons." Pre-275 Bracers of Archery shipped unwired (`effects: []`). This slice ships the +2 damage arm (the higher-payoff mechanical wire); the proficiency arm stays deferred until conditional `GrantProficiency` lands.

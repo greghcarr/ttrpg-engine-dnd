@@ -7928,11 +7928,12 @@
     {
       "id": "frightened",
       "name": "Frightened",
+      "description": "RAW (SRD 5.2.1 Frightened): 'Disadvantage on ability checks and attack rolls while the source of fear is within line of sight.' Slice 276 fixed two simultaneous bugs in the prior wire: (a) narrow breadth (only STR check disadvantage) replaced with the slice-266 check wildcard so all six abilities are penalized; (b) missing LoS gate added via the new `bearer.canSeeFearSource` consumer-supplied predicate fact. Both arms (attack disadvantage + check wildcard disadvantage) gate on `not eq path:'bearer.canSeeFearSource' value:false` — default-apply semantics: undefined or true fires the disadvantage; only an explicit false bypass (consumer-supplied) suppresses it. Consumers that model line of sight (dndbnb's encounter manager, a VTT) pass the value; consumers without scene state get the strict-RAW default (apply unless explicitly bypassed). The fact is per-bearer (any source of fear in LoS produces true); per-source granularity would need additional engine state and stays deferred.",
       "stackable": false,
       "endsOn": [],
       "effects": [
-        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage" },
-        { "kind": "SetAdvantage", "on": { "kind": "check", "ability": "STR" }, "mode": "disadvantage" }
+        { "kind": "SetAdvantage", "on": "attack", "mode": "disadvantage", "condition": { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeFearSource", "value": false } } },
+        { "kind": "SetAdvantage", "on": { "kind": "check" }, "mode": "disadvantage", "condition": { "kind": "not", "term": { "kind": "eq", "path": "bearer.canSeeFearSource", "value": false } } }
       ]
     },
     {

@@ -204,6 +204,22 @@ export interface AttackIntent {
   readonly advantage?: 'advantage' | 'disadvantage' | 'none';
   readonly cover?: CoverKind;
   readonly at?: string;
+  // Slice 276: consumer-supplied bearer-side perception fact for the
+  // Frightened LoS gate. RAW (SRD 5.2.1 Frightened): "Disadvantage on
+  // ability checks and attack rolls while the source of fear is
+  // within line of sight." When the attacker carries a Frightened
+  // condition, the predicate-gated SetAdvantage on attack only fires
+  // if the bearer can see their fear source. The engine doesn't
+  // model line of sight; the consumer supplies the value. Semantics:
+  //   true  -> source is visible (disadvantage applies; default RAW
+  //            reading when no information is available).
+  //   false -> source is NOT visible (RAW bypass; no disadvantage).
+  //   undefined -> consumer didn't specify; default-apply (same as
+  //                true). The predicate is `not eq value:false` so
+  //                undefined and true both fire.
+  // Symmetric `bearerCanSeeFearSource?` field on ComputeAbilityCheckInput
+  // gates the ability-check disadvantage arm.
+  readonly bearerCanSeeFearSource?: boolean;
 }
 
 const chooseDamageAbility = (
@@ -267,6 +283,9 @@ export interface ResolveAttackInput {
   // attackerFacts map so predicates (Hunter Escape the Horde, future
   // OA-specific riders) can scope to OAs without sniffing the planner.
   readonly isOpportunityAttack?: boolean;
+  // Slice 276: consumer-supplied LoS fact for Frightened. See doc
+  // comment on AttackIntent.bearerCanSeeFearSource above.
+  readonly bearerCanSeeFearSource?: boolean;
 }
 
 export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> => {
@@ -425,8 +444,15 @@ export const resolveAttack = (input: ResolveAttackInput): ReadonlyArray<Event> =
   // disadvantage on attacks (e.g. Blinded, Frightened, Poisoned,
   // Prone, Restrained). Folded alongside target-side contributions
   // so 2024 RAW advantage-cancellation applies symmetrically.
+  // Slice 276: `bearer.canSeeFearSource` is consumer-supplied (see
+  // ResolveAttackInput doc). Undefined defaults to "default-apply"
+  // (the predicate is `not eq value:false`, so undefined evaluates
+  // true and the Frightened disadvantage fires). Consumers that
+  // model line of sight pass `false` to bypass when the source is
+  // out of sight.
   const attackerSelfAdvantageFacts = new Map<string, unknown>([
     ['target.canLocateInvisible', targetCanLocateInvisible],
+    ['bearer.canSeeFearSource', input.bearerCanSeeFearSource],
   ]);
   const attackerSelfAdvantage = attackerEffects.advantageFor('attack', attackerSelfAdvantageFacts);
   // Build a small facts map for type-conditional ImposeDisadvantage
@@ -916,6 +942,9 @@ export const planAttack = (
     weaponInstanceId: intent.weaponInstanceId,
     ...(intent.cover !== undefined ? { cover: intent.cover } : {}),
     ...(intent.advantage !== undefined ? { advantage: intent.advantage } : {}),
+    ...(intent.bearerCanSeeFearSource !== undefined
+      ? { bearerCanSeeFearSource: intent.bearerCanSeeFearSource }
+      : {}),
     at,
   });
   // If we fired a Loading weapon, append a WeaponLoaded event so the
